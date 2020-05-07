@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CDG_TESTO_MAIL_DECOD</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CDG_TESTO_MAIL_DECOD.html">Details</a></div></div>
+<div class="tab"><div><a href="CDG_TESTO_MAIL_DECOD_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CDG_TESTO_MAIL_DECOD_References.html">References</a></div></div>
+<div class="tab"><div><a href="CDG_TESTO_MAIL_DECOD_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CDG_TESTO_MAIL_DECOD_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION cdg_testo_mail_decod 
+(p_cod_tabtesti IN NUMBER,
+ p1 IN VARCHAR2, p2 IN VARCHAR2, p3 IN VARCHAR2, p4 IN VARCHAR2, p5 IN VARCHAR2,
+ p6 IN VARCHAR2, p7 IN VARCHAR2, p8 IN VARCHAR2, p9 IN VARCHAR2, p10 IN VARCHAR2,
+ p11 IN VARCHAR2, p12 IN VARCHAR2, p13 IN VARCHAR2, p14 IN VARCHAR2, p15 IN VARCHAR2) 
+RETURN VARCHAR2 IS
+
+ v VARCHAR2(4000);
+BEGIN
+
+  SELECT testo 
+  INTO v
+  FROM fin_t_cdg_testi_mail
+  WHERE codice = p_cod_tabtesti;
+  v := REPLACE(v,'&lt;desc_str_richiedente>',p1);
+  v := REPLACE(v,'&lt;cod_str_richiedente>',p2);
+  v := REPLACE(v,'&lt;desc_str_titolare>',p3);
+  v := REPLACE(v,'&lt;cod_str_titolare>',p4);
+  v := REPLACE(v,'&lt;capitolo_rich>',p5);
+  v := REPLACE(v,'&lt;progr_richiesta>',p6);
+  v := REPLACE(v,'&lt;importo_rich>',p7);  
+  v := REPLACE(v,'&lt;nominativo_operatore>',p8);
+  v := REPLACE(v,'&lt;data_richiesta>',p9);
+  v := REPLACE(v,'&lt;cod_str_tit_cdg>',p10);
+  v := REPLACE(v,'&lt;desc_str_competente>',p11);
+  v := REPLACE(v,'&lt;cod_str_competente>',p12);
+  v := REPLACE(v,'&lt;importo_tit>',p13);
+  v := REPLACE(v,'&lt;importo_cdg>',p14);
+  v := REPLACE(v,'&lt;anno_finanziario>',p15);
+
+  RETURN v;
+ 
+END;</pre>	</td></tr>
+</table></div>

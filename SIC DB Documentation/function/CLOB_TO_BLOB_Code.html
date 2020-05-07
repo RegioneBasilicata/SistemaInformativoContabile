@@ -1,0 +1,47 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CLOB_TO_BLOB</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CLOB_TO_BLOB.html">Details</a></div></div>
+<div class="tab"><div><a href="CLOB_TO_BLOB_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CLOB_TO_BLOB_References.html">References</a></div></div>
+<div class="tab"><div><a href="CLOB_TO_BLOB_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CLOB_TO_BLOB_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function clob_to_blob (p_clob_in in clob)
+return blob
+is
+v_blob blob;
+v_offset integer;
+v_buffer_varchar varchar2(32000);
+v_buffer_raw raw(32000);
+v_buffer_size binary_integer := 32000;
+begin
+--
+  if p_clob_in is null then
+    return null;
+  end if;
+--
+  DBMS_LOB.CREATETEMPORARY(v_blob, TRUE);
+  v_offset := 1;
+  FOR i IN 1..CEIL(DBMS_LOB.GETLENGTH(p_clob_in) / v_buffer_size)
+  loop
+    dbms_lob.read(p_clob_in, v_buffer_size, v_offset, v_buffer_varchar);
+    v_buffer_raw := utl_raw.cast_to_raw(v_buffer_varchar);
+    dbms_lob.writeappend(v_blob, utl_raw.length(v_buffer_raw), v_buffer_raw);
+    v_offset := v_offset + v_buffer_size;
+  end loop;
+  return v_blob;
+end clob_to_blob;</pre>	</td></tr>
+</table></div>

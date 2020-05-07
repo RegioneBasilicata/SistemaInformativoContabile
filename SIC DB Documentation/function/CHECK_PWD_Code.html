@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CHECK_PWD</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CHECK_PWD.html">Details</a></div></div>
+<div class="tab"><div><a href="CHECK_PWD_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CHECK_PWD_References.html">References</a></div></div>
+<div class="tab"><div><a href="CHECK_PWD_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CHECK_PWD_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION check_pwd
+(username varchar2,
+ password varchar2,
+ old_password varchar2)
+RETURN boolean IS 
+ differ number;
+ pw_lower varchar2(256); 
+ db_name varchar2(40);
+ i number;
+ simple_password varchar2(10);
+ reverse_user varchar2(32);
+ digit_array varchar2(10) := '0123456789';
+ alpha_array varchar2(26) := 'abcdefghijklmnopqrstuvwxyz';
+ lung_min number;
+ lung_max number;
+ letter number;
+ upper number;
+ lower number;
+ digit number;
+ special number;
+ cnt_letter number;
+ cnt_upper number;
+ cnt_lower number;
+ cnt_digit number;
+ cnt_special number;
+ delimiter boolean := FALSE;
+ ch CHAR(1);
+ msg_err  varchar2(2000);
+begin
+-- le impostazioni da controllare sono memorizzare in una tabella applicazion parameter
+-- la procedura prevede che se un valore di una variabile e' null vuol dire che non si 
+-- vuole il controllo per quella determinato parametro
+ select lung_min_pwd, lung_max_pwd, num_letter, num_upper, num_lower, num_digit, num_special, num_differ
+   into lung_min, lung_max, letter, upper, lower, digit, special, differ
+   from application_parameter;
+-- Questa e' la costruzione del messaggio che si pou' inserire nella pagina (le prime 2 opzioni sono fisse)
+-- msg_err:='La password deve :Non avere il carattere "; Non deve contenere la username';
+-- if lung_min is not null then msg_err:=msg_err||'Essere lunga almeno '||lung_min||' caratteri; ';
+-- if lung_max is not null then msg_err:=msg_err||'Essere lunga meno di '||lung_max||' caratteri; ';
+-- if letter is not null then msg_err:=msg_err||'Avere almeno '||letter||' lettere maiuscole/minuscole; ';
+-- if upper is not null then msg_err:=msg_err||'Avere almeno '||upper||' maiuscole; ';
+-- if lower is not null then msg_err:=msg_err||'Avere almeno '||lower||' minuscole; ';
+-- if digit is not null then msg_err:=msg_err||'Avere almeno '||digit||' numeri; ';
+-- if special is not null then msg_err:=msg_err||'Avere almeno '||special||' caratteri speciali; ';
+-- if differ is not null then msg_err:=msg_err||'Avere almeno '||differ||' caratteri differenti dalla vecchia password; ';
+ 
+  -- Classifica ciascuna carattere della password
+   FOR i in 1..NVL(length(password),0) LOOP
+      ch := substr(password, i, 1);
+      IF ch = '"' THEN
+         delimiter := TRUE;
+      ELSIF instr(digit_array, ch) > 0 THEN
+         cnt_digit := cnt_digit + 1;
+      ELSIF instr(alpha_array, NLS_LOWER(ch)) > 0 THEN
+         cnt_letter := cnt_letter + 1;
+         IF ch = NLS_LOWER(ch) THEN
+            cnt_lower := cnt_lower + 1;
+         ELSE
+            cnt_upper := cnt_upper + 1;
+         END IF;
+      ELSE
+         cnt_special := cnt_special + 1;
+      END IF;
+   END LOOP;
+-- controllo carattere "
+   IF delimiter = TRUE THEN
+      return false;
+   END IF;
+-- controllo lunghezza minima
+   if lung_min is not null and NVL(length(password),0)&lt;lung_min
+	    then return false;
+   end if;
+-- controllo lunghezza massimo
+   if lung_max is not null and NVL(length(password),0)>lung_max
+	    then return false;
+   end if;
+-- controllo numero di maiuscole/minuscole
+   IF letter IS NOT NULL AND cnt_letter &lt; letter 
+	    then return false;
+   END IF;
+-- controllo numero di maiuscole
+   IF upper IS NOT NULL AND cnt_upper &lt; upper 
+	    then return false;
+   END IF;
+-- controllo numero di minuscole
+   IF lower IS NOT NULL AND cnt_lower &lt; lower 
+ 	    then return false;
+   END IF;
+-- controllo numero di caratteri speciali
+   IF digit IS NOT NULL AND cnt_digit &lt; digit 
+ 	    then return false;
+   END IF;
+   IF special IS NOT NULL AND cnt_special &lt; special 
+	    then return false;
+   END IF;
+   -- Check if the password contains the username
+   pw_lower := NLS_LOWER(password);
+   IF instr(pw_lower, NLS_LOWER(username)) > 0 
+	    then return false;
+   END IF;
+   -- Check if the password differs from the previous password by at least
+   -- 3 characters
+   IF old_password IS NOT NULL THEN
+     differ := string_distance(old_password, password);
+     IF differ &lt; 3 
+ 	    then return false;
+     END IF;
+   END IF ;
+
+ return true;
+end;</pre>	</td></tr>
+</table></div>
