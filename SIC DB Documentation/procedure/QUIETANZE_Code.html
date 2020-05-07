@@ -1,0 +1,217 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>QUIETANZE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="QUIETANZE.html">Details</a></div></div>
+<div class="tab"><div><a href="QUIETANZE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="QUIETANZE_References.html">References</a></div></div>
+<div class="tab"><div><a href="QUIETANZE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="QUIETANZE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure quietanze as
+
+
+cursor quietanza is
+select distinct
+a.rowid id_doc_distinta
+,a.numero_mandato 
+,b.data_movimento data_quietanza
+,b.numero_bolletta_quietanza numero_quietanza
+from
+fin_distinte_mand_dettaglio a
+,siope_movimenti_conto_evidenza b
+,siope_giornali_cassa g
+where a.tipo_mandato in ('V')
+and a.numero_quietanza is null
+and a.anno_finanziario > 2016
+and b.numero_documento = to_number(ltrim(substr(a.numero_mandato,5),'0'))
+and b.tipo_documento='MANDATO'
+and b.tipo_operazione in ('PAGATO','REGOLARIZZATO','ESEGUITO')
+and g.progr_giornale = b.progr_giornale
+and g.esercizio = a.anno_finanziario;
+
+
+cursor quietanza_rev is
+select distinct
+a.rowid id_doc_distinta
+,a.numero_reversale
+,b.data_movimento data_quietanza
+,b.numero_bolletta_quietanza numero_quietanza
+from
+fin_distinte_rev_dettaglio a
+,siope_movimenti_conto_evidenza b
+,siope_giornali_cassa g
+where a.tipo_reversale = 'V'
+and a.numero_quietanza is null 
+and a.anno_finanziario>2016 
+and a.numero_quietanza is null
+and b.numero_documento = to_number(ltrim(substr(a.numero_reversale,5),'0'))
+and b.tipo_documento='REVERSALE'
+and b.tipo_operazione in ('RISCOSSO','REGOLARIZZATO','ESEGUITO')
+and g.progr_giornale = b.progr_giornale
+and g.esercizio = a.anno_finanziario;
+
+cursor quietanza_tp is
+select distinct
+d.doc_id doc_id
+,t.attribute17
+,t.third_party_line_num progr_doc
+,t.id_ana 
+,t.id_sede
+,b.data_movimento data_quietanza
+,b.numero_bolletta_quietanza numero_quietanza
+from
+fin_t_documenti d
+,fin_t_documenti_terze_parti t
+,siope_movimenti_conto_evidenza b
+,siope_giornali_cassa g
+where d.doc_type in ('MAND','REV')
+and nvl(d.open_balance_proposed,0) > 0
+and d.segment8 > 2016
+and t.doc_id = d.doc_id
+and t.attribute17 is null
+and b.numero_documento = to_number(ltrim(substr(d.doc_sequence_value,5),'0'))
+and b.tipo_documento = decode(d.doc_type,'MAND','MANDATO','REVERSALE')
+and b.tipo_operazione in ('PAGATO','REGOLARIZZATO','ESEGUITO','RISCOSSO')
+and b.progressivo_documento = decode(nvl(t.third_party_line_num,0),0,1,nvl(t.third_party_line_num,0))
+and g.progr_giornale = b.progr_giornale
+and g.esercizio = d.segment8
+and b.data_movimento in (select max(x.data_movimento) 
+from siope_movimenti_conto_evidenza x 
+,siope_giornali_cassa y
+where x.numero_documento = to_number(ltrim(substr(d.doc_sequence_value,5),'0'))
+and x.tipo_documento = decode(d.doc_type,'MAND','MANDATO','REVERSALE')
+and x.tipo_operazione in ('PAGATO','REGOLARIZZATO','ESEGUITO')
+and x.progressivo_documento = decode(nvl(t.third_party_line_num,0),0,1,nvl(t.third_party_line_num,0))
+and x.progr_giornale = g.progr_giornale
+and g.esercizio = d.segment8);
+
+cursor carico is
+select distinct
+ a.rowid id_doc_distinta
+,a.tipo_mandato
+,a.numero_mandato 
+,b.esito_operazione
+,b.data_ora_esito_operazione data_in_carico
+from
+fin_distinte_mand_dettaglio a
+,siope_esiti_applicativi b
+where a.tipo_mandato in ('V')
+and a.data_in_carico is null 
+and a.anno_finanziario>2016 
+and b.esercizio||lpad(b.numero_ordine,5,0) = a.numero_mandato
+and b.esercizio=a.anno_finanziario
+and b.tipo_ordine='MANDATO'
+and b.esito_operazione in ('ACQUISITO')
+union
+select distinct
+ a.rowid id_doc_distinta
+,a.tipo_mandato
+,a.numero_mandato 
+,b.esito_operazione
+,b.data_ora_esito_operazione data_in_carico
+from
+fin_distinte_mand_dettaglio a
+,siope_esiti_applicativi b
+where a.tipo_mandato in ('M')
+and a.data_in_carico is null 
+and a.anno_finanziario>2016 
+and b.esercizio||lpad(b.numero_ordine,5,0) = a.numero_mandato
+and b.esercizio=a.anno_finanziario
+and b.tipo_ordine='MANDATO'
+and b.esito_operazione in ('VARIATO');
+
+cursor carico_rev is
+select distinct
+ a.rowid id_doc_distinta
+,a.tipo_reversale
+,a.numero_reversale 
+,b.esito_operazione
+,b.data_ora_esito_operazione data_in_carico
+from
+fin_distinte_rev_dettaglio a
+,siope_esiti_applicativi b
+where a.tipo_reversale in ('V')
+and a.numero_quietanza is null 
+and a.anno_finanziario>2016 
+and b.esercizio||lpad(b.numero_ordine,5,0) = a.numero_reversale
+and b.esercizio=a.anno_finanziario
+and b.tipo_ordine='REVERSALE'
+and b.esito_operazione in ('ACQUISITO')
+union
+select distinct
+ a.rowid id_doc_distinta
+,a.tipo_reversale
+,a.numero_reversale 
+,b.esito_operazione
+,b.data_ora_esito_operazione data_in_carico
+from
+fin_distinte_rev_dettaglio a
+,siope_esiti_applicativi b
+where a.tipo_reversale in ('M')
+and a.numero_quietanza is null 
+and a.anno_finanziario>2016 
+and b.esercizio||lpad(b.numero_ordine,5,0) = a.numero_reversale
+and b.esercizio=a.anno_finanziario
+and b.tipo_ordine='REVERSALE'
+and b.esito_operazione in ('VARIATO');
+
+begin
+
+ delete tmp_risposte_procedure where funzione='Quietanze' and utente = 'TRACCIA';
+ commit;
+
+ for a in quietanza loop
+  update fin_distinte_mand_dettaglio set data_quietanza=a.data_quietanza, numero_quietanza=a.numero_quietanza
+  where rowid = a.id_doc_distinta and tipo_mandato in ('V','M');
+  commit;
+ end loop;
+
+ risposte_procedure ('Quietanze','TRACCIA','Fine Elaborazione Quietanze MAND');  
+
+ for a in carico loop
+  update fin_distinte_mand_dettaglio set data_in_carico=a.data_in_carico, in_carico='S'
+  where rowid = a.id_doc_distinta;
+  commit;
+ end loop;
+
+ risposte_procedure ('Quietanze','TRACCIA','Fine Elaborazione prese in Carico MAND');  
+
+  for a in quietanza_rev loop
+  update fin_distinte_rev_dettaglio set data_quietanza=a.data_quietanza, numero_quietanza=a.numero_quietanza
+  where rowid = a.id_doc_distinta and tipo_reversale in ('V','M');
+  commit;
+ end loop;
+
+risposte_procedure ('Quietanze','TRACCIA','Fine Elaborazione Quietanze REV');  
+
+ for a in carico_rev loop
+  update fin_distinte_rev_dettaglio set data_in_carico=a.data_in_carico, in_carico='S'
+  where rowid = a.id_doc_distinta;
+  commit;
+ end loop;
+
+ risposte_procedure ('Quietanze','TRACCIA','Fine Elaborazione prese in Carico REV');  
+ 
+
+  for a in quietanza_tp loop
+      update fin_t_documenti_terze_parti t set t.attribute18=to_char(a.data_quietanza,'dd/mm/yyyy'), t.attribute17=a.numero_quietanza
+      where t.doc_id = a.doc_id and t.id_ana = a.id_ana and t.id_sede = a.id_sede;
+      commit;
+  end loop;
+ risposte_procedure ('Quietanze','TRACCIA','Fine Elaborazione Quietanze TP'); 
+ 
+ 
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,580 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VARIAZIONE_ENTRATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE.html">Details</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="VARIAZIONE_ENTRATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure  variazione_entrate
+(p_anno in number
+,p_anno_stampa in number
+,p_da_data_movimento in date
+,p_a_data_movimento in date
+,p_residuo in varchar2
+,p_utente in varchar2
+,p_fpv in varchar2) AS
+
+-- PROCEDURA PER LA GENERAZIONE DEI DATI REPORT VARIAZIONE CATEGORIA 3 ALLEGATI VARIAZIONE DI BILANCIO
+cassa_prec number;
+cassa_pos number;
+cassa_neg number;
+cassa_def number;
+
+
+compe_prec number;
+compe_pos number;
+compe_neg number;
+compe_def number;
+
+cp_res_prec number;
+cp_res_pos number;
+cp_res_neg number;
+cp_res_def number;
+
+p_ord number;
+p_ord_max number;
+
+avanzo_previsione number;
+variazione_avanzo_piu number;
+variazione_avanzo_meno number;
+avanzo_finale number;
+fpv_iniziale number;
+fpv_variazione_piu number;
+fpv_variazione_meno number;
+fpv_finale number;
+dg_cassa_iniziale number;
+dg_cassa_var_piu number;
+dg_cassa_var_meno number;
+dg_cassa_finale number;
+
+cassa number; --verifiche per stampa capitolo
+compe number; --verifiche per stampa capitolo
+cp_stampa number; --verifiche per stampa capitolo
+cp_cas_pos number;
+cp_cas_neg number;
+cp_com_pos number;
+cp_com_neg number;
+cp_cassa_prec  number;
+cp_cassa_def   number;
+cp_compe_prec  number;
+cp_compe_def   number;
+
+
+
+cursor capitoli is 
+select 
+ a.eu||a.codice capitolo_bil
+,decode(nvl(a.modificato_nuovo,'Z'),'M','(Modificato) ','N','(Nuovo) ',null)||a.descrizione desc_capitolo
+,nvl(l1.codice,'0') titolo
+,nvl(l2.codice,0) tipologia
+,nvl(l3.codice,0) categoria
+,l1.descrizione desc_titolo
+,l2.descrizione desc_tipologia
+,l3.descrizione desc_categoria
+,a.codice_precedente cap_precs1
+,a.codice_precedente2 cap_precs2
+,a.codice_precedente3 cap_precs3
+,a.codice_precedente4 cap_precs4
+,a.codice_precedente5 cap_precs5
+,nvl(a.modificato_nuovo,'Z') modificato_nuovo
+,a.nb_piano_conti_fina pcf
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+nb_livello3 l3
+where a.anno=p_anno_stampa 
+and a.abilitato = 'S'
+and a.eu = 'E' 
+and l3.id(+) = a.nb_id_padre 
+and l2.id(+) = l3.id_livello2
+and l1.id(+) = l2.id_livello1
+order by 3,4,5,1;
+
+
+cursor titoli is
+select 
+utente
+,num_ord_riga
+,nvl(car01,'N') 
+,nvl(car02,'N') Titolo
+,nvl(car03,'N') Desc_titolo
+,nvl(car04,'N') Tipologia
+,nvl(car05,'N') Desc_tipologia
+,nvl(car06,'N') categoria
+,nvl(car07,'N') desc_categoria
+,nvl(car08,'N') capitolo
+,nvl(car09,'N') desc_capitolo
+,nvl(car10,'N') stampa
+from tmp_Tabulati2
+where car01='VARIAZIONE ENTRATE'
+and utente=p_utente
+and nvl(car10,'N') = '0'
+order by nvl(car02,'N'),nvl(car04,'N'),nvl(car06,'N'),stampa,nvl(car08,'N');
+
+begin
+
+delete tmp_tabulati2 where car01='VARIAZIONE ENTRATE' and utente=p_utente;
+ p_ord:=2;
+	for c in capitoli loop
+
+
+
+     if p_anno-p_anno_stampa =0
+	  then
+	  variazione_competenza(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,compe_prec,compe_pos,compe_neg,compe_def);
+	  variazione_cassa(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,cassa_prec,cassa_pos,cassa_neg,cassa_def);
+      variazione_residuo(p_anno_stampa,c.capitolo_bil,p_utente,cp_res_prec,cp_res_pos,cp_res_neg,cp_res_def);
+	 end if;
+
+     if p_anno_stampa-p_anno = 1
+	  then
+	  variazione_pluriennale1(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,compe_prec,compe_pos,compe_neg,compe_def);
+     end if;	
+
+     if p_anno_stampa-p_anno = 2
+	  then
+	  variazione_pluriennale2(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,compe_prec,compe_pos,compe_neg,compe_def);
+     end if;
+
+
+cassa := nvl(cassa_pos,0) - nvl(cassa_neg,0);
+compe := nvl(compe_pos,0) - nvl(compe_neg,0);
+
+
+	if cassa = 0 
+     then cp_cas_pos := 0; 
+          cp_cas_neg := 0;
+     else cp_cas_pos := cassa_pos;
+          cp_cas_neg := cassa_neg;
+    end if;	 
+
+	if compe = 0 
+     then cp_com_pos := 0; 
+          cp_com_neg := 0;
+     else cp_com_pos := compe_pos;
+          cp_com_neg := compe_neg;
+    end if;	 
+
+
+    if cassa = 0 and
+	  compe = 0 and 
+	  c.modificato_nuovo &lt;> 'M'
+       then cp_stampa := 1;
+       else cp_stampa := 0;
+    end if;
+
+cp_cassa_prec := cassa_prec;
+cp_cassa_def := cassa_def;
+cp_compe_prec := compe_prec;	
+cp_compe_def := compe_def;
+
+
+insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+	(p_utente
+	,p_ord
+	,'VARIAZIONE ENTRATE'
+	,c.Titolo
+	,c.desc_titolo
+	,c.tipologia
+	,c.desc_tipologia
+	,c.categoria
+	,c.desc_categoria
+	,c.capitolo_bil
+    ,c.desc_capitolo
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,c.pcf
+	,cp_compe_prec
+	,cp_com_pos 
+	,cp_com_neg
+	,cp_compe_def);
+   commit;
+
+
+  if p_anno-p_anno_stampa = 0
+  then	
+    if p_residuo='S'
+    then
+	update tmp_tabulati2 set NUM05 = cp_res_prec, NUM06 = cp_res_pos, NUM07 = cp_res_neg, NUM08 = cp_res_def where CAR08 = c.capitolo_bil and car01='VARIAZIONE ENTRATE' and utente=p_utente;
+    else
+	update tmp_tabulati2 set NUM05 = cp_res_prec, NUM06 = 0, NUM07 = 0, NUM08 = cp_res_def where CAR08 = c.capitolo_bil and car01='VARIAZIONE ENTRATE' and utente=p_utente;
+   	end if;
+	update tmp_tabulati2 set NUM09 = cp_cassa_prec, NUM10 = cp_cas_pos , NUM11 = cp_cas_neg, NUM12 = cp_cassa_def where CAR08 = c.capitolo_bil and car01='VARIAZIONE ENTRATE' and utente=p_utente;
+	commit;
+
+  end if;
+
+
+p_ord:=p_ord+1;
+end loop;
+commit;
+
+for t in titoli loop
+
+update tmp_tabulati2 set CAR15 = 'S' where CAR02 = t.titolo and car01='VARIAZIONE ENTRATE' and utente=p_utente;
+update tmp_tabulati2 set CAR16 = 'S' where CAR04 = t.tipologia and car01='VARIAZIONE ENTRATE' and utente=p_utente;
+update tmp_tabulati2 set CAR17 = 'S' where CAR06 = t.categoria and car01='VARIAZIONE ENTRATE' and utente=p_utente; 
+end loop;
+
+commit;
+
+select 	
+nvl(dg.cassa,0) 
+,nvl(dg.variazione_cassa_piu,0) 
+,nvl(dg.variazione_cassa_meno,0)
+,nvl(dg.cassa,0) + nvl(dg.variazione_cassa_piu,0) - nvl(dg.variazione_cassa_meno,0) 
+,nvl(dg.avanzo_amministrazione,0) 
+--,nvl(dg.variazione_avanzo_delibera,0) 
+,nvl(dg.variazione_avanzo_piu,0) 
+,nvl(dg.variazione_avanzo_meno,0) 
+,nvl(dg.avanzo_amministrazione,0)  + nvl(dg.variazione_avanzo_delibera,0)  + nvl(dg.variazione_avanzo_piu,0)  - nvl(dg.variazione_avanzo_meno,0) 
+,nvl(dg.fpv_corrente,0) + nvl(dg.fpv_capitale,0)
+,decode( sign( nvl(dg.variazione_fpv_corrente,0) + nvl(dg.variazione_fpv_capitale,0) ), -1, 0,  nvl(dg.variazione_fpv_corrente,0) + nvl(dg.variazione_fpv_capitale,0) )  
+,decode( sign( nvl(dg.variazione_fpv_corrente,0) + nvl(dg.variazione_fpv_capitale,0) ), -1,  nvl(dg.variazione_fpv_corrente,0) + nvl(dg.variazione_fpv_capitale,0) ,0 ) 
+,(nvl(dg.fpv_corrente,0) + nvl(dg.fpv_capitale,0) + nvl(dg.variazione_fpv_corrente,0) + nvl(dg.variazione_fpv_capitale,0))
+into
+dg_cassa_iniziale,dg_cassa_var_piu,dg_cassa_var_meno,dg_cassa_finale
+,avanzo_previsione, variazione_avanzo_piu,variazione_avanzo_meno,avanzo_finale
+,fpv_iniziale, fpv_variazione_piu, fpv_variazione_meno, fpv_finale
+from fin_t_dati_generali dg
+where
+dg.anno_finanziario = p_anno_stampa;
+
+select max(num_ord_riga)
+into p_ord_max
+from tmp_tabulati2 
+where car01='VARIAZIONE ENTRATE' and utente=p_utente;
+
+
+    insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+	(p_utente
+	,p_ord_max+1
+	,'VARIAZIONE ENTRATE'
+	,'0'
+	,'AVANZO VINCOLATO'
+	,null
+	,null
+	,null
+	,null
+	,null
+    ,null
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,'CO'
+    ,'S'
+	,avanzo_previsione
+    ,variazione_avanzo_piu
+    ,variazione_avanzo_meno
+    ,avanzo_finale);
+
+commit;
+
+ if p_fpv = 'S'
+ then
+    insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+	(p_utente
+	,p_ord_max+2
+	,'VARIAZIONE ENTRATE'
+	,'0'
+	,'FONDO PLURIENNALE VINCOLATO'
+	,null
+	,null
+	,null
+	,null
+	,null
+    ,null
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,'CO'
+    ,'S'
+	,fpv_iniziale
+	,fpv_variazione_piu
+	,fpv_variazione_meno
+	,fpv_finale);
+  else
+    insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+	(p_utente
+	,p_ord_max+2
+	,'VARIAZIONE ENTRATE'
+	,'0'
+	,'FONDO PLURIENNALE VINCOLATO'
+	,null
+	,null
+	,null
+	,null
+	,null
+    ,null
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,'CO'
+    ,'S'
+	,fpv_iniziale
+	,0
+	,0
+	,fpv_iniziale);
+ end if;
+
+commit;
+
+   if p_anno-p_anno_stampa =0
+   then
+	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+    ,CAR15
+	,NUM09
+	,NUM10
+	,NUM11
+	,NUM12)
+    values
+	(p_utente
+	,p_ord_max+3
+	,'VARIAZIONE ENTRATE'
+	,'0'
+	,'FONDO CASSA'
+	,null
+	,null
+	,null
+	,null
+	,null
+    ,null
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,'CA'
+    ,'S'
+	,dg_cassa_iniziale
+    ,dg_cassa_var_piu
+    ,dg_cassa_var_meno
+    ,dg_cassa_finale);
+  end if;
+
+commit;
+
+--TOTALE GENERALE CON AVANZO E FPV
+
+insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    (select
+    p_utente
+	,p_ord_max+4
+	,'VARIAZIONE ENTRATE'
+	,'0'
+	,'TOTALE GENERALE CON AVANZO e FONDO PLURIENNALE VINCOLATO'
+	,null
+	,null
+	,null
+	,null
+	,null
+    ,null
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,'CO'
+    ,'S'
+	,sum(nvl(NUM01,0))
+	,sum(nvl(NUM02,0))
+	,sum(nvl(NUM03,0))
+	,sum(nvl(NUM04,0))
+    from tmp_tabulati2
+    where car01='VARIAZIONE ENTRATE' and utente=p_utente);
+
+
+    insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+	,CAR13
+    ,CAR14
+    ,CAR15
+	,NUM09
+	,NUM10
+    ,NUM11
+	,p_ord_max+5
+	,NUM12)
+    (select
+    p_utente
+	,'VARIAZIONE ENTRATE'
+	,'0'
+	,'TOTALE GENERALE CON AVANZO e FONDO PLURIENNALE VINCOLATO'
+	,null
+	,null
+	,null
+	,null
+	,null
+    ,null
+	,cp_stampa
+	,null
+	,p_anno
+    ,p_anno_stampa
+    ,'CA'
+    ,'S'
+	,sum(nvl(NUM09,0))
+	,sum(nvl(NUM10,0))
+	,sum(nvl(NUM11,0))
+	,sum(nvl(NUM12,0))
+    from tmp_tabulati2
+    where car01='VARIAZIONE ENTRATE' and utente=p_utente);
+
+
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

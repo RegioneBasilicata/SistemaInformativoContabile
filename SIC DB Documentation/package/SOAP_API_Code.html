@@ -1,0 +1,71 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SOAP_API</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SOAP_API.html">Details</a></div></div>
+<div class="tab"><div><a href="SOAP_API_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SOAP_API_References.html">References</a></div></div>
+<div class="tab"><div><a href="SOAP_API_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SOAP_API_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PACKAGE soap_api AS
+-- --------------------------------------------------------------------------
+-- Name         : http://www.oracle-base.com/dba/miscellaneous/soap_api
+-- Author       : DR Timothy S Hall
+-- Description  : SOAP related functions for consuming web services.
+-- Ammedments   :
+--   When         Who       What
+--   ===========  ========  =================================================
+--   04-OCT-2003  Tim Hall  Initial Creation
+--   23-FEB-2006  Tim Hall  Parameterized the "soap" envelope tags.
+-- --------------------------------------------------------------------------
+
+TYPE t_request IS RECORD (
+  method        VARCHAR2(256),
+  namespace     VARCHAR2(256),
+  body          VARCHAR2(32767),
+  envelope_tag  VARCHAR2(30)
+);
+
+TYPE t_response IS RECORD
+(
+  doc           XMLTYPE,
+  envelope_tag  VARCHAR2(30)
+);
+
+FUNCTION new_request(p_method        IN  VARCHAR2,
+                     p_namespace     IN  VARCHAR2,
+                     p_envelope_tag  IN  VARCHAR2 DEFAULT 'SOAP-ENV')
+  RETURN t_request;
+
+
+PROCEDURE add_parameter(p_request  IN OUT NOCOPY  t_request,
+                        p_name     IN             VARCHAR2,
+                        p_type     IN             VARCHAR2,
+                        p_value    IN             VARCHAR2);
+                        
+PROCEDURE add_body(p_request  IN OUT NOCOPY  t_request, corpo  IN varchar2);                        
+
+FUNCTION invoke(p_request  IN OUT NOCOPY  t_request,
+                p_url      IN             VARCHAR2,
+                p_action   IN             VARCHAR2)
+  RETURN t_response;
+
+FUNCTION get_return_value(p_response   IN OUT NOCOPY  t_response,
+                          p_name       IN             VARCHAR2,
+                          p_namespace  IN             VARCHAR2)
+  RETURN VARCHAR2;
+
+END soap_api;</pre>	</td></tr>
+</table></div>

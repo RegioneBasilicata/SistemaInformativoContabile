@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>UPLOAD_FILE_UTENTE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="UPLOAD_FILE_UTENTE.html">Details</a></div></div>
+<div class="tab"><div><a href="UPLOAD_FILE_UTENTE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="UPLOAD_FILE_UTENTE_References.html">References</a></div></div>
+<div class="tab"><div><a href="UPLOAD_FILE_UTENTE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="UPLOAD_FILE_UTENTE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE UPLOAD_FILE_UTENTE (
+      directory_file in varchar2,
+      nome_file in varchar, 
+      file_content in clob,
+      errore out number) is
+  
+  l_file      UTL_FILE.FILE_TYPE;
+  l_buffer    RAW(32767);
+  l_amount    BINARY_INTEGER := 32767;
+  l_pos       INTEGER := 1;
+  l_blob      BLOB;
+  l_blob_len  INTEGER;
+  
+  l_lang_context  integer := DBMS_LOB.DEFAULT_LANG_CTX;
+  l_warning       integer := DBMS_LOB.WARN_INCONVERTIBLE_CHAR;
+  l_dest_offset   integer := 1;
+  l_source_offset integer := 1;  
+  
+BEGIN
+  
+  -- converto il clob in blob
+  dbms_lob.createtemporary(l_blob, true);
+
+  dbms_lob.converttoblob (
+           dest_lob    => l_blob,
+           src_clob    => file_content,
+           amount      => DBMS_LOB.LOBMAXSIZE,
+           dest_offset => l_dest_offset,
+           src_offset  => l_source_offset,
+           blob_csid   => DBMS_LOB.DEFAULT_CSID,
+           lang_context=> l_lang_context,
+           warning     => l_warning
+      );  
+
+  l_blob_len := DBMS_LOB.getlength(l_blob);
+  
+  -- Open the destination file.
+  l_file := UTL_FILE.fopen(directory_file,nome_file,'wb', 32767);
+
+  -- Read chunks of the BLOB and write them to the file
+  -- until complete.
+  WHILE l_pos &lt; l_blob_len LOOP
+    DBMS_LOB.read(l_blob, l_amount, l_pos, l_buffer);
+    UTL_FILE.put_raw(l_file, l_buffer, TRUE);
+    l_pos := l_pos + l_amount;
+  END LOOP;
+  
+  -- Close the file.
+  UTL_FILE.fclose(l_file);
+  errore:=null;  
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Close the file if something goes wrong.
+    IF UTL_FILE.is_open(l_file) THEN
+      UTL_FILE.fclose(l_file);
+    END IF;
+    errore:=1;
+    RAISE;
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CARICA_VAL_ALFRESCO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CARICA_VAL_ALFRESCO.html">Details</a></div></div>
+<div class="tab"><div><a href="CARICA_VAL_ALFRESCO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CARICA_VAL_ALFRESCO_References.html">References</a></div></div>
+<div class="tab"><div><a href="CARICA_VAL_ALFRESCO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CARICA_VAL_ALFRESCO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE carica_val_alfresco 
+(p_anno number,p_ufficio VARCHAR2,p_matricola NUMBER,p_alfresco_url VARCHAR2, p_alfresco_usr VARCHAR2, p_alfresco_pass VARCHAR2, p_alfresco_url_share VARCHAR2) is 
+
+wClob clob;
+wNomeFile varchar2(1000);
+wNodeRef varchar2(1000);
+wId number;
+wUrlCompleto varchar2(1000);
+
+w_alfresco_url varchar2(1000) := nvl(p_alfresco_url,'http://traccia:integra@alfresco.regione.basilicata.it:8080/alfresco/'); 
+w_alfresco_usr varchar2(1000) := nvl(p_alfresco_usr,'traccia');
+w_alfresco_pass varchar2(1000) := nvl(p_alfresco_pass,'integra');
+w_alfresco_url_share varchar2(1000) := nvl(p_alfresco_url_share,'http://traccia:integra@alfresco.regione.basilicata.it:8080/share/proxy/alfresco/api/node/content/');
+
+cursor dip is
+select ANNO,UFFICIO,MATRICOLA,CODICE_FISCALE,NOME_FILE,TIPO_SCHEDA
+from pdp2_stampa_scheda
+where anno = nvl(p_anno,1999)
+and matricola = nvl(p_matricola,matricola)
+and ufficio = nvl(p_ufficio,ufficio)
+and nuovo_nome_file is null
+and url_completo is null
+and nvl(stampato,'N') = 'S'
+and nome_file is not null;
+
+begin
+
+
+alfresco_pkg.set_url(w_alfresco_url);
+alfresco_pkg.set_usr(w_alfresco_usr);
+alfresco_pkg.set_psw(w_alfresco_pass);
+
+cmis1_pkg.set_url(w_alfresco_url);
+cmis1_pkg.set_usr(w_alfresco_usr);
+cmis1_pkg.set_psw(w_alfresco_pass);
+
+for d in dip loop
+
+-- wNomeFile := d.anno||'_'||d.UFFICIO||'_'||d.matricola||'_'||d.CODICE_FISCALE||substr(d.NOME_FILE,-4);
+wNomeFile := d.anno||'_'||d.UFFICIO||'_'||d.matricola||'_'||d.CODICE_FISCALE||'_'||REPLACE(d.tipo_scheda,' ')||substr(d.NOME_FILE,-4);
+
+
+wClob := cmis1_pkg.upload_from_file('DIR_SCHEDE_VALUTAZIONE', d.NOME_FILE, wNomeFile, '2d15f209-0ce4-46bb-b121-36c0bfebc34b');
+wNomeFile := ws_xml.readVarchar2Clob(wClob, '&lt;atom:title>');
+wNodeRef := ws_xml.readVarchar2Clob(wClob, '&lt;cmis:propertyId propertyDefinitionId="cmis:versionSeriesId" displayName="Version series id" localName="versionSeriesId" queryName="cmis:versionSeriesId">&lt;cmis:value>');
+
+-- insert into aaa_test (clob) values (wClob); commit;
+
+wUrlCompleto := w_alfresco_url_share||replace(wNodeRef,':/','')||'/'||utl_url.escape(wNomeFile,true)||'?a=true';
+
+update pdp2_stampa_scheda set 
+  NUOVO_NOME_FILE = wNomeFile,
+  NODE_REF = wNodeRef,
+  URL_COMPLETO = wUrlCompleto,
+  TIMESTAMP = sysdate
+where anno = d.anno
+and matricola = d.matricola
+and ufficio = d.ufficio
+AND TIPO_SCHEDA = d.tipo_scheda;
+commit;
+
+end loop;
+
+
+
+end;</pre>	</td></tr>
+</table></div>

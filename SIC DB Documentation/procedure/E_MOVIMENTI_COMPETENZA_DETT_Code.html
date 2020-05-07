@@ -1,0 +1,209 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>E_MOVIMENTI_COMPETENZA_DETT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="E_MOVIMENTI_COMPETENZA_DETT.html">Details</a></div></div>
+<div class="tab"><div><a href="E_MOVIMENTI_COMPETENZA_DETT_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="E_MOVIMENTI_COMPETENZA_DETT_References.html">References</a></div></div>
+<div class="tab"><div><a href="E_MOVIMENTI_COMPETENZA_DETT_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="E_MOVIMENTI_COMPETENZA_DETT_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE E_MOVIMENTI_COMPETENZA_DETT (
+w_anno in out number, 
+w_capitolo in out varchar, 
+w_data_creazione in out date) is
+
+
+doc_id_accertamento number;
+doc_id_storno_accertamento number;
+doc_id_reversale number;
+incassi_competenza number(15,2);
+
+totale_storno_reversale number(15,2);
+totale_correzione_storno_acc number(15,2);
+totale_storno_accertamenti number(15,2);
+
+w_imp_acc_competenza number(15,2):=0; 
+w_man_rev_competenza number(15,2):=0;
+conta_acc number := 0;
+p_data date := nvl(w_data_creazione,to_date('3112'||w_anno,'ddmmyyyy'));
+
+
+cursor accertamenti is
+select     distinct
+substr(bi.ind_cap,1,6) capitolo_accertamento,
+nvl(jugd.document_amount,0) importo_accertamento,
+to_number(to_char(jugd.date_created,'yyyy')) anno_accertamento,
+jugd.doc_id doc_id_accertamento,
+jugd.doc_sequence_value numero_acc,
+jugd.description oggetto_acc
+from
+fin_t_documenti jugd,                                                               
+bas_ind bi
+where                                                                                                                              
+jugd.doc_type = 'ACC' and                                                
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y' and                        
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z'))='PI' and
+jugd.gl_date is not null and
+jugd.period_name is not null and        
+jugd.date_created is not null and        
+bi.doc_id = jugd.doc_id and
+bi.ind_anno = w_anno and
+bi.ind_cap  = substr(w_capitolo,1,6)      and
+jugd.date_created &lt;= p_data and
+jugd.segment8 = w_anno;
+
+
+cursor storno_accertamenti is
+select    
+nvl(jugd.document_amount,0)  importo_storno_accertamento,
+to_number(to_char(jugd.date_created,'yyyy')) anno_storno_accertamento,
+jugd.doc_id  doc_id_storno_accertamento,
+jugd.previous_doc_id previous_doc_id_acc
+from    
+fin_t_documenti  jugd
+where    
+jugd.doc_type  = 'ST-ACC'                  and                                                
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y'         and                        
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z'))='PI' and
+jugd.gl_date is not null                 and
+jugd.period_name is not null                 and        
+jugd.date_created is not null                 and    
+jugd.date_created &lt;= p_data and
+jugd.segment8 = w_anno and
+jugd.previous_doc_id = doc_id_accertamento;
+
+cursor corr_storno_accertamenti is
+select    
+nvl(jugd.document_amount,0)                                         importo_corr_accertamento,
+to_number(to_char(jugd.date_created,'yyyy'))         anno_corr_accertamento,
+jugd.previous_doc_id                                                        previous_doc_id_corr_acc
+from    
+fina_documenti         jugd
+where    
+jugd.doc_type = 'CORR_AC'                          and                                                
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y'              and                        
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z'))='PI' and
+jugd.gl_date is not null                        and
+jugd.period_name is not null                     and        
+jugd.date_created is not null                     and   
+jugd.date_created &lt;= p_data and
+jugd.segment8 = w_anno and
+jugd.previous_doc_id = doc_id_storno_accertamento;
+
+cursor reversali is
+select     
+nvl(jugd1.document_amount,0)                                         importo_reversale,
+jugd1.doc_id                                                                        doc_id_reversale,
+to_number(to_char(jugd1.date_created,'yyyy'))      anno_reversale,
+jugd1.previous_doc_id                                                        previous_doc_id_reversale
+from    
+fina_documenti         jugd1
+where     
+jugd1.doc_type = 'REV' and
+jugd1.date_created is not null and
+upper(nvl(jugd1.proposal_status_flag,'Z'))||upper(nvl(jugd1.auditing_status_flag,'Z'))='PI' and
+upper(nvl(jugd1.deletion_status_flag,'N')) &lt;> 'Y' and
+jugd1.date_created &lt;= p_data and
+jugd1.segment8 = w_anno and
+jugd1.previous_doc_id    = doc_id_accertamento;
+
+cursor storno_reversali is
+select    
+nvl(jugd1.document_amount,0)                                     importo_storno_reversale,
+jugd1.previous_doc_id                                                 previous_doc_id_storno_rev
+from    
+fina_documenti         jugd1
+where    
+jugd1.doc_type = 'ST-REV' and
+upper(nvl(jugd1.proposal_status_flag,'Z'))||upper(nvl(jugd1.auditing_status_flag,'Z'))='PI' and
+upper(nvl(jugd1.deletion_status_flag,'N')) &lt;> 'Y' and
+jugd1.date_created &lt;= p_data and
+jugd1.segment8 = w_anno and
+jugd1.previous_doc_id = doc_id_reversale;
+
+BEGIN
+
+for a in accertamenti loop
+ doc_id_accertamento := a.doc_id_accertamento;
+ incassi_competenza := 0;
+ 
+-- calcolo reversali 
+ for r in reversali loop
+
+  totale_storno_reversale := 0;
+  doc_id_reversale := r.doc_id_reversale;
+  for sr in storno_reversali loop
+   totale_storno_reversale := totale_storno_reversale + nvl(sr.importo_storno_reversale,0);    
+  end loop;
+  incassi_competenza := incassi_competenza + (nvl(r.importo_reversale,0) - nvl(totale_storno_reversale,0));
+ end loop;
+-- fine calcolo reversali
+
+-- calcolo storno_accertamenti 
+ totale_storno_accertamenti := 0;
+ for sa in storno_accertamenti loop
+  totale_correzione_storno_acc := 0;
+  doc_id_storno_accertamento := sa.doc_id_storno_accertamento;
+   for csa in corr_storno_accertamenti loop
+    totale_correzione_storno_acc := totale_correzione_storno_acc + nvl(csa.importo_corr_accertamento,0);    
+   end loop;
+
+  totale_storno_accertamenti := totale_storno_accertamenti + (nvl(sa.importo_storno_accertamento,0) - nvl(totale_correzione_storno_acc,0));
+ end loop;
+-- fine calcolo storno accertamenti
+  w_imp_acc_competenza := (nvl(a.importo_accertamento,0) - nvl(totale_storno_accertamenti,0));
+  w_man_rev_competenza := nvl(incassi_competenza,0);
+  
+-- aggiorna/inserisci in TNP_ANZIANITA_RESIDUI_DETT
+if (w_imp_acc_competenza - w_man_rev_competenza) > 0
+  then
+     select count(numero_doc) into conta_acc
+     from TMP_ANZIANITA_RESIDUI_DETT
+     where ANNO = w_anno
+     and CAPITOLO = w_capitolo
+     and TIPO_DOC = 'ACC'
+     and NUMERO_DOC = a.numero_acc;
+ 
+     if conta_acc > 0
+     then 
+     update TMP_ANZIANITA_RESIDUI_DETT set RES_CORRENTI = (w_imp_acc_competenza - w_man_rev_competenza)
+     where ANNO = w_anno
+     and CAPITOLO = w_capitolo
+     and TIPO_DOC = 'ACC'
+     and NUMERO_DOC = a.numero_acc;
+     commit;
+     else 
+     insert into TMP_ANZIANITA_RESIDUI_DETT(ANNO
+    ,CAPITOLO
+    ,TIPO_DOC
+    ,NUMERO_DOC
+    ,OGGETTO_DOC
+    ,RES_CORRENTI
+    )
+    values
+    (w_anno,w_capitolo,'ACC',a.numero_acc,a.oggetto_acc
+    ,(w_imp_acc_competenza - w_man_rev_competenza));
+    commit; 
+    end if;
+    incassi_competenza := 0;
+    w_imp_acc_competenza := 0;
+    w_man_rev_competenza := 0;
+ end if;
+-- azzeramento variabili
+
+end loop;
+
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,1847 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>EQUILIBRI_PREVISIONE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="EQUILIBRI_PREVISIONE.html">Details</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_PREVISIONE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_PREVISIONE_References.html">References</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_PREVISIONE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="EQUILIBRI_PREVISIONE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      EQUILIBRI_PREVISIONE(p_anno in number,p_utente in varchar2,p_id_report in number) as
+ riga NUMBER;
+ c1 VARCHAR2(1000); c2 VARCHAR2(10);
+ n1 NUMBER; n2 NUMBER; n3 NUMBER;
+ v1 NUMBER; v2 NUMBER; v3 NUMBER; 
+ vdata_approvazione_previsione date;
+ p_anno1 number(4);
+ p_anno2 number(4);
+
+-- Vale a partire dal bilancio di previsione 2017.
+-- 21.11.2019 inserita riga 375
+-- 25.03.2020 G.ZACCARO Aggiornamento della select di insert in fin_T_previsione_eqb
+
+BEGIN
+
+ DELETE tmp_tabulati 
+ WHERE utente = p_utente;
+ COMMIT;
+
+ p_anno1 := p_anno + 1;
+ p_anno2 := p_anno + 2;
+
+
+ begin
+  select data_approvazione_previsione 
+  into vdata_approvazione_previsione
+  from fin_t_dati_generali 
+  where anno_finanziario= p_anno;
+  exception when no_data_found then null;
+ end;
+
+
+
+ riga := 10;
+ c1 := 'Utilizzo risultato di amministrazione presunto per il finanziamento di spese correnti e al rimborso di prestiti';
+ c2 := '(+)';
+
+ /*SELECT NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AVANZO')),0) +
+        NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AV_REG')),0) +
+        NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AV_RP')),0) ucompe
+ INTO n1
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id in (1,4) -- titolo 1 e titolo 4 29.01.2017 
+ */ 
+
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+--  and nvl(a.sanita_sn,'N')='S' 
+  and a.nb_titolo in (1,4)
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) in ('AVANZO','AV_REG','AV_RP');
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,NULL,NULL,p_utente,riga);   
+
+-- Il rigo viene ripetuto nella posizione 520 - Purtroppo l'avevamo dimenticato.
+
+
+ riga := 520;
+ c1 := 'Utilizzo risultato di amministrazione presunto per il finanziamento di spese correnti e al rimborso di prestiti';
+ c2 := '(-)';
+ -- PIERRO 28/05/2018 da 520 a 580 mettere tutto a 0
+  n1:=0;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,NULL,NULL,p_utente,riga);   
+
+
+ riga := 20;
+ c1 := 'Ripiano disavanzo presunto di amministrazione esercizio precedente';--'Dato da impostare manualmente';
+ c2 := '(-)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+ -- 09/05/18 fferrante: modifica richiesta da Pierro (sposto il risultato del campo "Disavanzo pregresso derivante da debito autorizzato e non contratto (presunto)" in questo campo
+ /* SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'RDPAEP_ANNO';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'RDPAEP_ANNO+1';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'RDPAEP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;     */
+ SELECT  NVL(disavanzo_amministrazione,0) ecompe
+  INTO n1
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno;
+  SELECT NVL(disavanzo_amministrazione,0) ecompe1
+  INTO n2
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno1;
+  SELECT NVL(disavanzo_amministrazione,0) ecompe2
+  INTO n3
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno2; 
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+ EXCEPTION WHEN NO_DATA_FOUND
+   THEN null;
+END;
+
+ riga := 30;
+ c1 := 'Fondo pluriennale vincolato per spese correnti iscritto in entrata';
+ c2 := '(+)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN
+  SELECT  NVL(fpv_corrente,0) + NVL(variazione_fpv_corrente,0) ecompe
+  INTO n1
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno;
+  SELECT NVL(fpv_corrente,0) + NVL(variazione_fpv_corrente,0) ecompe1
+  INTO n2
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno1;
+  SELECT NVL(fpv_corrente,0) + NVL(variazione_fpv_corrente,0) ecompe2
+  INTO n3
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno2; 
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+ EXCEPTION WHEN NO_DATA_FOUND
+   THEN null;
+  END;
+
+ riga := 40;
+ c1 := 'Entrate titoli 1-2-3';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       NVL(SUBSTR(l1.codice,1,1),'1') &lt; '4';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 50;
+ c1 := 'Entrate in conto capitale per Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       SUBSTR(a.nb_piano_conti_fina,1,9) = 'E.4.02.06';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 60;
+ c1 := 'Entrate Titolo 4.03 - Altri trasferimenti in conto capitale';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.4.03%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+/* -- nel 2016 viene eliminata la riga e gestita in riga 14 e 42...a seconda se positiva o negativa.
+ riga := 70;
+ c1 := '(Entrate titolo 5.00 - Spese titolo 3.00) - Variazioni attivitÃ  finanziarie';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.5%';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO v1, v2, v3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'U.3%';
+ n1 := n1 - v1;
+ n2 := n2 - v2;
+ n3 := n3 - v3;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+ */
+
+ riga := 80; -- Nota bene questo rigo è ripetuto anche nel rigo 250
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(+)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'ECCDEAP_ANNO';
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'ECCDEAP_ANNO+1';
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'ECCDEAP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 90;
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(+)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EAPDEAP_ANNO';
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EAPDEAP_ANNO+1';
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EAPDEAP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 100;
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(+)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EPCDSCBSDLPC_ANNO';
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EPCDSCBSDLPC_ANNO+1';
+  SELECT descrizione_campo_report,'(+)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EPCDSCBSDLPC_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 110;
+ c1 := 'Spese correnti';
+ c2 := '(-)';
+        NVL(SUM(previsione_iniziale(p_anno,a.nb_capitolo_fpv)),0) ufv_compe,
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2,
+        NVL(SUM(previsione_iniziale(p_anno1,a.nb_capitolo_fpv)),0) ufv_plur1,
+        NVL(SUM(previsione_iniziale(p_anno2,a.nb_capitolo_fpv)),0) ufv_plur2
+ INTO n1, n2, n3,
+      v1,v2,v3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id = 1 /* titolo 1 */ ;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 120;
+ c1 := '  -  di cui al fondo pluriennale vincolato';
+ c2 := NULL;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,v1,v2,v3,p_utente,riga);   
+
+ riga := 130;
+ c1 := 'Spese Titolo 2.04 - Altri trasferimenti in conto capitale';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'U.2.04%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ -- sostituisce la riga 7 che scompare. Se negativo viene riportato in riga 14 altrimenti 41
+riga := 140;
+ c1 := 'Variazioni attivita'' finanziarie (se negativo)';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.5%';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO v1, v2, v3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'U.3%';
+ if n1 &lt; v1 
+      then n1 := n1 - v1;
+      else n1 := 0;
+ end if;
+ if n2 &lt;= v2 
+      then n2 := n2 - v2;
+      else n2 := 0;
+ end if;
+ if n3 &lt; v3 
+      then n3 := n3 - v3;
+      else n3 := 0;
+ end if;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,abs(n1),abs(n2),abs(n3),p_utente,riga);   
+ --
+
+ riga := 150;
+ c1 := 'Rimborso prestiti';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id = 4 /* titolo 4 */ ;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 155;
+ c1 := 'Dato da impostare manualmente';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,NULL,NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'DICUIFADL_ANNO';
+  SELECT descrizione_campo_report,NULL,NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'DICUIFADL_ANNO+1';
+  SELECT descrizione_campo_report,NULL,NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+  WHEN OTHERS THEN NULL;
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'DICUIFADL_ANNO+2';
+ EXCEPTION 
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 160;
+ c1 := 'Dato da impostare manualmente';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,NULL,NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'DICUIEAP_ANNO';
+  SELECT descrizione_campo_report,NULL,NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'DICUIEAP_ANNO+1';
+  SELECT descrizione_campo_report,NULL,NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'DICUIEAP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+
+ riga := 170;
+ c1 := 'A) Equilibrio di parte corrente ';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ SELECT SUM(DECODE(num_ord_riga,10,num01,20,num01*(-1),30,num01,40,num01,50,num01,60,num01,70,num01,80,num01,90,num01,100,num01,110,num01*(-1),130,num01*(-1),140,num01*(-1),150,num01*(-1),0)) compe,
+        SUM(DECODE(num_ord_riga,10,num02,20,num02*(-1),30,num02,40,num02,50,num02,60,num02,70,num02,80,num02,90,num02,100,num02,110,num02*(-1),130,num02*(-1),140,num02*(-1),150,num02*(-1),0)) compe1,
+        SUM(DECODE(num_ord_riga,10,num03,20,num03*(-1),30,num03,40,num03,50,num03,60,num03,70,num03,80,num03,90,num03,100,num03,110,num03*(-1),130,num03*(-1),140,num03*(-1),150,num03*(-1),0)) compe2
+ INTO n1,n2,n3
+ FROM tmp_tabulati 
+ WHERE utente = p_utente;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 180;
+ c1 := NULL;
+ c2 := NULL;
+ n1 := NULL;  n2 := NULL; n3 := NULL;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 190;
+ c1 := 'Utilizzo risultato presunto di amministrazione vincolato per il finanziamento di spese dÂ¿investimento';
+ c2 := '(+)';
+/*
+ SELECT NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AVANZO')),0) +
+        NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AV_REG')),0) +
+        NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AV_RP')),0) ucompe
+ INTO n1
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id IN (2,4) ; -- titoli 2,4 Ã¨ sbagliato Ã¨ solo il titolo2 30.01.2017
+*/ 
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+--  and nvl(a.sanita_sn,'N')='S' 
+  and a.nb_titolo in (2)
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+ VALUES (c1,c2,n1,NULL,NULL,p_utente,riga);   
+  and d.segment9(+) in ('AVANZO','AV_REG','AV_RP');       
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+
+ riga := 200;
+ c1 := 'Fondo pluriennale vincolato per spese in conto capitale iscritto in entrata';
+ c2 := '(+)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN
+  SELECT NVL(dg.fpv_capitale,0) +  NVL(dg.variazione_fpv_capitale,0) ecompe
+  INTO n1
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno;
+  SELECT NVL(dg.fpv_capitale,0) +  NVL(dg.variazione_fpv_capitale,0) ecompe1
+  INTO n2
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno1;
+  SELECT NVL(dg.fpv_capitale,0) +  NVL(dg.variazione_fpv_capitale,0) ecompe2
+  INTO n3
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno2; 
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+ EXCEPTION WHEN NO_DATA_FOUND
+   THEN null;
+ END;
+
+ riga := 210;
+ c1 := 'Entrate in conto capitale (Titolo 4)';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0) ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       NVL(SUBSTR(l1.codice,1,1),'1') = '4';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 220;
+ c1 := 'Entrate Titolo 5.01.01 - Alienazioni  di partecipazioni ';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE '5.01.0%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 230;
+ c1 := 'Entrate per accensioni di prestiti (Titolo 6)';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0) ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       NVL(SUBSTR(l1.codice,1,1),'1') = '6';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 240;
+ c1 := 'Entrate in conto capitale per Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.4.02.06%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+
+
+ riga := 250;
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(-)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'ECCDEAP_ANNO';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'ECCDEAP_ANNO+1';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+        id_report = TO_NUMBER(p_id_report) AND
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        nome_campo_report = 'ECCDEAP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+/* Pierro 22.05.2017 - Il campo va impostato manualmente i caso di modifica occhio alla riga 80 che  utilizza lo stesso campo
+ riga := 250;
+ c1 := 'Entrate in c/capitale destinate all''estinzione anticipata di prestiti';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.4.04.01.08%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+*/
+
+
+ riga := 260;
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(-)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EPCDSCBSDLPC_CAP_ANNO';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EPCDSCBSDLPC_CAP_ANNO+1';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EPCDSCBSDLPC_CAP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 270;
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(-)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EAPDEAP_CAP_ANNO';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EAPDEAP_CAP_ANNO+1';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'EAPDEAP_CAP_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 280;
+ c1 := 'Entrate Titolo  4.03 - Altri trasferimenti in conto capitale';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.4.03%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 290;
+ c1 := 'Spese in conto capitale';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2,
+        NVL(SUM(previsione_iniziale(p_anno,a.nb_capitolo_fpv)),0) ufv_compe,
+        NVL(SUM(previsione_iniziale(p_anno1,a.nb_capitolo_fpv)),0) ufv_plur1,
+        NVL(SUM(previsione_iniziale(p_anno2,a.nb_capitolo_fpv)),0) ufv_plur2
+ INTO n1, n2, n3,
+      v1,v2,v3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id = 2 /* titolo 2 */ ;
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 300;
+ c1 := '  -  di cui al fondo pluriennale vincolato';
+ c2 := NULL;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,v1,v2,v3,p_utente,riga);   
+
+ riga := 310;
+ c1 := 'Spese Titolo 2.04 - Altri trasferimenti in conto capitale'; 
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'U.2.04%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ -- 08/01/2014     f.coretti. Pierro fa notare che a seconda dell'anno questo criterio potrebbe  
+ -- non essere valido e pertanto si concorda una gestione manuale
+ -- riga := 315;
+ -- c1 := 'Spese Titolo 3.01.01 - Acquisizioni di partecipazioni e conferimenti di capitale'; 
+ -- c2 := '(-)';
+ --SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+    --    NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+    --    NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ --INTO n1, n2, n3
+ --FROM fin_t_articoli a,
+   --   nb_titoli_uscite l3
+ --WHERE a.anno = p_anno AND
+   --    a.abilitato = 'S' AND
+   --    a.eu = 'U' AND
+   --    l3.anno(+) = a.anno AND
+   --    l3.id(+) = NVL(a.nb_titolo,0) AND
+   --    a.nb_piano_conti_fina LIKE 'U.3.01.01%';
+ --INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ --VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 320;
+ c1 := 'Dato da impostare manualmente';
+ c2 := '(-)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ BEGIN 
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'APCC_ANNO';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'APCC_ANNO+1';
+  SELECT descrizione_campo_report,'(-)',NVL(importo,0) importo
+  INTO c1,c2,n3
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'APCC_ANNO+2';
+ EXCEPTION 
+  WHEN OTHERS THEN NULL;
+ END;      
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+riga := 330;
+ c1 := 'Ripiano disavanzo pregresso derivante da debito autorizzato e non contratto (presunto)'; 
+ c2 := '(-)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ /*BEGIN
+  SELECT  NVL(disavanzo_amministrazione,0) ecompe
+  INTO n1
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno;
+  SELECT NVL(disavanzo_amministrazione,0) ecompe1
+  INTO n2
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno1;
+  SELECT NVL(disavanzo_amministrazione,0) ecompe2
+  INTO n3
+  FROM fin_t_dati_generali dg
+  WHERE dg.anno_finanziario = p_anno2; 
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+ EXCEPTION WHEN NO_DATA_FOUND
+   THEN null;
+ END;
+*/
+
+
+ --  Se negativo viene riportato in riga 140 altrimenti qui in riga 340
+riga := 340;
+ c1 := 'Variazioni attivita'' finanziarie (se positivo)';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       a.nb_piano_conti_fina LIKE 'E.5%';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+      nb_titoli_uscite l3
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO v1, v2, v3
+ FROM fin_t_articoli a,
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'U.3%';
+ if n1 >= v1 
+      then n1 := n1 - v1;
+      else n1 := 0;
+ end if;
+ if n2 >= v2 
+      then n2 := n2 - v2;
+      else n2 := 0;
+ end if;
+ if n3 >= v3 
+      then n3 := n3 - v3;
+      else n3 := 0;
+ end if;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,abs(n1),abs(n2),abs(n3),p_utente,riga);   
+
+ riga := 350;
+ c1 := 'B) Equilibrio di parte capitale ';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ SELECT SUM(DECODE(num_ord_riga,190,num01,200,num01,210,num01,220,num01,230,num01,240,num01*(-1),250,num01*(-1),270,num01*(-1),280,num01*(-1),290,num01*(-1),310,num01,320,num01*(-1),330,num01*(-1),340,num01,0)) compe,
+        SUM(DECODE(num_ord_riga,190,num02,200,num02,210,num02,220,num02,230,num02,240,num02*(-1),250,num02*(-1),270,num02*(-1),280,num02*(-1),290,num02*(-1),310,num02,320,num02*(-1),330,num02*(-1),340,num02,0)) compe1,
+        SUM(DECODE(num_ord_riga,190,num03,200,num03,210,num03,220,num03,230,num03,240,num03*(-1),250,num03*(-1),270,num03*(-1),280,num03*(-1),290,num03*(-1),310,num03,320,num03*(-1),330,num03*(-1),340,num03,0)) compe2
+ INTO n1,n2,n3
+ FROM tmp_tabulati 
+ WHERE utente = p_utente;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 360;
+ c1 := NULL;
+ c2 := NULL;
+ n1 := NULL;  n2 := NULL; n3 := NULL;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 370;
+ c1 := 'Utilizzo risultato presunto di amministrazione vincolato al finanziamento di attivitÃ  finanziarie';
+ c2 := '(+)';
+/* SELECT NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AVANZO')),0) +
+        NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AV_REG')),0) +
+        NVL(SUM(previsione_iniziale_segment9(p_anno,a.eu||a.codice,'AV_RP')),0) ucompe
+ INTO n1
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id = 3; --titolo 3 
+*/
+
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+--  and nvl(a.sanita_sn,'N')='S' 
+  and a.nb_titolo in (3)
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) in ('AVANZO','AV_REG','AV_RP');       
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,NULL,NULL,p_utente,riga);   
+
+ riga := 375;--21.11.2019 In fin_T_dati generali non abbiamo fpv_finanziario quindi prendiamo il dato dal dai movimenti di bilancio G.ZACCARO
+ c1 := 'Fondo pluriennale vincolato per incremento di attività finanziarie iscritto in entrata';
+ c2 := '(+)';
+ n1 := 0;  n2 := 0; n3 := 0;
+ begin  
+ select 
+ nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) into n1
+ from  
+ fin_t_documenti d,
+ fin_t_articoli a
+ where substr(d.segment2,1,1) = 'U' and
+ d.segment8 = p_anno and
+ d.segment2 = a.eu||a.codice and
+ d.doc_type in ('B_COM_POS','V_COM_POS','A_COM_POS','B_PL1_POS','V_PL1_POS','A_PL1_POS','B_PL2_POS','V_PL2_POS','A_PL2_POS','B_COM_NEG','V_COM_NEG','A_COM_NEG','B_PL1_NEG','V_PL1_NEG','A_PL1_NEG','B_PL2_NEG','V_PL2_NEG','A_PL2_NEG') and 
+ d.segment9 in ('FPV','FPV_REG') and
+ d.segment8 = a.anno and
+ a.nb_titolo = '3';
+
+ select 
+ nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) into n2
+ from  
+ fin_t_documenti d,
+ fin_t_articoli a
+ where substr(d.segment2,1,1) = 'U' and
+ d.segment8 = p_anno1 and
+ d.doc_type in ('B_COM_POS','V_COM_POS','A_COM_POS','B_PL1_POS','V_PL1_POS','A_PL1_POS','B_PL2_POS','V_PL2_POS','A_PL2_POS','B_COM_NEG','V_COM_NEG','A_COM_NEG','B_PL1_NEG','V_PL1_NEG','A_PL1_NEG','B_PL2_NEG','V_PL2_NEG','A_PL2_NEG') and 
+ d.segment9 in ('FPV','FPV_REG') and
+ d.segment8 = a.anno and
+ d.segment2 = a.eu||a.codice and
+ a.nb_titolo = '3';
+
+ select 
+ nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) into n3
+ from  
+ fin_t_documenti d,
+ fin_t_articoli a
+ where substr(d.segment2,1,1) = 'U' and
+ d.segment8 = p_anno2 and
+ d.doc_type in ('B_COM_POS','V_COM_POS','A_COM_POS','B_PL1_POS','V_PL1_POS','A_PL1_POS','B_PL2_POS','V_PL2_POS','A_PL2_POS','B_COM_NEG','V_COM_NEG','A_COM_NEG','B_PL1_NEG','V_PL1_NEG','A_PL1_NEG','B_PL2_NEG','V_PL2_NEG','A_PL2_NEG') and 
+ d.segment9 in ('FPV','FPV_REG') and
+ d.segment8 = a.anno and
+ d.segment2 = a.eu||a.codice and
+ a.nb_titolo = '3';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+ EXCEPTION WHEN NO_DATA_FOUND
+   THEN null;
+  END;
+
+ riga := 380;
+ c1 := 'Entrate titolo titolo 5 - Riduzioni attivitÃ  finanziarie';
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_livello1 l1,
+      nb_livello2 l2,
+      nb_livello3 l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.id(+) = a.nb_id_padre AND
+       l2.id(+) = l3.id_livello2 AND
+       l1.id(+) = l2.id_livello1 AND
+       NVL(SUBSTR(l1.codice,1,1),'1') = '5';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 390;
+ c1 := 'Spese titolo 3.00 - Incremento attivitÃ  finanziarie';
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ecompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) eplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) eplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       l3.id = 3 /* titolo 3 */ ;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 400;
+ c1 := 'Entrate Titolo 5.01.01 - Alienazioni  di partecipazioni'; 
+ c2 := '(-)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'E' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'E.5.01.01%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 410;
+ c1 := 'Spese Titolo 3.01.01 - Acquisizioni di partecipazioni e conferimenti di capitale '; 
+ c2 := '(+)';
+ SELECT NVL(SUM(previsione_iniziale(p_anno,a.eu||a.codice)),0)  ucompe,
+        NVL(SUM(pluriennale1_iniziale(p_anno1,a.eu||a.codice)),0) uplur1,
+        NVL(SUM(pluriennale2_iniziale(p_anno2,a.eu||a.codice)),0) uplur2
+ INTO n1, n2, n3
+ FROM fin_t_articoli a,
+      nb_titoli_uscite l3
+ WHERE a.anno = p_anno AND
+       a.abilitato = 'S' AND
+       a.eu = 'U' AND
+       l3.anno(+) = a.anno AND
+       l3.id(+) = NVL(a.nb_titolo,0) AND
+       a.nb_piano_conti_fina LIKE 'U.3.01.01%';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 420;--21.11.2019 inserita riga 375 FPV attività finanziarie
+ c1 := 'C) Variazioni Attivita''  Finanziaria ';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ SELECT SUM(DECODE(num_ord_riga,360,num01,370,num01,375,num01,380,num01,390,num01*(-1),400,num01*(-1),410,num01,0)) compe,
+ FROM tmp_tabulati 
+        SUM(DECODE(num_ord_riga,360,num02,370,num02,375,num02,380,num02,390,num02*(-1),400,num02*(-1),410,num02,0)) compe1,
+        SUM(DECODE(num_ord_riga,360,num03,370,num03,375,num03,380,num03,390,num03*(-1),400,num03*(-1),410,num03,0)) compe2
+ INTO n1,n2,n3
+ WHERE utente = p_utente;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+
+ riga := 430;
+ c1 := NULL;
+ c2 := NULL;
+ n1 := NULL;  n2 := NULL; n3 := NULL;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 440;
+ c1 := 'EQUILIBRIO FINALE (D=A+B) ';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ SELECT SUM(DECODE(num_ord_riga,170,num01,350,num01,0)) compe,
+        SUM(DECODE(num_ord_riga,170,num02,350,num02,0)) compe1,
+        SUM(DECODE(num_ord_riga,170,num03,350,num03,0)) compe2
+ INTO n1,n2,n3
+ FROM tmp_tabulati 
+ WHERE utente = p_utente;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);  
+
+
+/*29.01.2017*/
+
+
+  riga := 500;
+  c1 := 'Saldo corrente ai fini della copertura degli investimenti pluriennali delle Regioni  a statuto ordinario';
+  c2 := null;
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,null,null,null,p_utente,riga);   
+
+ riga := 510;
+ c1 := 'A) Equilibrio di parte corrente ';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ SELECT SUM(DECODE(num_ord_riga,10,num01,20,num01*(-1),30,num01,40,num01,50,num01,60,num01,70,num01,80,num01,90,num01,100,num01,110,num01*(-1),130,num01*(-1),140,num01*(-1),150,num01*(-1),0)) compe,
+        SUM(DECODE(num_ord_riga,10,num02,20,num02*(-1),30,num02,40,num02,50,num02,60,num02,70,num02,80,num02,90,num02,100,num02,110,num02*(-1),130,num02*(-1),140,num02*(-1),150,num02*(-1),0)) compe1,
+        SUM(DECODE(num_ord_riga,10,num03,20,num03*(-1),30,num03,40,num03,50,num03,60,num03,70,num03,80,num03,90,num03,100,num03,110,num03*(-1),130,num03*(-1),140,num03*(-1),150,num03*(-1),0)) compe2
+ INTO n1,n2,n3
+ FROM tmp_tabulati 
+ WHERE utente = p_utente;
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+
+-- la riga 520  è scritta subito dopo la 10  -- 18.05.2017
+
+-- PIERRO 28/05/2018 Blocco calcolo per i campi da 520 a 580 riportare 0 
+
+  riga := 530;
+  c1 := 'Fondo pluriennale vincolato per spese correnti iscritto in entrata al netto delle componenti non vincolate derivanti dal riaccertamento ord.';
+  c2 := '(-)';
+  n1 := 0;  n2 := 0; n3 := 0;
+/*  select 
+  nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U' 
+  and a.nb_titolo = 1
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) = 'FPV_REG' 
+  and nvl(d.segment11(+),'NA')&lt;>'NA';
+
+
+  select nvl(sum(decode(substr(d1.doc_type,7,3),'NEG',(d1.document_amount * -1),d1.document_amount)),0) n2 
+  into n2
+  from fin_t_articoli a
+  ,fin_t_documenti d1
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U' 
+  and a.nb_titolo = 1
+  and d1.segment8(+) = (p_anno + 1)
+  and d1.segment2(+) = a.eu||a.codice
+  and d1.doc_type(+) in 
+  ('B_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+  and d1.segment9(+) = 'FPV_REG' 
+  and nvl(d1.segment11(+),'NA')&lt;>'NA';
+
+
+  select nvl(sum(decode(substr(d2.doc_type,7,3),'NEG',(d2.document_amount * -1),d2.document_amount)),0) n3
+  into n3
+  from fin_t_articoli a
+  ,fin_t_documenti d2
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U' 
+  and a.nb_titolo = 1
+  and d2.segment8(+) = (p_anno + 2)
+  and d2.segment2(+) = a.eu||a.codice
+  and d2.doc_type(+) in 
+  ('B_PL2_POS'
+  ,'B_PL2_NEG')
+  and d2.segment9(+) = 'FPV_REG' 
+  and nvl(d2.segment11(+),'NA')&lt;>'NA';
+*/
+
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+  riga := 540;
+  c1 := 'Entrate titoli 1-2-3 non sanitarie con specifico vincolo di destinazione';
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  c2 := '(-)';
+n1 := 0;  n2 := 0; n3 := 0;
+/*
+  into n1
+  from fin_t_articoli a
+  ,nb_livello3 l
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'E'
+  and nvl(a.sanita_sn,'N')&lt;>'S' 
+  and l.id = a.nb_id_padre
+  and l.anno= a.anno
+  and l.eu =  a.eu
+  and substr(l.codice,1,1) in ('1','2','3')
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+
+  select nvl(sum(decode(substr(d1.doc_type,7,3),'NEG',(d1.document_amount * -1),d1.document_amount)),0) n2
+  into n2
+  from fin_t_articoli a
+  ,nb_livello3 l
+  ,fin_t_documenti d1
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'E'
+  and nvl(a.sanita_sn,'N')&lt;>'S' 
+  and l.id = a.nb_id_padre
+  and l.anno= a.anno
+  and l.eu =  a.eu
+  and substr(l.codice,1,1) in ('1','2','3')
+  and d1.segment8(+) = (p_anno + 1)
+  and d1.segment2(+) = a.eu||a.codice
+  and d1.doc_type(+) in 
+  ('B_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+  and d1.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+
+  select nvl(sum(decode(substr(d2.doc_type,7,3),'NEG',(d2.document_amount * -1),d2.document_amount)),0) n3
+  into n3
+  from fin_t_articoli a
+  ,nb_livello3 l
+  ,fin_t_documenti d2
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'E'
+  and nvl(a.sanita_sn,'N')&lt;>'S' 
+  and l.id = a.nb_id_padre
+  and l.anno= a.anno
+  and l.eu =  a.eu
+  and substr(l.codice,1,1) in ('1','2','3')
+  and d2.segment8(+) = (p_anno + 2)
+  and d2.segment2(+) = a.eu||a.codice
+  and d2.doc_type(+) in 
+  ('B_PL2_POS'
+  ,'B_PL2_NEG')
+  and d2.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+*/
+
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+  riga := 550;
+  c1 := 'Entrate titoli 1-2-3 destinate al finanziamento del SSN';
+  c2 := '(-)';
+n1 := 0;  n2 := 0; n3 := 0;
+/*
+  select 
+  nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,nb_livello3 l
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'E'
+  and nvl(a.sanita_sn,'N')='S' 
+  and l.id = a.nb_id_padre
+  and l.anno= a.anno
+  and l.eu =  a.eu
+  and substr(l.codice,1,1) in ('1','2','3')
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+  select nvl(sum(decode(substr(d1.doc_type,7,3),'NEG',(d1.document_amount * -1),d1.document_amount)),0) n2 
+  into n2
+  from fin_t_articoli a
+  ,nb_livello3 l
+  ,fin_t_documenti d1
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'E'
+  and nvl(a.sanita_sn,'N')='S' 
+  and l.id = a.nb_id_padre
+  and l.anno= a.anno
+  and l.eu =  a.eu
+  and substr(l.codice,1,1) in ('1','2','3')
+  and d1.segment8(+) = (p_anno + 1)
+  and d1.segment2(+) = a.eu||a.codice
+  and d1.doc_type(+) in 
+  ('B_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+  and d1.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+  select nvl(sum(decode(substr(d2.doc_type,7,3),'NEG',(d2.document_amount * -1),d2.document_amount)),0) n3
+  into n3
+  from fin_t_articoli a
+  and a.abilitato = 'S'
+  ,nb_livello3 l
+  ,fin_t_documenti d2
+  where a.anno = p_anno
+  and a.eu = 'E'
+  and nvl(a.sanita_sn,'N')='S' 
+  and l.id = a.nb_id_padre
+  and l.anno= a.anno
+  and l.eu =  a.eu
+  and substr(l.codice,1,1) in ('1','2','3')
+  and d2.segment8(+) = (p_anno + 2)
+  and d2.segment2(+) = a.eu||a.codice
+  and d2.doc_type(+) in 
+  ('B_PL2_POS'
+  ,'B_PL2_NEG')
+  and d2.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+*/
+
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ riga := 560;
+  c1 := 'Spese correnti non sanitarie finanziate da entrate con specifico vincolo di destinazione ';
+  c2 := '(+)';
+n1 := 0;  n2 := 0; n3 := 0;
+/*
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+  and nvl(a.sanita_sn,'N')&lt;>'S' 
+  and a.nb_titolo = 1
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+
+  select nvl(sum(decode(substr(d1.doc_type,7,3),'NEG',(d1.document_amount * -1),d1.document_amount)),0) n2 
+  into n2
+  from fin_t_articoli a
+  ,fin_t_documenti d1
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+  and nvl(a.sanita_sn,'N')&lt;>'S' 
+  and a.nb_titolo = 1
+  and d1.segment8(+) = (p_anno + 1)
+  and d1.segment2(+) = a.eu||a.codice
+  and d1.doc_type(+) in 
+  ('B_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+  and d1.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+
+  select nvl(sum(decode(substr(d2.doc_type,7,3),'NEG',(d2.document_amount * -1),d2.document_amount)),0) n3
+  into n3
+  from fin_t_articoli a
+  ,fin_t_documenti d2
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+  and nvl(a.sanita_sn,'N')&lt;>'S' 
+  and a.nb_titolo = 1
+  and d2.segment8(+) = (p_anno + 2)
+  and d2.segment2(+) = a.eu||a.codice
+  and d2.doc_type(+) in 
+  ('B_PL2_POS'
+  ,'B_PL2_NEG')
+  and d2.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+*/ 
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);  
+
+
+  riga := 570;
+  c1 := 'Fondo pluriennale vincolato di parte corrente (di spesa) al netto delle componenti non vincolate derivanti dal riaccertamento ord.';
+  c2 := '(+)';
+n1 := 0;  n2 := 0; n3 := 0;
+/*
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U' 
+  and a.nb_titolo = 1
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) = 'FPV_REG';
+
+
+  select nvl(sum(decode(substr(d1.doc_type,7,3),'NEG',(d1.document_amount * -1),d1.document_amount)),0) n2 
+  into n2
+  from fin_t_articoli a
+  ,fin_t_documenti d1
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U' 
+  and a.nb_titolo = 1
+  and d1.segment8(+) = (p_anno + 1)
+  and d1.segment2(+) = a.eu||a.codice
+  and d1.doc_type(+) in 
+  ('B_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+  and d1.segment9(+) = 'FPV_REG';
+
+
+  ,fin_t_documenti d2
+  select nvl(sum(decode(substr(d2.doc_type,7,3),'NEG',(d2.document_amount * -1),d2.document_amount)),0) n3
+  into n3
+  from fin_t_articoli a
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U' 
+  and a.nb_titolo = 1
+  and d2.segment8(+) = (p_anno + 2)
+  and d2.segment2(+) = a.eu||a.codice
+  and d2.doc_type(+) in 
+  ('B_PL2_POS'
+  ,'B_PL2_NEG')
+--  and nvl(d2.segment11(+),'NA')&lt;>'NA'
+  and d2.segment9(+) = 'FPV_REG';
+*/
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+
+  riga := 580;
+  c1 := 'Spese correnti finanziate da entrate destinate al SSN';
+  c2 := '(+)';
+n1 := 0;  n2 := 0; n3 := 0;
+/*
+  select nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) n1
+  into n1
+  from fin_t_articoli a
+  ,fin_t_documenti d
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+  and nvl(a.sanita_sn,'N')='S' 
+  and a.nb_titolo = 1
+  and d.segment8(+) = p_anno
+  and d.segment2(+) = a.eu||a.codice
+  and 
+  (
+  d.doc_type(+) in 
+  ('B_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG'
+  ) or (d.doc_type(+) in ('V_COM_POS','V_COM_NEG') and trunc(d.date_created(+),'dd') &lt; trunc(nvl(vdata_approvazione_previsione,d.date_created(+)+1),'dd')))
+  and d.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+
+  select nvl(sum(decode(substr(d1.doc_type,7,3),'NEG',(d1.document_amount * -1),d1.document_amount)),0) n2 
+  into n2
+  from fin_t_articoli a
+  ,fin_t_documenti d1
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+  and nvl(a.sanita_sn,'N')='S' 
+  and a.nb_titolo = 1
+  and d1.segment8(+) = (p_anno + 1)
+  and d1.segment2(+) = a.eu||a.codice
+  and d1.doc_type(+) in 
+  ('B_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+  and d1.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+
+  select nvl(sum(decode(substr(d2.doc_type,7,3),'NEG',(d2.document_amount * -1),d2.document_amount)),0) n3
+  into n3
+  from fin_t_articoli a
+  ,fin_t_documenti d2
+  where a.anno = p_anno
+  and a.abilitato = 'S'
+  and a.eu = 'U'
+  and nvl(a.sanita_sn,'N')='S' 
+  and a.nb_titolo = 1
+  and d2.segment8(+) = (p_anno + 2)
+  and d2.segment2(+) = a.eu||a.codice
+  and d2.doc_type(+) in 
+  ('B_PL2_POS'
+  ,'B_PL2_NEG')
+  and d2.segment9(+) in ('OBBLIG','MUTUIN','MUTUI','ALTRI VIN','REG VIN','UE','STATO');
+*/
+  INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+  VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+
+ riga := 590;
+ c1 := 'Equilibrio di parte corrente ai fini della copertura degli investimenti pluriennali';
+ c2 := NULL;
+ n1 := 0;  n2 := 0; n3 := 0;
+ SELECT SUM(DECODE(num_ord_riga,510,num01,520,num01*(-1),530,num01*(-1),540,num01*(-1),550,num01*(-1),560,num01,570,num01,580,num01,0)) compe,
+        SUM(DECODE(num_ord_riga,510,num02,520,num02*(-1),530,num02*(-1),540,num02*(-1),550,num02*(-1),560,num02,570,num02,580,num02,0)) compe1,
+        SUM(DECODE(num_ord_riga,510,num03,520,num03*(-1),530,num03*(-1),540,num03*(-1),550,num03*(-1),560,num03,570,num03,580,num03,0)) compe2
+ INTO n1,n2,n3
+ FROM tmp_tabulati 
+ WHERE utente = p_utente;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga);   
+
+ COMMIT; 
+
+
+
+-- inserisco valore nella tabella fin_t_previsione_qgr
+
+ delete fin_t_previsione_eqb where anno=p_anno and utente=upper(p_utente);
+ commit;
+
+ begin 
+ insert into fin_t_previsione_eqb
+  (data_generazione 
+  ,utente           
+  ,riga             
+  ,anno0          
+  ,anno             
+  ,desc_rigo
+  ,segno          
+  ,anno1          
+  ,anno2          
+  ,tag_bdap) 
+ select
+   sysdate
+  ,upper(p_utente)
+  ,a.num_ord_riga
+  ,p_anno
+  ,a.car01
+  ,a.car02
+  ,a.num01
+  ,a.num02
+  ,a.num03
+  ,case when a.num_ord_riga = 340 and (nvl(a.num01,0)+nvl(a.num02,0)+NVL(a.num03,0))=0 then null--25.03.2020 G.ZACCARO BDAP per le Variazioni attivita'' finanziarie vuole solo uno dei due tag
+        when a.num_ord_riga = 140 
+        then decode((select nvl(a.num01,0)+nvl(a.num02,0)+NVL(a.num03,0) from tmp_tabulati where utente=upper(p_utente) and num_ord_riga = 340 and nvl(car20,'N')='N'),0,b.tag_bdap,null) 
+        else b.tag_bdap
+        end 
+ from 
+  tmp_tabulati a
+ ,fin_t_previsione_eqb b 
+ where a.utente=upper(p_utente)
+ and a.num_ord_riga=b.riga(+)
+ and b.anno(+)=2000
+ and b.utente(+)='PREV2000'
+ and to_char(b.data_generazione(+),'ddmmyyyy')='01012000'
+ order by num_ord_riga;
+ end;
+ commit;
+
+END;</pre>	</td></tr>
+</table></div>

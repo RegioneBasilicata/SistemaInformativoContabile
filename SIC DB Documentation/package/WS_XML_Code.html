@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>WS_XML</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="WS_XML.html">Details</a></div></div>
+<div class="tab"><div><a href="WS_XML_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="WS_XML_References.html">References</a></div></div>
+<div class="tab"><div><a href="WS_XML_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="WS_XML_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PACKAGE WS_XML AS 
+
+	/**
+	Dato un xml in ingresso, restituisce il numero di occorrenze per un determinato xpath
+	*/
+	function readIndexXML (
+      p_file_lettura XMLTYPE, 
+      p_xpath varchar2
+	) return number;
+
+  /**
+  Dato un xml in ingresso, estrae il contenuto di un tag e lo restituisce nuovamente convertito in xml
+  */
+  function estraiXMLdaTag (
+      p_xml in xmltype
+      ,p_tag in varchar2
+  ) return xmltype;
+
+	/**
+	Dato un xml in ingresso, restituisce il clob contenuto in un determinato xpath (associato ad un determinato namespace)
+	*/	
+	function readClobXML (
+      p_file_lettura XMLTYPE, 
+      p_xpath varchar2,
+	  p_namespace varchar2
+	) return clob;
+
+	/**
+	Dato un xml in ingresso, restituisce la data contenuta in un determinato xpath (associata ad un determinato namespace)
+	*/	
+	function readDateXML (
+      p_file_lettura XMLTYPE, 
+      p_xpath varchar2,
+	  p_namespace varchar2
+	) return date;
+	
+	/**
+	Dato un xml in ingresso, restituisce il numero contenuto in un determinato xpath (associato ad un determinato namespace)
+	*/	
+	function readNumberXML (
+      p_file_lettura XMLTYPE, 
+      p_xpath varchar2,
+	  p_namespace varchar2
+	) return number;
+	
+	/**
+	Dato un xml in ingresso, restituisce il varchar2 contenuto in un determinato xpath (associato ad un determinato namespace)
+	*/	
+	function readVarchar2XML (
+      p_file_lettura XMLTYPE, 
+      p_xpath varchar2,
+	  p_namespace varchar2
+	) return varchar2;
+
+	/**
+	Dato un clob di un xml in ingresso, restituisce il varchar2 contenuto in un determinato xpath (associato ad un determinato namespace)
+	*/	
+	function readVarchar2Clob (
+      p_file_lettura clob, 
+      p_tag varchar2
+	) return varchar2;
+
+	/**
+	Dato un clob in ingresso contenente un file p7m, cerca di estrarre il relativo xml eliminando i caratteri non validi.
+	*/	
+	function extractXML (
+      p_file_start clob
+	) return xmltype;
+  
+END WS_XML;</pre>	</td></tr>
+</table></div>

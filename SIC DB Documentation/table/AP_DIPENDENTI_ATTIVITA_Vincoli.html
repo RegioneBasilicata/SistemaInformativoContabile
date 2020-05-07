@@ -1,0 +1,163 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AP_DIPENDENTI_ATTIVITA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA.html">Colonne</a></div></div>
+<div class="tab" id="current"><div><a href="AP_DIPENDENTI_ATTIVITA_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="AP_DIPENDENTI_ATTIVITA_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Vincoli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>CONSTRAINT_NAME</th>
+	<th>CONSTRAINT_TYPE</th>
+	<th>SEARCH_CONDITION</th>
+	<th>R_OWNER</th>
+	<th>R_TABLE_NAME</th>
+	<th>R_CONSTRAINT_NAME</th>
+	<th>DELETE_RULE</th>
+	<th>STATUS</th>
+	<th>DEFERRABLE</th>
+	<th>VALIDATED</th>
+	<th>GENERATED</th>
+	<th>BAD</th>
+	<th>RELY</th>
+	<th>LAST_CHANGE</th>
+	<th>INDEX_OWNER</th>
+	<th>INDEX_NAME</th>
+	<th>INVALID</th>
+	<th>VIEW_RELATED</th>
+</tr>
+	<tr>
+<td>AP_DIPATTIVITA_CK1</td>
+<td>Check</td>
+<td>NVL(ora_inizio_rep,0) BETWEEN 0 AND 2400</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AP_DIPATTIVITA_CK2</td>
+<td>Check</td>
+<td>NVL(ora_fine_rep,0) BETWEEN 0 AND 2400</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AP_DIPATTIVITA_CK3</td>
+<td>Check</td>
+<td>fl_festivo IN ('S','N')</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AP_DIPATTIVITA_CK4</td>
+<td>Check</td>
+<td>(ora_inizio_rep IS NULL AND ora_fine_rep IS NULL AND ore_rep IS NULL ) OR (ora_inizio_rep IS NOT NULL AND ora_fine_rep IS NOT NULL AND ora_inizio_rep&lt;ora_fine_rep AND ore_rep>0)</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AP_DIPATTIVITA_FK1</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>AP_AUTOPARCO</td>
+<td>AP_AUTOPARCO_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AP_DIPATTIVITA_FK2</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>AP_ATTIVITA</td>
+<td>AP_ATTIVITA_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+</table></div>

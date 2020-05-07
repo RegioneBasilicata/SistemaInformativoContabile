@@ -1,0 +1,375 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_INDICATORI_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_INDICATORI_BILANCIO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_INDICATORI_BILANCIO_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ANNO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ORD</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>Ordinamento</td>
+	</tr>
+	<tr>
+<td>TIPO_BILANCIO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>P= previsione R= rendiconto</td>
+	</tr>
+	<tr>
+<td>TIPO_INDICATORE</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>S= sintetici E = Entrate U =Uscite</td>
+	</tr>
+	<tr>
+<td>CODICE_INDICATORE1</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>contiene il codice per gli indicatori sintetici, titolo per le Entrate e Missione per le Uscite</td>
+	</tr>
+	<tr>
+<td>DESC_COD1</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_INDICATORE2</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>contiene il codice Tipologia per le Entrate e Programma per le Uscite</td>
+	</tr>
+	<tr>
+<td>DESC_COD2</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DEFINIZIONE</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>DEfinizione indicatori sintetici e PCF MIS_PROGR per Entrate/Uscite</td>
+	</tr>
+	<tr>
+<td>TOT_MISSIONI1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>TOT_MISSIONI2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>TOT_MISSIONI3</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>MISSIONE13_1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>MISSIONE13_2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>MISSIONE13_3</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>NETTO_MISSIONI1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>NETTO_MISSIONI2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>NETTO_MISSIONI3</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>per indicatori Sintetici</td>
+	</tr>
+	<tr>
+<td>PREVCOMPE_SU_TOT1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>per indicatori Entrate</td>
+	</tr>
+	<tr>
+<td>PREVCOMPE_SU_TOT2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>per indicatori Entrate</td>
+	</tr>
+	<tr>
+<td>PREVCOMPE_SU_TOT3</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>per indicatori Entrate</td>
+	</tr>
+	<tr>
+<td>MACC_SU_MTOT</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>per indicatori Entrate</td>
+	</tr>
+	<tr>
+<td>PREVCASSA_SU_TOT1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>per indicatori Entrate</td>
+	</tr>
+	<tr>
+<td>MRISC_SU_MACC</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>per indicatori Entrate</td>
+	</tr>
+	<tr>
+<td>INC_MIS_PROG1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_FPV1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>CAP_PAG1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_MIS_PROG2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_FPV2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_MIS_PROG3</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_FPV3</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_MIS_PROG_MEDIA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>INC_FPV_MEDIA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>CAP_PAG_MEDIA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>per indicatori Uscite</td>
+	</tr>
+	<tr>
+<td>TAG_SINT_TOT</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>tag indicatore sintetico TOTALE MISSIONI</td>
+	</tr>
+	<tr>
+<td>TAG_SINT_MIS13</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>tag indicatore sintetico MISSIONE 13</td>
+	</tr>
+	<tr>
+<td>TAG_SINT_NO_MIS13</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>tag indicatore sintetico al NETTO della MISSIONE 13</td>
+	</tr>
+	<tr>
+<td>UNITREF</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>eur o pure a seconda del tipo di contenuto della riga</td>
+	</tr>
+	<tr>
+<td>NUMERATORE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>contiene l'importo al numeratore dell'indice (per facilitare i controlli)</td>
+	</tr>
+	<tr>
+<td>DENOMINATORE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>contiene l'importo al numeratore dell'indice (per facilitare i controlli</td>
+	</tr>
+	<tr>
+<td>NUMERATORE2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>importo numeratore Mssione 13</td>
+	</tr>
+	<tr>
+<td>DENOMINATORE2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>importo denominatore Missione 13</td>
+	</tr>
+</table></div>

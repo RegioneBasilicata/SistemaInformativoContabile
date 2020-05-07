@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_CHIAVI_CONTABILI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_CHIAVI_CONTABILI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_CHIAVI_CONTABILI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>CODICE</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VINCOLO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>Se S è obbligatorio impostare il vincolo (movimento doppio)</td>
+	</tr>
+	<tr>
+<td>SEGMENT11</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>Se S è obbligatorio indicare per il segment11 della documenti un valore come capitolo collegato (vincolo o avanzo o FPV)</td>
+	</tr>
+	<tr>
+<td>MOSTRA_RICHIESTE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>Rende o meno visibile la chiave contabile per il modulo "Gestione Richieste"</td>
+	</tr>
+	<tr>
+<td>TIPO_VINCOLO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+</table></div>

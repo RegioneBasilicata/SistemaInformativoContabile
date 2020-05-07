@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_IMPEGNI1</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_IMPEGNI1.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_IMPEGNI1_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_IMPEGNI1_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_IMPEGNI1_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_IMPEGNI1_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-02-12</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_IMPEGNI1</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1386</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+jugd2.doc_sequence_value 			numero_movimento,
+jugd2.date_created 				data_movimento,
+jugd2.description 				oggetto_movimento,
+upper(jugd2.doc_type) 				tipo_movimento,
+decode(jugd2.auditing_status_flag,'T','S','N') 	perenzione,
+jugd2.document_amount 				importo_movimento,
+jugd2.segment2 					capitolo_spesa,
+jugd2.segment8 					esercizio_impegno,
+jugd2.segment3 					dipartimento,
+decode(jugd2.administrative_expedient,null,jugd2.ext_document_ref,jugd2.administrative_expedient) numero_mov_mainframe,
+jugd2.attribute13 				tipo_atto_imp,
+jugd2.attribute14 				numero_atto_imp,
+jugd2.attribute15 				data_atto_imp,
+jugd4.doc_sequence_value 			numero_movimento_precedente,
+jugd4.date_created 				data_movimento_precedente,
+jugd4.segment8 					esercizio_movimento_precedente,
+decode(jugd4.administrative_expedient,null,jugd4.ext_document_ref,jugd4.administrative_expedient) numero_mov_prec_mainframe
+FROM
+fina_documenti 		jugd2,  /* trova documento figlio */
+fina_documenti 		jugd4	/* serve per trovare l'eventuale documento padre*/
+WHERE
+upper(jugd2.doc_type) in ('IMP','IMP-PER','IMP-DEF','ST-IMP','ST-IMPDEF','DIS','ECO','CORR') 	and
+upper(nvl(jugd2.deletion_status_flag,'N')) &lt;> 'Y' 							and
+jugd2.gl_date is not null 				   	  								and
+jugd2.period_name is not null 												and
+jugd2.date_created is not null 												and
+jugd2.previous_doc_id			= jugd4.doc_id(+)
+</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

@@ -1,0 +1,77 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>QUADRI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="QUADRI.html">Details</a></div></div>
+<div class="tab"><div><a href="QUADRI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="QUADRI_References.html">References</a></div></div>
+<div class="tab"><div><a href="QUADRI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="QUADRI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure quadri as
+  id_doc      number;
+  progr       number;
+  errore      number;
+  wdocumento varchar2(200);
+  in_file UTL_FILE.FILE_TYPE;
+  linebuf  VARCHAR2(11);
+  a_cod_inv varchar2(100);
+BEGIN
+   --CREATE DIRECTORY DIR_QUADRI AS '/file_repository/file_esterni/quadri';
+   in_file:=UTL_FILE.FOPEN('DIR_QUADRI','quadri.txt','r');
+ LOOP
+  UTL_FILE.GET_LINE(in_file,linebuf);
+  linebuf:=substr(linebuf,1,10);	
+  errore :=null;
+  begin
+   select cod_inv
+     into a_cod_inv
+     from tb_beni_mobili
+     where num_inv=substr(linebuf,1,6);	
+  exception
+    WHEN no_data_found THEN
+	  DBMS_OUTPUT.PUT_LINE (linebuf); 
+      errore:=1;       
+  end;   
+  if errore is null then
+    select doc_seq.nextval
+      into id_doc
+      from dual;
+
+    wdocumento := id_doc||linebuf;
+    UTL_FILE.FRENAME('DIR_QUADRI', linebuf , 'DIR_QUADRI', wdocumento, TRUE);
+
+    insert into fina_file_esterni
+      (id,nome_file)
+      values
+      (id_doc,linebuf);
+    SELECT nvl(max(progr),0) + 1
+        into progr
+        FROM  tb_doc_cesp
+        WHERE codice=a_cod_inv;
+    insert into tb_doc_cesp
+      (CODICE,PROGR,DOCUMENTO,DESCRIZIONE,TIPO,CREATO_DA,CREATO_IL)
+       values
+      (a_cod_inv,progr,id_doc,'Foto','M',1000,sysdate);
+  end if;
+ END LOOP;
+ UTL_FILE.FCLOSE(in_file);
+ --DROP DIRECTORY DIR_QUADRI
+EXCEPTION
+ WHEN no_data_found THEN
+    UTL_FILE.FCLOSE(in_file);
+      COMMIT;
+	 -- DROP DIRECTORY DIR_QUADRI
+END;</pre>	</td></tr>
+</table></div>

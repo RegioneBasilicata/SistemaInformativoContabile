@@ -1,0 +1,587 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>REND_IMPPLUR</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="REND_IMPPLUR.html">Details</a></div></div>
+<div class="tab"><div><a href="REND_IMPPLUR_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="REND_IMPPLUR_References.html">References</a></div></div>
+<div class="tab"><div><a href="REND_IMPPLUR_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="REND_IMPPLUR_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure rend_impplur (p_anno number,p_utente varchar2) is
+
+p_titolo varchar2(50);
+p_macro varchar2(50);
+
+imp1 number(15,2) := 0;
+imp2 number(15,2) := 0;
+imp3 number(15,2) := 0;
+
+
+appoggio number(15,2) := 0;
+c_riga number := 1;
+
+CP_imp1annodopo number(15,2) := 0;
+CP_imp2annidopo number(15,2) := 0;
+CP_impannisucc number(15,2) := 0;
+CP_prcomp1annodopo number(15,2) := 0;
+CP_prcomp2annidopo number(15,2) := 0;
+CP_prcompannisucc number(15,2) := 0;
+
+TOT_imp1annodopo number(15,2) := 0;
+TOT_imp2annidopo number(15,2) := 0;
+TOT_impannisucc number(15,2) := 0;
+TOT_prcomp1annodopo number(15,2) := 0;
+TOT_prcomp2annidopo number(15,2) := 0;
+TOT_prcompannisucc number(15,2) := 0;
+
+-- per i dati del Consiglio in caso di Consolidato
+imp1_c number(15,2) := 0;
+imp2_c number(15,2) := 0;
+imp3_c number(15,2) := 0;
+
+plur1_c number(15,2) := 0;
+plur2_c number(15,2) := 0;
+plur3_c number(15,2) := 0;
+
+
+cursor titoli is
+select distinct nb_titolo liv1,desc_nb_titolo descrizione
+from vw_nb_articoli
+where anno = p_anno
+and eu = 'U'
+and nvl(abilitato,'N') = 'S'
+order by to_number(nb_titolo);
+
+cursor mac is
+select distinct MACRO_AGG liv2,DESC_MACRO_AGG descrizione
+from vw_nb_articoli
+where anno = p_anno
+and eu = 'U'
+and nvl(abilitato,'N') = 'S'
+and nb_titolo = p_titolo
+order by to_number(MACRO_AGG);
+
+cursor cap1 is
+select a.eu||a.codice capitolo
+from fin_t_articoli a,
+vw_nb_articoli b
+where a.anno = p_anno + 1 AND
+a.eu = 'U' AND
+b.anno = p_anno AND
+b.eu||b.codice = a.codice_precedente AND
+nvl(b.abilitato,'N') = 'S' AND
+b.MACRO_AGG = p_macro;
+
+
+cursor cap2 is
+select a.eu||a.codice capitolo
+from fin_t_articoli a,
+fin_t_articoli b,
+vw_nb_articoli c
+where a.anno = p_anno + 2 AND
+a.eu = 'U' AND
+b.anno = p_anno + 1 AND
+b.eu||b.codice = a.codice_precedente and
+c.anno = p_anno AND
+c.eu||c.codice = b.codice_precedente AND
+nvl(c.abilitato,'N') = 'S' AND
+c.MACRO_AGG = p_macro;
+
+cursor cap3 is
+select a.eu||a.codice capitolo
+from fin_t_articoli a,
+fin_t_articoli b,
+fin_t_articoli c,
+vw_nb_articoli d
+where a.anno = p_anno + 3 AND
+a.eu = 'U' AND
+b.anno = p_anno + 2 AND
+b.eu||b.codice = a.codice_precedente and
+c.anno = p_anno + 1 AND
+c.eu||c.codice = b.codice_precedente AND
+d.anno = p_anno AND
+d.eu||d.codice = c.codice_precedente AND
+nvl(d.abilitato,'N') = 'S' AND
+d.MACRO_AGG = p_macro;
+
+begin
+
+
+delete FIN_T_RENDICONTO_IMPPLUR where anno = p_anno and utente = p_utente;
+commit;
+ -- accertamenti
+
+ for tit in titoli loop
+ p_titolo := tit.liv1;
+
+     for t in MAC loop
+
+     p_macro := t.liv2;
+
+     for c in cap1 loop
+     SELECT NVL(SUM(impegni),0) impegni
+     INTO imp1
+     FROM (SELECT NVL(SUM(NVL(d.document_amount,0)),0) impegni
+           FROM fin_t_documenti d
+           WHERE d.doc_type like 'IMP%' AND
+                 NVL(d.deletion_status_flag,'N') = 'N' AND
+                 d.date_created = TO_DATE('0101'||(p_anno + 1),'ddmmyyyy') AND
+                 d.attribute21 is null AND
+                 substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno AND -- substr(nvl(d.attribute38,'9999'),1,4) = p_anno AND
+                 d.segment8 = p_anno + 1 AND
+                 d.segment2 = c.capitolo 
+                 UNION ALL
+                 select nvl(sum(nvl(f.importo_variazione,0)),0) impegni
+                          from FIN_T_VARIAZIONI_FPV f
+                          where to_char(f.data_variazione,'yyyy') > p_anno
+                          --and f.importo_originario = f.importo_variazione
+                          and f.doc_id in (select d.doc_id 
+                          from fin_t_documenti d
+                          where d.doc_type like 'IMP%'
+                          and d.segment8 = p_anno+1
+                          and d.attribute21 is null
+                          and d.date_created = to_date('0101'||(p_anno+1),'ddmmyyyy')
+                          and substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno -- and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+                          and d.segment2 = c.capitolo));
+
+       CP_imp1annodopo := nvl(CP_imp1annodopo,0) + imp1;
+       TOT_imp1annodopo := nvl(TOT_imp1annodopo,0) + imp1;
+
+       CP_prcomp1annodopo := CP_prcomp1annodopo + pluriennale1_definitivo(p_anno+1,c.capitolo);
+       TOT_prcomp1annodopo := TOT_prcomp1annodopo + pluriennale1_definitivo(p_anno+1,c.capitolo);
+       end loop;
+
+
+     -- accertamenti
+
+     for c in cap2 loop
+     SELECT NVL(SUM(impegni),0) impegni
+     INTO imp2
+     FROM (SELECT NVL(SUM(NVL(d.document_amount,0)),0) impegni
+           FROM fin_t_documenti d
+           WHERE d.doc_type likE 'IMP%' AND
+                 NVL(d.deletion_status_flag,'N') = 'N' AND
+                 d.date_created = TO_DATE('0101'||(p_anno + 2),'ddmmyyyy') AND
+                 d.attribute21 is null AND
+                 substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno AND -- substr(nvl(d.attribute38,'9999'),1,4) = p_anno AND
+                 d.segment8 = p_anno + 2 AND
+                 d.segment2 = c.capitolo 
+                 UNION ALL
+                 select nvl(sum(nvl(f.importo_variazione,0)),0) impegni
+                          from FIN_T_VARIAZIONI_FPV f
+                          where to_char(f.data_variazione,'yyyy') > p_anno
+                          --and f.importo_originario = f.importo_variazione
+                          and f.doc_id in (select d.doc_id 
+                          from fin_t_documenti d
+                          where d.doc_type likE 'IMP%'
+                          --and nvl(d.deletion_status_flag,'N') = 'Y'
+                          and d.segment8 = p_anno + 2
+                          and d.attribute21 is null
+                          and d.date_created = to_date('0101'||(p_anno + 2),'ddmmyyyy')
+                          and substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno -- and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+                          and d.segment2 = c.capitolo));
+
+      CP_imp2annidopo := nvl(CP_imp2annidopo,0) + imp2;
+      TOT_imp2annidopo := nvl(TOT_imp2annidopo,0) + imp2;
+
+      CP_prcomp2annidopo := CP_prcomp2annidopo + pluriennale2_definitivo(p_anno+2,c.capitolo);
+      TOT_prcomp2annidopo := TOT_prcomp2annidopo + pluriennale2_definitivo(p_anno+2,c.capitolo);
+      end loop;
+
+
+    for c in cap3 loop
+              SELECT NVL(SUM(impegni),0) impegni
+     INTO imp3
+     FROM (SELECT NVL(SUM(NVL(d.document_amount,0)),0) impegni
+           FROM fin_t_documenti d
+           WHERE d.doc_type likE 'IMP%' AND
+                 NVL(d.deletion_status_flag,'N') = 'N' AND
+                 d.date_created = TO_DATE('0101'||(p_anno + 3),'ddmmyyyy') AND
+                 d.attribute21 is null AND
+                 substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno AND -- substr(nvl(d.attribute38,'9999'),1,4) = p_anno AND
+                 d.segment8 = p_anno + 3 AND
+                 d.segment2  = c.capitolo 
+                 UNION ALL
+                 select nvl(sum(nvl(f.importo_variazione,0)),0) impegni
+                  from FIN_T_VARIAZIONI_FPV f
+                  where f.anno > p_anno
+                  --and f.importo_originario = f.importo_variazione
+                  and f.doc_id in (select d.doc_id 
+                  from fin_t_documenti d
+                  where d.doc_type likE 'IMP%'
+                  --and nvl(d.deletion_status_flag,'N') = 'Y'
+                  and d.segment8 = p_anno + 3
+                  and d.attribute21 is null
+                  and d.date_created = to_date('0101'||(p_anno + 3),'ddmmyyyy')
+                  and substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno -- and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+                  and d.segment2 = c.capitolo));
+
+      CP_impannisucc := nvl(CP_impannisucc,0) + imp3;
+      TOT_impannisucc := nvl(TOT_impannisucc,0) + imp3;
+
+      CP_prcompannisucc  := CP_prcompannisucc  + previsione_definitiva(p_anno+3,c.capitolo);
+      TOT_prcompannisucc  := TOT_prcompannisucc  + previsione_definitiva(p_anno+3,c.capitolo);
+      
+            
+      if p_utente = 'CONSOLIDATO'
+      then
+      -- anno 1 dati consiglio
+      SELECT NVL(SUM(impegni),0) impegni
+      INTO imp1_c
+      FROM (SELECT NVL(SUM(NVL(d.document_amount,0)),0) impegni
+           FROM sic_consiglio.fin_t_documenti d
+           WHERE d.doc_type like 'IMP%' AND
+                 NVL(d.deletion_status_flag,'N') = 'N' AND
+                 d.date_created = TO_DATE('0101'||(p_anno + 1),'ddmmyyyy') AND
+                 d.attribute21 is null AND
+                 substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno AND -- substr(nvl(d.attribute38,'9999'),1,4) = p_anno AND
+                 d.segment8 = p_anno + 1 AND
+                 d.segment2 in     (select a.eu||a.codice capitolo
+                                    from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.vw_nb_articoli b
+                                    where a.anno = p_anno + 1 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno AND
+                                    b.eu||b.codice = a.codice_precedente AND
+                                    nvl(b.abilitato,'N') = 'S' AND
+                                    b.MACRO_AGG = p_macro)
+                 UNION ALL
+                 select nvl(sum(nvl(f.importo_variazione,0)),0) impegni
+                          from sic_consiglio.FIN_T_VARIAZIONI_FPV f
+                          where to_char(f.data_variazione,'yyyy') > p_anno
+                          --and f.importo_originario = f.importo_variazione
+                          and f.doc_id in (select d.doc_id 
+                          from fin_t_documenti d
+                          where d.doc_type like 'IMP%'
+                          and d.segment8 = p_anno+1
+                          and d.attribute21 is null
+                          and d.date_created = to_date('0101'||(p_anno+1),'ddmmyyyy')
+                          and substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno -- and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+                          and d.segment2 in     (select a.eu||a.codice capitolo
+                                    from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.vw_nb_articoli b
+                                    where a.anno = p_anno + 1 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno AND
+                                    b.eu||b.codice = a.codice_precedente AND
+                                    nvl(b.abilitato,'N') = 'S' AND
+                                    b.MACRO_AGG = p_macro)));
+                                    
+        select nvl(sum(sic_consiglio.pluriennale1_definitivo(p_anno+1,a.eu||a.codice)),0)
+        into plur1_c
+        from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.vw_nb_articoli b
+                                    where a.anno = p_anno + 1 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno AND
+                                    b.eu||b.codice = a.codice_precedente AND
+                                    nvl(b.abilitato,'N') = 'S' AND
+                                    b.MACRO_AGG = p_macro;
+        
+
+        -- anno 2 dati consiglio
+        
+         SELECT NVL(SUM(impegni),0) impegni
+      INTO imp2_c
+      FROM (SELECT NVL(SUM(NVL(d.document_amount,0)),0) impegni
+           FROM sic_consiglio.fin_t_documenti d
+           WHERE d.doc_type like 'IMP%' AND
+                 NVL(d.deletion_status_flag,'N') = 'N' AND
+                 d.date_created = TO_DATE('0101'||(p_anno + 2),'ddmmyyyy') AND
+                 d.attribute21 is null AND
+                 substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno AND -- substr(nvl(d.attribute38,'9999'),1,4) = p_anno AND
+                 d.segment8 = p_anno + 2 AND
+                 d.segment2 in     (select a.eu||a.codice capitolo
+                                    from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.fin_t_articoli b,
+                                    sic_consiglio.vw_nb_articoli c
+                                    where a.anno = p_anno + 2 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno + 1 AND
+                                    b.eu||b.codice = a.codice_precedente and
+                                    c.anno = p_anno AND
+                                    c.eu||c.codice = b.codice_precedente AND
+                                    nvl(c.abilitato,'N') = 'S' AND
+                                    c.MACRO_AGG = p_macro)
+                 UNION ALL
+                 select nvl(sum(nvl(f.importo_variazione,0)),0) impegni
+                          from sic_consiglio.FIN_T_VARIAZIONI_FPV f
+                          where to_char(f.data_variazione,'yyyy') > p_anno
+                          --and f.importo_originario = f.importo_variazione
+                          and f.doc_id in (select d.doc_id 
+                          from fin_t_documenti d
+                          where d.doc_type = 'ACC'
+                          and d.segment8 = p_anno+2
+                          and d.attribute21 is null
+                          and d.date_created = to_date('0101'||(p_anno+1),'ddmmyyyy')
+                          and substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno -- and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+                          and d.segment2 in     (select a.eu||a.codice capitolo
+                                                from sic_consiglio.fin_t_articoli a,
+                                                sic_consiglio.fin_t_articoli b,
+                                                sic_consiglio.vw_nb_articoli c
+                                                where a.anno = p_anno + 2 AND
+                                                a.eu = 'U' AND
+                                                b.anno = p_anno + 1 AND
+                                                b.eu||b.codice = a.codice_precedente and
+                                                c.anno = p_anno AND
+                                                c.eu||c.codice = b.codice_precedente AND
+                                                nvl(c.abilitato,'N') = 'S' AND
+                                                c.MACRO_AGG = p_macro)));
+       from sic_consiglio.fin_t_articoli a,
+                                                                                    
+        select nvl(sum(sic_consiglio.pluriennale2_definitivo(p_anno+2,a.eu||a.codice)),0)
+        into plur2_c
+                                                sic_consiglio.fin_t_articoli b,
+                                                sic_consiglio.vw_nb_articoli c
+                                                where a.anno = p_anno + 2 AND
+                                                a.eu = 'U' AND
+                                                b.anno = p_anno + 1 AND
+                                                b.eu||b.codice = a.codice_precedente and
+                                                c.anno = p_anno AND
+                                                c.eu||c.codice = b.codice_precedente AND
+                                                nvl(c.abilitato,'N') = 'S' AND
+                                                c.MACRO_AGG = p_macro;
+         -- anno 3 dati consiglio
+        
+         SELECT NVL(SUM(impegni),0) impegni
+      INTO imp3_c
+      FROM (SELECT NVL(SUM(NVL(d.document_amount,0)),0) impegni
+           FROM sic_consiglio.fin_t_documenti d
+           WHERE d.doc_type like 'IMP%' AND
+                 NVL(d.deletion_status_flag,'N') = 'N' AND
+                 d.date_created = TO_DATE('0101'||(p_anno + 3),'ddmmyyyy') AND
+                 d.attribute21 is null AND
+                 substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno AND -- substr(nvl(d.attribute38,'9999'),1,4) = p_anno AND
+                 d.segment8 = p_anno + 3 AND
+                 d.segment2 in     (select a.eu||a.codice capitolo
+                                    from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.fin_t_articoli b,
+                                    sic_consiglio.fin_t_articoli c,
+                                    sic_consiglio.vw_nb_articoli d
+                                    where a.anno = p_anno + 3 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno + 2 AND
+                                    b.eu||b.codice = a.codice_precedente and
+                                    c.anno = p_anno + 1 AND
+                                    c.eu||c.codice = b.codice_precedente AND
+                                    d.anno = p_anno AND
+                                    d.eu||d.codice = c.codice_precedente AND
+                                    nvl(d.abilitato,'N') = 'S' AND
+                                    d.MACRO_AGG = p_macro)
+                 UNION ALL
+                 select nvl(sum(nvl(f.importo_variazione,0)),0) impegni
+                          from sic_consiglio.FIN_T_VARIAZIONI_FPV f
+                          where to_char(f.data_variazione,'yyyy') > p_anno
+                          --and f.importo_originario = f.importo_variazione
+                          and f.doc_id in (select d.doc_id 
+                          from fin_t_documenti d
+                          where d.doc_type = 'ACC'
+                          and d.segment8 = p_anno+2
+                          and d.attribute21 is null
+                          and d.date_created = to_date('0101'||(p_anno+1),'ddmmyyyy')
+                          and substr(nvl(d.attribute38,'9999'),1,4) &lt;= p_anno -- and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+                                    sic_consiglio.fin_t_articoli c,
+                          and d.segment2 in     (select a.eu||a.codice capitolo
+                                    from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.fin_t_articoli b,
+                                    sic_consiglio.vw_nb_articoli d
+                                    where a.anno = p_anno + 3 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno + 2 AND
+                                    b.eu||b.codice = a.codice_precedente and
+                                    c.anno = p_anno + 1 AND
+                                    c.eu||c.codice = b.codice_precedente AND
+                                    d.anno = p_anno AND
+                                    d.eu||d.codice = c.codice_precedente AND
+                                    nvl(d.abilitato,'N') = 'S' AND
+                                    d.MACRO_AGG = p_macro)));
+                                    
+        select nvl(sum(sic_consiglio.previsione_definitiva(p_anno+3,a.eu||a.codice)),0)
+        into plur3_c
+      from sic_consiglio.fin_t_articoli a,
+                                    sic_consiglio.fin_t_articoli b,
+                                    sic_consiglio.fin_t_articoli c,
+                                    sic_consiglio.vw_nb_articoli d
+                                    where a.anno = p_anno + 3 AND
+                                    a.eu = 'U' AND
+                                    b.anno = p_anno + 2 AND
+                                    b.eu||b.codice = a.codice_precedente and
+                                    c.anno = p_anno + 1 AND
+                                    c.eu||c.codice = b.codice_precedente AND
+                                    d.anno = p_anno AND
+                                    d.eu||d.codice = c.codice_precedente AND
+                                    nvl(d.abilitato,'N') = 'S' AND
+                                    d.MACRO_AGG = p_macro;
+      end if;
+      
+       CP_imp1annodopo := nvl(CP_imp1annodopo,0) + imp1_c;
+       TOT_imp1annodopo := nvl(TOT_imp1annodopo,0) + imp1_c;
+                  
+       CP_prcomp1annodopo := CP_prcomp1annodopo + plur1_c;
+       TOT_prcomp1annodopo := TOT_prcomp1annodopo + plur1_c;
+    
+    
+      CP_imp2annidopo := nvl(CP_imp2annidopo,0) + imp2_c;
+      TOT_imp2annidopo := nvl(TOT_imp2annidopo,0) + imp2_c;
+    
+      CP_prcomp2annidopo := CP_prcomp2annidopo + plur2_c;
+      TOT_prcomp2annidopo := TOT_prcomp2annidopo + plur2_c;
+      
+      CP_impannisucc := nvl(CP_impannisucc,0) + imp3_c;
+      TOT_impannisucc := nvl(TOT_impannisucc,0) + imp3_c;
+    
+      CP_prcompannisucc  := CP_prcompannisucc  + plur3_c;
+     --
+      TOT_prcompannisucc  := TOT_prcompannisucc  + plur3_c;
+
+     end loop;
+
+           insert into fin_t_rendiconto_impplur (
+          DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,CODICE
+          ,DESCRIZIONE
+          ,PREVCOMPE1
+          ,IMP1
+          ,PREVCOMPE2
+          ,IMP2
+          ,IMPN
+          ,TAG_BDAP_PREVCOMPE1
+          ,TAG_BDAP_IMP1
+          ,TAG_BDAP_PREVCOMPE2
+          ,TAG_BDAP_IMP2
+          ,TAG_BDAP_IMPN)     
+          values
+          (sysdate
+          ,p_utente
+          ,c_riga
+          ,p_anno
+          ,t.liv2
+          ,t.descrizione
+          ,CP_prcomp1annodopo
+          ,CP_imp1annodopo
+          ,CP_prcomp2annidopo
+          ,CP_imp2annidopo
+          ,CP_impannisucc
+          ,'SPE-IMPPLU_U.'||substr(t.liv2,1,1)||'.'||substr(t.liv2,2,2)||'.00.00.000_Anno1CP'
+          ,'SPE-IMPPLU_U.'||substr(t.liv2,1,1)||'.'||substr(t.liv2,2,2)||'.00.00.000_Anno1I'
+          ,'SPE-IMPPLU_U.'||substr(t.liv2,1,1)||'.'||substr(t.liv2,2,2)||'.00.00.000_Anno2CP'
+          ,'SPE-IMPPLU_U.'||substr(t.liv2,1,1)||'.'||substr(t.liv2,2,2)||'.00.00.000_Anno2I'
+          ,'SPE-IMPPLU_U.'||substr(t.liv2,1,1)||'.'||substr(t.liv2,2,2)||'.00.00.000_AnnoNI'
+          );
+
+          c_riga := c_riga + 1;
+          CP_imp1annodopo := 0;
+          CP_imp2annidopo := 0;
+          CP_impannisucc := 0;
+          CP_prcomp1annodopo := 0;
+          CP_prcomp2annidopo := 0;
+          CP_prcompannisucc := 0;
+
+
+     end loop;
+     commit;
+
+         insert into fin_t_rendiconto_impplur (
+         DATA_GENERAZIONE
+         ,UTENTE
+         ,RIGA
+         ,ANNO
+         ,CODICE
+         ,DESCRIZIONE
+         ,PREVCOMPE1
+         ,IMP1
+         ,PREVCOMPE2
+         ,IMP2
+         ,IMPN
+         ,TAG_BDAP_PREVCOMPE1
+         ,TAG_BDAP_IMP1
+         ,TAG_BDAP_PREVCOMPE2
+         ,TAG_BDAP_IMP2
+         ,TAG_BDAP_IMPN)     
+         values
+         (sysdate
+         ,p_utente
+         ,c_riga
+         ,p_anno
+         ,tit.liv1||'00'
+         ,'Totale TITOLO '||substr(tit.liv1,1,1)
+         ,TOT_prcomp1annodopo
+         ,TOT_imp1annodopo
+         ,TOT_prcomp2annidopo
+         ,TOT_imp2annidopo
+         ,TOT_impannisucc
+         ,'SPE-IMPPLU_U.'||substr(tit.liv1,1,1)||'.00.00.00.000_Anno1CP'
+         ,'SPE-IMPPLU_U.'||substr(tit.liv1,1,1)||'.00.00.00.000_Anno1I'
+         ,'SPE-IMPPLU_U.'||substr(tit.liv1,1,1)||'.00.00.00.000_Anno2CP'
+         ,'SPE-IMPPLU_U.'||substr(tit.liv1,1,1)||'.00.00.00.000_Anno2I'
+         ,'SPE-IMPPLU_U.'||substr(tit.liv1,1,1)||'.00.00.00.000_AnnoNI'
+         );
+
+
+        c_riga := c_riga + 1;
+        TOT_imp1annodopo := 0;
+        TOT_imp2annidopo := 0;
+        TOT_impannisucc := 0;
+        TOT_prcomp1annodopo := 0;
+        TOT_prcomp2annidopo := 0;
+        TOT_prcompannisucc := 0;
+
+
+    end loop;
+  commit;
+
+insert into fin_t_rendiconto_impplur (
+ DATA_GENERAZIONE
+ ,UTENTE
+ ,RIGA
+ ,ANNO
+ ,DESCRIZIONE
+ ,PREVCOMPE1
+ ,IMP1
+ ,PREVCOMPE2
+ ,IMP2
+ ,IMPN
+ ,TAG_BDAP_PREVCOMPE1
+ ,TAG_BDAP_IMP1
+ ,TAG_BDAP_PREVCOMPE2
+ ,TAG_BDAP_IMP2
+ ,TAG_BDAP_IMPN)     
+ (select sysdate
+ ,p_utente
+ ,c_riga
+ ,p_anno
+ ,'TOTALE IMPEGNI'
+ ,nvl(sum(prevcompe1),0)
+ ,nvl(sum(imp1),0)
+ ,nvl(sum(prevcompe2),0)
+ ,nvl(sum(imp2),0)
+ ,nvl(sum(impn),0)
+ ,'SPE-IMPPLU_TotaleImpegni_Anno1CP'
+ ,'SPE-IMPPLU_TotaleImpegni_Anno1I'
+ ,'SPE-IMPPLU_TotaleImpegni_Anno2CP'
+ ,'SPE-IMPPLU_TotaleImpegni_Anno2I'
+ ,'SPE-IMPPLU_TotaleImpegni_AnnoNI'
+ from fin_t_rendiconto_impplur
+ where anno = p_anno
+ and utente = p_utente
+ and substr(codice,2) = '00'
+ );
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

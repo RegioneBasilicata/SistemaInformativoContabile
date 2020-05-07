@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGG_OCCUPANTI_STANZE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGG_OCCUPANTI_STANZE.html">Details</a></div></div>
+<div class="tab"><div><a href="AGG_OCCUPANTI_STANZE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGG_OCCUPANTI_STANZE_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGG_OCCUPANTI_STANZE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGG_OCCUPANTI_STANZE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure agg_occupanti_stanze as
+begin
+-- questa procedura aggiorna gli occuanti delle stanze leggendoli dalle assegnazioni fatte ai beni (inserisce solo nuovi occupanti)
+insert into tb_stanze_occ
+(ASS_MATRICOLA, ASS_COGNOME,  ASS_NOME , ASS_UFFICIO, STANZA_BENE_IMM, STANZA_PROGR,DATA_RIL,creato_da,creato_il)
+select A.ASS_MATRICOLA, A.ASS_COGNOME,  A.ASS_NOME , A.ASS_UFFICIO, A.STANZA_BENE_IMM, A.STANZA_PROGR,max(a.DATA_ASS),'GAT2',sysdate
+FROM TB_BENI_ASS A
+WHERE a.ass_matricola&lt;100000 and
+a.DATA_FINE_ASS IS NOT NULL AND
+STANZA_BENE_IMM IS NOT NULL AND
+0=(SELECT COUNT(*) FROM TB_STANZE_OCC O 
+    WHERE O.ASS_COGNOME = A.ASS_COGNOME AND 
+          O.ASS_MATRICOLA = A.ASS_MATRICOLA AND
+          O.ASS_NOME = A.ASS_NOME and
+          O.STANZA_BENE_IMM=A.STANZA_BENE_IMM and
+          O.STANZA_PROGR=A.STANZA_PROGR)
+group by A.ASS_MATRICOLA, A.ASS_COGNOME,  A.ASS_NOME , A.ASS_UFFICIO, A.STANZA_BENE_IMM, A.STANZA_PROGR;
+-- questa procedura aggiorna gli occuanti delle stanze inserendo la data fine per quelli che non hanno beni assegnati per quella stanza
+UPDATE TB_STANZE_OCC O 
+SET DATA_FINE_OCC=TRUNC(sysdate,'dd'),
+modificato_da='GAT2',
+modificato_il=sysdate
+where id in (
+select id from TB_STANZE_OCC O 
+where data_fine_occ is null and
+0=(SELECT COUNT(*) FROM TB_BENI_ASS A 
+      WHERE A.ASS_COGNOME=O.ASS_COGNOME AND 
+            A.ASS_MATRICOLA=O.ASS_MATRICOLA AND
+            A.ASS_NOME =O.ASS_NOME and
+            a.DATA_FINE_ASS IS NULL and
+            A.STANZA_BENE_IMM=O.STANZA_BENE_IMM and
+            A.STANZA_PROGR=O.STANZA_PROGR));
+end;</pre>	</td></tr>
+</table></div>

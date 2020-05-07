@@ -1,0 +1,151 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>EC_ARTICOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="EC_ARTICOLI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="EC_ARTICOLI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>CODICE</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UN_MIS</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CATEGORIA</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SOTTO_CAT</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_IVA</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SCORTA_MIN</td>
+<td>NUMBER(8,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTE</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PREZZO</td>
+<td>NUMBER(10,5)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FILE_IMMAGINE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>'EC' </td>
+<td>11</td>
+<td>Individua la tipologia dell'articolo es. EC = economato</td>
+	</tr>
+	<tr>
+<td>COD_BAR</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PUNT_IMMAGINE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_EQUIV</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>gli articoli con lo stesso id sono equivalenti</td>
+	</tr>
+	<tr>
+<td>SOSPESO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>S non viene piu' elencato tra gli articoli che si possono richiedere</td>
+	</tr>
+</table></div>

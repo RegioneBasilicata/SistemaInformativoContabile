@@ -1,0 +1,521 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>EQUILIBRI_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="EQUILIBRI_BILANCIO.html">Details</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_BILANCIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_BILANCIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_BILANCIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="EQUILIBRI_BILANCIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      equilibri_bilancio(p75_anno in number,p_prev_ass in varchar2, p_utente in varchar2) as
+
+ap_disavanzo number(15,2);
+ap_avanzo number(15,2);
+capitolo VARCHAR2(7);
+dg_disavanzo_amministrazione number(15,2);
+etitolo number(15,2);
+utitolo number(15,2);
+ecompe number(15,2);
+ucompe number(15,2);
+eplur1 number(15,2);
+uplur1 number(15,2);
+eplur2 number(15,2);
+uplur2 number(15,2);
+ufv_compe number(15,2);
+ufv_plur1 number(15,2);
+ufv_plur2 number(15,2);
+
+previsione_assestamento varchar2(1) := 'P';
+
+P75_EBQ111 varchar2(100) :=null;
+P75_EBQ115 varchar2(5):= null;
+P75_EBQ112 number(15,2) :=0;
+P75_EBQ113 number(15,2) :=0;
+P75_EBQ114 number(15,2) :=0;
+P75_EBQ121 varchar2(100) :=null;
+P75_EBQ125 varchar2(5):= null;
+P75_EBQ122 number(15,2) :=0;
+P75_EBQ123 number(15,2) :=0;
+P75_EBQ124 number(15,2) :=0;
+P75_EBQ131 varchar2(100) :=null;
+P75_EBQ135 varchar2(5):= null;
+P75_EBQ132 number(15,2) :=0;
+P75_EBQ133 number(15,2) :=0;
+P75_EBQ134 number(15,2) :=0;
+P75_EBQ141 varchar2(100) :=null;
+P75_EBQ145 varchar2(5):= null;
+P75_EBQ142 number(15,2) :=0;
+P75_EBQ143 number(15,2) :=0;
+P75_EBQ144 number(15,2) :=0;
+P75_EBQ151 varchar2(100) :=null;
+P75_EBQ155 varchar2(5):= null;
+P75_EBQ152 number(15,2) :=0;
+P75_EBQ153 number(15,2) :=0;
+P75_EBQ154 number(15,2) :=0;
+P75_EBQ161 varchar2(100) :=null;
+P75_EBQ165 varchar2(5):= null;
+P75_EBQ162 number(15,2) :=0;
+P75_EBQ163 number(15,2) :=0;
+P75_EBQ164 number(15,2) :=0;
+P75_EBQ171 varchar2(100) :=null;
+P75_EBQ175 varchar2(5):= null;
+P75_EBQ172 number(15,2) :=0;
+P75_EBQ173 number(15,2) :=0;
+P75_EBQ174 number(15,2) :=0;
+P75_EBQ211 varchar2(100) :=null;
+P75_EBQ215 varchar2(5):= null;
+P75_EBQ212 number(15,2) :=0;
+P75_EBQ213 number(15,2) :=0;
+P75_EBQ214 number(15,2) :=0;
+P75_EBQ221 varchar2(100) :=null;
+P75_EBQ225 varchar2(5):= null;
+P75_EBQ222 number(15,2) :=0;
+P75_EBQ223 number(15,2) :=0;
+P75_EBQ224 number(15,2) :=0;
+P75_EBQ231 varchar2(100) :=null;
+P75_EBQ235 varchar2(5):= null;
+P75_EBQ232 number(15,2) :=0;
+P75_EBQ233 number(15,2) :=0;
+P75_EBQ234 number(15,2) :=0;
+P75_EBQ241 varchar2(100) :=null;
+P75_EBQ245 varchar2(5):= null;
+P75_EBQ242 number(15,2) :=0;
+P75_EBQ243 number(15,2) :=0;
+P75_EBQ244 number(15,2) :=0;
+P75_EBQ251 varchar2(100) :=null;
+P75_EBQ255 varchar2(5):= null;
+P75_EBQ252 number(15,2) :=0;
+P75_EBQ253 number(15,2) :=0;
+P75_EBQ254 number(15,2) :=0;
+P75_EBQ311 varchar2(100) :=null;
+P75_EBQ315 varchar2(5):= null;
+P75_EBQ312 number(15,2) :=0;
+P75_EBQ313 number(15,2) :=0;
+P75_EBQ314 number(15,2) :=0;
+P75_EBQ321 varchar2(100) :=null;
+P75_EBQ325 varchar2(5):= null;
+P75_EBQ322 number(15,2) :=0;
+P75_EBQ323 number(15,2) :=0;
+P75_EBQ324 number(15,2) :=0;
+P75_EBQ331 varchar2(100) :=null;
+P75_EBQ335 varchar2(5):= null;
+P75_EBQ332 number(15,2) :=0;
+P75_EBQ333 number(15,2) :=0;
+P75_EBQ334 number(15,2) :=0;
+P75_EBQ341 varchar2(100) :=null;
+P75_EBQ345 varchar2(5):= null;
+P75_EBQ342 number(15,2) :=0;
+P75_EBQ343 number(15,2) :=0;
+P75_EBQ344 number(15,2) :=0;
+P75_EBQ351 varchar2(100) :=null;
+P75_EBQ355 varchar2(5):= null;
+P75_EBQ352 number(15,2) :=0;
+P75_EBQ353 number(15,2) :=0;
+P75_EBQ354 number(15,2) :=0;
+
+P75_EBQ181 varchar2(150) :=null;
+P75_EBQ185 varchar2(5):= null;
+P75_EBQ182 number(15,2) :=0;
+P75_EBQ183 number(15,2) :=0;
+P75_EBQ184 number(15,2) :=0;
+
+
+
+
+
+cursor entrate is 
+select 
+nvl(substr(l1.codice,1,1),'1') Etitolo
+,decode(p_prev_ass,'A',0,previsione_iniziale(P75_anno,a.eu||a.codice)) Ecompe
+,decode(p_prev_ass,'A',0,pluriennale1_iniziale(P75_anno+1,a.eu||a.codice)) Eplur1
+,decode(p_prev_ass,'A',0,pluriennale2_iniziale(P75_anno+2,a.eu||a.codice)) Eplur2
+--
+,decode(p_prev_ass,'P',0,assestamento_com_iniziale(P75_anno,a.eu||a.codice) + assestamento_competenza(P75_anno,a.eu||a.codice)) ass_ecompe
+,decode(p_prev_ass,'P',0,assestamento_pl1_iniziale(P75_anno+1,a.eu||a.codice) + assestamento_pluriennale1(P75_anno+1,a.eu||a.codice)) ass_eplur1
+,decode(p_prev_ass,'P',0,assestamento_pl2_iniziale(P75_anno+2,a.eu||a.codice) + assestamento_pluriennale2(P75_anno+2,a.eu||a.codice)) ass_eplur2
+,a.nb_piano_conti_fina
+from 
+fin_t_articoli a
+,nb_livello1 l1
+,nb_livello2 l2
+,nb_livello3 l3
+where a.anno=P75_anno 
+and a.abilitato = 'S'
+and a.eu = 'E' 
+and l3.id(+) = a.nb_id_padre 
+and l2.id(+) = l3.id_livello2
+and l1.id(+) = l2.id_livello1;
+
+
+cursor uscite is 
+select 
+ a.eu||a.codice Ucapitolo
+,l3.id UTitolo
+,decode(p_prev_ass,'A',0,previsione_iniziale(P75_anno,a.eu||a.codice)) Ucompe
+,decode(p_prev_ass,'A',0,pluriennale1_iniziale(P75_anno+1,a.eu||a.codice)) Uplur1
+,decode(p_prev_ass,'A',0,pluriennale2_iniziale(P75_anno+2,a.eu||a.codice)) Uplur2
+--
+,decode(p_prev_ass,'A',0,previsione_iniziale(P75_anno,a.nb_capitolo_fpv)) Ufv_compe
+,decode(p_prev_ass,'A',0,pluriennale1_iniziale(P75_anno+1,a.nb_capitolo_fpv)) Ufv_plur1
+,decode(p_prev_ass,'A',0,pluriennale2_iniziale(P75_anno+2,a.nb_capitolo_fpv)) Ufv_plur2
+--
+,decode(p_prev_ass,'P',0,assestamento_com_iniziale(P75_anno,a.eu||a.codice) + assestamento_competenza(P75_anno,a.eu||a.codice)) ass_ucompe
+,decode(p_prev_ass,'P',0,assestamento_pl1_iniziale(P75_anno+1,a.eu||a.codice) + assestamento_pluriennale1(P75_anno+1,a.eu||a.codice)) ass_uplur1
+,decode(p_prev_ass,'P',0,assestamento_pl2_iniziale(P75_anno+2,a.eu||a.codice) + assestamento_pluriennale2(P75_anno+2,a.eu||a.codice)) ass_uplur2
+--
+,decode(p_prev_ass,'P',0,assestamento_com_iniziale(P75_anno,a.nb_capitolo_fpv) + assestamento_competenza(P75_anno,a.nb_capitolo_fpv)) ass_ufv_compe
+,decode(p_prev_ass,'P',0,assestamento_pl1_iniziale(P75_anno+1,a.nb_capitolo_fpv) + assestamento_pluriennale1(P75_anno+1,a.nb_capitolo_fpv)) ass_ufv_plur1
+,decode(p_prev_ass,'P',0,assestamento_pl2_iniziale(P75_anno+2,a.nb_capitolo_fpv) + assestamento_pluriennale2(P75_anno+2,a.nb_capitolo_fpv)) ass_ufv_plur2
+from 
+ fin_t_articoli a
+,nb_titoli_uscite l3
+where a.anno=P75_anno 
+and a.abilitato = 'S'
+and a.eu = 'U' 
+and l3.anno(+) = a.anno
+and l3.id(+) = nvl(a.nb_titolo,0)
+;
+
+BEGIN
+
+previsione_assestamento := nvl(p_prev_ass,'P');
+
+-- ex procedura Dati_generali
+begin  
+select 
+ nvl(dg.DISAVANZO_EFFETTIVO_ANNI_PREC,0) + nvl(dg.DISAVANZO_REGIONALE,0)+ nvl(dg.variazione_disavanzo_piu,0) - nvl(dg.variazione_disavanzo_meno,0) nb_disavanzo,
+ nvl(fpv_corrente,0) + nvl(variazione_fpv_corrente,0),
+ nvl(fpv_capitale,0) +  nvl(variazione_fpv_capitale,0)
+into
+ ap_disavanzo,
+ P75_EBQ122,
+ P75_EBQ222 
+from     fina_dati_generali dg
+where    dg.anno_finanziario = P75_anno;
+exception when no_data_found 
+    then 
+        ap_disavanzo := 0;
+        P75_EBQ122 := 0;
+        P75_EBQ222 := 0;        
+end;
+
+begin  
+select 
+ nvl(fpv_corrente,0) + nvl(variazione_fpv_corrente,0),
+ nvl(fpv_capitale,0) +  nvl(variazione_fpv_capitale,0)
+into
+ P75_EBQ123,
+ P75_EBQ223 
+from  fina_dati_generali dg
+where dg.anno_finanziario = P75_anno + 1;
+exception when no_data_found 
+  then P75_EBQ123 := 0;
+       P75_EBQ223 := 0;
+end;
+
+begin  
+select 
+ nvl(fpv_corrente,0) + nvl(variazione_fpv_corrente,0),
+ nvl(fpv_capitale,0) +  nvl(variazione_fpv_capitale,0)
+into
+ P75_EBQ124,
+ P75_EBQ224
+from  fina_dati_generali dg
+where dg.anno_finanziario = P75_anno + 2;
+exception when no_data_found 
+  then P75_EBQ124 := 0;
+       P75_EBQ224 := 0;
+end;
+
+dg_disavanzo_amministrazione := ap_disavanzo;
+
+-- ex procedura Dati_generali
+
+-- ex procedura capitoli_e
+for c in entrate loop
+ --capitolo := c.ecapitolo;
+ etitolo := c.etitolo;
+
+if upper(previsione_assestamento) = 'P' 
+   then 
+   ecompe := c.ecompe;
+   eplur1 := c.eplur1;
+   eplur2 := c.eplur2;
+   else 
+   ecompe := c.ass_ecompe;
+   eplur1 := c.ass_eplur1;
+   eplur2 := c.ass_eplur2;
+end if;
+
+ -- ex procedura eb7e_dettaglio;
+  if etitolo &lt; 4
+       then P75_ebq131 := 'Entrate Titoli 1-2-3';
+            P75_ebq132 := P75_ebq132 + ecompe;
+                 P75_ebq133 := P75_ebq133 + eplur1;
+                 P75_ebq134 := P75_ebq134 + eplur2;
+                 P75_ebq135 := '(+)';
+ end if;
+
+ if etitolo = 4
+       then P75_ebq231 := 'Entrate in Conto Capitale';
+            P75_ebq232 := P75_ebq232 + ecompe;
+                 P75_ebq233 := P75_ebq233 + eplur1;
+                 P75_ebq234 := P75_ebq234 + eplur2;
+                 P75_ebq235 := '(+)';
+ end if;
+
+ if etitolo = 5
+       then P75_ebq241 := 'Entrate da Riduzioni di Attivita'' Finanziarie';
+            P75_ebq242 := P75_ebq242 + ecompe;
+                 P75_ebq243 := P75_ebq243 + eplur1;
+                 P75_ebq244 := P75_ebq244 + eplur2;
+                 P75_ebq245 := '(+)';
+ end if;
+
+
+P75_ebq181 := 'Entrate in conto capitale per Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche (**)';            
+P75_ebq185 := '(+)';
+ if substr(c.nb_piano_conti_fina,1,9) = 'E.4.02.06'
+       then P75_ebq182 := P75_ebq182 + ecompe;
+            P75_ebq183 := P75_ebq183 + eplur1;
+            P75_ebq184 := P75_ebq184 + eplur2;
+ end if;
+
+
+ -- end ex procedura eb7e_dettaglio
+
+
+end loop;
+-- end ex procedura capitoli_e
+
+-- ex procedura capitoli_u
+for c in uscite loop
+ capitolo := c.ucapitolo;
+ utitolo := c.utitolo;
+
+if upper(previsione_assestamento) = 'P' 
+  then
+  ucompe := c.ucompe;
+  uplur1 := c.uplur1;
+  uplur2 := c.uplur2;
+  ufv_compe := c.ufv_compe;
+  ufv_plur1 := c.ufv_plur1;
+  ufv_plur2 := c.ufv_plur2;
+  else
+  ucompe := c.ass_ucompe;
+  uplur1 := c.ass_uplur1;
+  uplur2 := c.ass_uplur2;
+  ufv_compe := c.ass_ufv_compe;
+  ufv_plur1 := c.ass_ufv_plur1;
+  ufv_plur2 := c.ass_ufv_plur2;
+end if;
+
+ -- ex procedura eb7u_dettaglio
+  if utitolo = 1
+       then P75_ebq141 := 'Spese Correnti';
+            P75_ebq142 := P75_ebq142 + ucompe;
+                 P75_ebq143 := P75_ebq143 + uplur1;
+                 P75_ebq144 := P75_ebq144 + uplur2;
+                 P75_ebq145 := '(-)';
+            P75_ebq151 := ' - di cui fondo pluriennale vincolato';
+            P75_ebq152 := P75_ebq152 + ufv_compe;
+                 P75_ebq153 := P75_ebq153 + ufv_plur1;
+                 P75_ebq154 := P75_ebq154 + ufv_plur2;
+                 P75_ebq155 := '';
+ end if;
+
+ if utitolo = 4
+       then P75_ebq161 := 'Rimborso Prestiti';
+            P75_ebq162 := P75_ebq162 + ucompe;
+                 P75_ebq163 := P75_ebq163 + uplur1;
+                 P75_ebq164 := P75_ebq164 + uplur2;
+                 P75_ebq165 := '(-)';
+ end if;
+
+
+ if utitolo = 2
+       then P75_ebq311 := 'Spese in Conto Capitale';
+            P75_ebq312 := P75_ebq312 + ucompe;
+                 P75_ebq313 := P75_ebq313 + uplur1;
+                 P75_ebq314 := P75_ebq314 + uplur2;
+                 P75_ebq315 := '(-)';
+            P75_ebq321 := ' - di cui fondo pluriennale vincolato';
+            P75_ebq322 := P75_ebq322 + ufv_compe;
+                 P75_ebq323 := P75_ebq323 + ufv_plur1;
+                 P75_ebq324 := P75_ebq324 + ufv_plur2;
+                 P75_ebq325 := '';
+ end if;
+
+ if utitolo = 3
+       then P75_ebq331 := 'Spese per Incremento di Attivita'' Finanziarie';
+            P75_ebq332 := P75_ebq332 + ucompe;
+                 P75_ebq333 := P75_ebq333 + uplur1;
+                 P75_ebq334 := P75_ebq334 + uplur2;
+                 P75_ebq335 := '(-)';
+ end if;
+  -- end ex procedura eb7u_dettaglio
+
+
+ -- ex procedura eb7u_avanzo
+ begin
+  select sum(nvl(quota_avanzo,0))
+  into ap_avanzo
+  from fin_avanzi_assestamento a
+  where a.anno=P75_anno 
+  and a.eu||a.capitolo_uscita = capitolo
+  group by a.eu||a.capitolo_uscita;
+  exception when no_data_found then ap_avanzo := 0;
+ end;
+
+ if utitolo = 1
+       then P75_ebq111 := 'Avanzo di Amministrazione vincolato per il finanziamento di spese correnti';
+            P75_ebq112 := P75_ebq112 + ap_avanzo;
+                 P75_ebq113 := P75_ebq113 + 0;
+                 P75_ebq114 := P75_ebq114 + 0;
+                 P75_ebq115 := '(+)';
+ end if;
+
+ if utitolo = 2 or
+       utitolo = 3 or
+       utitolo = 4
+       then P75_ebq211 := 'Avanzo di Amministrazione vincolato per il finanziamento di spese d''investimento';
+            P75_ebq212 := P75_ebq212 + ap_avanzo;
+                 P75_ebq213 := P75_ebq213 + 0;
+                 P75_ebq214 := P75_ebq214 + 0;
+                 P75_ebq215 := '(+)';
+ end if;
+ -- end ex procedura eb7u_avanzo
+end loop;
+
+-- ex procedura eb7u_fondo_plur_vinc
+P75_ebq121 := 'Fondo Pluriennale Vincolato per spese correnti';
+P75_ebq122 := P75_ebq122 + 0;
+P75_ebq123 := P75_ebq123 + 0;
+P75_ebq124 := P75_ebq124 + 0;
+P75_ebq125 := '(+)';
+
+P75_ebq221 := 'Fondo Pluriennale Vincolato per spese in conto capitale';
+P75_ebq222 := P75_ebq222 + 0;
+P75_ebq223 := P75_ebq223 + 0;
+P75_ebq224 := P75_ebq224 + 0;
+P75_ebq225 := '(+)';
+-- end ex procedura eb7u_fondo_plur_vinc
+
+-- ex procedura eb7eu_totali
+P75_ebq171 := 'A)Saldo di parte Corrente';
+P75_ebq172 := P75_ebq112 + P75_ebq122 + P75_ebq132 + P75_ebq182 - P75_ebq142 - P75_ebq162 ;
+P75_ebq173 := P75_ebq113 + P75_ebq123 + P75_ebq133 + P75_ebq183 - P75_ebq143 - P75_ebq163 ;
+P75_ebq174 := P75_ebq114 + P75_ebq124 + P75_ebq134 + P75_ebq184 - P75_ebq144 - P75_ebq164 ;
+P75_ebq175 := '';
+
+P75_ebq251 := 'B)Risorse disponibili per la copertura degli investimenti';
+--P75_ebq252 := p75_ebq172 + P75_ebq212 + P75_ebq222 + P75_ebq232 + P75_ebq242 - P75_ebq182 ;
+--P75_ebq253 := p75_ebq173 + P75_ebq213 + P75_ebq223 + P75_ebq233 + P75_ebq243 - P75_ebq183;
+--P75_ebq254 := p75_ebq174 + P75_ebq214 + P75_ebq224 + P75_ebq234 + P75_ebq244 - P75_ebq184;
+P75_ebq254 := P75_ebq214 + P75_ebq224 + P75_ebq234 + P75_ebq244 - P75_ebq184;
+-- richiesta pierro 24.07.2014 il saldo corrente non va totalizzato
+P75_ebq252 := P75_ebq212 + P75_ebq222 + P75_ebq232 + P75_ebq242 - P75_ebq182 ;
+P75_ebq253 := P75_ebq213 + P75_ebq223 + P75_ebq233 + P75_ebq243 - P75_ebq183;
+
+P75_ebq255 := '';
+
+P75_ebq341 := 'Disavanzo Pregresso (Presunto)';
+P75_ebq342 := dg_disavanzo_amministrazione;
+P75_ebq343 := 0;
+P75_ebq344 := 0;
+P75_ebq345 := '(-)';
+
+P75_ebq351 := 'C)Totale debito a Pareggio';
+P75_ebq352 := P75_ebq172 + (P75_ebq252 - P75_ebq312 - P75_ebq332) - P75_ebq342 ;
+P75_ebq353 := P75_ebq173 + (P75_ebq253 - P75_ebq313 - P75_ebq333) - P75_ebq343;
+P75_ebq354 := P75_ebq174 + (P75_ebq254 - P75_ebq314 - P75_ebq334) - P75_ebq344;
+P75_ebq355 := '';
+-- end ex procedura eb7eu_totali
+-- ex procedura capitoli_u
+
+delete tmp_tabulati where utente = p_utente;
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ111,P75_EBQ115,P75_EBQ112,P75_EBQ113,P75_EBQ114,p_utente,1); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ121,P75_EBQ125,P75_EBQ122,P75_EBQ123,P75_EBQ124,p_utente,2); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ131,P75_EBQ135,P75_EBQ132,P75_EBQ133,P75_EBQ134,p_utente,3); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ181,P75_EBQ185,P75_EBQ182,P75_EBQ183,P75_EBQ184,p_utente,4); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ141,P75_EBQ145,P75_EBQ142,P75_EBQ143,P75_EBQ144,p_utente,5); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ151,P75_EBQ155,P75_EBQ152,P75_EBQ153,P75_EBQ154,p_utente,6); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ161,P75_EBQ165,P75_EBQ162,P75_EBQ163,P75_EBQ164,p_utente,7); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ171,P75_EBQ175,P75_EBQ172,P75_EBQ173,P75_EBQ174,p_utente,8); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (null,null,null,null,null,p_utente,9); 
+
+-- richiesta pierro 24.07.2014 non va stampato 
+--P75_ebq171 := 'Saldo di parte Corrente';
+--insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+--values (P75_EBQ171,P75_EBQ175,P75_EBQ172,P75_EBQ173,P75_EBQ174,p_utente,10); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ211,P75_EBQ215,P75_EBQ212,P75_EBQ213,P75_EBQ214,p_utente,11); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ221,P75_EBQ225,P75_EBQ222,P75_EBQ223,P75_EBQ224,p_utente,12); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ231,P75_EBQ235,P75_EBQ232,P75_EBQ233,P75_EBQ234,p_utente,13); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ181,'-',P75_EBQ182,P75_EBQ183,P75_EBQ184,p_utente,14); 
+
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ241,P75_EBQ245,P75_EBQ242,P75_EBQ243,P75_EBQ244,p_utente,15); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ251,P75_EBQ255,P75_EBQ252,P75_EBQ253,P75_EBQ254,p_utente,16); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (null,null,null,null,null,p_utente,17); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ311,P75_EBQ315,P75_EBQ312,P75_EBQ313,P75_EBQ314,p_utente,18); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ321,P75_EBQ325,P75_EBQ322,P75_EBQ323,P75_EBQ324,p_utente,19); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ331,P75_EBQ335,P75_EBQ332,P75_EBQ333,P75_EBQ334,p_utente,20); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ341,P75_EBQ345,P75_EBQ342,P75_EBQ343,P75_EBQ344,p_utente,21); 
+
+insert into tmp_tabulati (car01,car02,car03,car04,car05,utente,num_ord_riga) 
+values (P75_EBQ351,P75_EBQ355,P75_EBQ352,P75_EBQ353,P75_EBQ354,p_utente,22); 
+
+commit;
+END;</pre>	</td></tr>
+</table></div>

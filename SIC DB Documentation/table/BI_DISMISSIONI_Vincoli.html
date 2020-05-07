@@ -1,0 +1,223 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BI_DISMISSIONI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BI_DISMISSIONI.html">Colonne</a></div></div>
+<div class="tab" id="current"><div><a href="BI_DISMISSIONI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="BI_DISMISSIONI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Vincoli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>CONSTRAINT_NAME</th>
+	<th>CONSTRAINT_TYPE</th>
+	<th>SEARCH_CONDITION</th>
+	<th>R_OWNER</th>
+	<th>R_TABLE_NAME</th>
+	<th>R_CONSTRAINT_NAME</th>
+	<th>DELETE_RULE</th>
+	<th>STATUS</th>
+	<th>DEFERRABLE</th>
+	<th>VALIDATED</th>
+	<th>GENERATED</th>
+	<th>BAD</th>
+	<th>RELY</th>
+	<th>LAST_CHANGE</th>
+	<th>INDEX_OWNER</th>
+	<th>INDEX_NAME</th>
+	<th>INVALID</th>
+	<th>VIEW_RELATED</th>
+</tr>
+	<tr>
+<td>BID_BIBI_FK</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>BI_BENI_IMM</td>
+<td>BIBI_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BID_BIDI_FK</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>BI_TIPI_DISM</td>
+<td>BIDI_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BID_BITA_FK</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>BI_TIPI_ATTO</td>
+<td>BITA_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BIDISM_BIACQ_FK</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>BI_TIPO_ACQUIRENTE</td>
+<td>BI_TIPO_ACQ_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2019-04-09</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BIDISM_BIMODCES_FK</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>BI_MODALITA_CESSIONE</td>
+<td>BI_MOD_CESS_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2019-04-09</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BID_PK</td>
+<td>Primary_Key</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>GAT2</td>
+<td>BID_BIBI_FK_I</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C0029432</td>
+<td>Check</td>
+<td>"COD_CESP" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C0029433</td>
+<td>Check</td>
+<td>"TIPO_DISM" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C0029434</td>
+<td>Check</td>
+<td>"DATA_DISM" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2011-12-07</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+</table></div>

@@ -1,0 +1,264 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>INDICATORI_BIL_REND_USCITE2</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="INDICATORI_BIL_REND_USCITE2.html">Details</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_REND_USCITE2_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_REND_USCITE2_References.html">References</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_REND_USCITE2_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="INDICATORI_BIL_REND_USCITE2_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure indicatori_bil_rend_Uscite2 (p_anno in number) is 
+
+ -- *** per evitare di lavorare su bil previsione non fissato l'utente lo impostiamo di fisso
+    p_utente varchar2 (20) := 'CONS'||p_anno;
+
+	type vettore_5 is varray(5) of number;
+    p_ord number := 0; -- per ordinamento righe tabella
+
+    descrizione varchar2(20); -- solo come appoggio
+
+	tot_prev_compe_i number := 0;  -- contiene il totale delle previsioni di competenza p_anno
+	tot_prev_compe_f number := 0;  -- contiene il totale delle previsioni di competenza p_anno + 1
+	tot_res_i number := 0;
+	tot_res_f number := 0;
+	tot_fpv_i number := 0;  -- contiene il totale delle previsioni FPV p_anno iniziali
+	tot_fpv_f number := 0;  -- contiene il totale delle previsioni FPV p_anno definitive
+	tot_fpv_def number := 0;  -- contiene il totale FPV definitivo
+	tot_impegni number := 0;  -- contiene il totale impegnato p_anno
+	tot_eco number := 0;  -- contiene il totale delle economie p_anno
+
+
+	i_missione vettore_5 := vettore_5(0,0,0,0,0);
+	i_programma vettore_5 := vettore_5(0,0,0,0,0);
+	i_totale_missioni vettore_5 := vettore_5(0,0,0,0,0);
+
+	p_missione varchar2(3); -- valore missione nel loop
+
+	cursor missioni is
+	select distinct 'Missione'||' '||CODICE||' '||DESCRIZIONE codice
+	,CODICE cod_singolo
+	from nb_livello1
+	where anno = p_anno
+	and eu = 'U'
+	order by 1; 
+
+	cursor programmi is 
+	select codice
+    ,descrizione
+    ,sum(cassa_ini)  		cassa_ini
+    ,sum(cassa_def)  		cassa_def
+    ,sum(pag_compe)			pag_compe
+    ,sum(pag_res)			pag_res
+    from
+    (select  nb_livello2 codice
+	,desc_nb_livello2 descrizione
+	,sum(nvl(PREVISIONI_INIZIALI_CASSA,0))      	cassa_ini
+	,sum(nvl(PREVISIONI_DEFINITIVE_CASSA,0))    	cassa_def
+	,sum(nvl(RISCOSSIONI_PAGAMENTI_COMPE,0))     	pag_compe
+	,sum(nvl(RISCOSSIONI_PAGAMENTI_RES,0)) 			pag_res
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and nb_livello1 = p_missione
+	group by nb_livello2,DESC_NB_LIVELLO2
+    UNION
+    select l.codice codice
+	,l.descrizione descrizione
+    ,0 cassa_ini
+	,0 cassa_def
+	,0 pag_compe
+	,0 pag_res
+    from nb_livello2 l
+    ,nb_livello1 m
+    where l.anno = p_anno
+    and l.eu ='U'
+    and l.id_livello1 = m.id
+    and m.anno = l.anno
+    and m.eu = l.eu
+    and m.codice = p_missione
+	)
+    group by codice
+    ,descrizione
+    order by 1;
+
+
+	begin
+
+	-- pulisco la FIN_T_INDICATORI_BILANCIO per l'anno, l'utente e la tipologia di indicatore considerato
+	delete FIN_T_INDICATORI_BILANCIO where anno = p_anno and utente = p_utente and TIPO_BILANCIO = 'R' and TIPO_INDICATORE = 'U2';
+		commit;
+	delete FIN_T_INDICATORI_NUM_DEN where anno = p_anno and utente = p_utente and TIPO_BILANCIO = 'R' and TIPO_INDICATORE = 'U2';
+		commit;
+	-- ********************************************
+
+    -- calcolo i totali per i DENOMINATORI
+    select 'TOTALI' descrizione
+    ,nvl(sum(nvl(PREVISIONI_INIZIALI_COMPE,0)),0)
+	,nvl(sum(nvl(PREVISIONI_DEFINITIVE_COMPE,0)),0)
+	,nvl(sum(nvl(PREVISIONI_INIZIALI_RES,0)),0)
+	,nvl(sum(nvl(RESIDUI_INIZIALI,0)),0)
+	,nvl((select 
+	 sum(previsione_iniziale(p_anno,a.eu||a.codice)) 
+     from vw_nb_articoli a
+     where a.anno = p_anno
+     and a.eu = 'U'
+     and nvl(a.nb_fpv,'N') = 'S'),0)
+	,nvl(sum(nvl(FPV_FONTE,0)),0)
+	,nvl(sum(nvl(FPV,0)),0)
+	,nvl(sum(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+	into
+	 descrizione
+	,tot_prev_compe_i
+	,tot_prev_compe_f
+	,tot_res_i
+	,tot_res_f
+	,tot_fpv_i 
+	,tot_fpv_f 
+	,tot_fpv_def
+	,tot_impegni 
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and nb_livello1 &lt;> '0'
+	group by 'TOTALI';
+
+
+
+
+for m in missioni loop
+	 p_missione := m.cod_singolo;
+	 i_missione := vettore_5(0,0,0,0,0);
+
+
+    for p in  programmi loop
+
+
+        if (tot_res_i + tot_prev_compe_i - tot_fpv_i) > 0
+        then
+		i_programma(1) := round((p.cassa_ini/(tot_res_i + tot_prev_compe_i - tot_fpv_i))*100,2);
+		end if;
+
+        if (tot_res_f + tot_prev_compe_f - tot_fpv_f) > 0
+        then
+        i_programma(2) := round((p.cassa_def/(tot_res_f + tot_prev_compe_f - tot_fpv_f))*100,2);
+		end if;
+
+        if (tot_impegni + tot_res_f) > 0
+        then
+        i_programma(3) := round((p.pag_compe+p.pag_res)*100/(tot_impegni + tot_res_f),2);
+		end if;
+
+        if tot_impegni  > 0
+        then
+        i_programma(4) := round((p.pag_compe/tot_impegni)*100,2);
+        end if;
+
+        if tot_res_f > 0
+        then
+        i_programma(5) := round((p.pag_res/tot_res_f)*100,2);
+        end if;
+
+
+		p_ord := p_ord + 1;
+
+    		insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,CODICE_INDICATORE2,DESC_COD2
+    			,INC_MIS_PROG1
+    			,INC_FPV1
+    			,CAP_PAG1
+    			,INC_MIS_PROG2
+    			,INC_FPV2
+    			,DEFINIZIONE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','U2',p_missione,m.codice,p.codice,p.descrizione
+	    	,i_programma(1)
+	    	,i_programma(2)
+	    	,i_programma(3)
+	    	,i_programma(4)
+	    	,i_programma(5)
+	    	,p_missione||'.'||p.codice);
+	    	commit;
+
+	    insert into fin_t_indicatori_num_den (ANNO, UTENTE, ORD, TIPO_BILANCIO, TIPO_INDICATORE, CODICE_INDICATORE1, DESC_COD1,NUM1, DEN1, NUM2, DEN2, NUM3, DEN3, NUM4, DEN4, NUM5, DEN5)
+            values
+	    	(p_anno,p_utente,p_ord,'R','U2',p.codice,p.descrizione
+	    	,p.cassa_ini,(tot_res_i + tot_prev_compe_i - tot_fpv_i) --1
+            ,p.cassa_def,(tot_res_f + tot_prev_compe_f - tot_fpv_f) --2
+            ,p.pag_compe+p.pag_res,(tot_impegni + tot_res_f) --3
+            ,p.pag_compe,tot_impegni --4
+            ,p.pag_res,tot_res_f --5
+            );
+	    	commit;
+
+	    i_missione(1) := i_missione(1) + nvl(i_programma(1),0);
+		i_missione(2) := i_missione(2) + nvl(i_programma(2),0);
+		i_missione(3) := i_missione(3) + nvl(i_programma(3),0);
+		i_missione(4) := i_missione(4) + nvl(i_programma(4),0);
+		i_missione(5) := i_missione(5) + nvl(i_programma(5),0);
+
+        end loop;
+
+ 	p_ord := p_ord + 1;
+
+		insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DESC_COD2
+			,INC_MIS_PROG1
+			,INC_FPV1
+			,CAP_PAG1
+			,INC_MIS_PROG2
+			,INC_FPV2
+			,Definizione)
+    	values
+    	(p_anno,p_utente,p_ord,'R','U2',p_missione,m.codice,'TOTALE '||m.codice
+    	,i_missione(1)
+    	,i_missione(2)
+    	,i_missione(3)
+    	,i_missione(4)
+    	,i_missione(5)
+    	,p_missione);
+    	commit;
+
+    	i_totale_missioni(1) := i_totale_missioni(1) + i_missione(1);
+		i_totale_missioni(2) := i_totale_missioni(2) + i_missione(2);
+		i_totale_missioni(3) := i_totale_missioni(3) + i_missione(3);
+        i_totale_missioni(4) := i_totale_missioni(4) + i_missione(4);
+		i_totale_missioni(5) := i_totale_missioni(5) + i_missione(5);
+
+
+	end loop;
+
+	p_ord := p_ord + 1;
+
+
+		insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,DESC_COD2
+			,INC_MIS_PROG1
+			,INC_FPV1
+			,CAP_PAG1
+			,INC_MIS_PROG2
+			,INC_FPV2
+			)
+    	values
+    	(p_anno,p_utente,p_ord,'R','U2','TOTALE MISSIONI'
+    	,round(i_totale_missioni(1))
+    	,round(i_totale_missioni(2))
+    	,round(i_totale_missioni(3))
+    	,round(i_totale_missioni(4))
+    	,round(i_totale_missioni(5))
+    	);
+    	commit;
+
+	end;
+-- ****** FINE USCITE 2 ***********</pre>	</td></tr>
+</table></div>

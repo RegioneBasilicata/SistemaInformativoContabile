@@ -1,0 +1,3528 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>INDICATORI_BIL_REND_SINTETICI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="INDICATORI_BIL_REND_SINTETICI.html">Details</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_REND_SINTETICI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_REND_SINTETICI_References.html">References</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_REND_SINTETICI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="INDICATORI_BIL_REND_SINTETICI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure indicatori_bil_rend_sintetici (p_anno in number) is 
+
+    -- *** per evitare di lavorare su bil previsione non fissato l'utente lo impostiamo di fisso
+    p_utente varchar2 (20) := 'CONS'||p_anno;
+    verifica_consE number := 0;
+    verifica_consU number := 0;
+
+    -- variabili per indicatori sintetici
+	type vettore_3 is varray(3) of number;
+	numeratore number := 0;
+	denominatore number := 0;
+	numeratore2 number := 0;
+	denominatore2 number := 0;
+	id_utente number := 0;
+	disavanzo number := 0;
+	p_ord number := 0;
+	imp_num number := 0;
+	imp_den number := 0;
+	acc_num number := 0;
+	acc_den number := 0;
+	pag_num number := 0;
+	fpv_spesa number := 0;
+	fpv_entrata number := 0;
+	imp_chius_antic number := 0;
+
+	RISAMM_ParteDisponibile number := 0;
+
+	-- ENTRATE
+	compe_E_1_2_3_ini number := 0; -- contiene lo stanziamento INIZIALE di competenza dei primi 3 Titoli dell'anno p_anno
+	compe_E_1_2_3_def number := 0; -- contiene lo stanziamento DEFINITIVE di competenza dei primi 3 Titoli dell'anno p_anno
+	compe_U_1_def number := 0; -- contiene lo stanziamento DEFINITIVE di competenza del primo Titolo dell'UScita dell'anno p_anno
+
+	cassa_E_1_2_3_ini number := 0; -- contiene lo stanziamento di cassa dei primi 3 Titoli dell'anno p_anno
+	cassa_E_1_2_3_def number := 0;
+    compe_U_1_2_3_def number := 0;
+    fondo_anticipazioni_liq number := 0;
+	rev_num number := 0;
+
+	FCDE_corrente number:= 0; --contiente il FCDE corrente p_anno
+	FCDE_capitale number:= 0; --contiente il FCDE capitale p_anno
+
+  	PD1 number := 0; --Debiti da finanziamento
+	PD1_13 number := 0; -- Debiti da finanziamento miss. 13
+
+	PAT number := 0; -- Patrimonio netto
+
+
+	E_TDRAP number := 0; -- riga E tabella dimostrativa Risultato di Amministrazione
+	A_TDRAP number := 0; -- riga A tabella dimostrativa Risultato di Amministrazione
+
+
+	popolazione_res number := 0;
+	accensione_pres_rineg number := 0;
+
+
+		-- indicatore 1.1
+		i1_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 2.1
+		i2_1 number := 0;
+
+		-- indicatore 2.2
+		i2_2 number := 0;
+
+		-- indicatore 2.3
+		i2_3 number := 0;
+
+		-- indicatore 2.4
+		i2_4 number := 0;
+
+		-- indicatore 2.5
+		i2_5 number := 0;
+
+		-- indicatore 2.6
+		i2_6 number := 0;
+
+		-- indicatore 2.7
+		i2_7 number := 0;
+
+		-- indicatore 2.8
+		i2_8 number := 0;
+
+		-- indicatore 3.1
+		i3_1 number := 0;
+
+		-- indicatore 3.2
+		i3_2 number := 0;
+
+		-- indicatore 4.1
+		i4_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 4.2
+		i4_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 4.3
+		i4_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 4.4
+		i4_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 5.1
+		i5_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 6.1
+		i6_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 6.2
+		i6_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 6.3
+		i6_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.1
+		i7_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.2
+		i7_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.3
+		i7_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.4
+		i7_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.5
+		i7_5 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.6
+		i7_6 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 7.7
+		i7_7 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 8.1
+		i8_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 8.2
+		i8_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 8.3
+		i8_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 8.4
+		i8_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 8.5
+		i8_5 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 8.6
+		i8_6 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.1
+		i9_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.2
+		i9_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.3
+		i9_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.4
+		i9_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.5
+		i9_5 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 10.1
+		i10_1 number := 0;
+
+		-- indicatore 10.2
+		i10_2 number := 0;
+
+		-- indicatore 10.3
+		i10_3 number := 0;
+
+		-- indicatore 10.4
+		i10_4 number := 0;
+
+		-- indicatore 11.1
+		i11_1 number := 0;
+
+		-- indicatore 11.1
+		i11_2 number := 0;
+
+		-- indicatore 11.1
+		i11_3 number := 0;
+
+		-- indicatore 11.1
+		i11_4 number := 0;
+
+		-- indicatore 12.1
+		i12_1 number := 0;
+
+		-- indicatore 12.2
+		i12_2 number := 0;
+
+		-- indicatore 12.1
+		i12_3 number := 0;
+
+		-- indicatore 12.1
+		i12_4 number := 0;
+
+		-- indicatore 12.1
+		i12_5 number := 0;
+
+		-- indicatore 13.1
+		i13_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 13.1
+		i13_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 13.1
+		i13_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 14.1
+		i14_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 15.1
+		i15_1  number := 0;
+
+		-- indicatore 15.2
+		i15_2 vettore_3 := vettore_3(0,0,0);
+
+
+begin
+	
+	-- pulisco la FIN_T_INDICATORI_BILANCIO per l'anno, l'utente e la tipologia di indicatore considerato
+	delete FIN_T_INDICATORI_BILANCIO where anno = p_anno and utente = p_utente and TIPO_BILANCIO = 'R' and TIPO_INDICATORE = 'S';
+		commit;
+	-- ********************************************
+
+	-- verifico se è stato generato il Consuntivo con l'utente CONS||p_anno in caso contrario lo genero
+	select count(*) into verifica_consU
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U';
+
+	select count(*) into verifica_consE
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E';
+
+	if verifica_consU = 0
+	  then consuntivo_uscite(p_anno,null,to_date('3112'||p_anno,'ddmmyyyy'),p_utente);
+	end if;
+
+	if verifica_consE = 0
+	  then consuntivo_entrate(p_anno,null,to_date('3112'||p_anno,'ddmmyyyy'),p_utente);
+	end if;
+
+	-- **** Fine verifica rendiconto 
+
+
+    -- indice 1.1 anno1 TOT
+
+    select nvl(sum(previsioni_definitive_compe),0) into disavanzo
+    from fin_t_consuntivo_excel
+    where anno_consuntivo = p_anno
+    and tipo_capitolo = 'U'
+    and instr(upper(desc_capitolo),'DISAVANZO') > 0
+    and utente = p_utente;
+
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (NB_MACROAGGREGATO in ('101','107') or NB_TITOLO = '4' or NB_piano_conti_fina ='U.1.02.01.01.000');
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  = '101';
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  = '101';
+
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+    and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+    numeratore   := (disavanzo + imp_num - fpv_entrata + fpv_spesa);
+    denominatore := (acc_den + fondo_anticipazioni_liq) ;
+
+    if denominatore > 0
+    then
+    i1_1(1) := round(numeratore/denominatore*100,2);
+    end if;
+
+
+    -- indice 1.1 anno1 MIS13
+
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (NB_MACROAGGREGATO in ('101','107') or NB_TITOLO = '4' or NB_piano_conti_fina ='U.1.02.01.01.000')
+	and NB_LIVELLO1 = '13';
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  = '101'
+	and NB_LIVELLO1 = '13';
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  = '101'
+    and NB_LIVELLO1 = '13';
+
+    numeratore2   := (disavanzo + imp_num - fpv_entrata + fpv_spesa);
+    denominatore2 := (acc_den + fondo_anticipazioni_liq);
+
+
+    if denominatore2 > 0
+    then
+    i1_1(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+    -- indice 1.1 anno1  DIFF 
+    i1_1(3) := i1_1(1) - i1_1(2);
+
+
+    -- insert indicatore 1 e 1.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','1','Rigidita'' strutturale di bilancio');
+    	commit;
+
+    p_ord := p_ord + 1;
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	        ,TOT_MISSIONI1
+    	        ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','1.1','Incidenza spese rigide (disavanzo, personale e debito) su entrate correnti',
+    	'[ripiano disavanzo a carico dell''esercizio + Impegni (Macroaggregati 1.1 "Redditi di lavoro dipendente" + pdc 1.02.01.01.000 "IRAP"– FPV entrata concernente il Macroaggregato 1.1 + FPV personale in uscita 1.1 + 1.7 "Interessi passivi" + Titolo 4 Rimborso prestiti)] / (Accertamenti primi tre titoli Entrate + Utilizzo Fondo Anticipazione DL 35/2013)'
+    	,i1_1(1),i1_1(2),i1_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+  	-- indice 2.1
+
+  	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	select nvl(sum(nvl(PREVISIONI_INIZIALI_COMPE,0)),0) into compe_E_1_2_3_ini
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	numeratore   := acc_num;
+    denominatore := compe_E_1_2_3_ini;
+
+
+    if denominatore > 0
+    then
+    i2_1 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+	-- insert indicatore 2 e 2.1 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2','Entrate correnti');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.1','Incidenza degli accertamenti di parte corrente sulle previsioni iniziali di parte corrente'
+    	,'Totale accertamenti primi tre titoli di entrata / Stanziamenti iniziali di competenza dei primi tre titoli delle Entrate'
+    	,i2_1,numeratore,denominatore);
+    	commit;
+
+    -- indice 2.2
+
+    select nvl(sum(nvl(PREVISIONI_DEFINITIVE_COMPE,0)),0) into compe_E_1_2_3_def
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+    denominatore := compe_E_1_2_3_def;
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	numeratore   := acc_num;
+
+
+    if denominatore > 0
+    then
+    i2_2 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+    -- insert indicatore 2.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	        ,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.2','Incidenza degli accertamenti di parte corrente sulle previsioni definitive di parte corrente',
+    	'Totale accertamenti primi tre titoli di entrata / Stanziamenti definitivi di competenza dei primi tre titoli delle Entrate'
+    	,i2_2,numeratore,denominatore);
+    	commit;
+
+    -- indicatore 2.3
+
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and ((substr(NB_piano_conti_fina,1,6) = 'E.1.01' and substr(NB_piano_conti_fina,1,9) &lt;> 'E.1.01.04') or substr(NB_piano_conti_fina,1,3) = 'E.3');
+
+	numeratore   := acc_num;
+    denominatore := compe_E_1_2_3_ini;
+
+
+    if denominatore > 0
+    then
+    i2_3 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+	-- insert indicatore 2.3 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	        ,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.3','Incidenza degli accertamenti delle entrate proprie sulle previsioni iniziali di parte corrente',
+    	'Totale accertamenti (pdc E.1.01.00.00.000 "Tributi" – "Compartecipazioni di tributi" E.1.01.04.00.000 + E.3.00.00.00.000 "Entrate extratributarie") / Stanziamenti iniziali di competenza dei primi tre titoli delle Entrate'
+    	,i2_3,numeratore,denominatore);
+    	commit;
+
+    -- indicatore 2.4
+
+    numeratore   := acc_num;
+    denominatore := compe_E_1_2_3_def;
+
+    if denominatore > 0
+    then
+    i2_4 := round((numeratore/denominatore)*100,2);
+    end if;
+
+	-- insert indicatore 2.4 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORd,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	        ,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.4','Incidenza degli accertamenti delle entrate proprie sulle previsioni definitive di parte corrente',
+    	'Totale accertamenti (pdc E.1.01.00.00.000 "Tributi" – "Compartecipazioni di tributi" E.1.01.04.00.000 + E.3.00.00.00.000 "Entrate extratributarie") / Stanziamenti definitivi di competenza dei primi tre titoli delle Entrate'
+    	,i2_4,numeratore,denominatore);
+    	commit;
+
+ -- indice 2.5
+
+  	select nvl(sum(nvl(riscossioni_pagamenti_totale,0)),0) into rev_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	select nvl(sum(nvl(PREVISIONI_INIZIALI_CASSA,0)),0) into cassa_E_1_2_3_ini
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	numeratore   := rev_num;
+    denominatore := cassa_E_1_2_3_ini; --07/12/2018 Gerry sostituzione di compe_E_1_2_3_ini con cassa_E_1_2_3_ini
+
+
+    if denominatore > 0
+    then
+    i2_5 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+	-- insert indicatore 2.5
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.5','Incidenza degli incassi correnti sulle previsioni iniziali di parte corrente'
+    	,'Totale incassi c/competenza e c/residui dei primi tre titoli di entrata / Stanziamenti iniziali di cassa dei primi tre titoli delle Entrate'
+    	,i2_5,numeratore,denominatore);
+    	commit;
+
+-- indice 2.6
+
+	select nvl(sum(nvl(PREVISIONI_DEFINITIVE_CASSA,0)),0) into cassa_E_1_2_3_def
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	numeratore   := rev_num;
+    denominatore := cassa_E_1_2_3_def; --07/12/2018 Gerry sostituzione di compe_E_1_2_3_ini con cassa_E_1_2_3_def
+
+
+
+    if denominatore > 0
+    then
+    i2_6 := round((numeratore/denominatore)*100,2);
+    end if;
+
+-- insert indicatore 2.6
+
+    p_ord := p_ord + 1;
+
+    	(p_anno,p_utente,p_ord,'R','S','2.6','Incidenza degli incassi correnti sulle previsioni definitive di parte corrente'
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	,'Totale incassi c/competenza e c/residui primi tre titoli di entrata / Stanziamenti definitivi di cassa dei primi tre titoli delle Entrate'
+    	,i2_6,numeratore,denominatore);
+    	commit;
+
+-- indicatore 2.7
+
+    select nvl(sum(nvl(riscossioni_pagamenti_totale,0)),0) into rev_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and ((substr(NB_piano_conti_fina,1,6) = 'E.1.01' and substr(NB_piano_conti_fina,1,9) &lt;> 'E.1.01.04') or substr(NB_piano_conti_fina,1,3) = 'E.3');
+
+	numeratore   := rev_num;
+    denominatore := cassa_E_1_2_3_ini; --07/12/2018 Gerry sostituzione di compe_E_1_2_3_ini con cassa_E_1_2_3_ini
+
+
+    if denominatore > 0
+    then
+    i2_7 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+	-- insert indicatore 2.7 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	        ,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.7','Incidenza degli incassi delle entrate proprie sulle previsioni iniziali di parte corrente',
+    	'Totale incassi c/competenza e c/residui (pdc E.1.01.00.00.000 "Tributi" – "Compartecipazioni di tributi" E.1.01.04.00.000 + E.3.00.00.00.000 "Entrate extratributarie") / Stanziamenti iniziali di cassa dei primi tre titoli delle Entrate'
+    	,i2_7,numeratore,denominatore);
+    	commit;
+
+
+   -- indicatore 2.8
+
+    numeratore   := rev_num;
+    denominatore := cassa_E_1_2_3_def; --07/12/2018 Gerry sostituzione di compe_E_1_2_3_ini con cassa_E_1_2_3_def
+
+
+    if denominatore > 0
+    then
+    i2_8 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+	-- insert indicatore 2.8 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORd,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	        ,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','2.8','Incidenza degli incassi delle entrate proprie sulle previsioni definitive di parte corrente',
+    	'Totale incassi c/competenza e c/residui (pdc E.1.01.00.00.000 "Tributi" – "Compartecipazioni di tributi" E.1.01.04.00.000 + E.3.00.00.00.000 "Entrate extratributarie") / Stanziamenti definitivi di cassa dei primi tre titoli delle Entrate'
+    	,i2_8,numeratore,denominatore);
+    	commit;
+
+
+    -- indice  3 e 3.1 anno1 
+
+    i3_1 := 0;
+
+
+
+    -- insert indicatore 3 e 3.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','3','Anticipazioni dell''Istituto tesoriere');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	,TOT_MISSIONI1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','3.1','Utilizzo medio Anticipazioni di tesoreria',
+    	'Sommatoria degli utilizzi giornalieri delle anticipazioni nell''esercizio / (365 x max previsto dalla norma)'
+    	,i3_1);
+    	commit;
+
+
+ -- indice 3.2 
+    i3_2 := 0;
+
+  -- insert indicatore 3.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	,TOT_MISSIONI1,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','3.2','Anticipazioni chiuse solo contabilmente',
+    	'Anticipazione di tesoreria all''inizio dell''esercizio successivo / max previsto dalla norma)'
+    	,i3_2,numeratore,denominatore);
+    	commit;
+
+-- indice 4.1 anno1
+  -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (NB_MACROAGGREGATO = '101' or NB_PIANO_CONTI_FINA = 'U.1.02.01.01.000');
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	from fin_t_consuntivo_excel
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1';
+
+
+	select nvl(sum(nvl(PREVISIONI_DEFINITIVE_COMPE,0)),0) into FCDE_corrente
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA = 'U.1.10.01.03.000';
+
+
+	numeratore  := (imp_num + fpv_spesa - fpv_entrata);
+    denominatore := (imp_den - FCDE_corrente + fpv_spesa - fpv_entrata);
+
+
+    if denominatore > 0
+    then
+    i4_1(1) := round(numeratore/denominatore*100,2);
+    end if;
+
+  -- indice 4.1 anno1 MIS13
+  -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (NB_MACROAGGREGATO = '101' or NB_PIANO_CONTI_FINA = 'U.1.02.01.01.000')
+	and NB_LIVELLO1 = '13';
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' 
+	and NB_LIVELLO1 = '13';
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' 
+	and NB_LIVELLO1 = '13';
+
+    numeratore2   := (imp_num + fpv_spesa - fpv_entrata);
+    denominatore2 := (imp_den - FCDE_corrente + fpv_spesa - fpv_entrata);
+
+
+    if denominatore2 > 0
+    then
+    i4_1(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 4.1 TOT,MIS13  DIFF
+    i4_1(3) := i4_1(1) - i4_1(2);
+
+
+    -- insert indicatore 4 e 4.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','4','Spese di personale');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','4.1','Incidenza della spesa di personale sulla spesa corrente',
+    	'Impegni (Macroaggregato 1.1 "Redditi di lavoro dipendente" + pdc 1.02.01.01.000 "IRAP" + FPV personale in uscita 1.1 – FPV personale in entrata concernente il Macroaggregato 1.1) / Impegni (Spesa corrente – FCDE corrente + FPV concernente il Macroaggregato 1.1 – FPV di entrata concernente il Macroaggregato 1.1)'
+    	,i4_1(1),i4_1(2),i4_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+    -- indice 4.2 
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(document_amount,0)),0) into imp_num
+	from fin_t_documenti
+	where doc_type like 'IMP%'
+    and segment8 = p_anno
+    and nvl(DELETION_STATUS_FLAG,'N') = 'N'
+	and attribute16 in ('U.1.01.01.01.004',
+	'U.1.01.01.01.008',
+	'U.1.01.01.01.003',
+	'U.1.01.01.01.007');
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' ;
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' ;
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and (NB_MACROAGGREGATO = '101' or NB_PIANO_CONTI_FINA like 'U.1.02.01.01%');
+
+    numeratore   := (imp_num + fpv_spesa - fpv_entrata);
+    denominatore := (imp_den + fpv_spesa - fpv_entrata); --07/12/2018 Gerry eliminato FCDE_corrente; solo sul 4.1
+
+
+    if denominatore > 0
+    then
+    i4_2(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+  -- indice 4.2 anno1 MIS13
+  -- ***** NUMERATORE *******
+   --07/12/2018 Gerry Deve andare sui documenti perchè il pcf è al V livello
+	where d.doc_type like 'IMP%'
+   select nvl(sum(nvl(document_amount,0)),0) into imp_num
+	from fin_t_documenti d,
+    fin_t_consuntivo_Excel e
+    and d.segment8 = p_anno
+    and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+	and d.attribute16 in ('U.1.01.01.01.004',
+	'U.1.01.01.01.008',
+	'U.1.01.01.01.003',
+	'U.1.01.01.01.007')
+    and e.anno_consuntivo = d.segment8
+	and e.UTENTE = p_utente
+    and e.tipo_capitolo||e.capitolo = d.segment2
+    and e.NB_LIVELLO1 = '13'
+    ;
+      /*select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA in ('U.1.01.01.01.004',
+	'U.1.01.01.01.008',
+	'U.1.01.01.01.003',
+	'U.1.01.01.01.007')
+	and NB_LIVELLO1 = '13';*/
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' 
+	and NB_LIVELLO1 = '13';
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' 
+	and NB_LIVELLO1 = '13';
+
+    numeratore2   := (imp_num + fpv_spesa - fpv_entrata);
+    denominatore2 := (imp_den + fpv_spesa - fpv_entrata); --07/12/2018 Gerry eliminato FCDE_corrente; solo sul 4.1
+
+
+    if denominatore2 > 0
+    then
+    i4_2(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 4.2 TOT,MIS13  DIFF
+    i4_2(3) := i4_2(1) - i4_2(2);
+
+
+    -- insert indicatore 4.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','4.2','Incidenza del salario accessorio ed incentivante rispetto al totale della spesa di personale',
+    	'Impegni (pdc 1.01.01.004 + 1.01.01.008 "indennità e altri compensi al personale a tempo indeterminato e determinato"+ pdc 1.01.01.003 + 1.01.01.007 "straordinario al personale a tempo indeterminato e determinato" + FPV in uscita concernente il Macroaggregato 1.1 – FPV di entrata concernente il Macroaggregato 1.1) / Impegni (Macroaggregato 1.1 "Redditi di lavoro dipendente" + pdc U.1.02.01.01.000 "IRAP" + FPV in uscita concernente il Macroaggregato 1.1 – FPV in entrata concernente il Macroaggregato 1.1)'
+    	,i4_2(1),i4_2(2),i4_2(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+    -- indice 4.3
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA in ('U.1.03.02.10.000',
+	'U.1.03.02.12.000',
+	'U.1.03.02.11.000');
+
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and (NB_MACROAGGREGATO = '101' OR NB_PIANO_CONTI_FINA = 'U.1.02.01.01.000');
+
+    select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' ;
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' ;
+
+    numeratore   := imp_num;
+    denominatore := (imp_den + fpv_spesa - fpv_entrata);
+
+
+    if denominatore > 0
+    then
+    i4_3(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+  -- indice 4.3 anno1 MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA in ('U.1.03.02.010.000',
+	'U.1.03.02.12.000',
+	'U.1.03.02.11.000')
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := (imp_den + fpv_spesa - fpv_entrata);
+
+
+    if denominatore2 > 0
+    then
+    i4_3(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 4.2 TOT,MIS13  DIFF
+    i4_3(3) := i4_3(1) - i4_3(2);
+
+
+    -- insert indicatore 4.3 
+    p_ord := p_ord + 1;
+
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','4.3','Incidenza spesa personale flessibile rispetto al totale della spesa di personale',
+    	'Impegni (pdc U.1.03.02.010.000 "Consulenze" + pdc U.1.03.02.12.000 "lavoro flessibile/LSU/Lavoro interinale" + pdc U.1.03.02.11.000 "Prestazioni professionali e specialistiche") /
+         Impegni (Macroaggregato 1.1 "Redditi di lavoro dipendente" + pdc U.1.02.01.01.000 "IRAP" + FPV in uscita concernente il Macroaggregato 1.1 – FPV in entrata concernente il Macroaggregato 1.1)'
+    	,i4_3(1),i4_3(2),i4_3(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+
+    -- indice 4.4
+     -- ***** NUMERATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_PIANO_CONTI_FINA = 'U.1.02.01.01.000';
+
+    select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' ;
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' ;
+
+
+     -- *** DENOMINATORE
+    --popolazione redisente
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+
+
+    numeratore   := (imp_num + fpv_spesa - fpv_entrata);
+    denominatore := popolazione_res;
+
+
+    if denominatore > 0
+    then
+    i4_4(1) := round((numeratore/denominatore),2);
+    end if;
+
+
+  -- indice 4.3 anno1 MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_PIANO_CONTI_FINA = 'U.1.02.01.01.000'
+	and NB_LIVELLO1 = '13';
+
+	 select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' 
+	and NB_LIVELLO1 = '13';
+
+	select nvl(sum(nvl(fpv_fonte,0)),0) into fpv_entrata
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '101' 
+	and NB_LIVELLO1 = '13';
+
+     -- *** DENOMINATORE
+    --popolazione redisente
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+    
+    numeratore2   := (imp_num + fpv_spesa - fpv_entrata);--C'era imp_den Gerry 14-09-2018
+    denominatore2 := popolazione_res;
+
+
+    if denominatore2 > 0
+    then
+    i4_4(2) := round((numeratore2/denominatore2),2);
+    end if;
+
+
+    -- indice 4.2 TOT,MIS13  DIFF
+    i4_4(3) := i4_4(1) - i4_4(2);
+
+
+    -- insert indicatore 4.4 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','4.4','Spesa di personale procapite (Indicatore di equilibrio dimensionale in valore assoluto)',
+    	'Impegni (Macroaggregato 1.1 "Redditi di lavoro dipendente" + pdc 1.02.01.01.000 "IRAP" + FPV personale in uscita 1.1 – FPV personale in entrata concernente il Macroaggregato 1.1) / popolazione residente al 1° gennaio 
+         (al 1° gennaio dell''esercizio di riferimento o, se non disponibile, al 1° gennaio dell''ultimo anno disponibile)'
+    	,i4_4(1),i4_4(2),i4_4(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+-- indice 5.1 anno1 TOT
+  -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA in ('U.1.03.02.15.000', 
+	'U.1.04.03.01.000',
+	'U.1.04.03.02.000');
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1';
+
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+
+    then
+    i5_1(1) := round(numeratore/denominatore*100,2);
+    end if;
+  -- indice 5.1 anno1 MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA in ('U.1.03.02.15.000', 
+	'U.1.04.03.01.000',
+	'U.1.04.03.02.000')
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i5_1(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 5.1 TOT,MIS13  DIFF
+    i5_1(3) := i5_1(1) - i5_1(2);
+
+
+    -- insert indicatore 5 e 5.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','5','Esternalizzazione dei servizi');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','5.1','Indicatore di esternalizzazione dei servizi',
+    	'Impegni (pdc U.1.03.02.15.000 "Contratti di servizio pubblico" + pdc U.1.04.03.01.000 "Trasferimenti correnti a imprese controllate" + pdc U.1.04.03.02.000 "Trasferimenti correnti a altre imprese partecipate") / totale spese impegnate al Titolo I'
+    	,i5_1(1),i5_1(2),i5_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+
+
+-- indice 6.1 anno1 TOT
+  -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '107';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	numeratore   := imp_num;
+    denominatore := acc_den;
+
+
+    if denominatore > 0
+    then
+    i6_1(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 6.1 anno1 MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '107'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := acc_den;
+
+
+    if denominatore2 > 0
+    then
+    i6_1(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 5.1 TOT,MIS13  DIFF
+    i6_1(3) := i6_1(1) - i6_1(2);
+
+
+    -- insert indicatore 6 e 6.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','6','Interessi passivi');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','6.1','Incidenza degli interessi passivi sulle entrate correnti',
+    	'Impegni Macroaggregato 1.7 "Interessi passivi" / Accertamenti primi tre titoli delle Entrate ("Entrate correnti")'
+    	,i6_1(1),i6_1(2),i6_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+	--indice 6.2 TOT
+    -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA = 'U.1.07.06.04.000';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '107';
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+  -- indice 6.2 anno1 MIS13
+    i6_2(1) := round((numeratore/denominatore*100),2);
+    end if;
+
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA = 'U.1.07.06.04.000'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := acc_den;
+
+
+    if denominatore2 > 0
+    then
+    i6_2(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 6.2 TOT,MIS13  DIFF
+    i6_2(3) := i6_2(1) - i6_2(2);
+
+
+    -- insert indicatore 6.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','6.2','Incidenza degli interessi passivi sulle anticipazioni sul totale della spesa per interessi passivi',
+    	'Impegni voce del pdc U.1.07.06.04.000 "Interessi passivi su anticipazioni di tesoreria" / Impegni Macroaggregato 1.7 "Interessi passivi"'
+    	,i6_2(1),i6_2(2),i6_2(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+    --indice 6.3 TOT
+      -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA = 'U.1.07.06.02.000';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '107';
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i6_3(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 6.3  MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_PIANO_CONTI_FINA = 'U.1.07.06.02.000'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i6_3(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 6.3 TOT,MIS13  DIFF
+    i6_3(3) := i6_3(1) - i6_3(2);
+
+
+    -- insert indicatore 6.3 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','6.3','Incidenza interessi di mora sul totale della spesa per interessi passivi',
+    	'Impegni voce del pdc U.1.07.06.02.000 "Interessi di mora" / Impegni Macroaggregato 1.7 "Interessi passivi"'
+    	,i6_3(1),i6_3(2),i6_3(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+
+   -- indice 7.1 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('202','203');
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO in  ('1','2');
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i7_1(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 7.1  MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('202','203')
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i7_1(2) := round((numeratore2/denominatore2)*100,2);
+    -- indice 7.1 TOT,MIS13  DIFF
+    end if;
+
+
+    i7_1(3) := i7_1(1) - i7_1(2);
+
+
+    -- insert indicatore 7 e 7.1 
+    p_ord := p_ord + 1;
+
+   insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7','Investimenti');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.1','Incidenza investimenti sul totale della spesa corrente e in conto capitale',
+    	'Impegni (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti") / totale Impegni Tit. I + II'
+    	,i7_1(1),i7_1(2),i7_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+
+ -- indice 7.2 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO  = '202';
+
+
+
+
+     -- *** DENOMINATORE
+    -- popolazione residente
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+
+	numeratore   := imp_num;
+    denominatore := popolazione_res;
+
+
+    if denominatore > 0
+    then
+    i7_2(1) := round((numeratore/denominatore),2); --07/12/2018 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+    -- indice 7.2 anno1 MIS13
+-- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '202'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := popolazione_res;
+
+
+    if denominatore2 > 0
+    then
+    i7_2(2) := round((numeratore2/denominatore2),2); --07/12/2018 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+    -- indice 7.2 TOT,MIS13  DIFF
+    i7_2(3) := i7_2(1) - i7_2(2);
+
+
+    -- insert indicatore 7.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.2','Investimenti diretti procapite (in valore assoluto)',
+    	'Impegni per Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" / popolazione residente al 1° gennaio'
+    	,i7_2(1),i7_2(2),i7_2(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 7.3  TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	and NB_MACROAGGREGATO  = '203';
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+
+
+
+
+     -- *** DENOMINATORE
+    -- popolazione residente
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+
+	numeratore   := imp_num;
+    denominatore := popolazione_res;
+
+
+    if denominatore > 0
+    then
+    i7_3(1) := round((numeratore/denominatore),2); --07/12/2018 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+    -- indice 7.3 anno1 MIS13
+-- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO = '203'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := popolazione_res;
+
+
+    if denominatore2 > 0
+    then
+    i7_3(2) := round((numeratore2/denominatore2),2); --07/12/2018 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+    -- indice 7.3 TOT,MIS13  DIFF
+    i7_3(3) := i7_3(1) - i7_3(2);
+
+
+    -- insert indicatore 7.3 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.3','Contributi agli investimenti procapite (in valore assoluto)',
+    	'Impegni per Macroaggregato 2.3 "Contributi agli investimenti" / popolazione residente al 1° gennaio'
+    	,i7_3(1),i7_3(2),i7_3(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 7.4  TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO  in ('202','203');
+
+
+
+
+     -- *** DENOMINATORE
+    -- popolazione residente
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+
+	numeratore   := imp_num;
+    denominatore := popolazione_res;
+
+
+    if denominatore > 0
+    then
+    i7_4(1) := round((numeratore/denominatore),2); --07/12/2018 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+    -- indice 7.4 anno1 MIS13
+-- ***** NUMERATORE *******
+   select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('202','203')
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := popolazione_res;
+
+
+    if denominatore2 > 0
+    then
+    i7_4(2) := round((numeratore2/denominatore2),2); --07/12/2018 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+    -- indice 7.4 TOT,MIS13  DIFF
+    i7_4(3) := i7_4(1) - i7_4(2);
+
+
+    -- insert indicatore 7.4
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.4','Investimenti complessivi procapite (in valore assoluto)',
+    	'Impegni per Macroaggregato 2.3 "Impegni per Macroaggregati 2.2 "Investimenti fissi lordi e acquisto di terreni" e 2.3 "Contributi agli investimenti" / popolazione residente al 1° gennaio'
+    	,i7_4(1),i7_4(2),i7_4(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 7.5  TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_E_1_2_3_def -- Gerry 07/12/2018 Passiamo dalle previsioni definitive ai documenti, come per gli enti.
+    from fin_t_consuntivo_excel
+    where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_U_1_2_3_def
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1';
+
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+
+
+     -- *** DENOMINATORE
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO  in ('202','203');
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  in ('202','203');
+
+	numeratore   := compe_E_1_2_3_def - compe_U_1_2_3_def;--31/10/2018 C'era il segno + Modifica Gerry 
+    denominatore := imp_den + fpv_spesa;
+
+
+    if denominatore > 0
+    then
+    i7_5(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+    -- indice 7.5 anno1 MIS13
+-- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_E_1_2_3_def -- Gerry 07/12/2018 Passiamo dalle previsioni definitive ai documenti, come per gli enti.
+    from fin_t_consuntivo_excel
+    where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3')
+	and nvl(SANITA_SN,'N') = 'S';
+
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_U_1_2_3_def
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1'
+	and nvl(SANITA_SN,'N') = 'S'
+	and NB_LIVELLO1 = '13';
+
+    numeratore2   := compe_E_1_2_3_def - compe_U_1_2_3_def;
+    denominatore2 := imp_den + fpv_spesa;
+
+
+    if denominatore2 > 0 and numeratore2 > 0 -- modifica Consuntivo 2016 numeratore negativo 14/09/2018
+    then
+    i7_5(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 7.4 TOT,MIS13  DIFF
+    i7_5(3) := i7_5(1) - i7_5(2);
+
+
+    -- insert indicatore 7.4
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.5','Quota investimenti complessivi finanziati dal risparmio corrente',
+    	'Margine corrente di competenza / [Impegni + relativi FPV (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti")]'
+    	,i7_5(1),i7_5(2),i7_5(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 7.6  TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_E_1_2_3_def -- Gerry 07/12/2018 Passiamo dalle previsioni definitive ai documenti, come per gli enti.
+    from fin_t_consuntivo_excel
+    where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) = '5';
+
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_U_1_2_3_def
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '3';
+
+
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO  in ('202','203');
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  in ('202','203');
+
+	numeratore   := compe_E_1_2_3_def - compe_U_1_2_3_def; --31/10/2018 C'era il segno + Modifica Gerry 
+    denominatore := imp_den + fpv_spesa;
+
+    if numeratore > 0 and denominatore > 0 --09/10/2019 Gerry su indicazioni di Luigi Pierro anche il numeratore deve essere positivo altrimenti mettiamo 0
+    then
+    i7_6(1) := round((numeratore/denominatore)*100,2);
+    else 
+    i7_6(1) := round(0,2);
+    end if;
+ 
+
+
+    -- indice 7.6 anno1 MIS13
+-- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_E_1_2_3_def -- Gerry 07/12/2018 Passiamo dalle previsioni definitive ai documenti, come per gli enti.
+    from fin_t_consuntivo_excel
+    where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) = '5'
+	and nvl(SANITA_SN,'N') = 'S';
+
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into compe_U_1_2_3_def
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '3'
+	and nvl(SANITA_SN,'N') = 'S'
+	and NB_LIVELLO1 = '13';
+
+ 
+    numeratore2   := compe_E_1_2_3_def - compe_U_1_2_3_def; --31/10/2018 C'era il segno + Modifica Gerry 
+    denominatore2 := imp_den + fpv_spesa;
+
+    if numeratore2 > 0 and denominatore2 > 0 --09/10/2019 Gerry su indicazioni di Luigi Pierro anche il numeratore deve essere positivo altrimenti mettiamo 0
+    then
+    i7_6(2) := round((numeratore2/denominatore2)*100,2);
+    else
+    i7_6(2) := round(0,2);
+    end if;
+ 
+
+    -- indice 7.4 TOT,MIS13  DIFF
+    i7_6(3) := i7_6(1) - i7_6(2);
+
+
+    -- insert indicatore 7.6
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.6','Quota investimenti complessivi finanziati dal saldo positivo delle partite finanziarie',
+    	'Saldo positivo delle partite finanziarie / [Impegni + relativi FPV (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti")]'
+    	,i7_6(1),i7_6(2),i7_6(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 7.7  TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO3,1,1) = '6'
+	and substr(NB_LIVELLO3,2,4) not in ('0202','0303');
+
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO  in ('202','203');
+
+	select nvl(sum(nvl(FPV,0)),0) into fpv_spesa
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+    and NB_MACROAGGREGATO  in ('202','203');
+
+	numeratore   := acc_num - accensione_pres_rineg;
+    denominatore := imp_den + fpv_spesa;
+
+
+    if denominatore > 0
+    then
+    i7_7(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+    -- indice 7.7 anno1 MIS13
+-- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO3,1,1) = '6'
+	and substr(NB_LIVELLO3,2,4) not in ('0202','0303')
+	and nvl(SANITA_SN,'N') = 'S';
+
+
+    numeratore2   := acc_num - accensione_pres_rineg;
+    denominatore2 := imp_den + fpv_spesa;
+
+
+    if denominatore2 > 0
+    then
+    i7_7(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 7.7 TOT,MIS13  DIFF
+    i7_7(3) := i7_7(1) - i7_7(2);
+
+
+    -- insert indicatore 7.7
+    	         ,TOT_MISSIONI1
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','7.7','Quota investimenti complessivi finanziati da debito',
+    	'Accertamenti (Titolo 6 "Accensione prestiti" - Categoria 6.02.02 "Anticipazioni" - Categoria 6.03.03 "Accensione prestiti a seguito di escussione di garanzie" - Accensioni di prestiti da rinegoziazioni) / [Impegni + relativi FPV (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti")]'
+    	,i7_7(1),i7_7(2),i7_7(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+
+-- indice 8 e 8.1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(residui_competenza,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_finali,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1';
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i8_1(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 8.1  MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(residui_competenza,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '1'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i8_1(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i8_1(3) := i8_1(1) - i8_1(2);
+
+
+    -- insert indicatore 8 e 8.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8','Analisi dei residui');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8.1','Incidenza nuovi residui passivi di parte corrente su stock residui passivi correnti',
+    	'Totale residui passivi titolo 1 di competenza dell''esercizio / Totale residui passivi titolo 1 al 31 dicembre'
+    	,i8_1(1),i8_1(2),i8_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+-- indice 8.2 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(residui_competenza,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '2';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_finali,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '2';
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i8_2(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 8.2  MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(residui_competenza,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '2'
+	and NB_LIVELLO1 = '13';
+
+    numeratore2   := imp_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i8_2(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i8_2(3) := i8_2(1) - i8_2(2);
+
+
+   -- insert indicatore 8.2
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8.2','Incidenza nuovi residui passivi in c/capitale su stock residui passivi in conto capitale al 31 dicembre',
+    	'Totale residui passivi titolo 2 di competenza dell''esercizio/ Totale residui titolo 2 al 31 dicembre'
+    	,i8_2(1),i8_2(2),i8_2(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 8.3 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(residui_competenza,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '3';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_finali,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '3';
+
+	numeratore   := imp_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i8_3(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 8.3  MIS13
+  -- ***** NUMERATORE *******
+   select nvl(sum(nvl(residui_competenza,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '3'
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := imp_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i8_3(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.3 TOT,MIS13  DIFF
+    i8_3(3) := i8_3(1) - i8_3(2);
+
+
+    -- insert indicatore 8.3 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8.3','Incidenza nuovi residui passivi per incremento attività finanziarie su stock residui passivi per incremento attività finanziarie al 31 dicembre',
+    	'Totale residui passivi titolo 3 di competenza dell''esercizio / Totale residui passivi titolo 3 al 31 dicembre'
+    	,i8_3(1),i8_3(2),i8_3(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 8.4 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(residui_competenza,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_finali,0)),0) into acc_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	numeratore   := acc_num;
+    denominatore := acc_den;
+
+
+    if denominatore > 0
+    then
+    i8_4(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+
+    -- insert indicatore 8.3 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8.4','Incidenza nuovi residui attivi di parte corrente su stock residui attivi di parte corrente',
+    	'Totale residui attivi titoli 1,2,3 di competenza dell''esercizio / Totale residui attivi titolo 1, 2, 3 al 31 dicembre'
+    	,i8_4(1),numeratore,denominatore);
+    	commit;
+
+-- indice 8.5 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(residui_competenza,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) = '4';
+
+	from fin_t_consuntivo_excel
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_finali,0)),0) into acc_den
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) = '4';
+
+	numeratore   := acc_num;
+    denominatore := acc_den;
+
+
+    if denominatore > 0
+    then
+    i8_5(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+
+    -- insert indicatore 8.3 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8.5','Incidenza nuovi residui attivi in c/capitale su stock residui attivi in c/capitale',
+    	'Totale residui attivi titolo 4 di competenza dell''esercizio / Totale residui attivi titolo 4 al 31 dicembre'
+    	,i8_5(1),numeratore,denominatore);
+    	commit;
+
+
+-- indice 8.6 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(residui_competenza,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) = '5';
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_finali,0)),0) into acc_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) = '5';
+
+	numeratore   := acc_num;
+    denominatore := acc_den;
+
+
+    if denominatore > 0
+    then
+    i8_6(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+
+    -- insert indicatore 8.6 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','8.6','Incidenza nuovi residui attivi per riduzione di attività finanziarie su stock residui attivi per riduzione di attività finanziarie',
+    	'Totale residui attivi titolo 5 di competenza dell''esercizio / Totale residui attivi titolo 5 al 31 dicembre'
+    	,i8_6(1),numeratore,denominatore);
+    	commit;
+
+-- indice 9 e 9.1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(riscossioni_pagamenti_compe,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('103','202');
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('103','202');
+
+	numeratore   := pag_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i9_1(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 9.1  MIS13
+  -- ***** NUMERATORE *******
+  select nvl(sum(nvl(riscossioni_pagamenti_compe,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('103','202')
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := pag_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i9_1(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i9_1(3) := i9_1(1) - i9_1(2);
+
+
+    -- insert indicatore 9 e 9.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','9','Smaltimento debiti non finanziari');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','9.1','Smaltimento debiti commerciali nati nell''esercizio',
+    	'Pagamenti di competenza (Macroaggregati 1.3 "Acquisto di beni e servizi" + 2.2 "Investimenti fissi lordi e acquisto di terreni") / Impegni di competenza (Macroaggregati 1.3 "Acquisto di beni e servizi" + 2.2 "Investimenti fissi lordi e acquisto di terreni")'
+    	,i9_1(1),i9_1(2),i9_1(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+     -- ***** NUMERATORE *******
+
+
+-- indice 9.2 TOT
+    select nvl(sum(nvl(riscossioni_pagamenti_res,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('103','202');
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_iniziali,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('103','202');
+
+	numeratore   := pag_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i9_2(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 9.2  MIS13
+  -- ***** NUMERATORE *******
+  select nvl(sum(nvl(riscossioni_pagamenti_res,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_MACROAGGREGATO in ('103','202')
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := pag_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i9_2(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i9_2(3) := i9_2(1) - i9_2(2);
+
+
+    -- insert indicatore 9.2 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','9.2','Smaltimento debiti commerciali nati negli esercizi precedenti',
+    	'Pagamenti c/residui (Macroaggregati 1.3 "Acquisto di beni e servizi" + 2.2 "Investimenti fissi lordi e acquisto di terreni") / stock residui al 1° gennaio (Macroaggregati 1.3 "Acquisto di beni e servizi" + 2.2 "Investimenti fissi lordi e acquisto di terreni")'
+    	,i9_2(1),i9_2(2),i9_2(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+
+-- indice 9.3 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(riscossioni_pagamenti_compe,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (substr(NB_PIANO_CONTI_FINA,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21') OR NB_MACROAGGREGATO in ('105','106'));
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (substr(NB_PIANO_CONTI_FINA,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21') OR NB_MACROAGGREGATO in ('105','106'));
+
+	numeratore   := pag_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i9_3(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 9.3  MIS13
+  -- ***** NUMERATORE *******
+  select nvl(sum(nvl(riscossioni_pagamenti_compe,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (substr(NB_PIANO_CONTI_FINA,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21') OR NB_MACROAGGREGATO in ('105','106'))
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := pag_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i9_3(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i9_3(3) := i9_3(1) - i9_3(2);
+
+
+    -- insert indicatore 9.3
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','9.3','Smaltimento debiti verso altre amministrazioni pubbliche nati nell''esercizio',
+
+    	'Pagamenti di competenza [Trasferimenti correnti a Amministrazioni Pubbliche (U.1.04.01.00.000) + Trasferimenti di tributi (U.1.05.00.00.000) + Fondi perequativi (U.1.06.00.00.000) + Contributi agli investimenti a Amministrazioni pubbliche (U.2.03.01.00.000) + Altri trasferimenti in conto capitale (U.2.04.01.00.000 + U.2.04.11.00.000 + U.2.04.16.00.000 + U.2.04.21.00.000)] / Impegni di competenza [Trasferimenti correnti a Amministrazioni Pubbliche (U.1.04.01.00.000) + Trasferimenti di tributi (U.1.05.00.00.000) + Fondi perequativi (U.1.06.00.00.000) + Contributi agli investimenti a Amministrazioni pubbliche (U.2.03.01.00.000) + Altri trasferimenti in conto capitale (U.2.04.01.00.000 + U.2.04.11.00.000 + U.2.04.16.00.000 + U.2.04.21.00.000)]'
+    	,i9_3(1),i9_3(2),i9_3(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+-- indice 9.4 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(riscossioni_pagamenti_res,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (substr(NB_PIANO_CONTI_FINA,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21') OR NB_MACROAGGREGATO in ('105','106'));
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(residui_iniziali,0)),0) into imp_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (substr(NB_PIANO_CONTI_FINA,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21') OR NB_MACROAGGREGATO in ('105','106'));
+
+	numeratore   := pag_num;
+    denominatore := imp_den;
+
+
+    if denominatore > 0
+    then
+    i9_4(1) := round((numeratore/denominatore)*100,2);
+    end if;
+
+  -- indice 9.4  MIS13
+  -- ***** NUMERATORE *******
+  select nvl(sum(nvl(riscossioni_pagamenti_res,0)),0) into pag_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (substr(NB_PIANO_CONTI_FINA,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21') OR NB_MACROAGGREGATO in ('105','106'))
+	and NB_LIVELLO1 = '13';
+
+
+    numeratore2   := pag_num;
+    denominatore2 := imp_den;
+
+
+    if denominatore2 > 0
+    then
+    i9_4(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i9_4(3) := i9_4(1) - i9_4(2);
+
+
+    -- insert indicatore 9.4
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','9.4','Smaltimento debiti verso altre amministrazioni pubbliche nati negli esercizi precedenti',
+    	'Pagamenti in c/residui [Trasferimenti correnti a Amministrazioni Pubbliche (U.1.04.01.00.000) + Trasferimenti di tributi (U.1.05.00.00.000) + Fondi perequativi (U.1.06.00.00.000) + Contributi agli investimenti a Amministrazioni pubbliche (U.2.03.01.00.000) + Altri trasferimenti in conto capitale (U.2.04.01.00.000 + U.2.04.11.00.000 + U.2.04.16.00.000 + U.2.04.21.00.000)] / stock residui al 1° gennaio [Trasferimenti correnti a Amministrazioni Pubbliche (U.1.04.01.00.000) + Trasferimenti di tributi (U.1.05.00.00.000) + Fondi perequativi (U.1.06.00.00.000) + Contributi agli investimenti a Amministrazioni pubbliche (U.2.03.01.00.000) + Altri trasferimenti in conto capitale (U.2.04.01.00.000 + U.2.04.11.00.000 + U.2.04.16.00.000 + U.2.04.21.00.000)]'
+    	,i9_4(1),i9_4(2),i9_4(3),numeratore,denominatore,numeratore2,denominatore2);
+    	commit;
+
+-- indice 9.5 TOT
+     -- ***** NUMERATORE ******* Inserimento Rendiconto 2016 Gerry 14-09-2018
+    select sum(valore) into i9_5(1)
+    from fin_t_tempi_pagamenti
+    where anno = p_anno
+    and nvl(finale,'N') = 'S'
+    and nvl(miss13,'N')= 'T';
+   
+
+	-- ***** DENOMINATORE *******
+
+	/*numeratore   := 0; -- giorni pagamento
+    denominatore := 0; -- ammontare pagamenti
+
+
+    if denominatore > 0
+    then
+    i9_5(1) := round((numeratore/denominatore)*100,2);
+    end if;*/
+
+  -- indice 9.4  MIS13
+  -- ***** NUMERATORE *******
+
+
+    numeratore2   := 0; -- giorni pagamento solo missione 13
+    denominatore2 := 0; -- ammontare pagamenti missione 13
+
+
+    if denominatore2 > 0
+    then
+    i9_5(2) := round((numeratore2/denominatore2)*100,2);
+    end if;
+
+
+    -- indice 8.1 TOT,MIS13  DIFF
+    i9_5(3) := i9_5(1) - i9_5(2);
+
+
+    -- insert indicatore 9.5
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,MISSIONE13_1
+				,NETTO_MISSIONI1,NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+    	values
+    	commit;
+    	(p_anno,p_utente,p_ord,'R','S','9.5','Indicatore annuale di tempestività dei pagamenti',
+    	'Giorni effettivi intercorrenti tra la data di scadenza della fattura o richiesta equivalente di pagamento e la data di pagamento ai fornitori moltiplicata per l’importo dovuto, rapportata alla somma degli importi pagati nel periodo di riferimento'
+    	,i9_5(1),i9_5(2),i9_5(3),numeratore,denominatore,numeratore2,denominatore2);
+
+
+-- indice 10 e 10.1 TOT
+   Genera_Economica.piacee_importi(p_anno-1,99999);
+
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(importo,0)),0) into imp_chius_antic
+	from fnd_reports_importi_man
+	where valore_parametro_anno = p_anno
+	and nome_campo_report = 'IMP_CHIUS_ANTICIP_PRESTITI';
+
+
+	-- ***** DENOMINATORE *******
+	--**** DENOMINATORE *****
+	 select nvl(sum(nvl(importo,0)),0) into PD1
+	 from nb_piacee_importi
+	 where anno = p_anno-1
+	 and utente = 99999
+	 and codice_piacee = 'PD1';
+
+	numeratore   := imp_chius_antic;
+    denominatore := PD1;
+
+
+    if denominatore > 0
+    then
+    i10_1 := round((numeratore/denominatore)*100,2);
+    end if;
+
+    -- insert indicatore 10 e 10.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','10','Debiti finanziari');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','10.1','Incidenza estinzioni anticipate debiti finanziari',
+    	'Impegni per estinzioni anticipate / Debito da finanziamento al 31 dicembre anno precedente'
+    	,i10_1,numeratore,denominatore);
+    	commit;
+
+
+-- indice 10.2 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and NB_TITOLO = '4';
+
+
+	-- ***** DENOMINATORE *******
+	--PD1
+	numeratore   := imp_num - imp_chius_antic;
+    denominatore := PD1;
+
+
+    if denominatore > 0
+    then
+    i10_2 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+
+    -- insert indicatore 10.2 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','10.2','Incidenza estinzioni ordinarie debiti finanziari',
+    	'(Totale impegni Titolo 4 della spesa – Impegni estinzioni anticipate) / Debito da finanziamento al 31/12 anno precedente'
+    	,i10_2,numeratore,denominatore);
+    	commit;
+
+
+-- indice 10.3 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'U'
+	and (NB_MACROAGGREGATO = '107' or NB_TITOLO = '4')
+	and NB_PIANO_CONTI_FINA not in ('U.1.07.06.02.000','U.1.07.06.04.000');
+
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_num
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO3,1,5) in ('40206','40301','40304');
+
+
+	-- ***** DENOMINATORE *******
+	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+	from fin_t_consuntivo_excel
+	where anno_consuntivo = p_anno
+	and UTENTE = p_utente
+	and tipo_capitolo = 'E'
+	and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+
+	numeratore   := (imp_num - imp_chius_antic) - acc_num;
+    denominatore := acc_den;
+
+
+    if denominatore > 0
+    then
+    i10_3 := round((numeratore/denominatore)*100,2);
+    end if;
+
+
+
+    -- insert indicatore 10.3 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','10.3','Sostenibilità debiti finanziari',
+
+    	'[Impegni (Totale 1.7 "Interessi passivi" – "Interessi di mora" (U.1.07.06.02.000) – "Interessi per anticipazioni prestiti" (U.1.07.06.04.000) + Titolo 4 della spesa – estinzioni anticipate) – (Accertamenti Entrate categoria E.4.02.06.00.000 "Contributi agli investimenti direttamente destinati al rimborso di prestiti da amministrazioni pubbliche") + Trasferimenti in conto capitale per assunzione di debiti dell''amministrazione da parte di amministrazioni pubbliche  (E.4.03.01.00.000) + Trasferimenti in conto capitale da parte di amministrazioni pubbliche per cancellazione di debiti dell''amministrazione  (E.4.03.04.00.000)] / Accertamenti titoli 1, 2 e 3'
+    	,i10_3,numeratore,denominatore);
+    	commit;
+
+-- indice 10.4 TOT
+     -- ***** NUMERATORE *******
+     select nvl(sum(nvl(importo,0)),0) into PD1
+	 from nb_piacee_importi
+	 where anno = p_anno
+	 and utente = 99999
+	 and codice_piacee = 'PD1';
+
+
+	-- ***** DENOMINATORE *******
+	--popolazione_res
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+
+
+	numeratore   := PD1;
+    denominatore := popolazione_res;
+
+
+    if denominatore > 0
+    then
+    i10_4 := round((numeratore/denominatore),2); --08/10/2019 Gerry: Eliminata *100 perchè si tratta di un dato in valore assoluto sulla popolazione
+    end if;
+
+
+
+    -- insert indicatore 10.4 
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+    	         ,TOT_MISSIONI1
+    	         ,NUMERATORE,DENOMINATORE)
+    	values
+    	(p_anno,p_utente,p_ord,'R','S','10.4','Indebitamento procapite (in valore assoluto)',
+    	'Debito di finanziamento al 31/12 (2) / popolazione residente'
+    	,i10_4,numeratore,denominatore);
+    	commit;
+
+
+-- *********  Verifica segno parte disponibile AVANZO (lettera E) Risulato avanzo amm.ne) ************
+
+select nvl(totale,0) into imp_num
+	from fin_t_rendiconto_risamm
+	where anno = p_anno
+	and utente = p_utente
+	and tag_bdap_totale = 'RISAMM_ParteDisponibile';
+
+if imp_num >= 0
+ then
+
+	-- indice 11 e 11.1 TOT
+
+	     -- ***** NUMERATORE *******
+	    -- RISAMM_ParteDisponibile
+
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		select nvl(totale,0) into imp_den
+		from fin_t_rendiconto_risamm
+		where anno = p_anno
+		and utente = p_utente
+		and tag_bdap_totale = 'RISAMM_RisultatoAmministrazione31Dic';
+
+        
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i11_1 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 11 e 11.1 
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11','Composizione dell''avanzo di amministrazione');
+	    	commit;
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.1','Incidenza quota libera di parte corrente nell''avanzo',
+	    	'Quota libera di parte corrente dell''avanzo/Avanzo di amministrazione'
+	    	,i11_1,numeratore,denominatore);
+	    	commit;
+
+
+	-- indice 11.2 TOT
+
+	     -- ***** NUMERATORE *******
+	    select nvl(totale,0) into imp_num
+		from fin_t_rendiconto_risamm
+		where anno = p_anno
+		and utente = p_utente
+		and tag_bdap_totale = 'RISAMM_ParteDestinataInvestimentiTotale';
+        
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		--RISAMM_ParteDisponibile
+
+        
+
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i11_2 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 11.2
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.2','Incidenza quota libera in c/capitale nell''avanzo',
+	    	'Quota libera in conto capitale dell''avanzo/Avanzo di amministrazione'
+	    	,i11_2,numeratore,denominatore);
+	    	commit;
+
+
+	-- indice 11.3 TOT
+
+	     -- ***** NUMERATORE *******
+	    select nvl(totale,0) into imp_num
+		and tag_bdap_totale = 'RISAMM_ParteAccantonataTotale';
+		from fin_t_rendiconto_risamm
+		where anno = p_anno
+		and utente = p_utente
+
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		-- RISAMM_ParteDisponibile
+
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i11_3 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 11.3
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.3','Incidenza quota accantonata nell''avanzo',
+	    	'Quota accantonata dell''avanzo/Avanzo di amministrazione'
+	    	,i11_3,numeratore,denominatore);
+	    	commit;
+
+
+	-- indice 11.4 TOT
+
+	     -- ***** NUMERATORE *******
+	    select nvl(totale,0) into imp_num
+		from fin_t_rendiconto_risamm
+		where anno = p_anno
+		and utente = p_utente
+		and tag_bdap_totale = 'RISAMM_ParteVincolataTotale';
+
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		--RISAMM_ParteDisponibile;
+
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i11_4 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 11.4
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.4','Incidenza quota vincolata nell''avanzo',
+	    	'Quota vincolata dell''avanzo/Avanzo di amministrazione'
+	    	,i11_4,numeratore,denominatore);
+	    	commit;
+ else
+       -- 08/10/2019 Modifica Gerry inserimento righe con valori nulli per report
+       -- insert indicatore 11 e 11.1
+       p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11','Composizione dell''avanzo di amministrazione');
+	    	commit;
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.1','Incidenza quota libera di parte corrente nell''avanzo',
+	    	'Quota libera di parte corrente dell''avanzo/Avanzo di amministrazione'
+	    	,0,0,0);
+	    	commit;
+       -- insert indicatore 11.2
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.2','Incidenza quota libera in c/capitale nell''avanzo',
+	    	'Quota libera in conto capitale dell''avanzo/Avanzo di amministrazione'
+	    	,0,0,0);
+	    	commit;
+       
+        -- insert indicatore 11.3
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.3','Incidenza quota accantonata nell''avanzo',
+	    	'Quota accantonata dell''avanzo/Avanzo di amministrazione'
+	    	,0,0,0);
+	    	commit;
+        
+        -- insert indicatore 11.4
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','11.4','Incidenza quota vincolata nell''avanzo',
+	    	'Quota vincolata dell''avanzo/Avanzo di amministrazione'
+	    	,0,0,0);
+	    	commit;
+ 
+end if;
+
+	-- indice 12 e 12.1 TOT
+
+	     -- ***** NUMERATORE *******
+	    
+       
+       
+       /* select nvl(sum(nvl(c.previsioni_definitive_compe,0)),0) into imp_num
+		from fin_t_consuntivo_excel c
+		,fin_t_dati_generali d
+		where c.anno_consuntivo = p_anno
+		and c.utente = p_utente
+		and c.tipo_capitolo = 'U'
+		and c.capitolo = d.cap_disavanzo_amm1
+		and d.anno_finanziario = c.anno_consuntivo-1;
+
+		where c.anno_consuntivo = p_anno
+		select nvl(sum(nvl(c.previsioni_definitive_compe,0)),0) into acc_num
+		from fin_t_consuntivo_excel c
+		,fin_t_dati_generali d
+		and c.utente = p_utente
+		and c.tipo_capitolo = 'U'
+		and c.capitolo = d.cap_disavanzo_amm2--08/10/2019 cap_disavanzo_amm2
+		and d.anno_finanziario = c.anno_consuntivo;*/
+        
+        --08/10/2019 Modifica Gerry
+        select abs(nvl(totale,0)) into imp_num
+	    from fin_t_rendiconto_risamm
+	    where anno = p_anno-1
+	    and utente = 'CONS'||anno
+	    and tag_bdap_totale = 'RISAMM_ParteDisponibile';
+       
+       
+        select abs(nvl(totale,0)) into acc_num
+	    from fin_t_rendiconto_risamm
+	    where anno = p_anno
+	    and utente = p_utente
+	    and tag_bdap_totale = 'RISAMM_ParteDisponibile';
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		/*select nvl(sum(nvl(c.previsioni_definitive_compe,0)),0) into imp_den
+		from fin_t_consuntivo_excel c
+		,fin_t_dati_generali d
+		where c.anno_consuntivo = p_anno
+		and c.utente = p_utente
+		and c.tipo_capitolo = 'U'
+		and c.capitolo = d.cap_disavanzo_amm1
+		and d.anno_finanziario = c.anno_consuntivo-1;*/
+       
+        --08/10/2019 Modifica Gerry
+        select abs(nvl(totale,0)) into imp_den
+	    from fin_t_rendiconto_risamm
+	    where anno = p_anno-1
+	    and utente = 'CONS'||anno
+	    and tag_bdap_totale = 'RISAMM_ParteDisponibile';
+
+
+		numeratore   := imp_num - acc_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i12_1 := round((numeratore/denominatore)*100,2);
+	    i12_2 := round((-numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 12 e 12.1 
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','12','Disavanzo di amministrazione');
+	    	commit;
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','12.1','Quota disavanzo ripianato nell''esercizio',
+	    	'Quota libera di parte corrente dell''avanzo/Avanzo di amministrazione'
+	    	,i12_1,numeratore,denominatore);
+	   	commit;
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','12.2','Incremento del disavanzo rispetto all''esercizio precedente',
+	    	'Disavanzo di amministrazione esercizio in corso – Disavanzo di amministrazione esercizio precedente / Totale Disavanzo esercizio precedente'
+	    	,i12_2,numeratore,denominatore);
+	   	commit;
+
+-- indice 12.3 TOT
+
+  -- ***** NUMERATORE *******
+	    /*select nvl(sum(nvl(c.previsioni_definitive_compe,0)),0) into imp_num
+		from fin_t_consuntivo_excel c
+		,fin_t_dati_generali d
+		where c.anno_consuntivo = p_anno
+		and c.utente = p_utente
+		and c.tipo_capitolo = 'U'
+		and c.capitolo = d.cap_disavanzo_amm2--08/10/2019 cap_disavanzo_amm2
+		and d.anno_finanziario = c.anno_consuntivo;*/
+        --08/10/2019 Modifica Gerry
+        select abs(nvl(totale,0)) into imp_num
+	    from fin_t_rendiconto_risamm
+	    where anno = p_anno
+	    and utente = p_utente
+	    and tag_bdap_totale = 'RISAMM_ParteDisponibile';
+
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		select nvl(sum(nvl(importo,0)),0) into PAT
+		 from nb_piacee_importi
+		 where anno = p_anno
+		 and utente = 99999
+		 and codice_piacee = 'PAT';
+
+
+		numeratore   := imp_num;
+	    denominatore := PAT;
+
+
+	    if denominatore > 0
+	    then
+	    i12_3 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 12.3 
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','12.3','Sostenibilità patrimoniale del disavanzo',
+	    	'Totale disavanzo di amministrazione / Patrimonio netto'
+	    	,i12_3,numeratore,denominatore);
+	   	commit;
+
+-- indice 12.4 TOT
+
+  -- ***** NUMERATORE *******
+	    select nvl(sum(nvl(c.previsioni_definitive_compe,0)),0) into imp_num
+		from fin_t_consuntivo_excel c
+		,fin_t_dati_generali d
+		where c.anno_consuntivo = p_anno
+		and c.utente = p_utente
+
+		and c.tipo_capitolo = 'U'
+		and c.capitolo = d.cap_disavanzo_amm2--08/10/2019 cap_disavanzo_amm2
+		and d.anno_finanziario = c.anno_consuntivo;
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and UTENTE = p_utente
+		and tipo_capitolo = 'E'
+	    and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+
+		numeratore   := imp_num;
+	    denominatore := acc_den;
+
+
+	    if denominatore > 0
+	    then
+	    i12_4 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 12.3 
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','12.4','Sostenibilità disavanzo effettivamente a carico dell''esercizio',
+	    	'Disavanzo iscritto in spesa del conto del bilancio / Accertamenti dei titoli 1, 2 e 3 delle entrate'
+	    	,i12_4,numeratore,denominatore);
+	   	commit;
+
+-- indice 12.5 TOT
+
+  -- ***** NUMERATORE *******
+	    imp_num := 0;
+
+
+		-- ***** DENOMINATORE *******
+		--**** DENOMINATORE *****
+		--RISAMM_ParteDisponibile
+
+
+		numeratore   := imp_num;
+	    denominatore := RISAMM_ParteDisponibile;
+
+
+	    if denominatore &lt;> 0
+	    then
+	    i12_5 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 12.5 
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','12.5','Quota disavanzo derivante da debito autorizzato e non contratto (solo per le Regioni)',
+	    	'Disavanzo derivante da debito autorizzato e non contratto/Disavanzo di amministrazione di cui alla lettera E dell''allegato al rendiconto riguardante il risultato di amministrazione presunto'
+	    	,i12_5,numeratore,denominatore);
+	   	commit;
+
+-- indice 13 e 13.1 TOT
+
+	     -- ***** NUMERATORE *******
+	     -- al momento non sono rilevabili debiti fuori bilancio
+	    imp_num := 0;
+
+
+		-- ***** DENOMINATORE *******
+		select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and UTENTE = p_utente
+		and tipo_capitolo = 'U'
+		and NB_TITOLO in ('1','2');
+
+
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i13_1(1) := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 13 e 13.1
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','13','Debiti fuori bilancio');
+	    	commit;
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1,MISSIONE13_1,NETTO_MISSIONI1,
+	    	         NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','13.1','Debiti riconosciuti e finanziati',
+	    	'Importo Debiti riconosciuti e  finanziati / Totale impegni titolo I e titolo II'
+	    	,i13_1(1),i13_1(1),i13_1(1),numeratore,denominatore,numeratore,denominatore);
+	   	commit;
+
+ -- indice 13.2 TOT
+
+	     -- ***** NUMERATORE *******
+	     -- al momento non sono rilevabili debiti fuori bilancio
+	    imp_num := 0;
+
+	    -- ***** DENOMINATORE *******
+	   	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and UTENTE = p_utente
+		and tipo_capitolo = 'E'
+	    and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	    numeratore   := imp_num;
+	    denominatore := acc_den;
+
+
+	    if denominatore > 0
+	    then
+	    i13_2(1) := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 13.2
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1,MISSIONE13_1,NETTO_MISSIONI1,
+	    	'Disavanzo di amministrazione esercizio in corso – Disavanzo di amministrazione esercizio precedente / Totale Disavanzo esercizio precedente'
+	    	         NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','13.2','Debiti in corso di riconoscimento',
+	    	,i13_2(1),i13_2(1),i13_2(1),numeratore,denominatore,numeratore,denominatore);
+	   	commit;
+
+-- indice 13.3 TOT
+
+	     -- ***** NUMERATORE *******
+	     -- al momento non sono rilevabili debiti fuori bilancio
+	    imp_num := 0;
+
+	    -- ***** DENOMINATORE *******
+	   	select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and UTENTE = p_utente
+		and tipo_capitolo = 'E'
+	    and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+	    numeratore   := imp_num;
+	    denominatore := acc_den;
+
+
+	    if denominatore > 0
+	    then
+	    i13_3(1) := round((numeratore/denominatore)*100,2);
+	    end if;
+
+	    -- insert indicatore 13.2
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1,MISSIONE13_1,NETTO_MISSIONI1,
+	    	         NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','13.3','Debiti riconosciuti e in corso di finanziamento',
+	    	'Importo Debiti fuori bilancio riconosciuti e in corso di finanziamento/Totale accertamento entrate dei titoli 1, 2 e 3'
+	    	,i13_3(1),i13_3(1),i13_3(1),numeratore,denominatore,numeratore,denominatore);
+	   	commit;
+
+-- indice 14 e 14.1 TOT
+
+	     -- ***** NUMERATORE *******
+	     -- al momento non sono rilevabili debiti fuori bilancio
+         -- 07/12/2018 Gerry per adattarla alla fin_t_rendiconto_fpv
+	    select nvl(sum(nvl(col_a,0))-sum(nvl(col_c,0)),0) into imp_num
+		from fin_t_rendiconto_fpv
+		where anno = p_anno
+		and utente = p_utente;
+
+
+
+		-- ***** DENOMINATORE *******
+
+        select nvl(sum(nvl(col_a,0)),0) into imp_den
+		from fin_t_rendiconto_fpv
+		where anno = p_anno
+		and utente = p_utente;
+
+
+
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i14_1(1) := round((numeratore/denominatore)*100,2);
+	    end if;
+
+
+	    -- Missione 13
+	     -- ***** NUMERATORE *******
+	     -- al momento non sono rilevabili debiti fuori bilancio
+	     -- 07/12/2018 Gerry per adattarla alla fin_t_rendiconto_fpv
+	    select nvl(sum(nvl(col_a,0))-sum(nvl(col_c,0)),0) into imp_num
+		from fin_t_rendiconto_fpv
+		where anno = p_anno
+		and utente = p_utente
+        and missione='13';
+        
+        /*select nvl(sum(nvl(num02,0)+nvl(num03,0)),0) into imp_num
+		from tmp_tabulati 
+		where car02 = p_anno
+		and utente = p_utente
+		and car01 = 'Allegato b) al Rendiconto  - Fondo Pluriennale Vincolato'
+		and car03 = '13';*/
+
+		numeratore2   := imp_num;
+	    denominatore2 := imp_den;
+
+
+	    if denominatore2 > 0
+	    then
+	    i14_1(2) := round((numeratore2/denominatore2)*100,2);
+	    end if;
+
+	    i14_1(3) := i14_1(1) - i14_1(2);
+
+	    -- insert indicatore 14 e 14.1
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    p_ord := p_ord + 1;
+	    	(p_anno,p_utente,p_ord,'R','S','14','Fondo pluriennale vincolato');
+	    	commit;
+
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1,MISSIONE13_1,NETTO_MISSIONI1,
+	    	         NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','14.1','Utilizzo del FPV',
+	    	'(Fondo pluriennale vincolato corrente e capitale iscritto in entrata del bilancio - Quota del fondo pluriennale vincolato corrente e capitale non utilizzata nel corso dell''esercizio e rinviata agli esercizi successivi) / Fondo pluriennale vincolato corrente e capitale iscritto in entrata nel bilancio'
+	    	,i14_1(1),i14_1(2), i14_1(3),numeratore,denominatore,numeratore2,denominatore2);
+	   	commit;
+
+-- indice 15 e 15.1 TOT
+
+	     -- ***** NUMERATORE *******
+	     -- al momento non sono rilevabili debiti fuori bilancio
+	    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_num
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and utente = p_utente
+		and tipo_capitolo = 'E'
+		and substr(NB_LIVELLO1,1,1) = '9'
+		and substr(NB_PIANO_CONTI_FINA,1,9) &lt;> 'E.9.01.04'
+		and substr(NB_PIANO_CONTI_FINA,1,12) not in ('E.9.01.99.04','E.9.01.99.05');
+
+
+		-- ***** DENOMINATORE *******
+		select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into acc_den
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and utente = p_utente
+		and tipo_capitolo = 'E'
+		and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+
+
+		numeratore   := imp_num;
+	    denominatore := acc_den;
+
+
+	    if denominatore > 0
+	    then
+	    i15_1 := round((numeratore/denominatore)*100,2);
+	    end if;
+
+
+	    -- insert indicatore 15 e 15.1
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','15','Partite di giro e conto terzi');
+	    	commit;
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1
+	    	         ,NUMERATORE,DENOMINATORE)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','15.1','Incidenza partite di giro e conto terzi in entrata',
+	    	'Totale accertamenti Entrate per conto terzi e partite di giro / Totale accertamenti primi tre titoli delle entrate'
+	    	,i15_1,numeratore,denominatore);
+	   	commit;
+
+-- indice 15.2 TOT
+
+	     -- ***** NUMERATORE *******
+
+	    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and utente = p_utente
+		and tipo_capitolo = 'U'
+		and nb_titolo = 7
+		and substr(NB_PIANO_CONTI_FINA,1,9) &lt;> 'U.7.01.04'
+		and substr(NB_PIANO_CONTI_FINA,1,12) not in ('U.7.01.99.04','U.7.01.99.05','U.7.01.99.02');
+
+
+		-- ***** DENOMINATORE *******
+		select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_den
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and utente = p_utente
+		and tipo_capitolo = 'U'
+		and nb_titolo = 1;
+
+		numeratore   := imp_num;
+	    denominatore := imp_den;
+
+
+	    if denominatore > 0
+	    then
+	    i15_2(1) := round((numeratore/denominatore)*100,2);
+	    end if;
+
+-- Missione 13
+		 -- ***** NUMERATORE *******
+
+	    select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) into imp_num
+		from fin_t_consuntivo_excel
+		where anno_consuntivo = p_anno
+		and utente = p_utente
+		and tipo_capitolo = 'U'
+		and nb_titolo = 7
+		and substr(NB_PIANO_CONTI_FINA,1,9) &lt;> 'U.7.01.04'
+		and substr(NB_PIANO_CONTI_FINA,1,12) not in ('U.7.01.99.04','U.7.01.99.05','U.7.01.99.02')
+		and NB_LIVELLO1 = '13';
+
+
+		numeratore2   := imp_num;
+	    denominatore2 := denominatore;
+
+
+	    if denominatore2 > 0
+	    then
+	    i15_2(2) := round((numeratore2/denominatore2)*100,2);
+	    end if;
+
+	    i15_2(3) := i15_2(1) - i15_2(2);
+
+	    -- insert indicatore 15.2
+
+	    p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE
+	    	         ,TOT_MISSIONI1,MISSIONE13_1,NETTO_MISSIONI1,
+	    	         NUMERATORE,DENOMINATORE,NUMERATORE2,DENOMINATORE2)
+	    	values
+	    	(p_anno,p_utente,p_ord,'R','S','15.2','Incidenza partite di giro e conto terzi in uscita',
+	    	'Totale impegni Uscite per conto terzi e partite di giro / Totale impegni del titolo I della spesa'
+	    	,i15_2(1),i15_2(2), i15_2(3),numeratore,denominatore,numeratore2,denominatore2);
+	   	commit;
+        
+        
+  -- ********** UPDATE per inserimento TAG *************
+
+ 	update fin_t_indicatori_bilancio b set (b.TAG_SINT_TOT,b.TAG_SINT_MIS13,b.TAG_SINT_NO_MIS13,b.UNITREF) = 
+ 		(select a.TAG_SINT_TOT,a.TAG_SINT_MIS13,a.TAG_SINT_NO_MIS13,a.UNITREF
+ 		from fin_t_indicatori_bilancio a
+ 		where a.anno = 2000
+ 		and a.utente = 'CONS2000'
+ 		and a.CODICE_INDICATORE1 = b.CODICE_INDICATORE1)
+ 	where b.anno = p_anno
+ 	and b.utente = p_utente
+ 	and b.TIPO_BILANCIO = 'R'
+    and b.TIPO_INDICATORE = 'S';
+
+    commit;
+end;</pre>	</td></tr>
+</table></div>

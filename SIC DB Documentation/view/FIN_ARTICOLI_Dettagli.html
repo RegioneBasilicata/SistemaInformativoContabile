@@ -1,0 +1,178 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_ARTICOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_ARTICOLI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_ARTICOLI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_ARTICOLI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_ARTICOLI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_ARTICOLI_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_ARTICOLI</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>4518</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select
+ z.cap_anno															ANNO,
+ substr(z.cap_codice,1,1) 											EU,
+ substr(z.cap_s1,2,1) 												TITOLO,
+ substr(z.cap_s1,3,4) 												CATEGORIA,
+ substr(z.cap_s1,3,4)||'.'||substr(z.cap_s1,8,2) 					CAPITOLO,
+ substr(z.cap_codice,2,5) 											ARTICOLO,
+ z.cap_des 															DESCRIZIONE,
+ 1																	CODICE_NUM,
+ nvl(z.cap_cod_mecc_u,z.CAP_M_GENFUNZ||z.CAP_M_TITFUNZ||z.CAP_M_CLAECO1E2||z.CAP_M_CLAECO3||z.CAP_M_CLAFUNZ1||z.CAP_M_CLAFUNZ2)														CODICE_MECCANOGRAFICO,
+ substr(z.cap_cod_mecc_u,1,6)										TITOLO_SETTORE_RUBRICA,
+ z.cap_cod_stat														CODICE_STATISTICO,
+ z.cap_prec															CODICE_PRECEDENTE,
+ z.cap_prec2															CODICE_PRECEDENTE2,
+ z.cap_prec3															CODICE_PRECEDENTE3,
+ z.cap_prec4															CODICE_PRECEDENTE4,
+ z.cap_prec5															CODICE_PRECEDENTE5,
+ decode(z.cap_mutuo,'Y','S','N')										FLAG_MUTUO,
+ decode(z.cap_spe_obbl,'Y','S','N')									FLAG_SPESA_OBBLIGATORIA,
+ decode(upper(nvl(cap_tipo_ava,'N')),'STATO-UE','1','REGIONE','2','RES PASS','3','NA','N',cap_tipo_ava) 				TIPO_VINCOLATO,
+ decode(z.cap_nat_spe,'CORRENTE','S','C_OPERATIVA','S','C_FUNZIONAMENTO','S','RIMB_INTERESSI','S','N') 						FLAG_SPESE_CORRENTI,
+ decode(z.cap_nat_spe,'C_CAPITALE','S','N')											FLAG_SPESE_INVESTIMENTI,
+ decode(z.cap_annua,'Y','S','N')													FLAG_SPESE_ANNUALITA,
+ decode(z.cap_nat_spe,'RIMB_PREST','S','N')											FLAG_SPESE_RIMBORSO_PRESTITI,
+ 'N'																FLAG_ASSEGNAZIONE_STATO_UE,
+ z.cap_dipart															DIPARTIMENTO,
+ nvl(z.cap_nat_spe,'NA')														NATURA_SPESA,
+ null																NATURA_ENTRATA,
+ nvl(z.cap_fonte,'NA')														FONTE_FINANZIAMENTO,
+ z.cap_legge															LEGGE_ISTITUTIVA,
+ z.cap_provv															PROVVEDIMENTO,
+ z.cap_conto															PIANO_DEI_CONTI,
+ z.cap_conto2															PIANO_DEI_CONTI2,
+ z.cap_conto3															PIANO_DEI_CONTI3,
+ z.cap_conto4															PIANO_DEI_CONTI4,
+ z.cap_conto5															PIANO_DEI_CONTI5,
+ decode(nvl(z.cap_var_assesta,'N'),'Y','S','N')						FLAG_ASSESTAMENTO,
+ z.cap_tab_dest														TABELLA,
+ z.cap_annoist														anno_istituzione,
+ decode(nvl(z.cap_enabled,'Y'),'Y','S','N')							abilitato,
+ null																modificato_nuovo,
+ null																flag_perenti,
+ null																anno_terminale_tabella
+from
+ bas_capitoli z
+where
+ substr(z.cap_codice,1,1) = 'U'
+UNION
+select
+ z.cap_anno		   	  												ANNO,
+ substr(z.cap_codice,1,1) 													EU,
+ substr(z.cap_s1,2,1)														TITOLO,
+ substr(z.cap_s1,3,2)														CATEGORIA,
+ substr(z.cap_s1,2,1)||'.'||substr(z.cap_s1,3,2)||'.'||substr(z.cap_s1,6,2)							CAPITOLO,
+ substr(z.cap_codice,2,5) 													ARTICOLO,
+ z.cap_des 															DESCRIZIONE,
+ --to_number(substr(z.cap_codice,2,5))												CODICE_NUM,
+ 1																CODICE_NUM,
+ z.cap_cod_mecc_e														CODICE_MECCANOGRAFICO,
+ null																TITOLO_SETTORE_RUBRICA,
+ z.cap_cod_stat															CODICE_STATISTICO,
+ z.cap_prec															CODICE_PRECEDENTE,
+ z.cap_prec2															CODICE_PRECEDENTE2,
+ z.cap_prec3															CODICE_PRECEDENTE3,
+ z.cap_prec4															CODICE_PRECEDENTE4,
+ z.cap_prec5															CODICE_PRECEDENTE5,
+ 'N'																FLAG_MUTUO,
+ 'N'																FLAG_SPESA_OBBLIGATORIA,
+ 'N'																TIPO_VINCOLATO,
+ 'N'																FLAG_SPESE_CORRENTI,
+ 'N'																FLAG_SPESE_INVESTIMENTI,
+ 'N'																FLAG_SPESE_ANNUALITA,
+ 'N'																FLAG_SPESE_RIMBORSO_PRESTITI,
+ decode(nvl(z.cap_nat_entr,'N'),'CORR_UE','S','CORR_STATO','S','CAP_UE','S','CAP_STATO','S','N')					FLAG_ASSEGNAZIONE_STATO_UE,
+ null																DIPARTIMENTO,
+ null																NATURA_SPESA,
+ z.cap_nat_entr															NATURA_ENTRATA,
+ null																FONTE_FINANZIAMENTO,
+ z.cap_legge															LEGGE_ISTITUTIVA,
+ z.cap_provv															PROVVEDIMENTO,
+ z.cap_conto															PIANO_DEI_CONTI,
+ z.cap_conto2														PIANO_DEI_CONTI2,
+ z.cap_conto3														PIANO_DEI_CONTI3,
+ z.cap_conto4														PIANO_DEI_CONTI4,
+ z.cap_conto5														PIANO_DEI_CONTI5,
+ decode(nvl(z.cap_var_assesta,'N'),'Y','S','N')						FLAG_ASSESTAMENTO,
+ null																TABELLA,
+ z.cap_annoist														anno_istituzione,
+ decode(nvl(z.cap_enabled,'Y'),'Y','S','N')							abilitato,
+ null																modificato_nuovo,
+ null																flag_perenti,
+ null																anno_terminale_tabella
+from
+ bas_capitoli z
+where
+ substr(z.cap_codice,1,1) = 'E'
+</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

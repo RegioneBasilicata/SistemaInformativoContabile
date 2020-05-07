@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_MANDATI_PATTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_MANDATI_PATTO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_MANDATI_PATTO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_MANDATI_PATTO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_MANDATI_PATTO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_MANDATI_PATTO_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_MANDATI_PATTO</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1293</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select data_stampa, sum(a) A,sum(b) B,sum(patto) PATTO from(select d.data_stampa,sum(decode(m.tipo_mandato,'V',m.importo_mandato,-m.importo_mandato)) A, 0 B, 0 Patto
+from fin_distinte_mand_testata d
+,fin_distinte_mand_dettaglio m
+,fin_t_capitoli_no_patto c
+where d.anno_finanziario >= 2008
+and d.ANNO_FINANZIARIO = m.ANNO_FINANZIARIO
+and d.NUMERO_DISTINTA = m.NUMERO_DISTINTA
+and m.CAPITOLO_SPESA = c.CAPITOLO
+and c.por = 'N'
+group by d.DATA_STAMPA
+union
+select d.data_stampa, 0 A,sum(decode(m.tipo_mandato,'V',m.importo_mandato,-m.importo_mandato)) B,0 Patto
+from fin_distinte_mand_testata d
+,fin_distinte_mand_dettaglio m
+,fin_t_capitoli_no_patto c
+where d.anno_finanziario >= 2008
+and d.ANNO_FINANZIARIO = m.ANNO_FINANZIARIO
+and d.NUMERO_DISTINTA = m.NUMERO_DISTINTA
+and m.CAPITOLO_SPESA = c.CAPITOLO
+and c.por = 'S'
+group by d.DATA_STAMPA
+union
+select d.data_stampa, 0 A,0 B,sum(decode(m.tipo_mandato,'V',m.importo_mandato,-m.importo_mandato)) Patto
+from fin_distinte_mand_testata d
+,fin_distinte_mand_dettaglio m
+where d.anno_finanziario >= 2008
+and d.ANNO_FINANZIARIO = m.ANNO_FINANZIARIO
+and d.NUMERO_DISTINTA = m.NUMERO_DISTINTA
+and m.CAPITOLO_SPESA not in (select c.CAPITOLO from fin_t_capitoli_no_patto c where c.ANNO= d.ANNO_FINANZIARIO)
+group by d.DATA_STAMPA)
+group by data_stampa</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

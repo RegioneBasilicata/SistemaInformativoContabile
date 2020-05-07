@@ -1,0 +1,191 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_ELISIONE</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_ELISIONE.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ELISIONE_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ANNO</td>
+<td>NUMBER(4,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLO</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RESIDUI_INIZIALI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PREVISIONI_DEFINITIVE_COMPE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PREVISIONI_DEFINITIVE_CASSA</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ACCERTAMENTI_IMPEGNI_COMPE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RISCOSSIONI_PAGAMENTI_COMPE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RISCOSSIONI_PAGAMENTI_RES</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RISCOSSIONI_PAGAMENTI_TOTALE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIFFERENZA_PREVCOMPE_ACCERT</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIFFERENZA_PREVCOMPE_IMPEGNI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VARIAZIONE_RESIDUI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RIMANENZE_RESIDUI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RESIDUI_COMPETENZA</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RESIDUI_FINALI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ECONOMIE_COMPETENZA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>Previsione def compe - Impegni - FPV</td>
+	</tr>
+	<tr>
+<td>FPV</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>(Imp plur anno +1 e anno + 2 con anno data atto = p_anno) + (Imp riaccertati ossia con anno_riaccertamento not  null)</td>
+	</tr>
+	<tr>
+<td>RIACCERTAMENTO_RESIDUI</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>eco e dis dell'anno</td>
+	</tr>
+	<tr>
+<td>ELIMINAZIONE_PERENZIONE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>perenzione dell'anno</td>
+	</tr>
+	<tr>
+<td>TOTALE_VARIAZIONI_RESIDUI</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>riaccertamento residui + elimazioni per perenzione</td>
+	</tr>
+</table></div>

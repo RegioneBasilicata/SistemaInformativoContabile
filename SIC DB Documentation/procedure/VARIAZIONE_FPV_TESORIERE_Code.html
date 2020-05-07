@@ -1,0 +1,538 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VARIAZIONE_FPV_TESORIERE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VARIAZIONE_FPV_TESORIERE.html">Details</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_FPV_TESORIERE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_FPV_TESORIERE_References.html">References</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_FPV_TESORIERE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="VARIAZIONE_FPV_TESORIERE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure variazione_fpv_tesoriere(p_anno in number, p_anno_stampa in number,p_id number,p_utente in varchar2) is
+
+totale_capitolo_finale number(15,2);
+p_ord number;
+anno number;
+anno_stampa number;
+max_num_prog number;--numero massimo riga
+min_num_prog number;--numero minimo riga
+max_num_mis number;--numero massimo riga
+min_num_mis number;--numero minimo riga 
+p_missione varchar2(10); -- valore missione nel loop
+p_programma varchar2(10);
+p_programma_desc varchar2(200);--valore programma nel loop
+trova_programma varchar2(10); --valore programma nel if
+trova_missione varchar2(10); --valore missione nel if
+
+
+compe_i number(15,2);
+var_piu number(15,2);
+var_meno number(15,2);
+compe_fin number(15,2);
+totale_titolo_iniz number(15,2);
+totale_titolo_var_pos number(15,2);
+totale_titolo_var_neg number(15,2);
+totale_titolo_fin number(15,2);
+
+
+totale_progr_iniz number(15,2);
+totale_progr_var_pos number(15,2);
+totale_progr_var_neg number(15,2);
+totale_progr_fin number(15,2);
+
+
+totale_mis_iniz number(15,2);
+totale_mis_var_pos number(15,2);
+totale_mis_var_neg number(15,2);
+totale_mis_fin number(15,2);
+
+
+cursor variazioni_fpv_0 is 
+select 
+a.nb_titolo Titolo
+,nvl(l1.codice,'0') missione
+,nvl(l2.codice,0) programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,nvl(sum(decode(d.doc_type,'B_COM_POS',d.document_amount,'B_COM_NEG',-d.document_amount)),0)+ 
+ nvl(sum(decode(d.doc_type,'V_PL1_POS',d.document_amount,'V_PL1_NEG',-d.document_amount)),0)+
+ nvl(sum(decode(d.doc_type,'V_PL2_POS',d.document_amount,'V_PL2_NEG',-d.document_amount)),0) Competenza_iniziale
+,nvl(sum(decode(d.doc_type,'V_COM_POS',nvl(d.document_Amount,0))),0) Variazione_Competenza_Positiva
+,nvl(sum(decode(d.doc_type,'V_COM_NEG',-nvl(d.document_Amount,0))),0) Variazione_Competenza_Negativa
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+fin_t_documenti d
+where a.anno=p_anno_stampa 
+and nvl(a.abilitato,'N') = 'S'
+and a.eu = 'U' 
+and nvl(a.nb_fpv,'N') = 'S'
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and d.segment2 = a.eu||a.codice
+and d.segment8 = a.anno
+and d.doc_type in ('B_COM_POS','B_COM_NEG','V_PL1_POS','V_PL1_NEG','V_PL2_POS','V_PL2_NEG','V_COM_POS','V_COM_NEG')
+group by
+a.nb_titolo
+,nvl(l1.codice,'0') 
+,nvl(l2.codice,0) 
+,l1.descrizione 
+,l2.descrizione 
+order by 2,3,1;
+
+cursor variazioni_fpv_1 is 
+select 
+a.nb_titolo Titolo
+,nvl(l1.codice,'0') missione
+,nvl(l2.codice,0) programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,nvl(sum(decode(d.doc_type,'B_PL1_POS',d.document_amount,'B_PL1_NEG',-d.document_amount)),0)+
+ nvl(sum(decode(d.doc_type,'B_PL2_POS',d.document_amount,'B_PL2_NEG',-d.document_amount)),0)+
+ nvl(sum(decode(d.doc_type,'V_PL2_POS',d.document_amount,'V_PL2_NEG',-d.document_amount)),0) Competenza_iniziale
+,nvl(sum(decode(d.doc_type,'V_PL1_POS',nvl(d.document_Amount,0))),0) Variazione_Competenza_Positiva
+,nvl(sum(decode(d.doc_type,'V_PL1_NEG',-nvl(d.document_Amount,0))),0) Variazione_Competenza_Negativa
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+fin_t_documenti d
+where a.anno=p_anno_stampa
+and nvl(a.abilitato,'N') = 'S'
+and a.eu = 'U' 
+and nvl(a.nb_fpv,'N') = 'S'
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and d.segment2 = a.eu||a.codice
+and d.segment8 = a.anno
+and d.doc_type in ('B_PL1_POS','B_PL1_NEG','B_PL2_POS','B_PL2_NEG','V_PL2_POS','V_PL2_NEG','V_PL1_POS','V_PL1_NEG')
+group by
+a.nb_titolo
+,nvl(l1.codice,'0') 
+,nvl(l2.codice,0) 
+,l1.descrizione 
+,l2.descrizione 
+order by 2,3,1;
+
+cursor variazioni_fpv_2 is 
+select 
+a.nb_titolo Titolo
+,nvl(l1.codice,'0') missione
+,nvl(l2.codice,0) programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,nvl(sum(decode(d.doc_type,'B_PL2_POS',d.document_amount,'B_PL2_NEG',-d.document_amount)),0)Competenza_iniziale
+,nvl(sum(decode(d.doc_type,'V_PL2_POS',nvl(d.document_Amount,0))),0) Variazione_Competenza_Positiva
+,nvl(sum(decode(d.doc_type,'V_PL2_NEG',-nvl(d.document_Amount,0))),0) Variazione_Competenza_Negativa
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+fin_t_documenti d
+where a.anno=p_anno_stampa
+and nvl(a.abilitato,'N') = 'S'
+and a.eu = 'U' 
+and nvl(a.nb_fpv,'N') = 'S'
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and d.segment2 = a.eu||a.codice
+and d.segment8 = a.anno
+and d.doc_type in ('B_PL2_POS','B_PL2_NEG','V_PL2_POS','V_PL2_NEG')
+group by
+a.nb_titolo
+,nvl(l1.codice,'0') 
+,nvl(l2.codice,0) 
+,l1.descrizione 
+,l2.descrizione 
+order by 2,3,1;
+
+cursor missioni is
+select 
+codice cod_mis
+,descrizione desc_mis
+from nb_livello1
+where anno=p_anno
+and eu='U'
+order by codice;
+
+cursor programmi is
+select
+codice cod_prog
+,descrizione desc_prog
+from nb_livello2
+where anno= p_anno
+and eu='U';
+
+begin
+
+delete tmp_tabulati2 where car01='VARIAZIONE FPV TESORIERE';
+p_ord:=1;
+anno := p_anno;
+anno_stampa := p_anno_stampa;
+
+if anno_stampa-anno=0
+
+then
+
+	for v in variazioni_fpv_0 loop
+
+	totale_capitolo_finale:=0;
+
+	totale_capitolo_finale:=totale_capitolo_finale + v.competenza_iniziale+v.variazione_competenza_positiva - v.variazione_competenza_negativa;
+	p_ord := p_ord+20;
+
+	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+	(p_utente
+	,p_ord
+	,'VARIAZIONE FPV TESORIERE'
+	,v.Titolo
+	,v.missione
+	,v.desc_missione
+	,v.programma
+	,v.desc_programma
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno
+	,v.Competenza_iniziale
+	,v.variazione_competenza_positiva
+	,v.variazione_competenza_negativa
+	,totale_capitolo_finale);
+	end loop;
+
+elsif anno_stampa-anno=1
+then
+
+for v in variazioni_fpv_1 loop
+
+	totale_capitolo_finale:=0;
+
+	totale_capitolo_finale:=totale_capitolo_finale + v.competenza_iniziale+v.variazione_competenza_positiva - v.variazione_competenza_negativa;
+	p_ord := p_ord+20;
+
+	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+	(p_utente
+	,p_ord
+	,'VARIAZIONE FPV TESORIERE'
+	,v.Titolo
+	,v.missione
+	,v.desc_missione
+	,v.programma
+	,v.desc_programma
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno
+	,v.Competenza_iniziale
+	,v.variazione_competenza_positiva
+	,v.variazione_competenza_negativa
+	,totale_capitolo_finale);
+	end loop;
+elsif anno_stampa-anno=2
+then
+	for v in variazioni_fpv_2 loop
+
+	totale_capitolo_finale:=0;
+
+	totale_capitolo_finale:=totale_capitolo_finale + v.competenza_iniziale+v.variazione_competenza_positiva - v.variazione_competenza_negativa;
+	p_ord := p_ord+20;
+
+	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+	(p_utente
+	,p_ord
+	,'VARIAZIONE FPV TESORIERE'
+	,v.Titolo
+	,v.missione
+	,v.desc_missione
+	,v.programma
+	,v.desc_programma
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno
+	,v.Competenza_iniziale
+	,v.variazione_competenza_positiva
+	,v.variazione_competenza_negativa
+	,totale_capitolo_finale);
+	end loop;
+end if;
+
+for m in missioni loop
+
+p_missione := m.cod_mis;
+
+	for p in programmi loop
+
+	p_programma := p.cod_prog;
+    p_programma_desc := p.desc_prog;
+
+	max_num_prog:=0;
+	min_num_prog:=0;
+
+    select max(num_ord_riga), min(num_ord_riga) into max_num_prog, min_num_prog
+    from tmp_tabulati2
+    where p_missione=car03
+	and p_programma=car05
+    and p_programma_desc=car06
+    and nvl(car07,'N')='N';
+
+	select count(car05) into trova_programma
+    from tmp_tabulati2
+    where p_missione=car03
+	and p_programma=car05
+    and p_programma_desc=car06
+	and nvl(car07,'N')='P';
+
+	if trova_programma = 0
+	then
+	select nvl(sum(nvl(num01,0)),0),nvl(sum(nvl(num02,0)),0),nvl(sum(nvl(num03,0)),0),nvl(sum(nvl(num04,0)),0) into totale_progr_iniz,totale_progr_var_pos,totale_progr_var_neg,totale_progr_fin
+	from tmp_tabulati2
+	where p_missione=car03
+	and p_programma=car05
+    and p_programma_desc=car06;
+
+    if totale_progr_iniz+totale_progr_var_pos+totale_progr_var_neg+totale_progr_fin>0
+    then
+	insert into tmp_tabulati2
+	(UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR10
+    ,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	(select
+	 p_utente
+	,min_num_prog-1
+	,'VARIAZIONE FPV TESORIERE'
+	,null
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,'P'
+    ,p_id
+    ,p_anno
+	,null
+	,null
+	,null
+	,null
+	from tmp_tabulati2
+	where p_missione=car03
+	and p_programma=car05
+    and p_programma_desc=car06
+	and car01='VARIAZIONE FPV TESORIERE');
+
+	insert into tmp_tabulati2
+	(UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+	,CAR08
+	,CAR09
+    ,CAR10
+    ,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+	(p_utente
+	,max_num_prog+1
+	,'VARIAZIONE FPV TESORIERE'
+	,null
+	,m.cod_mis
+	,m.desc_mis
+	,p.cod_prog
+	,p.desc_prog
+	,'P'
+	,'T'
+	,'VALORI'
+    ,p_id
+    ,p_anno
+	,totale_progr_iniz
+	,totale_progr_var_pos
+	,totale_progr_var_neg
+	,totale_progr_fin);
+    end if;
+	end if;
+	end loop;--programmi
+commit;
+
+	max_num_mis:=0;
+	min_num_mis:=0;
+
+    select max(num_ord_riga), min(num_ord_riga)into max_num_mis, min_num_mis
+    from tmp_tabulati2
+    where p_missione=car03
+    and nvl(car07,'N')='P';
+
+	select sum(nvl(num01,0)),sum(nvl(num02,0)),sum(nvl(num03,0)),sum(nvl(num04,0)) into totale_mis_iniz,totale_mis_var_pos,totale_mis_var_neg,totale_mis_fin
+	from tmp_tabulati2
+	where p_missione=car03
+	and nvl(car07,'N')='P';
+
+    if (totale_mis_iniz+totale_mis_var_pos+totale_mis_var_neg+totale_mis_fin >0)
+    then 
+	insert into tmp_tabulati2
+	(UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+    ,CAR10
+    ,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	(select distinct
+	 p_utente
+	,min_num_mis-1
+	,'VARIAZIONE FPV TESORIERE'
+	,null
+	,CAR03
+	,CAR04
+	,null
+	,null
+	,'M'
+    ,'T'
+    ,p_id
+    ,p_anno
+	,null
+	from tmp_tabulati2
+	,null
+	,null
+	,null
+	where p_missione=car03
+	and car01='VARIAZIONE FPV TESORIERE'
+    and nvl(car07,'N')='P'
+    and nvl(car08,'N')='N'
+    and nvl(car09,'N')='N');
+
+	insert into tmp_tabulati2
+	(UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR05
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR06
+	,CAR07
+	,CAR08
+	,CAR09
+    ,CAR10
+    ,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+	(p_utente
+	,max_num_mis+1
+	,'VARIAZIONE FPV TESORIERE'
+	,null
+	,m.cod_mis
+	,m.desc_mis
+	,null
+	,null
+	,'M'
+	,'T'
+	,'VALORI'
+    ,p_id
+    ,p_anno
+	,totale_mis_iniz
+	,totale_mis_var_pos
+	,totale_mis_var_neg
+	,totale_mis_fin);
+
+    end if;
+
+	commit;
+end loop; --missione
+
+
+end;</pre>	</td></tr>
+</table></div>

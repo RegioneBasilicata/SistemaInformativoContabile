@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP000</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP000.html">Details</a></div></div>
+<div class="tab"><div><a href="SP000_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP000_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP000_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP000_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure SP000(p_anno in number, p_data in date) authid definer as
+crediti_IVA number := 0;
+crediti_IRAP number := 0;
+crediti_IRPEF number := 0;
+esercizio number := p_anno;
+
+verifica_causale number := 0;
+descr_causale varchar2(2000);
+
+id_pn_testa number := 0;
+id_mand number := 0;
+i number :=0; --indice
+p_data_chiusura date;
+p_data_mov date := nvl(p_data,to_date('3112'||esercizio,'ddmmyyyy'));
+
+
+-- cursore per selezionare le Variazioni NEGATIVE su Capitoli IVA, IRPEF e IRAP
+cursor variazioni_neg is
+select distinct d.date_created data_doc,
+d.doc_id doc_id
+,d.description||' '||d.doc_type||' n.'||d.doc_sequence_value descrizione
+,nvl(d.document_amount,0) importo_var
+,d.created_by utente
+,a.conto_sanita
+from fin_t_documenti d
+, fin_t_articoli a
+, sa_piano_dei_conti p
+where d.segment8 = esercizio
+and d.doc_type in  ('V_COM_NEG','A_COM_NEG')
+and nvl(d.deletion_status_flag,'N') = 'N'
+and nvl(d.open_balance_proposed,0) > 0
+and d.doc_id not in (select distinct nvl(doc_id,0) from sa_prima_nota_testa)
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2 
+and nvl(a.conto_sanita,'X') in ('2','5','6')
+order by d.date_created;
+-- FINE cursore Variazioni Negative
+
+
+begin
+ -- verifico che l'anno contabile non sia chiuso
+ begin
+ select nvl(data_chiusura,to_date('01011900','ddmmyyyy')) into p_data_chiusura
+ from sa_dati_generali
+ where anno = p_anno;
+ exception when no_data_found then p_data_chiusura := to_date('01011900','ddmmyyyy');
+ end;
+ if p_data_chiusura &lt;> to_date('01011900','ddmmyyyy')
+ then return;
+ end if;
+ -- FINE verifica anno contabile
+ 
+ select count(num_reg) into verifica_causale
+ from sa_prima_nota_testa
+ where to_char(data,'yyyy') = esercizio
+ and sa_cc_id = 1;
+
+
+  delete sa_prima_nota_testa where doc_id is not null and to_char(data,'yyyy') = esercizio; --- rigenero ogni volta tutte le scritture provenienti dalla finanziaria
+  commit;
+  sp_acc(esercizio,p_data_mov);
+  sp_rev(esercizio,p_data_mov);
+  sp_imp(esercizio,p_data_mov);
+  sp_liq(esercizio,p_data_mov);
+  sp_dis(esercizio,p_data_mov);
+  sp_insus(esercizio,p_data_mov);
+  sp_mand(esercizio,p_data_mov);
+  sp_capitoli(esercizio,p_data_mov);
+ 
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,153 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLO_AMMORTAMENTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLO_AMMORTAMENTO.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLO_AMMORTAMENTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLO_AMMORTAMENTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLO_AMMORTAMENTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLO_AMMORTAMENTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure calcolo_ammortamento (pTipoBene IN varchar2, pTIPO_AMM IN number,pCATEGORIA IN number,pSOTTO_CAT IN number,pDETT_SCAT IN number,AMM_FONDO_ORDINARIO IN number,AMM_COSTO_AMMORTIZZABILE IN OUT number,AMM_COSTO_NON_AMMORTIZZABILE IN OUT number,RESIDUO IN number,
+tipo_amm_def OUT number, aliq_std_def OUT number, perc_i_anno_def OUT number, a_perc_amm IN OUT number, quota_fondo OUT number, quota_amm_ind OUT number, quota_amm_perso OUT number, quota_amm_ant OUT number) is
+  
+  a_tipo_amm  NUMBER(1,0);
+  a_perc_std number;
+  a_perc_I number;
+  a_perc_min number;
+  a_max_imp_100 number;
+  a_imp_max number;
+  a2_tipo_amm  number;
+  a2_perc_amm number;
+  a1_perc_amm number;
+ 
+begin 
+ 
+  quota_fondo := 0;
+ 
+  -- recupera tipo e percentuale ammortamento
+  if pTIPO_AMM is not null then
+    a_tipo_amm:=pTIPO_AMM;           
+  else
+ 
+    select c.TIPO_AMMORTAMENTO,c.ALIQ_AMM
+      into a_tipo_amm,a1_perc_amm
+           from tb_cat_cesp c
+           where COD_CAT=pCATEGORIA;
+ 
+    select max(s.tipo_ammortamento),MAX(s.aliq_amm)
+      into a2_tipo_amm,a2_perc_amm
+           from tb_scat_cesp s
+           where s.TBCTC_COD_CAT=pCATEGORIA and
+                 s.progr=pSOTTO_CAT;
+                 
+     -- la sottocategoria ha un suo tipo ammortamento
+     if a2_tipo_amm is not null then
+        a_tipo_amm:=a2_tipo_amm;
+     end if;
+     if a2_perc_amm is not null then
+        a1_perc_amm:=a2_perc_amm;
+     end if;
+ 
+     if (pTipoBene = 'M') then
+         select max(d.tipo_ammortamento), max(d.aliq_amm)
+            into a2_tipo_amm,a2_perc_amm
+                 from tb_dett_scat d
+                 where TSP_TBCTC_COD_CAT=pCATEGORIA and
+                       TSP_PROGR=pSOTTO_CAT and
+                       progr=pDETT_SCAT;
+     -- il dettaglio ha un suo tipo ammortamento
+          if a2_tipo_amm is not null then
+            a_tipo_amm:=a2_tipo_amm;
+          end if;
+          if a2_perc_amm is not null then
+            a1_perc_amm:=a2_perc_amm;
+          end if;
+      end if;
+  end if;
+ 
+  select t.perc_amm_std,t.perc_i_anno,t.perc_min_rid,t.imp_amm_100,t.imp_max_amm
+     into a_perc_std,a_perc_I,a_perc_min,a_max_imp_100,a_imp_max
+          from tb_tipi_ammortamenti t
+          where  t.id(+)=a_tipo_amm;
+ 
+  tipo_amm_def:=a_tipo_amm;
+  if a1_perc_amm is not null then
+     aliq_std_def:=a1_perc_amm;
+  else
+     aliq_std_def:=a_perc_std;
+  end if;
+  perc_i_anno_def:=a_perc_I;
+  -- fine recupera tipo e percentuale ammortamento
+ 
+  --setta variabili aliquota per calcolo ammortamento
+  if nvl(AMM_FONDO_ORDINARIO,0)=0 then
+     if nvl(amm_costo_ammortizzabile,0)&lt;nvl(a_max_imp_100,0) then
+        aliq_std_def:=100;
+     else
+        aliq_std_def:=a_perc_I;
+     end if;
+  end if;
+ 
+  if a_perc_amm is null then
+     a_perc_amm:=aliq_std_def;
+  end if;
+  -- fine setta variabili aliquota per calcolo ammortamento
+ 
+ 
+  -- calcolo ammortamento  
+  if a_perc_amm is not null and residuo>0 then
+                
+    IF a_perc_amm=aliq_std_def THEN
+       quota_fondo:=amm_costo_ammortizzabile*a_perc_amm/100;
+       quota_amm_ind:=nvl(amm_costo_non_ammortizzabile,0)*a_perc_amm/100;
+       IF quota_fondo > residuo THEN
+          quota_fondo:=residuo;
+       END IF;
+       quota_amm_ant:=0;
+       quota_amm_perso:=0;
+ 
+    ELSIF a_perc_amm>aliq_std_def THEN
+       quota_fondo:=amm_costo_ammortizzabile*aliq_std_def/100;
+       quota_amm_ind:=nvl(amm_costo_non_ammortizzabile,0)*a_perc_amm/100;
+       IF quota_fondo > residuo THEN
+          quota_fondo:=residuo;
+       END IF;
+       quota_amm_ant:=amm_costo_ammortizzabile*(a_perc_amm-aliq_std_def)/100;
+       IF quota_amm_ant > (residuo+quota_fondo) THEN
+          quota_amm_ant:=(residuo+quota_fondo);
+       END IF;
+       quota_amm_perso:=0;
+    ELSE
+       if a_perc_amm>=a_perc_min then
+         quota_fondo:=amm_costo_ammortizzabile*a_perc_amm/100;
+         quota_amm_ind:=nvl(amm_costo_non_ammortizzabile,0)*a_perc_amm/100;
+         IF quota_fondo > residuo THEN
+            quota_fondo:=residuo;
+         END IF;
+         quota_amm_perso:=0;
+       else
+         quota_fondo:=amm_costo_ammortizzabile*a_perc_amm/100;
+         quota_amm_ind:=nvl(amm_costo_non_ammortizzabile,0)*a_perc_amm/100;
+         IF quota_fondo > residuo THEN
+            quota_fondo:=residuo;
+         END IF;
+          quota_amm_perso:=amm_costo_ammortizzabile*(a_perc_min-a_perc_amm)/100;
+       END IF;
+     END IF;
+  end if;
+  -- fine proc calcolo ammortamento 
+ 
+end calcolo_ammortamento;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,42 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>T_STRING_AGG</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="T_STRING_AGG.html">Details</a></div></div>
+<div class="tab"><div><a href="T_STRING_AGG_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="T_STRING_AGG_References.html">References</a></div></div>
+<div class="tab"><div><a href="T_STRING_AGG_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="T_STRING_AGG_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TYPE "T_STRING_AGG"                                                                          AS OBJECT
+(
+  g_string  VARCHAR2(32767),
+
+  STATIC FUNCTION ODCIAggregateInitialize(sctx  IN OUT  t_string_agg)
+    RETURN NUMBER,
+
+  MEMBER FUNCTION ODCIAggregateIterate(self   IN OUT  t_string_agg,
+                                       value  IN      VARCHAR2 )
+     RETURN NUMBER,
+
+  MEMBER FUNCTION ODCIAggregateTerminate(self         IN   t_string_agg,
+                                         returnValue  OUT  VARCHAR2,
+                                         flags        IN   NUMBER)
+    RETURN NUMBER,
+
+  MEMBER FUNCTION ODCIAggregateMerge(self  IN OUT  t_string_agg,
+                                     ctx2  IN      t_string_agg)
+    RETURN NUMBER
+); </pre>	</td></tr>
+</table></div>

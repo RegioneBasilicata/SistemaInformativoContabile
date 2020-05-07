@@ -1,0 +1,343 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_ANAGRAFICA</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_ANAGRAFICA.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ANAGRAFICA_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ID</td>
+<td>NUMBER(10,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO_ANAGRAFICA</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'F' </td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PARTITA_IVA</td>
+<td>VARCHAR2(11 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DENOMINAZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COGNOME_LR</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOME_LR</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SESSO_LR</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_COMUNE_NS_LR</td>
+<td>NUMBER(10,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_NS_LR</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>INDIRIZZO_LR</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_COMUNE_RES_LR</td>
+<td>NUMBER(10,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAP_RES_LR</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CF_LR</td>
+<td>VARCHAR2(16 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_FISCALE</td>
+<td>VARCHAR2(16 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COGNOME</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOME</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ALTRI_NOMI</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SESSO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_NS</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_COMUNE_NS</td>
+<td>NUMBER(10,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>INATTIVO_DAL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OLD_CODICE</td>
+<td>VARCHAR2(30 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OLD_PARTITA_IVA</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_OA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMUNE_NS_LR_OA</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMUNE_NS_OA</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PIGNORAMENTO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTA_PIGNORAMENTO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE_CREAZIONE</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE_AGGIORNAMENTO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_AGGIORNAMENTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_CREAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ESTERO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMMISSIONI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'N'</td>
+<td>34</td>
+<td>Dal 24/01/2017: 'S' ESENTE, 'E' A CARICO ENTE, 'N' A CARICO BENEFICIARIO</td>
+	</tr>
+	<tr>
+<td>ENTE_LOCALE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>se = 'S' l'anagrafica riguarda un ente locale</td>
+	</tr>
+	<tr>
+<td>POPOLAZIONE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>se = 'S' trattasi di comune con popolazione superiore ai 1000 abitanti</td>
+	</tr>
+	<tr>
+<td>PEC</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EMAIL</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PASS_TEMP</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+</table></div>

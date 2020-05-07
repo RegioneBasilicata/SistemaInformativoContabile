@@ -1,0 +1,40 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LETT_DATI_AZIE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LETT_DATI_AZIE.html">Details</a></div></div>
+<div class="tab"><div><a href="LETT_DATI_AZIE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LETT_DATI_AZIE_References.html">References</a></div></div>
+<div class="tab"><div><a href="LETT_DATI_AZIE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LETT_DATI_AZIE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure LETT_DATI_AZIE (sel_mia in varchar2,risultato1 out varchar2) is
+  TYPE cursor_ref IS REF CURSOR;
+  c1 cursor_ref;
+  TYPE ris1 IS TABLE OF NUMBER;
+
+  --TYPE risultati IS TABLE OF n_ris;
+
+  ok_ris1 ris1;
+
+  rows_fetched NUMBER;
+  tot1         NUMBER;
+BEGIN
+  tot1:=0;
+  OPEN c1 FOR sel_mia;
+
+  FETCH c1 BULK COLLECT INTO ok_ris1;
+  risultato1:=ok_ris1(1);
+END;</pre>	</td></tr>
+</table></div>

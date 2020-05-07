@@ -1,0 +1,281 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CREA_PRIMA_NOTA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CREA_PRIMA_NOTA.html">Details</a></div></div>
+<div class="tab"><div><a href="CREA_PRIMA_NOTA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CREA_PRIMA_NOTA_References.html">References</a></div></div>
+<div class="tab"><div><a href="CREA_PRIMA_NOTA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CREA_PRIMA_NOTA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE "CREA_PRIMA_NOTA"  (A_DOC_ID IN NUMBER,RIS OUT NUMBER,DESCR_RIS OUT VARCHAR2) is   
+ gr        VARCHAR2(10);
+ ms        VARCHAR2(10);
+ co        VARCHAR2(10);
+ da        VARCHAR2(1);
+ gr_iva    VARCHAR2(10);
+ gr_irap   VARCHAR2(10);
+ gr_ratei  VARCHAR2(10);
+ gr_risc   VARCHAR2(10);
+ imp_app   NUMBER(15,2);
+ imp_reg   NUMBER(15,2);
+ imp_iva   NUMBER(15,2);
+ imp_irap  NUMBER(15,2);
+ imp_ratei NUMBER(15,2);
+ imp_risc  NUMBER(15,2);
+ cod_mecc  varchar2(15);
+ cod_stat  varchar2(15);
+ e_u       varchar2(1);
+ seq_id    NUMBER(15);
+ conto_par varchar2(30);
+ tipo_reg  varchar2(15);
+ causale   varchar2(3);
+ i_data_reg  DATE;
+ gr_co_ri  VARCHAR2(10);
+ ms_co_ri  VARCHAR2(10);
+ co_co_ri  VARCHAR2(10);
+ ind_succ  NUMBER(1);
+ i_num_reg   NUMBER;
+ descr_testa VARCHAR2(2000);
+ w_denominazione_utente varchar2(100);
+ alert_button NUMBER;
+BEGIN
+    SELECT d.doc_sequence_value,d.document_amount,d.doc_type,description,
+           d.date_created,to_number(nvl(d.attribute3,'0')),
+           to_number(nvl(d.attribute5,'0')),d.attribute4,
+           to_number(nvl(d.attribute8,'0')),to_number(nvl(d.attribute9,'0')),
+           a.codice_meccanografico,a.codice_statistico,a.EU
+      INTO seq_id,imp_reg,tipo_reg,descr_testa,i_data_reg,imp_iva,imp_irap,conto_par,
+           imp_ratei,imp_risc,cod_mecc,cod_stat,e_u
+      FROM FINA_DOCUMENTI d,FINA_ARTICOLI a
+      WHERE d.DOC_ID = A_DOC_ID AND
+            a.ANNO=d.segment8 AND
+            a.EU||a.CODICE=d.segment2;
+    SELECT MAX(NUM_REG)
+      INTO i_num_reg
+      FROM TB_PRIMA_NOTA_TESTA
+      WHERE NVL(A_DOC_ID,0)=A_DOC_ID;
+-- lettura dati documento
+    IF nvl(i_num_reg,0)>0 THEN
+       DELETE TB_PRIMA_NOTA_CORPO
+          WHERE TBPNT_DATA=i_data_reg and
+                TBPNT_NUM_REG=i_num_reg;
+       DELETE TB_PRIMA_NOTA_TESTA
+          WHERE DATA=i_data_reg and
+                NUM_REG=i_num_reg;
+       COMMIT;
+    END IF;
+    SELECT max(TBMS_TBGR_GRUPPO),max(TBMS_MASTRO),max(CONTO)
+      INTO gr_co_ri,ms_co_ri,co_co_ri
+      FROM TB_PIANO_DEI_CONTI
+      WHERE conto_par=TBMS_TBGR_GRUPPO||TBMS_MASTRO||CONTO;
+-- creazione registrazione
+    SELECT id
+      INTO causale
+      FROM TB_CAUSALI_CONTABILI
+      WHERE DOC_TYPE = tipo_reg;
+    SELECT nvl(MAX(TBPC_TBMS_TBGR_GRUPPO),'XXX')
+      INTO gr_iva
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=3;
+    SELECT nvl(MAX(TBPC_TBMS_TBGR_GRUPPO),'XXX')
+      INTO gr_irap
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=4;
+    SELECT nvl(MAX(TBPC_TBMS_TBGR_GRUPPO),'XXX')
+      INTO gr_ratei
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=5;
+    SELECT nvl(MAX(TBPC_TBMS_TBGR_GRUPPO),'XXX')
+      INTO gr_risc
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=7;
+-- testa I nota
+    SELECT NVL(MAX(NUM_REG),0)+1
+      INTO i_num_reg
+      FROM TB_PRIMA_NOTA_TESTA
+      WHERE DATA=i_data_reg;
+    INSERT INTO TB_PRIMA_NOTA_TESTA
+      (DATA,NUM_REG,TBCC_ID,DOC_ID,DESCR_TESTA,ANNO_COMP)
+       VALUES (i_data_reg,i_num_reg,causale,A_DOC_ID,descr_testa,TO_CHAR(i_data_reg,'YYYY'));
+    COMMIT;
+    imp_app := imp_reg;
+    SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+           DARE_AVERE
+      INTO gr,ms,co,da
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=1;
+    INSERT INTO TB_PRIMA_NOTA_CORPO
+       (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+        TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+       VALUES
+       (gr,ms,co,i_data_reg,i_num_reg,1,imp_app,da);
+-- II riga costo/ricavo
+    imp_app := imp_reg;
+    SELECT nvl(MAX(TBPC_TBMS_TBGR_GRUPPO),'XXX')
+      INTO gr
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=2;
+    IF gr_iva&lt;>'XXX' AND
+       gr='XXX' THEN
+       imp_app := imp_app - imp_iva;
+    END IF;
+    IF gr_irap&lt;>'XXX' THEN
+       imp_app := imp_app - imp_irap;
+    END IF;
+    IF gr_ratei&lt;>'XXX' THEN
+       imp_app := imp_app - imp_ratei;
+    END IF;
+    IF gr_risc&lt;>'XXX' THEN
+       imp_app := imp_app - imp_risc;
+    END IF;
+    SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+           DARE_AVERE
+      INTO gr,ms,co,da
+      FROM TB_CAUSALI_GUIDATE
+      WHERE TBCC_ID=causale and
+            IND_CONTO=2;
+    IF gr='XXX' THEN
+       gr := gr_co_ri;
+       ms := ms_co_ri;
+       co := co_co_ri;
+    END IF;
+    INSERT INTO TB_PRIMA_NOTA_CORPO
+      (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+       TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+       VALUES
+      (gr,ms,co,i_data_reg,i_num_reg,2,imp_app,da);
+-- III rigo IVA
+    ind_succ := 3;
+    IF imp_iva &lt;>0 AND
+       gr_iva&lt;>'XXX' THEN
+       SELECT TBPC_TBMS_TBGR_GRUPPO
+         INTO gr
+         FROM TB_CAUSALI_GUIDATE
+         WHERE TBCC_ID=causale and
+               IND_CONTO=2;
+       IF gr='XXX' THEN
+          SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+                 DARE_AVERE
+            INTO gr,ms,co,da
+            FROM TB_CAUSALI_GUIDATE
+            WHERE TBCC_ID=causale and
+                  IND_CONTO=3;
+          INSERT INTO TB_PRIMA_NOTA_CORPO
+               (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+                TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+                VALUES
+               (gr,ms,co,i_data_reg,i_num_reg,3,imp_iva,da);
+          ind_succ := 4;
+       ELSE
+          INSERT INTO TB_PRIMA_NOTA_CORPO
+               (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+                TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+                VALUES
+               (gr_co_ri,ms_co_ri,co_co_ri,i_data_reg,i_num_reg,3,imp_iva,da);
+          SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+                 DARE_AVERE
+              INTO gr,ms,co,da
+              FROM TB_CAUSALI_GUIDATE
+              WHERE TBCC_ID=causale and
+                    IND_CONTO=3;
+          INSERT INTO TB_PRIMA_NOTA_CORPO
+               (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+                TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+             VALUES
+               (gr,ms,co,i_data_reg,i_num_reg,4,imp_iva,da);
+             ind_succ := 5;
+       END IF;
+    END IF;
+-- IV rigo IRAP
+    IF imp_irap &lt;>0 AND
+       gr_irap&lt;>'XXX' THEN
+       SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+            DARE_AVERE
+            INTO gr,ms,co,da
+            FROM TB_CAUSALI_GUIDATE
+            WHERE TBCC_ID=causale and
+                  IND_CONTO=4;
+       INSERT INTO TB_PRIMA_NOTA_CORPO
+           (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+            TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+            VALUES
+           (gr,ms,co,i_data_reg,i_num_reg,ind_succ,imp_irap,da);
+       ind_succ := ind_succ + 1;
+    END IF;
+-- V rigo RATEI e RISCONTI
+    IF imp_ratei &lt;>0 AND
+       gr_ratei&lt;>'XXX' THEN
+       IF ((e_u='E' AND substr(cod_stat,1,1)='1') OR
+           (e_u='U' AND substr(cod_mecc,3,1)='1')) THEN
+          SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+              DARE_AVERE
+              INTO gr,ms,co,da
+              FROM TB_CAUSALI_GUIDATE
+              WHERE TBCC_ID=causale and
+                    IND_CONTO=5;
+       ELSE
+          SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+              DARE_AVERE
+              INTO gr,ms,co,da
+              FROM TB_CAUSALI_GUIDATE
+              WHERE TBCC_ID=causale and
+                    IND_CONTO=6;
+       END IF;
+       INSERT INTO TB_PRIMA_NOTA_CORPO
+           (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+            TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+            VALUES
+           (gr,ms,co,i_data_reg,i_num_reg,ind_succ,imp_ratei,da);
+       ind_succ := ind_succ + 1;
+    END IF;
+    IF imp_risc &lt;>0 AND
+       gr_risc&lt;>'XXX' THEN
+       IF ((e_u='E' AND substr(cod_stat,1,1)='1') OR
+           (e_u='U' AND substr(cod_mecc,3,1)='1')) THEN
+          SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+              DARE_AVERE
+              INTO gr,ms,co,da
+              FROM TB_CAUSALI_GUIDATE
+              WHERE TBCC_ID=causale and
+                    IND_CONTO=7;
+       ELSE
+          SELECT TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+              DARE_AVERE
+              INTO gr,ms,co,da
+              FROM TB_CAUSALI_GUIDATE
+              WHERE TBCC_ID=causale and
+                    IND_CONTO=8;
+       END IF;
+       INSERT INTO TB_PRIMA_NOTA_CORPO
+           (TBPC_TBMS_TBGR_GRUPPO,TBPC_TBMS_MASTRO,TBPC_CONTO,
+            TBPNT_DATA,TBPNT_NUM_REG,ID,IMPORTO,D_A)
+            VALUES
+           (gr,ms,co,i_data_reg,i_num_reg,ind_succ,imp_risc,da);
+       ind_succ := ind_succ + 1;
+    END IF;
+    COMMIT;
+    RIS:=0;
+EXCEPTION
+    WHEN OTHERS THEN
+      RIS:=1;
+      DESCR_RIS:=SUBSTR(SQLERRM,1,200);
+END; </pre>	</td></tr>
+</table></div>

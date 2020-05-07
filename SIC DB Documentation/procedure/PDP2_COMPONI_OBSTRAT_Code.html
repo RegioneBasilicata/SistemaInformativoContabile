@@ -1,0 +1,180 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PDP2_COMPONI_OBSTRAT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PDP2_COMPONI_OBSTRAT.html">Details</a></div></div>
+<div class="tab"><div><a href="PDP2_COMPONI_OBSTRAT_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PDP2_COMPONI_OBSTRAT_References.html">References</a></div></div>
+<div class="tab"><div><a href="PDP2_COMPONI_OBSTRAT_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PDP2_COMPONI_OBSTRAT_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE pdp2_componi_obstrat (p_utente IN VARCHAR2, p_piano_dal IN VARCHAR2, p_piano_al IN VARCHAR2, p_dipart IN VARCHAR2, p_uff IN VARCHAR2, p_vers IN VARCHAR2) IS
+
+-- Vedi PP000024_p4 allegati tecnici_Mail_Tramutoli_05_01_2018.pdf e 
+-- note dei giorni 02/01/2018, 08/06/2018 di PP000024_parte4.docx.
+
+-- 07/10/2019 aggiunti i parametri 
+-- p_dipart, p_uff (entrambi vuoti o uno dei due è non nullo), 
+-- p_versione (se null, sarà considerata la versione più alta per ciascun piano)
+
+
+BEGIN
+ DELETE pdp_temp_rep_pdp00005
+ WHERE utente = p_utente;
+
+ COMMIT;
+
+ INSERT INTO pdp_temp_rep_pdp00005
+ (utente,
+ p_data_dal,
+ p_data_al,
+ coddipart, 
+ descdipart, 
+ coduff, 
+ descuff, 
+ linea,
+ priorita,
+ obstrat, 
+ descobstrat, 
+ codris, 
+ descris,
+ pesoobstr, 
+ anno, 
+ codobop, 
+ descrobop, 
+ pesoobop, 
+ capitolo) 
+ SELECT DISTINCT p_utente,
+        TO_DATE(p_piano_dal,'DD/MM/YYYY'),
+        TO_DATE(p_piano_al,'DD/MM/YYYY'),
+	SUBSTR(a.p_ufficio,1,2) coddipart,
+        b.descrizione descdipart,
+        a.p_ufficio coduff,
+        c.descrizione descuff,
+        a.linea linea,
+        a.priorita,
+        a.id obstrat,
+        v.desc_liv1 descobstrat, 
+        d.risultato codris,
+        g.descrizione descris,
+        (SELECT SUM(NVL(e2.peso,0))
+         FROM pdp2_ob_oper e2
+         WHERE e2.p_ufficio = a.p_ufficio AND
+               e2.p_data_dal = a.p_data_dal AND
+               e2.p_versione = a.p_versione AND 
+               e2.obstrat = a.id ) pesoobstr,
+       e.anno,
+       e.id codobop,
+       e.descrizione descrobop,
+       e.peso pesoobop, 
+       f.capitolo
+ FROM pdp_ob_strat a,
+      fin_t_dipartimenti b,
+      fin_t_strutture c,
+      pdp2_piani_obstr_risultati d,
+      pdp2_ob_oper e,
+      pdp2_oboper_capitoli f,
+      pdp2_risultati g,
+      vw_nb_articoli v
+ WHERE a.p_data_dal = TO_DATE(p_piano_dal,'DD/MM/YYYY') AND 
+       a.p_data_al = TO_DATE(p_piano_al,'DD/MM/YYYY') AND 
+       ((p_vers IS NOT NULL AND
+	     a.p_versione = p_vers) OR
+		(p_vers IS NULL AND 
+         a.p_versione = (SELECT MAX(p.versione)
+                         FROM pdp_piani_perf p
+                         WHERE p.ufficio = a.p_ufficio AND
+                               p.data_dal = a.p_data_dal AND
+                               p.data_al = a.p_data_al))
+       ) AND 
+       SUBSTR(a.p_ufficio,1,2) = NVL(p_dipart,SUBSTR(a.p_ufficio,1,2)) AND
+       a.p_ufficio = NVL(p_uff,a.p_ufficio) AND
+       b.codice = SUBSTR(a.p_ufficio,1,2) AND
+       b.data_assestamento = TO_DATE('01011900','DDMMYYYY') AND
+       c.anno = b.anno AND 
+       c.codice = a.p_ufficio AND
+       c.data_assestamento = TO_DATE('01011900','DDMMYYYY') AND
+       v.eu = 'U' AND 
+       REPLACE(a.id,'*') = v.anno||' | '||v.liv1 AND 
+  	   b.anno = e.anno AND 
+       d.p_ufficio = a.p_ufficio AND 
+       d.p_data_dal = a.p_data_dal AND
+       d.p_versione = a.p_versione AND 
+       d.obstrat = a.id AND 
+       d.risultato = g.id AND
+       e.p_ufficio = a.p_ufficio AND
+       e.p_data_dal = a.p_data_dal AND
+       e.p_versione = a.p_versione AND 
+       e.obstrat = a.id AND
+       e.risultato = d.risultato AND
+       f.p_ufficio(+) = e.p_ufficio AND 
+       f.p_data_dal(+) = e.p_data_dal AND
+       f.p_versione(+) = e.p_versione AND 
+       f.obstrat(+) = e.obstrat AND 
+       f.risultato(+) = e.risultato AND
+       f.anno(+) = e.anno AND
+       f.oboper(+) = e.id;
+
+ COMMIT;
+
+ -- se il capitolo di un anno è null, prendo quello del primo anno del triennio, vedi 02/01/18 e 19/01/2018 di PP000024_parte4.docx
+ UPDATE pdp_temp_rep_pdp00005 a
+ SET a.capitolo = (SELECT b.capitolo
+                   FROM pdp_temp_rep_pdp00005 b
+				   WHERE b.utente = a.utente AND
+                         b.coduff = a.coduff AND
+		                 b.obstrat = a.obstrat AND
+				         b.codris = a.codris AND 
+						 b.codobop = a.codobop AND
+                         b.anno = SUBSTR(b.p_data_dal,7,4) AND
+                         ROWNUM = 1)
+ WHERE a.utente = p_utente AND
+       a.capitolo IS NULL;
+ COMMIT;
+ --
+
+ FOR r IN (SELECT a.ROWID,
+		          a.obstrat,
+				  a.codris,
+				  a.capitolo
+		   FROM  pdp_temp_rep_pdp00005 a 
+		   WHERE utente = p_utente) LOOP
+  IF r.capitolo IS NOT NULL
+   THEN  
+    UPDATE pdp_temp_rep_pdp00005 b
+    SET (b.programma,b.desc_programma) = (SELECT DISTINCT v.liv2,
+	                                                      v.desc_liv2
+                                          FROM vw_nb_articoli v
+			                              WHERE v.eu||v.codice = r.capitolo AND 
+								                REPLACE(r.obstrat,'*') = v.anno||' | '||v.liv1)
+     WHERE b.ROWID = r.ROWID;
+   ELSE
+    UPDATE pdp_temp_rep_pdp00005 b
+    SET (b.programma,b.desc_programma) = (SELECT p.codice,
+	                                             p.descrizione
+                                          FROM nb_livello1 m,
+										       nb_livello2 p,
+											   pdp2_miss_progr_risultati mpr 
+			                              WHERE mpr.codris = r.codris AND
+										        p.eu = 'U' AND
+												p.id_livello1 = m.id AND
+												mpr.ob_strat = p.anno||' | '||m.codice||' | '||p.codice AND
+										        ROWNUM = 1 /* la tabella pdp2_miss_progr_risultati potrebbe non esswere rigorosa*/ )
+     WHERE b.ROWID = r.ROWID;
+  END IF;	 
+
+  COMMIT;
+ END LOOP;
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>NB_PRIMA_NOTA_TP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="NB_PRIMA_NOTA_TP.html">Details</a></div></div>
+<div class="tab"><div><a href="NB_PRIMA_NOTA_TP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="NB_PRIMA_NOTA_TP_References.html">References</a></div></div>
+<div class="tab"><div><a href="NB_PRIMA_NOTA_TP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="NB_PRIMA_NOTA_TP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure nb_prima_nota_tp (p_anno number) is
+
+begin
+
+delete nb_prima_nota_corpo_tp where to_char(t_data,'yyyy') = p_anno;
+commit;
+
+insert into nb_prima_nota_corpo_tp (T_DATA
+,T_NUM_REG
+,CONTO
+,PROGR
+,DOC_ID
+,ID_ANA
+,IMPORTO
+,DENOMINAZIONE_ANA)
+select c.t_data
+,c.T_NUM_REG
+,c.CONTO
+,c.PROGR
+,t.doc_id
+,p.id_ana
+,p.amount
+,nvl(a.denominazione,a.nome||' '||a.cognome) denominazione_ana
+from nb_prima_nota_testa t
+,nb_prima_nota_corpo c
+,fin_t_documenti_terze_parti p
+,fin_t_anagrafica a
+where to_char(t.data,'yyyy') = p_anno
+and t.doc_id is not null
+and c.t_data = t.data
+and c.t_num_reg = t.num_reg
+and p.doc_id = t.doc_id
+and a.id = p.id_ana;
+commit;
+
+insert into nb_prima_nota_corpo_tp (T_DATA
+,T_NUM_REG
+,CONTO
+,PROGR
+,DOC_ID
+,ID_ANA
+,IMPORTO
+,DENOMINAZIONE_ANA)
+select c.t_data
+,c.T_NUM_REG
+,c.CONTO
+,c.PROGR
+,null
+,c.id_cred_deb
+,c.importo
+,nvl(a.denominazione,a.nome||' '||a.cognome) denominazione_ana
+from nb_prima_nota_testa t
+,nb_prima_nota_corpo c
+,fin_t_anagrafica a
+where to_char(t.data,'yyyy') = p_anno
+and t.doc_id is null
+and c.t_data = t.data
+and c.t_num_reg = t.num_reg
+and c.id_cred_deb is not null
+and a.id = c.id_cred_deb;
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

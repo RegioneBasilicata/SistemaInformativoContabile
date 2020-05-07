@@ -1,0 +1,61 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PULIZIAPIANTAORGANICA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PULIZIAPIANTAORGANICA.html">Details</a></div></div>
+<div class="tab"><div><a href="PULIZIAPIANTAORGANICA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PULIZIAPIANTAORGANICA_References.html">References</a></div></div>
+<div class="tab"><div><a href="PULIZIAPIANTAORGANICA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PULIZIAPIANTAORGANICA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE PuliziaPiantaOrganica is
+begin
+for d in (SELECT MIN(rowid) riga,trunc(DATA,'DD') data1,MATRICOLA,COGNOME,NOME,CODFISC,CODAREA,CODUFF,CODSERV,CCODPRESIDIO,DESCRAREA,
+DESCRUFFICIO,DESCRSERV,DESCRPRESIDIO,DATAASS,LIVELLO,CODQUA,QUALIFICA,CODPOSORG,POSIZIONEORG,
+NUMTEL,DATACESS,EMAIL,count(*)
+FROM fin_t_pianta_organica b
+GROUP BY trunc(DATA,'DD'),MATRICOLA,COGNOME,NOME,CODFISC,CODAREA,CODUFF,CODSERV,CCODPRESIDIO,DESCRAREA,
+DESCRUFFICIO,DESCRSERV,DESCRPRESIDIO,DATAASS,LIVELLO,CODQUA,QUALIFICA,CODPOSORG,POSIZIONEORG,
+NUMTEL,DATACESS,EMAIL
+having count(*)>1) loop
+delete fin_t_pianta_organica b 
+where 
+trunc(b.DATA,'dd')=d.data1 and
+b.MATRICOLA=d.matricola and
+b.COGNOME=d.cognome and
+b.NOME=d.nome and
+b.CODFISC=d.codfisc and
+nvl(b.CODAREA,' ')=nvl(d.codarea,' ') and
+nvl(b.CODUFF,' ')=nvl(d.coduff,' ') and
+nvl(b.CODSERV,' ')=nvl(d.codserv,' ') and
+nvl(b.CCODPRESIDIO,' ')=nvl(d.ccodpresidio,' ') and
+nvl(b.DESCRAREA,' ')=nvl(d.descrarea,' ') and
+nvl(b.DESCRUFFICIO,' ')=nvl(d.descrufficio,' ') and
+nvl(b.DESCRSERV,' ')=nvl(d.descrserv,' ') and
+nvl(b.DESCRPRESIDIO,' ')=nvl(d.descrpresidio,' ') and
+trunc(b.DATAASS,'dd')=trunc(d.dataass,'dd') and
+nvl(b.LIVELLO,' ')=nvl(d.livello,' ') and
+nvl(b.CODQUA,' ')=nvl(d.codqua,' ') and
+nvl(b.QUALIFICA,' ')=nvl(d.qualifica,' ') and
+nvl(b.CODPOSORG,' ')=nvl(d.codposorg,' ') and
+nvl(b.POSIZIONEORG,' ')=nvl(d.posizioneorg,' ') and
+nvl(b.NUMTEL,' ')=nvl(d.numtel,' ') and
+nvl(b.DATACESS,to_date('01010001','ddmmyyyy'))=nvl(d.datacess,to_date('01010001','ddmmyyyy')) and
+nvl(b.EMAIL,' ')=nvl(d.email,' ') and
+b.rowid&lt;>d.riga;
+
+end loop;
+commit;
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,448 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CONTROLLO_DI_GESTIONE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CONTROLLO_DI_GESTIONE.html">Details</a></div></div>
+<div class="tab"><div><a href="CONTROLLO_DI_GESTIONE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CONTROLLO_DI_GESTIONE_References.html">References</a></div></div>
+<div class="tab"><div><a href="CONTROLLO_DI_GESTIONE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CONTROLLO_DI_GESTIONE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE controllo_di_gestione (p_anno in number) IS
+
+BEGIN
+
+-- loop per fin_t_asp
+  for a in (SELECT 
+           codice
+           ,descrizione
+           ,data_assestamento    
+          FROM fin_t_asp 
+          WHERE data_assestamento = to_date('01011900','ddmmyyyy') 
+          and anno = (p_anno - 1)) 
+   loop
+      begin
+      INSERT INTO fin_t_asp 
+       (anno
+       ,codice
+       ,descrizione
+       ,data_assestamento
+       ,aggiornato_da
+       ,data_aggiornamento) 
+       values 
+       (p_anno
+       ,a.codice
+       ,a.descrizione
+       ,a.data_assestamento
+       ,1000
+       ,trunc(sysdate,'dd'));    
+      exception when dup_val_on_index then null;
+      end;
+  end loop;
+-- fine fin_t_asp
+
+-- loop per fin_t_direttrice
+  for d in (SELECT 
+             codice
+             ,fin_t_asp_codice
+             ,descrizione
+             ,data_assestamento
+
+            FROM fin_t_direttrice 
+            WHERE data_assestamento = to_date('01011900','ddmmyyyy') 
+            AND anno = (p_anno - 1))
+      loop
+        begin
+        INSERT INTO fin_t_direttrice 
+         (anno
+         ,codice
+         ,fin_t_asp_anno
+         ,fin_t_asp_codice
+         ,descrizione
+         ,data_assestamento
+         ,aggiornato_da
+         ,data_aggiornamento) 
+         values
+         (p_anno
+         ,d.codice
+         ,p_anno
+         ,d.fin_t_asp_codice
+         ,d.descrizione
+         ,d.data_assestamento
+         ,1000
+         ,trunc(sysdate,'dd')
+         );
+         exception when dup_val_on_index then null;
+        end;
+    end loop;
+-- fine loop per fin_t_direttrice
+
+-- loop per fin_t_direttrice
+  for r in (SELECT 
+          codice
+         ,fin_t_asp_codice
+         ,fin_t_direttrice_codice
+         ,descrizione
+         ,data_assestamento
+         FROM fin_t_risultati 
+         WHERE data_assestamento = to_date('01011900','ddmmyyyy') 
+         AND anno = (p_anno - 1))
+    loop
+      begin
+      INSERT INTO fin_t_risultati 
+       (anno
+       ,codice
+       ,fin_t_asp_anno
+       ,fin_t_asp_codice
+       ,fin_t_direttrice_anno
+       ,fin_t_direttrice_codice
+       ,descrizione
+       ,data_assestamento
+       ,aggiornato_da
+       ,data_aggiornamento)
+       VALUES
+       (p_anno
+       ,r.codice
+       ,p_anno
+       ,r.fin_t_asp_codice
+       ,p_anno
+       ,r.fin_t_direttrice_codice
+       ,r.descrizione
+       ,r.data_assestamento
+       ,1000
+       ,trunc(sysdate,'dd'));
+       exception when dup_val_on_index then null;
+      end; 
+  end loop;
+ -- fine loop fin_t_risultati
+
+ -- loop per fin_t_obiettivi_gestionali
+     for o in (SELECT 
+               codice_parte1
+               ,codice_parte2
+               ,codice_parte3
+               ,fin_t_asp_codice
+               ,fin_t_direttrice_codice
+               ,fin_t_risultati_codice
+               ,descrizione
+               ,data_assestamento
+               ,peso
+               ,ufficio
+              FROM fin_t_obiettivi_gestionali 
+              WHERE data_assestamento = to_date('01011900','ddmmyyyy') 
+              AND anno = (p_anno - 1))
+      loop
+      begin
+      INSERT INTO fin_t_obiettivi_gestionali 
+       (anno
+       ,codice_parte1
+       ,codice_parte2
+       ,codice_parte3
+       ,fin_t_asp_anno
+       ,fin_t_asp_codice
+       ,fin_t_direttrice_anno
+       ,fin_t_direttrice_codice
+       ,fin_t_risultati_anno
+       ,fin_t_risultati_codice
+       ,descrizione
+       ,valido_dal
+       ,valido_al
+       ,data_assestamento
+       ,aggiornato_da
+       ,data_aggiornamento
+       ,peso
+       ,ufficio)
+       values
+       (p_anno
+       ,o.codice_parte1
+       ,o.codice_parte2
+       ,o.codice_parte3
+       ,p_anno
+       ,o.fin_t_asp_codice
+       ,p_anno
+       ,o.fin_t_direttrice_codice
+       ,p_anno
+       ,o.fin_t_risultati_codice
+       ,o.descrizione
+       ,to_date('01/01/'||p_anno,'dd/mm/yyyy')
+       ,to_date('31/12/'||p_anno,'dd/mm/yyyy')
+       ,o.data_assestamento
+       ,1000
+       ,trunc(sysdate,'dd')
+       ,o.peso
+       ,o.ufficio);
+      exception when dup_val_on_index then null;
+      end;
+  end loop;
+-- fine loop fin_t_obiettivi_gestionali
+
+-- loop per fin_t_obiettivi_gest_capitoli
+
+  for c in (SELECT 
+             fin_t_asp_codice
+             ,fin_t_direttrice_codice
+             ,fin_t_risultati_codice
+             ,fin_t_og_codice_parte1
+             ,fin_t_og_codice_parte2
+             ,fin_t_og_codice_parte3
+             ,capitolo_eu
+             ,capitolo_codice
+             ,data_assestamento
+             ,TITOLARITA         
+            FROM fin_t_obiettivi_gest_capitoli 
+            WHERE data_assestamento = to_date('01011900','ddmmyyyy') 
+            AND fin_t_asp_anno = (p_anno - 1)
+            and TITOLARITA &lt;> 'D')
+    loop
+          begin
+          INSERT INTO fin_t_obiettivi_gest_capitoli 
+           (fin_t_asp_anno
+           ,fin_t_asp_codice
+           ,fin_t_direttrice_anno
+           ,fin_t_direttrice_codice
+           ,fin_t_risultati_anno
+           ,fin_t_risultati_codice
+           ,fin_t_og_anno
+           ,fin_t_og_codice_parte1
+           ,fin_t_og_codice_parte2
+           ,fin_t_og_codice_parte3
+           ,capitolo_anno
+           ,capitolo_eu
+           ,capitolo_codice
+           ,data_assestamento
+           ,TITOLARITA)
+           values
+           (p_anno
+           ,c.fin_t_asp_codice
+           ,p_anno
+           ,c.fin_t_direttrice_codice
+           ,p_anno
+           ,c.fin_t_risultati_codice
+           ,p_anno
+           ,c.fin_t_og_codice_parte1
+           ,c.fin_t_og_codice_parte2
+           ,c.fin_t_og_codice_parte3
+           ,p_anno
+           ,c.capitolo_eu
+           ,c.capitolo_codice
+           ,c.data_assestamento
+           ,c.TITOLARITA
+           );
+          exception when dup_val_on_index then null;
+          end;
+   end loop;
+
+   for i in (SELECT 
+             codice
+             ,fin_t_asp_codice
+             ,fin_t_direttrice_codice
+             ,fin_t_risultati_codice
+             ,fin_t_ob_gest_codice_parte1
+             ,fin_t_ob_gest_codice_parte2
+             ,fin_t_ob_gest_codice_parte3
+             ,descrizione
+             ,target
+             ,data_assestamento
+            FROM fin_t_indicatori 
+            WHERE data_assestamento = to_date('01011900','ddmmyyyy') 
+            AND anno = (p_anno - 1))
+    loop
+      begin
+      INSERT INTO fin_t_indicatori 
+       (anno
+       ,codice
+       ,fin_t_asp_anno
+       ,fin_t_asp_codice
+       ,fin_t_direttrice_anno
+       ,fin_t_direttrice_codice
+       ,fin_t_risultati_anno
+       ,fin_t_risultati_codice
+       ,fin_t_ob_gest_anno
+       ,fin_t_ob_gest_codice_parte1
+       ,fin_t_ob_gest_codice_parte2
+       ,fin_t_ob_gest_codice_parte3
+       ,descrizione
+       ,target
+       ,data_assestamento
+       ,aggiornato_da
+       ,data_aggiornamento)
+       values
+       (p_anno
+       ,i.codice
+       ,p_anno
+       ,i.fin_t_asp_codice
+       ,p_anno
+       ,i.fin_t_direttrice_codice
+       ,p_anno
+       ,i.fin_t_risultati_codice
+       ,p_anno
+       ,i.fin_t_ob_gest_codice_parte1
+       ,i.fin_t_ob_gest_codice_parte2
+       ,i.fin_t_ob_gest_codice_parte3
+       ,i.descrizione
+       ,i.target
+       ,i.data_assestamento
+       ,1000
+       ,trunc(sysdate,'dd')
+       );
+      exception when dup_val_on_index then null;
+      end;
+  end loop;
+-- fine loop fin_t_indicatori
+
+--loop per fin_t_dipartimenti  
+   for d in (SELECT 
+           p_anno
+           ,codice
+           ,descrizione
+           ,attivo
+           ,note
+           ,data_assestamento
+           ,1000
+           ,sysdate
+           ,email_dg
+          FROM fina_t_dipartimenti 
+          WHERE data_assestamento = to_date('01011900','dd/mm/yyyy') 
+          AND anno = (p_anno - 1))
+   loop
+
+      begin
+      INSERT INTO fin_t_dipartimenti 
+       (anno
+       ,codice
+       ,descrizione
+       ,attivo
+       ,note
+       ,data_assestamento
+       ,aggiornato_da
+       ,data_aggiornamento
+       ,email_dg)
+       values
+       (p_anno
+       ,d.codice
+       ,d.descrizione
+       ,d.attivo
+       ,d.note
+       ,d.data_assestamento
+       ,1000
+       ,trunc(sysdate,'dd')
+       ,d.email_dg)
+      ;
+      exception when dup_val_on_index then null;
+      end;
+   end loop;
+-- fine loop fin_t_dipartimenti
+
+-- loop fin_t_strutture
+
+  for s in (SELECT 
+           codice
+           ,fin_t_dipartimenti_codice
+           ,descrizione
+           ,attivo
+           ,note
+           ,data_assestamento
+           ,monitoraggio
+           ,1000
+           ,sysdate
+           ,DIP_CONTROLLATO
+           ,CODICE_PCC
+           ,CODICE_IPA
+           ,PEC
+          FROM fina_t_strutture 
+          WHERE data_assestamento = to_date('01011900','dd/mm/yyyy') 
+          AND anno = (p_anno - 1))
+  loop  
+      begin
+      INSERT INTO fin_t_strutture 
+       (anno
+       ,codice
+       ,fin_t_dipartimenti_anno
+       ,fin_t_dipartimenti_codice
+       ,descrizione
+       ,attivo
+       ,note
+       ,data_assestamento
+       ,monitoraggio
+       ,aggiornato_da
+       ,data_aggiornamento
+       ,DIP_CONTROLLATO
+       ,CODICE_PCC
+       ,CODICE_IPA
+       ,PEC)
+       values
+       (p_anno
+       ,s.codice
+       ,p_anno
+       ,s.fin_t_dipartimenti_codice
+       ,s.descrizione
+       ,s.attivo
+       ,s.note
+       ,s.data_assestamento
+       ,s.monitoraggio
+       ,1000
+       ,trunc(sysdate,'dd')
+       ,s.DIP_CONTROLLATO
+       ,s.CODICE_PCC
+       ,s.CODICE_IPA
+       ,s.PEC);
+     exception when dup_val_on_index then null;
+      end;
+   end loop;
+-- fine loop fin_t_strutture
+
+-- loop per fin_t_strutture_Capitoli
+  for x in (SELECT 
+            fin_t_dipartimenti_codice
+            ,fin_t_strutture_codice
+            ,capitolo_eu
+            ,capitolo_codice
+            ,data_assestamento
+            ,TITOLARITA
+            FROM fin_t_strutture_capitoli 
+            WHERE data_assestamento = to_date('01011900','dd/mm/yyyy') 
+            AND fin_t_dipartimenti_anno = (p_anno - 1) 
+            and TITOLARITA &lt;> 'D')
+   loop
+   begin
+    INSERT INTO fin_t_strutture_capitoli 
+     (fin_t_dipartimenti_anno
+     ,fin_t_dipartimenti_codice
+     ,fin_t_strutture_anno
+     ,fin_t_strutture_codice
+     ,capitolo_anno
+     ,capitolo_eu
+     ,capitolo_codice
+     ,validita_dal
+     ,validita_al
+     ,data_assestamento
+     ,TITOLARITA)
+     values
+     (p_anno
+     ,x.fin_t_dipartimenti_codice
+     ,p_anno
+     ,x.fin_t_strutture_codice
+     ,p_anno
+     ,x.capitolo_eu
+     ,x.capitolo_codice
+     ,to_date('01/01/'||p_anno,'dd/mm/yyyy')
+     ,to_date('31/12/'||p_anno,'dd/mm/yyyy')
+     ,x.data_assestamento
+     ,x.TITOLARITA);
+    exception when dup_val_on_index then null;
+    end;
+   end loop;
+commit;  
+END;</pre>	</td></tr>
+</table></div>

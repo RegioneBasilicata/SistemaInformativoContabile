@@ -1,0 +1,213 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PERENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PERENTI.html">Details</a></div></div>
+<div class="tab"><div><a href="PERENTI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PERENTI_References.html">References</a></div></div>
+<div class="tab"><div><a href="PERENTI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PERENTI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE      PERENTI 
+(w_anno in out number, w_doc_id in out number, w_residuo_consuntivo in out number, w_man_rev_residui in out number, w_variazioni_residui in out number) IS
+a number(15,2);
+doc_id_impegno number;
+doc_id_storno_impegno number;
+doc_id_mandato number;
+pagamenti_residui number(15,2);
+pagamenti_anni_precedenti number(15,2);
+pagamenti_successivi number(15,2);
+
+totale_correzione_storno_imp number(15,2);
+totale_storno_impegni number(15,2);
+
+--totale_storno_impegni_var number(15,2);
+--totale_corr_storno_imp_var number(15,2);
+
+cursor impegni is
+select  distinct
+nvl(jugd.closed_amount_proposed,0) r_importo_impegno,
+--nvl(jugd.document_amount,0) r_importo_impegno,
+to_number(to_char(jugd.date_created,'yyyy')) r_anno_impegno,
+jugd.doc_type r_tipo_impegno,
+substr(bi.ind_cap,1,6) r_capitolo_spesa,
+jugd.previous_doc_id r_ndp_impegno,
+jugd.doc_id r_doc_id_impegno
+from
+fina_documenti jugd,
+bas_ind   bi
+where
+jugd.doc_type in ('IMP','IMP-PER','IMP-DEF')
+and upper(nvl(jugd.proposal_status_flag,'B'))    &lt;> 'B'
+and upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y'
+and jugd.auditing_status_flag in( 'T' ,'B')
+and jugd.gl_date is not null
+and jugd.period_name is not null
+and jugd.date_created is not null
+and bi.ind_anno = w_anno
+and bi.DOC_ID = w_doc_id
+and to_number(to_char(jugd.date_created,'yyyy')) &lt; w_anno
+and to_number(to_char(jugd.data_perenzione,'yyyy')) = w_anno + 1
+and jugd.doc_id = w_doc_id;
+
+
+cursor mandati is
+SELECT
+jugd.document_amount r_importo_documento_mandato,
+to_number(to_char(jugd.date_created,'yyyy')) r_anno_mandato,
+jugd1.doc_id r_numero_documento_liq,
+jugd2.doc_id  r_numero_documento_impegno,
+jugd3.date_created r_data_storno_mandato
+FROM
+fina_documenti         jugd,
+fina_documenti         jugd1, /* liquidazione */
+fina_documenti         jugd2, /* impegno */
+fina_documenti         jugd3 /* movimento_storno */
+WHERE
+upper(jugd.doc_type) = 'MAND' and
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z')) ='PI' and
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y' and
+to_number(to_char(jugd.date_created,'yyyy')) &lt;= w_anno + 1 and
+jugd.previous_doc_id = jugd1.doc_id and
+jugd1.previous_doc_id = jugd2.doc_id and
+jugd2.doc_id = doc_id_impegno and
+jugd.doc_id = jugd3.previous_doc_id(+) and
+upper(jugd3.doc_type(+))  = 'ST-MAND' and
+upper(nvl(jugd3.proposal_status_flag(+),'Z'))||upper(nvl(jugd3.auditing_status_flag(+),'Z'))    ='PI';
+
+cursor storno_impegni is
+SELECT
+jugd2.doc_id r_doc_id_storno,
+upper(jugd2.doc_type) r_tipo_storno_imp,
+nvl(jugd2.document_amount,0) r_importo_storno_imp,
+jugd2.previous_doc_id r_ndp_storno
+FROM
+fina_documenti jugd2
+WHERE
+upper(jugd2.doc_type) in ('ST-IMP','ST-IMPDEF','ECO','DIS')     and
+upper(nvl(jugd2.proposal_status_flag,'Z'))||upper(nvl(jugd2.auditing_status_flag,'Z'))    ='PI' and
+upper(nvl(jugd2.deletion_status_flag,'N'))  &lt;> 'Y'     and
+jugd2.gl_date is not null and
+jugd2.period_name is not null and
+jugd2.date_created is not null    and
+to_number(to_char(jugd2.date_created,'yyyy')) &lt; w_anno and
+jugd2.previous_doc_id = doc_id_impegno;
+
+
+cursor corr_storno_impegni is
+SELECT
+jugd2.doc_id r_doc_id_storno_corr,
+upper(jugd2.doc_type) r_tipo_storno_corr,
+nvl(jugd2.document_amount,0) r_importo_storno_corr,
+jugd2.previous_doc_id r_ndp_storno_corr
+FROM
+fina_documenti jugd2
+WHERE
+upper(jugd2.doc_type) in ('CORR','CORR-DIS') and
+upper(nvl(jugd2.proposal_status_flag,'Z'))||upper(nvl(jugd2.auditing_status_flag,'Z'))    ='PI' and
+upper(nvl(jugd2.deletion_status_flag,'N')) &lt;> 'Y' and
+jugd2.gl_date is not null and
+jugd2.period_name is not null and
+jugd2.date_created is not null    and
+to_number(to_char(jugd2.date_created,'yyyy')) &lt; w_anno and
+jugd2.previous_doc_id = doc_id_storno_impegno;
+
+cursor storno_impegni_variazione is
+SELECT
+jugd2.doc_id rv_doc_id_storno,
+upper(jugd2.doc_type) rv_tipo_storno_imp,
+nvl(jugd2.document_amount,0) rv_importo_storno_imp,
+jugd2.previous_doc_id rv_ndp_storno
+FROM
+fina_documenti jugd2
+WHERE
+upper(jugd2.doc_type) in ('ST-IMP','ST-IMPDEF','ECO','DIS')     and
+upper(nvl(jugd2.proposal_status_flag,'Z'))||upper(nvl(jugd2.auditing_status_flag,'Z'))    = 'PI' and
+upper(nvl(jugd2.deletion_status_flag,'N')) &lt;> 'Y'     and
+jugd2.gl_date is not null and
+jugd2.period_name is not null and
+jugd2.date_created is not null    and
+to_number(to_char(jugd2.date_created,'yyyy')) = w_anno and
+jugd2.previous_doc_id = doc_id_impegno;
+
+cursor corr_storno_impegni_variazione is
+SELECT
+jugd2.doc_id rv_doc_id_storno_corr,
+upper(jugd2.doc_type) rv_tipo_storno_corr,
+nvl(jugd2.document_amount,0) rv_importo_storno_corr,
+jugd2.previous_doc_id rv_ndp_storno_corr
+FROM
+fina_documenti jugd2
+WHERE
+upper(jugd2.doc_type) in ('CORR','CORR-DIS') and
+upper(nvl(jugd2.proposal_status_flag,'Z'))||upper(nvl(jugd2.auditing_status_flag,'Z'))    ='PI' and
+upper(nvl(jugd2.deletion_status_flag,'N')) &lt;> 'Y'  and
+jugd2.gl_date is not null and
+jugd2.period_name is not null and
+jugd2.date_created is not null and
+to_number(to_char(jugd2.date_created,'yyyy')) = w_anno and
+jugd2.previous_doc_id = doc_id_storno_impegno;
+
+BEGIN
+
+for i in impegni loop
+ doc_id_impegno := i.r_doc_id_impegno;
+
+-- calcolo mandati
+ pagamenti_successivi := 0;
+ pagamenti_anni_precedenti := 0;
+ pagamenti_residui := 0;
+ for m in mandati loop
+     if m.r_data_storno_mandato is not null
+     then null;
+     elsif m.r_anno_mandato &lt; w_anno
+             then pagamenti_anni_precedenti := pagamenti_anni_precedenti + nvl(m.r_importo_documento_mandato,0);
+                  elsif m.r_anno_mandato = w_anno
+                                            then pagamenti_residui := pagamenti_residui  + nvl(m.r_importo_documento_mandato,0);
+                                            else pagamenti_successivi := pagamenti_successivi  + nvl(m.r_importo_documento_mandato,0);
+ end if;
+ end loop;
+-- fine calcolo mandati
+
+-- calcolo storno impegni
+ totale_storno_impegni := 0;
+
+ for si in storno_impegni loop
+
+-- calcolo correzione storni impegni
+  doc_id_storno_impegno := si.r_doc_id_storno;
+  totale_correzione_storno_imp := 0;
+
+  for csi in corr_storno_impegni loop
+    totale_correzione_storno_imp := totale_correzione_storno_imp + nvl(csi.r_importo_storno_corr,0);
+  end loop;
+-- fine calcolo correzione storni impegni
+
+  totale_storno_impegni := totale_storno_impegni + (nvl(si.r_importo_storno_imp,0) - nvl(totale_correzione_storno_imp,0));
+ end loop;
+-- fine calcolo storni impegni
+
+ w_residuo_consuntivo := nvl(w_residuo_consuntivo,0) + nvl(i.r_importo_impegno,0);--+ (nvl(i.r_importo_impegno,0) - nvl(totale_storno_impegni,0) - nvl(pagamenti_anni_precedenti,0));
+
+ w_man_rev_residui := nvl(w_man_rev_residui,0) + nvl(pagamenti_residui,0);
+
+ a := (nvl(i.r_importo_impegno,0) - nvl(totale_storno_impegni,0) - nvl(pagamenti_anni_precedenti,0));
+ w_variazioni_residui := nvl(w_variazioni_residui,0) + nvl(i.r_importo_impegno,0);--+ (a - nvl(pagamenti_residui,0) - nvl(pagamenti_successivi,0));
+
+end loop;
+
+
+
+END;</pre>	</td></tr>
+</table></div>

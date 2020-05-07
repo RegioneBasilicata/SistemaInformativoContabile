@@ -1,0 +1,127 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_ACCERTAMENTI_RESIDUI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ACCERTAMENTI_RESIDUI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ANNO_FINANZIARIO</td>
+<td>NUMBER(4,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOC_ID_ACCERTAMENTO</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUMERO_ACCERTAMENTO</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_ACCERTAMENTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OGGETTO_ACCERTAMENTO</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO_ACCERTAMENTO</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>IMPORTO_ORIGINARIO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RESIDUO_INIZIALE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLO_SPESA_ORIGINARIO</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLO_SPESA_CORRENTE</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIPARTIMENTO</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PCF</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>attribute16 della FINT_T_DOCUMENTI che corrisponde al PCF</td>
+	</tr>
+</table></div>

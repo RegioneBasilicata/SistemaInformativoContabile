@@ -1,0 +1,347 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_COMPOSIZIONE_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_COMPOSIZIONE_BILANCIO.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_COMPOSIZIONE_BILANCIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_COMPOSIZIONE_BILANCIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_COMPOSIZIONE_BILANCIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_COMPOSIZIONE_BILANCIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure aggiorna_composizione_bilancio
+(
+ panno in number,
+ pcapitolo in varchar2
+ )
+IS
+
+vsegment2 varchar2(6);
+vsegment8 number := 0;
+
+valienazione_beni number := 0;
+vfpv number := 0;
+ventrate_libere number := 0;
+vavanzo_vincolato number := 0;
+vstato number := 0;
+vue number := 0;
+vregione_vincolato number := 0;
+valtri_soggetti number := 0;
+vmutui number := 0;
+
+begin
+ 
+ vsegment2 := pcapitolo;
+ vsegment8 := panno;
+
+/* 
+-- controllo se assestamento visibile o meno.
+ begin
+  select decode(visibilita_assestamento,'S','Y','N'),
+         ruolo_visibilita_assestamento
+  into   vassestamento_visibile1,
+         vruolo_visibilita
+  from fin_t_dati_generali
+  where anno_finanziario = vsegment8;
+  exception when no_data_found then vassestamento_visibile1 := 'N';
+ end;
+*/
+ 
+ begin
+ --alienazione beni
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into valienazione_beni
+  from fin_t_documenti d
+  where d.segment9 = 'ALIEN'
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+ 
+ 
+ 
+ begin
+ --fondo_pluriennale
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into vfpv
+  from fin_t_documenti d
+  where d.segment9 in ('FPV','FPV_REG')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+ 
+  begin
+ --entrate libere
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into ventrate_libere
+  from fin_t_documenti d
+  where d.segment9 in ('REGIONE')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+  
+  begin
+ --Avanzo Vincolato
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into vavanzo_vincolato
+  from fin_t_documenti d
+  where d.segment9 in ('AVANZO','AV_REG','AV_RP')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+  
+  begin
+ --Stato
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into vstato
+  from fin_t_documenti d
+  where d.segment9 in ('STATO')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+   
+  begin
+ --Unione Europea
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into vue
+  from fin_t_documenti d
+  where d.segment9 in ('UE')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+ 
+  begin
+ --Regione
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into vregione_vincolato
+  from fin_t_documenti d
+  where d.segment9 in ('REG VIN')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+  
+  begin
+ -- Altri Soggetti
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into valtri_soggetti
+  from fin_t_documenti d
+  where d.segment9 in ('ALTRI VIN')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+ 
+   begin
+ -- Altri Soggetti
+  select
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+  into vmutui
+  from fin_t_documenti d
+  where d.segment9 in ('MUTUI','MUTUIN','OBBLIG')
+  and d.segment2 = vsegment2
+  and d.segment8 = vsegment8
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG');
+ end;
+ 
+  update fin_t_bilancio set 
+   ENTRATE = nvl(ventrate_libere,0)
+   ,MUTUI = nvl(vmutui,0)
+  ,ALIENAZIONE_BENI_IMMOBILI = nvl(valienazione_beni,0)
+  ,STATO = nvl(vstato,0)
+  ,UNIONE_EUROPEA = nvl(vue,0)
+  ,AVANZI = nvl(vavanzo_vincolato,0)
+  ,REGIONE = nvl(vregione_vincolato,0)
+  ,ALTRI_SOGGETTI = nvl(valtri_soggetti,0)
+  ,AIUTI = nvl( vfpv, 0)
+ where anno = vsegment8
+ and eu||articolo = vsegment2;
+  commit;
+ 
+end aggiorna_composizione_bilancio;</pre>	</td></tr>
+</table></div>

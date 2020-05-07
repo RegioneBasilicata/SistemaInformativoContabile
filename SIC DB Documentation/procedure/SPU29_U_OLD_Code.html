@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SPU29_U_OLD</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SPU29_U_OLD.html">Details</a></div></div>
+<div class="tab"><div><a href="SPU29_U_OLD_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SPU29_U_OLD_References.html">References</a></div></div>
+<div class="tab"><div><a href="SPU29_U_OLD_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SPU29_U_OLD_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE      SPU29_U_OLD (p_anno in number) is
+w_residuo_consuntivo  number:=0;
+w_man_rev_residui number:=0;
+w_variazioni_residui number:=0;
+w_residuo_consuntivo_per_succ number:=0;
+w_man_rev_residui_per_succ number:=0;
+w_residuo_consuntivo_per number:=0;
+w_man_rev_residui_per number:=0;
+w_variazioni_residui_per number:=0;
+residui_capitoli_u number(15,2):=0;
+somme_pagate number(15,2):=0;
+dis_eco number(15,2):=0;
+perenzione number(15,2):=0;
+residui_da_riportare number(15,2):=0;
+res_precedenti number(15,2):=0;
+residui_liq number(15,2) := 0;
+anno number;
+
+cursor residui is
+select    distinct
+    to_char(res.DATA_IMPEGNO,'yyyy')    anno_imp,
+   res.CAPITOLO_SPESA_CORRENTE         codice_capitolo_u_stampa,
+   res.CAPITOLO_SPESA_ORIGINARIO               codice_capitolo_u,
+    cap.descrizione                        descr_cap_u,
+    nvl(to_number(to_char(res.data_perenzione,'yyyy')),p_anno + 2) anno_perenzione,
+    res.DOC_ID_IMPEGNO doc_id_imp
+    ,nvl(jugd.closed_amount_proposed,0) closed_amount
+from                                                                
+    fina_articoli                cap,
+    fin_t_impegni_residui res,
+    fin_t_documenti jugd
+where     res.anno_finanziario = p_anno and
+        res.residuo_iniziale > 0 and
+        cap.anno = p_anno and
+    cap.eu||cap.codice = res.CAPITOLO_SPESA_CORRENTE and 
+    jugd.DOC_ID = res.DOC_ID_IMPEGNO
+order by to_char(res.DATA_IMPEGNO,'yyyy');
+
+begin
+delete fin_t_spu29 where anno = p_anno and eu='U';
+commit;
+anno := p_anno;
+ for res in residui loop
+  IMPEGNI_RESIDUI(anno,res.doc_id_imp,w_residuo_consuntivo,w_man_rev_residui,w_variazioni_residui);
+
+  somme_pagate := w_man_rev_residui;
+  /*if res.anno_perenzione = p_anno
+  then PERENTI_SUCCESSIVI(anno,res.DOC_ID_IMP,w_residuo_consuntivo_per_succ,w_man_rev_residui_per_succ);
+  somme_pagate := nvl(w_residuo_consuntivo_per_succ,0);
+  else  somme_pagate := w_man_rev_residui;
+  end if;*/
+  if res.anno_perenzione = p_anno + 1
+  then PERENTI(anno,res.doc_id_imp,w_residuo_consuntivo_per,w_man_rev_residui_per,w_variazioni_residui_per);
+  perenzione := nvl(w_variazioni_residui_per,0);
+  end if;
+ if res.anno_perenzione &lt;= p_anno
+ then residui_capitoli_u := nvl(w_man_rev_residui,0);
+ else residui_capitoli_u := nvl(w_residuo_consuntivo,0);
+ end if;
+ if res.anno_perenzione &lt;= p_anno 
+  then 
+    if (residuo_imp_data(res.doc_id_imp,to_date('3112'||p_anno-1,'ddmmyyyy')) - nvl(res.closed_amount,0)) > 0 
+     then dis_eco := nvl(w_variazioni_residui,0);
+     else dis_eco := 0;
+    end if;
+ elsif res.anno_perenzione = p_anno + 1
+ then 
+  dis_eco := nvl(w_variazioni_residui,0);
+ --perenzione := perenzione - dis_eco;
+ else dis_eco := nvl(w_variazioni_residui,0);
+ end if;
+  residui_da_riportare := residui_capitoli_u - somme_pagate - dis_eco - perenzione;
+  if nvl(residui_capitoli_u,0) > 0
+  then
+  insert into fin_t_spu29 (ANNO,ANNO_RESIDUO,EU,CAPITOLO,DESCRIZIONE,RESIDUI_INIZIALI,SOMME_RISC_PAGATE,INSUSS_DIS_ECO,MAGG_ACC_PERENZIONE,RESIDUI_DA_RIPORTARE,DOC_ID)
+  values (p_anno,res.anno_imp,'U',res.codice_capitolo_u_stampa,res.descr_cap_u,residui_capitoli_u,somme_pagate,dis_eco,perenzione,residui_da_riportare,res.doc_id_imp);
+  commit;
+  end if;
+  w_residuo_consuntivo:=0;
+  w_man_rev_residui:=0;
+  w_variazioni_residui:=0;
+  w_residuo_consuntivo_per_succ:=0;
+  w_man_rev_residui_per_succ:=0;
+  w_residuo_consuntivo_per:=0;
+  w_man_rev_residui_per:=0;
+  w_variazioni_residui_per:=0;
+  residui_capitoli_u:=0;
+  somme_pagate:=0;
+  dis_eco:=0;
+  perenzione:=0;
+  residui_da_riportare:=0;
+ end loop;
+-- da inserire per cons. 2013 ma Sarli ha preferito per il momento non inserirlo
+if p_anno = 2013 
+ then
+ insert into fin_t_spu29 (ANNO,ANNO_RESIDUO,EU,CAPITOLO,DESCRIZIONE,RESIDUI_INIZIALI,SOMME_RISC_PAGATE,INSUSS_DIS_ECO,MAGG_ACC_PERENZIONE,RESIDUI_DA_RIPORTARE)
+  values (p_anno,2008,'U','U08270','SPESE PER LA FORMAZIONE E L''AGGIORNAMENTO DEL PERSONALE',0,0,-747,0,0);
+  commit;
+  end if;
+
+-- ***** UPDATE per Vincoli *****
+	update fin_t_spu29 r set r.CAPITOLI_VINCOLATI = 
+		(SELECT LISTAGG('E'||capitolo_entrata, ' - ') WITHIN GROUP (ORDER BY 'E'||capitolo_entrata)
+        FROM VW_VINCOLI_DEFINITIVI
+        where anno = p_anno
+        and capitolo_uscita = r.capitolo)
+        where r.anno = p_anno and substr(r.capitolo,1,1) = 'U';
+    commit;
+
+	-- ********
+end;</pre>	</td></tr>
+</table></div>

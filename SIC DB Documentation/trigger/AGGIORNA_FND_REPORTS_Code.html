@@ -1,0 +1,554 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_FND_REPORTS</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_FND_REPORTS_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER AGGIORNA_FND_REPORTS 
+ AFTER INSERT OR DELETE OR UPDATE ON fnd_reports
+ FOR EACH ROW
+DECLARE
+
+  wid NUMBER;
+  wdescrizione VARCHAR2(2000);
+  wintestazione01 VARCHAR2(200);
+  wintestazione02 VARCHAR2(200);
+  wintestazione_destra VARCHAR2(200);
+  wintestazione_sinistra VARCHAR2(200);
+  wpiede01 VARCHAR2(200);
+  wpiede02 VARCHAR2(200);
+  wpiede_destra VARCHAR2(200);
+  wpiede_sinistra VARCHAR2(200);
+  wid_categoria NUMBER;
+  wnome_reports VARCHAR2(15);
+  wp01_anno NUMBER(4,0);
+  wp01_anno_desc VARCHAR2(50);
+  wp02_anno NUMBER(4,0);
+  wp02_anno_desc VARCHAR2(50);
+  wp03_data DATE;
+  wp03_data_desc VARCHAR2(50);
+  wp04_data DATE;
+  wp04_data_desc VARCHAR2(50);
+  wp05_char VARCHAR2(30);
+  wp05_char_desc VARCHAR2(50);
+  wp06_char VARCHAR2(30);
+  wp06_char_desc VARCHAR2(50);
+  wp07_char VARCHAR2(30);
+  wp07_char_desc VARCHAR2(50);
+  wp08_char VARCHAR2(30);
+  wp08_char_desc VARCHAR2(50);
+  wp09_num NUMBER;
+  wp09_num_desc VARCHAR2(50);
+  wp10_num NUMBER;
+  wp10_num_desc VARCHAR2(50);
+  wp11_num NUMBER;
+  wp11_num_desc VARCHAR2(50);
+  wp12_num NUMBER;
+  wp12_num_desc VARCHAR2(50);
+  wp13_capitolo VARCHAR2(6);
+  wp13_capitolo_desc VARCHAR2(50);
+  wpagina NUMBER;
+  wordinamento NUMBER(5,0);
+  wutente VARCHAR2(100);
+  whelp VARCHAR2(4000);
+
+ BEGIN
+
+  IF DELETING 
+     THEN wid := :old.id;
+          BEGIN
+           delete from SIC_CONSIGLIO.fnd_reports where id = wid;
+           delete from SIC_PARCOGALLIPOLI.fnd_reports where id = wid;
+           delete from SIC_PARCOMURGIA.fnd_reports where id = wid;
+           delete from SIC_ARDSU.fnd_reports where id = wid;
+           delete from SIC_APT.fnd_reports where id = wid;
+           delete from SIC_ARPAB.fnd_reports where id = wid;
+           delete from SIC_ALSIA.fnd_reports where id = wid;
+           delete from SIC_LAB.fnd_reports where id = wid;
+           delete from SIC_PARCOVULTURE.fnd_reports where id = wid;
+          END;
+     ELSE wid := :new.id;
+          wdescrizione := :new.descrizione;
+          wintestazione01 := :new.intestazione01;
+          wintestazione02 := :new.intestazione02;
+          wintestazione_destra := :new.intestazione_destra;
+          wintestazione_sinistra := :new.intestazione_sinistra;
+          wpiede01 := :new.piede01;
+          wpiede02 := :new.piede02;
+          wpiede_destra := :new.piede_destra;
+          wpiede_sinistra := :new.piede_sinistra;
+          wid_categoria := :new.id_categoria;
+          wnome_reports := :new.nome_reports;
+          wp01_anno := :new.p01_anno;
+          wp01_anno_desc := :new.p01_anno_desc;
+          wp02_anno := :new.p02_anno;
+          wp02_anno_desc := :new.p02_anno_desc;
+          wp03_data := :new.p03_data;
+          wp03_data_desc := :new.p03_data_desc;
+          wp04_data := :new.p04_data;
+          wp04_data_desc := :new.p04_data_desc;
+          wp05_char := :new.p05_char;
+          wp05_char_desc := :new.p05_char_desc;
+          wp06_char := :new.p06_char;
+          wp06_char_desc := :new.p06_char_desc;
+          wp07_char := :new.p07_char;
+          wp07_char_desc := :new.p07_char_desc;
+          wp08_char := :new.p08_char;
+          wp08_char_desc := :new.p08_char_desc;
+          wp09_num := :new.p09_num;
+          wp09_num_desc := :new.p09_num_desc;
+          wp10_num := :new.p10_num;
+          wp10_num_desc := :new.p10_num_desc;
+          wp11_num := :new.p11_num;
+          wp11_num_desc := :new.p11_num_desc;
+          wp12_num := :new.p12_num;
+          wp12_num_desc := :new.p12_num_desc;
+          wp13_capitolo := :new.p13_capitolo;
+          wp13_capitolo_desc := :new.p13_capitolo_desc;
+          wpagina := :new.pagina;
+          wordinamento := :new.ordinamento;
+          wutente := :new.utente;
+          whelp := :new.help;
+  END IF;
+
+ IF UPDATING 
+    THEN  BEGIN
+          update sic_consiglio.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+        --  ,piede_destra            = wpiede_destra
+         -- ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+          update sic_parcogallipoli.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+          update sic_parcomurgia.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+          update sic_ardsu.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+          update sic_apt.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+           update sic_arpab.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p09_num                 = wp09_num
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+           update sic_alsia.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+           update sic_lab.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+           update sic_parcovulture.fnd_reports set
+           id                      = wid
+          ,descrizione             = wdescrizione
+          ,intestazione_sinistra   = wintestazione_sinistra
+          ,intestazione01          = wintestazione01
+          ,intestazione02          = wintestazione02
+          ,intestazione_destra     = wintestazione_destra
+          ,piede01                 = wpiede01
+          ,piede02                 = wpiede02
+          ,piede_destra            = wpiede_destra
+          ,piede_sinistra          = wpiede_sinistra
+          ,id_categoria            = wid_categoria
+          ,nome_reports            = wnome_reports
+          ,p01_anno                = wp01_anno
+          ,p01_anno_desc           = wp01_anno_desc
+          ,p02_anno                = wp02_anno
+          ,p02_anno_desc           = wp02_anno_desc
+          ,p03_data                = wp03_data
+          ,p03_data_desc           = wp03_data_desc
+          ,p04_data                = wp04_data
+          ,p04_data_desc           = wp04_data_desc
+          ,p05_char                = wp05_char
+          ,p05_char_desc           = wp05_char_desc
+          ,p06_char                = wp06_char
+          ,p06_char_desc           = wp06_char_desc
+          ,p07_char                = wp07_char
+          ,p07_char_desc           = wp07_char_desc
+          ,p08_char                = wp08_char
+          ,p08_char_desc           = wp08_char_desc
+          ,p09_num                 = wp09_num
+          ,p09_num_desc            = wp09_num_desc
+          ,p10_num                 = wp10_num
+          ,p10_num_desc            = wp10_num_desc
+          ,p11_num                 = wp11_num
+          ,p11_num_desc            = wp11_num_desc
+          ,p12_num                 = wp12_num
+          ,p12_num_desc            = wp12_num_desc
+          ,p13_capitolo            = wp13_capitolo
+          ,p13_capitolo_desc       = wp13_capitolo_desc
+          ,pagina                  = wpagina
+          ,ordinamento             = wordinamento
+          ,utente                  = wutente
+          where id = wid;
+
+
+          END;
+  END IF;
+
+  IF INSERTING 
+     THEN BEGIN
+          insert into SIC_CONSIGLIO.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,       p05_char_desc, p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente, help) values (wid, wdescrizione, wintestazione01, wintestazione02,       wintestazione_destra, wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char,     wp08_char_desc, wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente, whelp);
+
+          insert into SIC_PARCOGALLIPOLI.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc,   p05_char,     p05_char_desc, p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente, help) values (wid, wdescrizione, wintestazione01,   wintestazione02,     wintestazione_destra, wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char,   wp07_char_desc, wp08_char,     wp08_char_desc, wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente, whelp);
+
+          insert into SIC_PARCOMURGIA.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,       p05_char_desc, p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente, help) values (wid, wdescrizione, wintestazione01, wintestazione02,       wintestazione_destra, wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char,     wp08_char_desc, wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente, whelp);
+
+
+          insert into SIC_ARDSU.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,   p05_char_desc,     p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente, help) values (wid, wdescrizione, wintestazione01, wintestazione02,   wintestazione_destra,     wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char, wp08_char_desc,     wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente, whelp);
+
+          insert into SIC_APT.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,   p05_char_desc,     p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente, help) values (wid, wdescrizione, wintestazione01, wintestazione02,   wintestazione_destra,     wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char, wp08_char_desc,     wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente, whelp);
+
+          insert into SIC_ARPAB.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,   p05_char_desc,     p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente, help) values (wid, wdescrizione, wintestazione01, wintestazione02,   wintestazione_destra,     wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char, wp08_char_desc,     wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente, whelp);
+
+          insert into SIC_ALSIA.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,   p05_char_desc,     p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente) values (wid, wdescrizione, wintestazione01, wintestazione02,   wintestazione_destra,     wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char, wp08_char_desc,     wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente);
+          insert into SIC_LAB.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,   p05_char_desc,     p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente) values (wid, wdescrizione, wintestazione01, wintestazione02,   wintestazione_destra,     wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char, wp08_char_desc,     wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente);
+
+          insert into SIC_PARCOVULTURE.fnd_reports (id, descrizione, intestazione01, intestazione02, intestazione_destra, intestazione_sinistra, piede01, piede02, piede_destra, piede_sinistra, id_categoria, nome_reports, p01_anno, p01_anno_desc, p02_anno, p02_anno_desc, p03_data, p03_data_desc, p04_data, p04_data_desc, p05_char,   p05_char_desc,     p06_char, p06_char_desc, p07_char, p07_char_desc, p08_char, p08_char_desc, p09_num, p09_num_desc, p10_num, p10_num_desc, p11_num, p11_num_desc, p12_num, p12_num_desc, p13_capitolo, p13_capitolo_desc, pagina, ordinamento, utente) values (wid, wdescrizione, wintestazione01, wintestazione02,   wintestazione_destra,     wintestazione_sinistra, wpiede01, wpiede02, wpiede_destra, wpiede_sinistra, wid_categoria, wnome_reports, wp01_anno, wp01_anno_desc, wp02_anno, wp02_anno_desc, wp03_data, wp03_data_desc, wp04_data, wp04_data_desc, wp05_char, wp05_char_desc, wp06_char, wp06_char_desc, wp07_char, wp07_char_desc,   wp08_char, wp08_char_desc,     wp09_num, wp09_num_desc, wp10_num, wp10_num_desc, wp11_num, wp11_num_desc, wp12_num, wp12_num_desc, wp13_capitolo, wp13_capitolo_desc, wpagina, wordinamento, wutente);
+          END;
+  END IF;
+
+ END aggiorna_fnd_reports;</pre>	</td></tr>
+</table></div>

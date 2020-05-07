@@ -1,0 +1,234 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>RICH_CONDIV_CAP_STANDARD</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="RICH_CONDIV_CAP_STANDARD.html">Details</a></div></div>
+<div class="tab"><div><a href="RICH_CONDIV_CAP_STANDARD_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="RICH_CONDIV_CAP_STANDARD_References.html">References</a></div></div>
+<div class="tab"><div><a href="RICH_CONDIV_CAP_STANDARD_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="RICH_CONDIV_CAP_STANDARD_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE rich_condiv_cap_standard
+
+ /* 
+
+ Funzionamento della stored procedure:
+ - vede chi è l'ufficio titolare di p_capitolo per l'anno in corso
+ - cea per l'anno in corso una richiesta di condivisione capitolo di tipo "Standard",
+   in cui l'ufficio beneficiario della condivisione è p_ufficio
+ - imposta positivamente in fin_t_cdg_richieste tutti i flag di approvazione previsti 
+ - scrive nelle diverse tabelle coinvolte in tutto il work flow della "Richiesta Standard"
+
+
+ */
+
+ (p_ufficio IN VARCHAR2, 
+  p_capitolo IN VARCHAR2, 			  -- senza la 'U'
+  p_importo IN NUMBER,
+  p_obiettivo_gestionale IN VARCHAR2, -- per esempio 'A.0.X.71.02.01', '0.0.X.72.AE.0', ...
+  p_descr_ob_gestionale IN VARCHAR2,
+  p_motivazione IN VARCHAR2,
+  p_utente_creazione IN VARCHAR2, 	  -- nel work flow normale corrisponde a fnd_user.user_name
+  p_utente_aggiornam IN VARCHAR2, 	  -- nel work flow normale corrisponde a fnd_user.user_name
+  p_utente_id IN NUMBER 	  -- usato perche' la tabella fin_t_strutture capitoli e fin_t_obiettivi_gestionali usano il codice numerico
+ )  IS
+
+ v_titolare VARCHAR2(100);
+ fl_inserita VARCHAR2(1);
+ vid_rich NUMBER;
+ vprogr_uff NUMBER;
+ ob VARCHAR2(30);
+ v_asp_codice VARCHAR2(10);
+ v_direttrice_codice VARCHAR2(10);
+ v_risultati_codice VARCHAR2(10);
+ v_codice_parte1 VARCHAR2(10);
+ v_codice_parte2 VARCHAR2(10);
+ v_codice_parte3 VARCHAR2(10);
+ v_anno_finanz NUMBER;
+ v_rowid ROWID;
+ v_data_inizio DATE;
+ v_data_fine DATE;
+ v_data_fine_rich DATE;
+
+  CURSOR struttura_cap IS
+    SELECT rowid,
+           data_i_condivisione,
+           data_f_condivisione
+    FROM fin_t_strutture_capitoli
+    WHERE fin_t_dipartimenti_anno = v_anno_finanz AND
+          fin_t_strutture_codice = p_ufficio AND
+          capitolo_eu = 'U' AND
+          capitolo_codice = p_capitolo AND
+          data_assestamento = TO_DATE('01011900','DDMMYYYY');
+
+  CURSOR obiettivi_ric IS
+    SELECT estremi_ob,
+           importo_cdg
+    FROM fin_t_cdg_rich_obiettivi
+    WHERE richiesta = vid_rich;
+
+  CURSOR obiettivo_gest_cap IS
+    SELECT rowid,
+           data_i_condivisione,
+           data_f_condivisione
+    FROM fin_t_obiettivi_gest_capitoli
+    WHERE fin_t_asp_anno = v_anno_finanz AND
+          capitolo_eu = 'U' AND
+          capitolo_codice = p_capitolo AND
+          fin_t_asp_codice = v_asp_codice AND
+          fin_t_direttrice_codice = v_direttrice_codice AND
+          fin_t_risultati_codice = v_risultati_codice AND
+          fin_t_og_codice_parte1 = v_codice_parte1 AND
+          fin_t_og_codice_parte2 = v_codice_parte2 AND
+          fin_t_og_codice_parte3 = v_codice_parte3 AND
+          data_assestamento = TO_DATE('01011900','DDMMYYYY');
+
+BEGIN
+
+ v_anno_finanz := TO_CHAR(SYSDATE,'YYYY');
+ v_data_fine_rich := TO_DATE('31/12/'||v_anno_finanz,'DD/MM/YYYY');
+
+ SELECT a.fin_t_strutture_codice
+ INTO v_titolare 
+ FROM fin_t_strutture_capitoli a
+ WHERE a.capitolo_eu = 'U' AND
+       a.capitolo_codice = p_capitolo AND
+       a.fin_t_strutture_anno = v_anno_finanz AND
+       a.data_assestamento = TO_DATE('01011900','DDMMYYYY') AND
+       a.titolarita = 'T';
+
+ fl_inserita := 'N';
+ WHILE fl_inserita = 'N' LOOP
+   SELECT NVL(MAX(id),0)+1
+   INTO vid_rich
+   FROM fin_t_cdg_richieste;
+   SELECT NVL(MAX(progr),0)+1
+   INTO vprogr_uff
+   FROM fin_t_cdg_richieste
+   WHERE struttura_richiedente = p_ufficio AND
+         TO_CHAR(data,'YYYY') = v_anno_finanz;
+   BEGIN
+    INSERT INTO fin_t_cdg_richieste
+     (id,struttura_richiedente,data,progr,
+      capitolo_rich,struttura_titolare_origine,importo_rich,data_fine_rich,
+      motivaz_rich,fl_decisione_titolare,
+      importo_titolare,data_fine_titolare,fl_decisione_cdg,
+      importo_cdg,data_fine_cdg,
+      data_creazione,utente_creazione,utente_aggiornamento,data_aggiornamento,titolarita,
+      fl_decis_dirig_rich,fl_decis_dirig_tit) VALUES
+     (vid_rich,p_ufficio,TRUNC(SYSDATE),vprogr_uff,
+      p_capitolo,v_titolare,p_importo,v_data_fine_rich,
+      p_motivazione,'A',
+      p_importo,v_data_fine_rich,'A',
+      p_importo,v_data_fine_rich,
+      SYSDATE,p_utente_creazione,'TRACCIA',SYSDATE,'T',
+      'A','A');
+    fl_inserita := 'S';
+   EXCEPTION 
+    WHEN DUP_VAL_ON_INDEX 
+      THEN NULL;
+   END;
+ END LOOP;
+
+ INSERT INTO fin_t_cdg_rich_obiettivi (richiesta,estremi_ob,descrizione,importo_rich,importo_str_titolare,importo_cdg)
+ VALUES (vid_rich,p_obiettivo_gestionale,p_descr_ob_gestionale,p_importo,p_importo,p_importo);
+
+ --
+ -- operazioni che nel work flow normale avverrebbero all'approvazione del cdg  - inizio
+ --
+
+
+ -- trattamento fin_t_strutture_capitoli
+
+ OPEN struttura_cap; 	  
+ FETCH struttura_cap 	  
+ INTO v_rowid, 	  
+      v_data_inizio, 	  
+      v_data_fine;     
+ IF struttura_cap%FOUND     
+ 	THEN  	  
+     v_data_inizio := LEAST(v_data_inizio,TRUNC(SYSDATE));     
+     v_data_fine := GREATEST(v_data_fine,v_data_fine_rich);     
+     UPDATE fin_t_strutture_capitoli     
+ 	 SET importo_condivisione = importo_condivisione + p_importo, 	  
+         data_i_condivisione = v_data_inizio,     
+   	     data_f_condivisione = v_data_fine,     
+   	     aggiornato_da = p_utente_id,     
+         data_aggiornamento = SYSDATE     
+         WHERE ROWID = v_rowid;            
+   ELSE     
+     v_data_inizio := SYSDATE;     
+     v_data_fine := v_data_fine_rich;     
+     INSERT INTO fin_t_strutture_capitoli     
+ 	    (fin_t_dipartimenti_anno,fin_t_dipartimenti_codice,fin_t_strutture_anno,fin_t_strutture_codice, 	  
+ 	     capitolo_anno,capitolo_eu,capitolo_codice,validita_dal,validita_al,data_assestamento, 	  
+ 	     titolarita,importo_condivisione, 	  
+ 	     importo_prenotato, 	  
+ 	     data_i_condivisione,data_f_condivisione) VALUES 	  
+ 	    (v_anno_finanz,SUBSTR(p_ufficio,1,2),v_anno_finanz,p_ufficio, 	  
+ 	     v_anno_finanz,'U',p_capitolo,v_data_inizio,v_data_fine_rich,TO_DATE('01011900','DDMMYYYY'), 	  
+ 	     'D',p_importo, 	  
+ 	     NULL, 	  
+ 	     v_data_inizio,v_data_fine); 	  
+ END IF; 	 
+
+ -- trattamento fin_t_obiettivi_gest_capitoli 	  
+
+ FOR r IN obiettivi_ric LOOP	 	  
+   ob := r.estremi_ob;     
+   v_asp_codice := SUBSTR(ob,1,INSTR(ob,'.',1)-1);     
+   v_direttrice_codice := SUBSTR(ob, INSTR(ob,'.',1,1)+1, INSTR(ob,'.',1,2)-INSTR(ob,'.',1,1)-1);     
+   v_risultati_codice := SUBSTR(ob, INSTR(ob,'.',1,2)+1, INSTR(ob,'.',1,3)-INSTR(ob,'.',1,2)-1);     
+   v_codice_parte1 := SUBSTR(ob, INSTR(ob,'.',1,3)+1, INSTR(ob,'.',1,4)-INSTR(ob,'.',1,3)-1);     
+   v_codice_parte2 := SUBSTR(ob, INSTR(ob,'.',1,4)+1, INSTR(ob,'.',1,5)-INSTR(ob,'.',1,4)-1);     
+   v_codice_parte3 := SUBSTR(ob, INSTR(ob,'.',1,5)+1, LENGTH(ob)-INSTR(ob,'.',1,5));     
+   OPEN obiettivo_gest_cap;     
+   FETCH obiettivo_gest_cap     
+   INTO v_rowid,     
+        v_data_inizio,     
+        v_data_fine;     
+   IF obiettivo_gest_cap%FOUND     
+    THEN     
+     v_data_inizio := LEAST(v_data_inizio,TRUNC(SYSDATE));     
+     v_data_fine := GREATEST(v_data_fine,v_data_fine_rich);     
+     UPDATE fin_t_obiettivi_gest_capitoli     
+     SET importo_condivisione = importo_condivisione + p_importo,     
+         data_i_condivisione = LEAST(data_i_condivisione,TRUNC(SYSDATE)),     
+   	     data_f_condivisione = GREATEST(data_f_condivisione,v_data_fine_rich),     
+   	     aggiornato_da = p_utente_id,     
+   	     data_aggiornamento = SYSDATE     
+   	  WHERE ROWID = v_rowid;     
+     ELSE     
+      v_data_inizio := SYSDATE;     
+      v_data_fine := v_data_fine_rich;     
+      INSERT INTO fin_t_obiettivi_gest_capitoli     
+   	   (fin_t_asp_anno,fin_t_asp_codice,fin_t_direttrice_anno,fin_t_direttrice_codice,fin_t_risultati_anno,     
+   	    fin_t_risultati_codice,fin_t_og_anno,fin_t_og_codice_parte1,fin_t_og_codice_parte2,fin_t_og_codice_parte3,     
+   	    capitolo_anno,capitolo_eu,capitolo_codice,data_assestamento,titolarita,     
+   	    importo_condivisione,data_i_condivisione,data_f_condivisione) VALUES     
+   	   (v_anno_finanz,v_asp_codice,v_anno_finanz,v_direttrice_codice,v_anno_finanz,     
+   	    v_risultati_codice,v_anno_finanz,v_codice_parte1,v_codice_parte2,v_codice_parte3,     
+   	    v_anno_finanz,'U',p_capitolo,TO_DATE('01011900','DDMMYYYY'),'D',     
+   	    r.importo_cdg,v_data_inizio,v_data_fine_rich);     
+   END IF;     
+   CLOSE obiettivo_gest_cap;     
+ END LOOP;   
+
+ COMMIT;
+
+ RETURN;
+
+
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_NEWFATT_SIFESR1420</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_NEWFATT_SIFESR1420.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_NEWFATT_SIFESR1420_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_NEWFATT_SIFESR1420_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_NEWFATT_SIFESR1420_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_NEWFATT_SIFESR1420_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2018-01-25</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-03-12</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_NEWFATT_SIFESR1420</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>2346</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select f.chiave,d.descrizione tipo_doc,f.TBTD_SIGLA sigla, f.num_doc, f.data_doc, f.finta_id cod_forn,
+SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME)||' '||a.ALTRI_NOMI||' '||a.CODICE_FISCALE||' '||a.PARTITA_IVA,1,200) fornitore, f.num_prot_entrata, f.data_prot_entrata, 
+t.tot_doc totale, t.tot_impon, t.tot_iva, f.oggetto_fornitura, f.cig, f.cup, t.data_scad, f.data_reg, f.note, c.tab_codice tipo_contratto, c.progr progr_contratto,
+C.NUM_CONTRATTO repertorio, tg.descrizione descr_tipo_contr, c.ult_descr descr_contratto, 
+case nvl(f.stato,'C')
+when 'C' then 'Confermata'
+else 'Eliminata'
+end as stato,
+s.codice cod_uff_contr,
+s.codice_ipa cod_ipa_contr,
+rg.id_atto atto_sic,
+nvl((select azione from pcc_azioni_fatt where chiave=f.chiave and progr=(select max(progr) from pcc_azioni_fatt where chiave=f.chiave and azione&lt;>'CS')),' ') ult_evento,
+(select min(ID_ATTO) from tb_fatture_provvedimenti where id_fattura=f.chiave) provvedimento,
+(select sum(cp_imp_pag) from pcc_azioni_fatt pcc where pcc.chiave=f.chiave and pcc.azione='CP') pagato,
+decode(pcc.stato,'RI','Ricevuto','IL','In lavorazione','RE','Respinto','LA','Lavorato',null) stato_doc_pcc,
+pcc.id_pcc,pcc.data_ult_agg,pcc.IMP_LIQ, pcc.IMP_NO_LIQ, pcc.IMP_SOSP, pcc.IMP_PAG, pcc.IMP_CERT,
+c.cig cig_contratto, C.CODICE_CUP cup_contratto,fl.nome_file,D.DOC_SEQUENCE_VALUE,fm.IMPORTO_LIQUIDATO IMP_PAG_MAND
+--diverso da vw_fatture senza l'ufficio ipa fattura in quanto non da' grant per gat2_ws
+from tb_doc_iva f, FINA_ANAGRAFICA a,tb_tot_doc t, tb_tipi_doc d, bi_generale_gest c, bi_tabelle_gest tg, bi_rate_gest rg, 
+fin_t_strutture s, pcc_stato_fatture pcc,tb_fatture_allegati tfa ,fin_t_file_esterni fl,fin_t_mandati_fatture fm,fin_t_documenti d
+WHERE 
+tg.codice=c.tab_codice and
+nvl(tg.att_pass,'A')='P' and
+nvl(tg.settore,'BM')&lt;>'EE' and
+f.BGG_TAB_ID=c.tab_codice and 
+f.BGG_PROGR=c.progr and
+a.id=f.finta_id and
+t.tbdi_chiave=f.chiave and
+d.sigla=f.TBTD_SIGLA and
+d.sigla_pcc is not null and
+rg.chiave_fattura(+)=f.chiave and
+--wt.chiave_tb_doc_iva(+)=f.chiave and
+s.codice=c.ufficio and
+s.anno=to_char(sysdate,'yyyy') and
+s.data_assestamento=to_date('01011900','ddmmyyyy') and
+pcc.chiave_fattura(+)=f.chiave and
+tfa.id_fattura(+)=f.chiave and
+substr(tfa.descrizione(+),1,7)='marcato' and
+fl.id(+)=tfa.documento and
+fm.id_fattura(+)=f.chiave and
+d.doc_id(+)=fm.id_documento</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

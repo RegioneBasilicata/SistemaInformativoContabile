@@ -1,0 +1,948 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PREVISIONE_ASSESTAMENTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PREVISIONE_ASSESTAMENTO.html">Details</a></div></div>
+<div class="tab"><div><a href="PREVISIONE_ASSESTAMENTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PREVISIONE_ASSESTAMENTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="PREVISIONE_ASSESTAMENTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PREVISIONE_ASSESTAMENTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      PREVISIONE_ASSESTAMENTO(p_anno in number,p_anno_inizio_esercizio in number,p_data_stampa in date,p_utente in varchar2,p_eu in varchar2) as
+
+
+c_avanzo_amministrazione     number(15,2);
+c_variazione_avanzo_delibera number(15,2);
+c_variazione_avanzo_piu      number(15,2);
+c_variazione_avanzo_meno     number(15,2);
+c_avanzo_regionale           number(15,2);
+c_cassa                      number(15,2);
+c_variazione_cassa_piu       number(15,2);
+c_variazione_cassa_meno      number(15,2);
+
+c_fpv_capitale               number(15,2);
+c_fpv_corrente               number(15,2);
+c_variazione_fpv_capitale    number(15,2);
+c_variazione_fpv_corrente    number(15,2);
+c_assestamento_fpv_capitale    number(15,2);
+c_assestamento_fpv_corrente    number(15,2);
+c_variazione_del_fpv_capitale number(15,2);
+c_variazione_del_fpv_corrente number(15,2);
+c_variazione_fpv_capitale01  number(15,2);
+c_variazione_fpv_corrente01  number(15,2);
+c_variazione_fpv_capitale02  number(15,2);
+c_variazione_fpv_corrente02  number(15,2);
+
+
+c_disavanzo_amministrazione  number(15,2);
+c_disavanzo_regionale        number(15,2);
+c_disavanzo_eff_anni_prec    number(15,2);
+c_variazione_disavanzo_piu   number(15,2);
+c_variazione_disavanzo_meno  number(15,2);
+
+c_desc_capitolo              varchar2(2000);
+
+
+compe         number(15,2);             
+compe_var     number(15,2);         
+compe_var01   number(15,2);
+compe_var02   number(15,2);
+compe_var_del number(15,2);     
+compe_ass     number(15,2);         
+cassa         number(15,2);              
+cassa_var     number(15,2);         
+cassa_var_del number(15,2);     
+cassa_ass     number(15,2);         
+residuo       number(15,2);
+
+man_compe         number(15,2);             
+man_compe_var     number(15,2);         
+man_compe_var01   number(15,2);
+man_compe_var02   number(15,2);
+man_compe_var_del number(15,2);     
+man_compe_ass     number(15,2);         
+man_cassa         number(15,2);              
+man_cassa_var     number(15,2);         
+man_cassa_var_del number(15,2);     
+man_cassa_ass     number(15,2);         
+man_residuo       number(15,2);                      
+
+differenza_anni number(1);
+
+--p_anno_inizio_esercizio number(4) := 2013;
+
+cursor capitoli is 
+SELECT  
+ trunc(p_data_stampa,'dd') data_generazione
+,p_utente utente
+,b.eu eu
+,p_anno anno 
+,b.eu||b.codice capitolo
+,b.descrizione desc_capitolo
+,decode(b.eu,'E',nvl(nb1.codice,'Da Def.'),nvl(nb11.codice,'Da Def.')) etit_umis
+,decode(b.eu,'E',nb1.descrizione,nb11.descrizione) desc_tit_mis
+,decode(b.eu,'E',nvl(nb2.codice,'Da Def.'),nvl(nb12.codice,'Da Def.')) etip_uprog
+,decode(b.eu,'E',nb2.descrizione,nb12.descrizione) desc_tip_prog
+,decode(b.eu,'E',nvl(nb3.codice,'Da Def.'),null) ecat
+,decode(b.eu,'E',nb3.descrizione,null) desc_cat
+,b.nb_piano_conti_fina pcf
+,nbpcf.descrizione desc_pcf
+,b.nb_titolo titolo_uscite
+,nbtu.descrizione desc_titolo_uscite
+,b.nb_macroaggregato macroaggregato
+,nbma.descrizione desc_macroaggregato
+,b.nb_cofog_ii_livello cofog_ii_livello
+,nbcg.descrizione desc_cofog
+,b.nb_fpv fpv
+,b.nb_capitolo_fpv capitolo_fpv
+FROM fin_t_articoli b
+     ,nb_livello1 nb1
+     ,nb_livello2 nb2
+     ,nb_livello3 nb3
+     ,nb_livello1 nb11
+     ,nb_livello2 nb12
+     ,nb_pcf_04 nbpcf
+     ,nb_titoli_uscite nbtu
+     ,nb_macroaggregati nbma
+     ,nb_cofog_gruppo nbcg
+WHERE b.anno = p_anno
+and b.eu = p_eu
+and b.titolo &lt;> '0'
+and nvl(b.abilitato,'S') = 'S'
+and nb3.id(+) = b.nb_id_padre 
+and nb2.id(+) = nb3.id_livello2
+and nb1.id(+) = nb2.id_livello1
+and nb12.id(+) = b.nb_id_padre 
+and nb11.id(+) = nb12.id_livello1
+and b.anno = nbpcf.anno(+)
+and b.nb_piano_conti_fina = nbpcf.codice_finale(+)
+and b.anno = nbtu.anno(+)
+and b.nb_titolo = nbtu.id(+)
+and b.anno = nbma.anno(+)
+and b.nb_macroaggregato = nbma.codice(+) 
+and b.anno = nbcg.anno(+)
+and b.nb_cofog_ii_livello = nbcg.codice(+)
+order by 2;
+
+begin
+
+delete fin_t_previsione_assestamento where utente=p_utente and anno = p_anno and eu = nvl(p_eu,eu); -- anno_esercizio = p_anno_inizio_esercizio and 
+
+differenza_anni := p_anno - p_anno_inizio_esercizio ;
+
+ if p_eu = 'U'
+  then 
+  begin 
+  select 
+   nvl(disavanzo_amministrazione,0),
+   nvl(disavanzo_regionale,0),
+   nvl(disavanzo_effettivo_anni_prec,0),
+   nvl(variazione_disavanzo_piu,0),
+   nvl(variazione_disavanzo_meno,0)
+   into 
+   c_disavanzo_amministrazione,
+   c_disavanzo_regionale,
+   c_disavanzo_eff_anni_prec,
+   c_variazione_disavanzo_piu,
+   c_variazione_disavanzo_meno
+  from fin_t_dati_generali
+  where anno_finanziario = p_anno;
+  exception when no_data_found 
+   then c_disavanzo_amministrazione := 0;
+        c_disavanzo_regionale := 0;
+        c_disavanzo_eff_anni_prec := 0;
+        c_variazione_disavanzo_piu := 0;
+        c_variazione_disavanzo_meno := 0;
+  end;
+
+-- DISAVANZO EFFETTIVO ANNI PREC
+  if nvl(c_disavanzo_eff_anni_prec,0) &lt;> 0 or
+    nvl(c_variazione_disavanzo_piu,0) &lt;> 0 or
+    nvl(c_variazione_disavanzo_meno,0) &lt;> 0 
+   then
+   begin
+      select desc_cap_disavanzo_amm1 
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'U'
+   ,p_anno
+   ,'U00003'
+   ,c_desc_capitolo
+   ,nvl(c_disavanzo_eff_anni_prec,0)
+   ,nvl(c_variazione_disavanzo_piu,0) - nvl(c_variazione_disavanzo_meno,0)
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   );
+  commit;  
+  end if;
+
+--inserisco il record del DISAVANZO EFFETIVO di AMMINISTRAZIONE (U00002)
+  if (nvl(c_disavanzo_amministrazione,0) +  nvl(c_disavanzo_regionale,0)) > 0
+    then 
+   begin
+      select desc_cap_disavanzo_amm2 
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'U'
+   ,p_anno
+   ,'U00002'
+   ,c_desc_capitolo
+   ,nvl(c_disavanzo_amministrazione,0) 
+   ,nvl(c_disavanzo_regionale,0)
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   );
+  commit;  
+  end if;
+ end if; 
+ 
+ if nvl(p_eu,'E') = 'E'
+  then 
+  begin 
+   select 
+    nvl(avanzo_amministrazione,0)
+    ,nvl(variazione_avanzo_delibera,0)
+    ,nvl(variazione_avanzo_piu,0)
+    ,nvl(variazione_avanzo_meno,0)
+    ,nvl(avanzo_regionale,0)
+    ,nvl(cassa,0)
+    ,nvl(variazione_cassa_piu,0)
+    ,nvl(variazione_cassa_meno,0)
+--    ,nvl(fpv_capitale,0)
+--    ,nvl(fpv_corrente,0)
+--    ,nvl(variazione_fpv_capitale,0)
+--    ,nvl(variazione_fpv_corrente,0)
+   into 
+    c_avanzo_amministrazione
+    ,c_variazione_avanzo_delibera,
+    c_variazione_avanzo_piu
+    ,c_variazione_avanzo_meno
+    ,c_avanzo_regionale
+    ,c_cassa
+    ,c_variazione_cassa_piu
+    ,c_variazione_cassa_meno
+--    ,c_fpv_capitale
+--    ,c_fpv_corrente
+--    ,c_variazione_fpv_capitale
+--    ,c_variazione_fpv_corrente
+   from fin_t_dati_generali
+   where anno_finanziario = p_anno;
+  end;
+
+    
+  
+-- inserisco i record relativi all'AVANZO, al Fondo Cassa, ed al Fondo Pluriennale Vincolato
+  if nvl(c_avanzo_amministrazione,0) &lt;> 0 
+  or nvl(c_variazione_avanzo_delibera,0)&lt;> 0
+  or nvl(c_variazione_avanzo_piu,0) &lt;> 0 
+  or nvl(c_variazione_avanzo_meno,0) &lt;> 0
+    then 
+   begin
+      select desc_cap_avanzo_amm
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'E'
+   ,p_anno
+   ,'E00001'
+   ,c_desc_capitolo
+   ,nvl(c_avanzo_amministrazione,0)
+   ,(nvl(c_variazione_avanzo_piu,0) - nvl(c_variazione_avanzo_meno,0))
+   ,0
+   ,0
+   ,nvl(c_variazione_avanzo_delibera,0)
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   );
+  commit;  
+  end if;
+
+  if nvl(c_avanzo_regionale,0) &lt;> 0 
+     then 
+   begin
+      select desc_cap_avanzo_amm
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'E'
+   ,p_anno
+   ,'E00002'
+   ,c_desc_capitolo
+   ,0
+   ,nvl(c_avanzo_regionale,0)
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   );
+  commit;  
+  end if;
+
+
+      select desc_cap_fondo_cassa
+  if (nvl(c_cassa,0) + nvl(c_variazione_cassa_piu,0) - nvl(c_variazione_cassa_meno,0)) > 0
+    then 
+   begin
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'E'
+   ,p_anno
+   ,'E00003'
+   ,c_desc_capitolo
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,nvl(c_cassa,0)
+   ,(nvl(c_variazione_cassa_piu,0) - nvl(c_variazione_cassa_meno,0))
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   );
+  commit;  
+  end if;
+  
+  if differenza_anni = 0
+     then
+     c_fpv_corrente                         :=assestamento_fpvcor_iniziale (p_anno);
+     c_assestamento_fpv_corrente            :=assestamento_fpvcorrente (p_anno);
+     elsif differenza_anni=1
+           then c_fpv_corrente              :=assestamento_fpvcor_plur1(p_anno);
+                c_assestamento_fpv_corrente :=assestamento_fpvcorrente_pl1(p_anno);
+           else c_fpv_corrente              :=assestamento_fpvcor_plur2 (p_anno);
+                c_assestamento_fpv_corrente :=assestamento_fpvcorrente_pl2 (p_anno);
+  end if;
+  
+  c_variazione_fpv_corrente     := 0;
+  c_variazione_del_fpv_corrente := 0;
+  c_variazione_fpv_corrente01   := 0;
+  c_variazione_fpv_corrente02   := 0;
+ 
+ if nvl(c_fpv_corrente,0) &lt;> 0
+ or nvl(c_variazione_fpv_corrente,0) &lt;> 0
+ or nvl(c_assestamento_fpv_corrente,0) &lt;> 0
+ or nvl(c_variazione_del_fpv_corrente,0) &lt;> 0
+ or nvl(c_variazione_fpv_corrente01,0) &lt;> 0
+ or nvl(c_variazione_fpv_corrente02,0) &lt;> 0
+    then 
+   begin
+      select desc_cap_fpv_corrente
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'E'
+   ,p_anno
+   ,'E00004'
+   ,c_desc_capitolo
+   ,nvl(c_fpv_corrente,0)
+   ,nvl(c_variazione_fpv_corrente,0)
+   ,nvl(c_variazione_fpv_corrente01,0)
+   ,nvl(c_variazione_fpv_corrente02,0)
+   ,nvl(c_variazione_del_fpv_corrente,0)
+   ,nvl(c_assestamento_fpv_corrente,0)
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+  end if;
+   ,null
+   );
+  commit;  
+
+ begin
+  select nvl(importo,0)
+  into man_compe_var_del
+  from fnd_reports_importi_man
+  where valore_parametro_anno = p_anno
+  and nome_campo_report='COMPETENZA_VARIAZIONI_DELIBERA';
+  exception when no_data_found then man_compe_var_del := 0;
+end;
+
+
+ begin
+  select nvl(importo,0)
+  into man_compe_var
+  from fnd_reports_importi_man
+  where valore_parametro_anno = p_anno
+  and nome_campo_report='COMPETENZA_VARIAZIONI';
+  exception when no_data_found then man_compe_var:= 0;
+end;
+
+  if differenza_anni = 0
+     then
+     c_fpv_capitale                          :=assestamento_fpvcap_iniziale (p_anno);
+     c_assestamento_fpv_capitale             :=assestamento_fpvcapitale (p_anno);
+     elsif differenza_anni=1
+           then c_fpv_capitale               :=assestamento_fpvcap_plur1(p_anno);
+                 c_assestamento_fpv_capitale :=assestamento_fpvcapitale_pl1(p_anno);
+           else c_fpv_capitale               :=assestamento_fpvcap_plur2 (p_anno);
+                c_assestamento_fpv_capitale  :=assestamento_fpvcapitale_pl2 (p_anno);
+  end if;
+  
+  c_variazione_fpv_capitale     := 0;
+  c_variazione_del_fpv_capitale := 0;
+  c_variazione_fpv_capitale01   := 0;
+  c_variazione_fpv_capitale02   := 0;
+ 
+
+ if nvl(c_fpv_capitale,0) &lt;> 0
+ or nvl(c_variazione_fpv_capitale,0) + nvl(man_compe_var,0) &lt;> 0
+ or nvl(c_assestamento_fpv_capitale,0) &lt;> 0
+ or nvl(c_variazione_del_fpv_capitale,0) + nvl(man_compe_var_del,0) &lt;> 0
+ or nvl(c_variazione_fpv_capitale01,0) &lt;> 0
+ or nvl(c_variazione_fpv_capitale02,0) &lt;> 0
+    then 
+   begin
+      select desc_cap_fpv_capitale
+      into c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,'E'
+   ,p_anno
+   ,'E00005'
+   ,c_desc_capitolo
+   ,nvl(c_fpv_capitale,0)
+   ,nvl(c_variazione_fpv_capitale,0) + nvl(man_compe_var,0)
+   ,nvl(c_variazione_fpv_capitale01,0)
+   ,nvl(c_variazione_fpv_capitale02,0)
+   ,nvl(c_variazione_del_fpv_capitale,0) + nvl(man_compe_var_del,0)
+   ,nvl(c_assestamento_fpv_capitale,0)
+   ,0
+   ,0
+   ,0
+   ,0
+   ,0
+   ,'0'
+   ,c_desc_capitolo
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   ,null
+   );
+  commit;  
+  end if;
+ end if;
+ 
+ 
+ 
+ for c in capitoli loop
+-- Competenza Variazioni date_created &lt;> '0101' and attribute10 &lt;> 'Y'
+
+ 
+  if differenza_anni = 0
+     then
+     compe         :=assestamento_com_iniziale(p_anno,c.capitolo);
+     residuo    :=residuo_iniziale(p_anno,c.capitolo);
+     compe_ass    := assestamento_competenza (p_anno,c.capitolo);
+     cassa        :=assestamento_cas_iniziale(p_anno,c.capitolo);
+     cassa_ass    :=assestamento_cassa (p_anno,c.capitolo);
+     elsif differenza_anni=1
+           then compe      :=assestamento_pl1_iniziale(p_anno,c.capitolo);
+                compe_ass :=assestamento_pluriennale1 (p_anno,c.capitolo);
+           else compe      :=assestamento_pl2_iniziale(p_anno,c.capitolo);
+                compe_ass :=assestamento_pluriennale2 (p_anno,c.capitolo);
+  end if;
+  
+  compe_var := 0;
+  compe_var01 := 0;
+  compe_var02 := 0;
+  compe_var_del := 0;
+  cassa_var :=0;
+  cassa_var_del :=0;
+  
+ -- insert in FIN_T_PREVISIONE_ASSESTAMENTO
+ begin
+  insert into fin_t_previsione_assestamento
+   (data_generazione
+   ,utente
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,competenza_bilancio
+   ,competenza_variazioni
+   ,competenza_variazioni01
+   ,competenza_variazioni02
+   ,competenza_variazioni_delibera 
+   ,competenza_assestamento
+   ,cassa_bilancio
+   ,cassa_variazioni
+   ,cassa_variazioni_delibera
+   ,cassa_assestamento
+   ,residuo_bilancio
+   ,etitolo_umissione
+   ,desc_titolo_missione
+   ,etipologia_uprogramma
+   ,desc_tipologia_programma
+   ,ecategoria
+   ,desc_categoria
+   ,piano_conti_fina
+   ,desc_piano_conti_fina
+   ,titolo_uscite
+   ,desc_titolo_uscite
+   ,macroaggregato
+   ,desc_macroaggregato
+   ,cofog_ii_livello
+   ,descr_cofog
+   ,nb_fpv
+   ,nb_capitolo_fpv
+   )
+   values
+   (c.data_generazione
+   ,c.utente
+   ,c.eu
+   ,c.anno 
+   ,c.capitolo
+   ,c.desc_capitolo
+   ,compe
+   ,compe_var
+   ,compe_var01
+   ,compe_var02
+   ,compe_var_del
+   ,compe_ass
+   ,cassa
+   ,cassa_var
+   ,cassa_var_del
+   ,cassa_ass
+   ,residuo
+   ,c.etit_umis
+   ,c.desc_tit_mis
+   ,c.etip_uprog
+   ,c.desc_tip_prog
+   ,c.ecat
+   ,c.desc_cat
+   ,c.pcf
+   ,c.desc_pcf
+   ,c.titolo_uscite
+   ,c.desc_titolo_uscite
+   ,c.macroaggregato
+   ,c.desc_macroaggregato
+   ,c.cofog_ii_livello
+   ,c.desc_cofog
+   ,c.fpv
+   ,c.capitolo_fpv
+   );
+  commit;
+ end;
+ end loop;
+end;</pre>	</td></tr>
+</table></div>

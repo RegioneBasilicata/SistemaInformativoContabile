@@ -1,0 +1,538 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>COSTI_MISSIONI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="COSTI_MISSIONI.html">Details</a></div></div>
+<div class="tab"><div><a href="COSTI_MISSIONI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="COSTI_MISSIONI_References.html">References</a></div></div>
+<div class="tab"><div><a href="COSTI_MISSIONI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="COSTI_MISSIONI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure costi_missioni(p_anno in number,p_utente varchar2) is
+
+cod_costo varchar2(10);
+trova_miss number := 0;
+pl_sql varchar2(4000);
+i number := 1;
+tot1 number := 0;
+tot2 number := 0;
+tot3 number := 0;
+tot4 number := 0;
+tot5 number := 0;
+totF number := 0;
+
+cursor miss is
+select miss,desc_missione,conto_ce,sum(importo) importo
+from(select a.liv1 miss
+  ,a.DESC_LIV1 desc_missione
+  ,m.CODICE_CONTO_BIL conto_ce
+  ,nvl(sum(decode(m.dare_avere,'D',nvl(m.importo_mov,0),-nvl(m.importo_mov,0))),0) importo
+  from vw_nb_articoli a
+  ,vw_nb_mastrini m
+  where a.anno = p_anno
+  and a.eu = 'U'
+  and to_char(m.DATA_REGISTRAZIONE,'yyyy') = a.anno
+  and m.CODICE_CONTO_BIL = cod_costo
+  and m.CAPITOLO = a.eu||a.codice
+  group by a.liv1
+  ,a.DESC_LIV1
+  ,m.CODICE_CONTO_BIL
+  UNION
+ select a.codice miss
+  ,a.descrizione desc_missione
+  ,m.CODICE_CONTO_BIL conto_ce
+  ,nvl(sum(decode(m.dare_avere,'D',nvl(m.importo_mov,0),-nvl(m.importo_mov,0))),0) importo
+  from NB_LIVELLO1 a
+  ,vw_nb_mastrini m
+  where a.anno = p_anno
+  and a.eu = 'U'
+  and to_char(m.DATA_REGISTRAZIONE,'yyyy') = a.anno
+  and m.CODICE_CONTO_BIL = cod_costo
+  and m.CAPITOLO  is null
+  and m.missione = a.codice
+  group by a.codice
+  ,a.DESCRIZIONE
+  ,m.CODICE_CONTO_BIL)
+  group by miss,desc_missione,conto_ce
+ order by to_number(miss);
+
+cursor costi is
+select ordinamento
+,CODICE_CAMPO
+,DESCRIZIONE
+,VOCE_CE
+,CODICE_CE
+from NB_COSTI_MISSIONI_STRUTTURA
+order by 1;
+
+
+
+begin
+
+ delete tmp_tabulati2 where upper(car01) = 'COSTI PER MISSIONI' and utente=p_utente; 
+ commit;
+
+ insert into tmp_tabulati2(UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03)
+ values
+ (p_utente
+ ,1
+ ,'COSTI PER MISSIONI'
+ ,'CODICE MISSIONE'
+ ,'DESCRIZIONE MISSIONE');
+
+
+ for c in costi loop
+  cod_costo := c.codice_ce;
+
+ update tmp_tabulati2 
+  set
+CAR04 = case when c.codice_campo = 'num01' then c.descrizione else CAR04 end,
+CAR05 = case when c.codice_campo = 'num02' then c.descrizione else CAR05 end,
+CAR06 = case when c.codice_campo = 'num03' then c.descrizione else CAR06 end,
+CAR07 = case when c.codice_campo = 'num04' then c.descrizione else CAR07 end,
+CAR08 = case when c.codice_campo = 'num05' then c.descrizione else CAR08 end,
+CAR09 = case when c.codice_campo = 'num06' then c.descrizione else CAR09 end,
+CAR10 = case when c.codice_campo = 'num07' then c.descrizione else CAR10 end,
+CAR11 = case when c.codice_campo = 'num08' then c.descrizione else CAR11 end,
+CAR12 = case when c.codice_campo = 'num09' then c.descrizione else CAR12 end,
+CAR13 = case when c.codice_campo = 'num10' then c.descrizione else CAR13 end,
+CAR14 = case when c.codice_campo = 'num11' then c.descrizione else CAR14 end,
+CAR15 = case when c.codice_campo = 'num12' then c.descrizione else CAR15 end,
+CAR16 = case when c.codice_campo = 'num13' then c.descrizione else CAR16 end,
+CAR17 = case when c.codice_campo = 'num14' then c.descrizione else CAR17 end,
+CAR18 = case when c.codice_campo = 'num15' then c.descrizione else CAR18 end,
+CAR19 = case when c.codice_campo = 'num16' then c.descrizione else CAR19 end,
+CAR20 = case when c.codice_campo = 'num17' then c.descrizione else CAR20 end,
+CAR21 = case when c.codice_campo = 'num18' then c.descrizione else CAR21 end,
+CAR22 = case when c.codice_campo = 'num19' then c.descrizione else CAR22 end,
+CAR23 = case when c.codice_campo = 'num20' then c.descrizione else CAR23 end,
+CAR24 = case when c.codice_campo = 'num21' then c.descrizione else CAR24 end,
+CAR25 = case when c.codice_campo = 'num22' then c.descrizione else CAR25 end,
+CAR26 = case when c.codice_campo = 'num23' then c.descrizione else CAR26 end,
+CAR27 = case when c.codice_campo = 'num24' then c.descrizione else CAR27 end,
+CAR28 = case when c.codice_campo = 'num25' then c.descrizione else CAR28 end,
+CAR29 = case when c.codice_campo = 'num26' then c.descrizione else CAR29 end,
+CAR30 = case when c.codice_campo = 'num27' then c.descrizione else CAR30 end,
+CAR31 = case when c.codice_campo = 'num28' then c.descrizione else CAR31 end
+    where UTENTE = p_utente
+    and num_ord_riga = 1;
+
+  for m in miss loop
+   i := i+1;
+   select count(*) into trova_miss
+   from tmp_tabulati2
+   where utente = p_utente
+   and upper(car01) = 'COSTI PER MISSIONI'
+   and nvl(car02,'00') = m.miss;--contiene il codice missione
+
+   if trova_miss = 0
+    then 
+    insert into tmp_tabulati2(UTENTE, NUM_ORD_RIGA, CAR01, CAR02, CAR03
+    ,CAR04
+    ,CAR05
+    ,CAR06
+    ,CAR07
+    ,CAR08
+    ,CAR09
+    ,CAR10
+    ,CAR11
+    ,CAR12
+    ,CAR13
+    ,CAR14
+    ,CAR15
+    ,CAR16
+    ,CAR17
+    ,CAR18
+    ,CAR19
+    ,CAR20
+    ,CAR21
+    ,CAR22
+    ,CAR23
+    ,CAR24
+    ,CAR25
+    ,CAR26
+    ,CAR27
+    ,CAR28
+    ,CAR29
+    ,CAR30
+    ,CAR31
+    ,NUM04
+    ,NUM05
+    ,NUM06
+    ,NUM07
+    ,NUM08
+    ,NUM09
+    ,NUM10
+    ,NUM11
+    ,NUM12
+    ,NUM13
+    ,NUM14
+    ,NUM15
+    ,NUM16
+    ,NUM17
+    ,NUM18
+    ,NUM19
+    ,NUM20
+    ,NUM21
+    ,NUM22
+    ,NUM23
+    ,NUM24
+    ,NUM25
+    ,NUM26
+    ,NUM27
+    ,NUM28
+    ,NUM29
+    ,NUM30
+    ,NUM31) 
+    values(
+    p_utente
+    ,i
+    ,'COSTI PER MISSIONI'
+    ,m.miss
+    ,m.desc_missione
+    ,'COSTIMIS_Missione'||m.miss||'_AcquistoMateriePrime'
+    ,'COSTIMIS_Missione'||m.miss||'_VarRimanenze'
+    ,'COSTIMIS_Missione'||m.miss||'_PrestServizi'
+    ,'COSTIMIS_Missione'||m.miss||'_TrasfCorrenti'
+    ,'COSTIMIS_Missione'||m.miss||'_QuotaContrInvestPA'
+    ,'COSTIMIS_Missione'||m.miss||'_ContrInvestAltriSogg'
+    ,'COSTIMIS_Missione'||m.miss||'_UtilizzoBeniTerzi'
+    ,'COSTIMIS_Missione'||m.miss||'_Personale'
+    ,'COSTIMIS_Missione'||m.miss||'_AmmortImmobImm'
+    ,'COSTIMIS_Missione'||m.miss||'_AmmortImmobMat'
+    ,'COSTIMIS_Missione'||m.miss||'_AltreSvalImmob'
+    ,'COSTIMIS_Missione'||m.miss||'_SvalCrediti'
+    ,'COSTIMIS_Missione'||m.miss||'_AccantRischi'
+    ,'COSTIMIS_Missione'||m.miss||'_AltriAccant'
+    ,'COSTIMIS_Missione'||m.miss||'_OneriDiversiGest'
+    ,'COSTIMIS_Missione'||m.miss||'_TotCompNegGestione'
+    ,'COSTIMIS_Missione'||m.miss||'_InteressiAltriOneriFinanz'
+    ,'COSTIMIS_Missione'||m.miss||'_TotOneriFinanz'
+    ,'COSTIMIS_Missione'||m.miss||'_Svalutazioni'
+    ,'COSTIMIS_Missione'||m.miss||'_TotRettValoreAttFinanz'
+    ,'COSTIMIS_Missione'||m.miss||'_SopravvPassiveInsussAttivo'
+    ,'COSTIMIS_Missione'||m.miss||'_MinusvalPatr'
+    ,'COSTIMIS_Missione'||m.miss||'_TrasfCCapitale'
+    ,'COSTIMIS_Missione'||m.miss||'_AltriOneriStr'
+    ,'COSTIMIS_Missione'||m.miss||'_TotOneriStr'
+    ,'COSTIMIS_Missione'||m.miss||'_Imposte'
+    ,'COSTIMIS_Missione'||m.miss||'_TotImposte'
+    ,'COSTIMIS_Missione'||m.miss||'_TotCosti',
+    case when c.codice_campo = 'num01' then m.importo else 0 end,
+    case when c.codice_campo = 'num02' then m.importo else 0 end,
+    case when c.codice_campo = 'num03' then m.importo else 0 end,
+    case when c.codice_campo = 'num04' then m.importo else 0 end,
+    case when c.codice_campo = 'num05' then m.importo else 0 end,
+    case when c.codice_campo = 'num06' then m.importo else 0 end,
+    case when c.codice_campo = 'num07' then m.importo else 0 end,
+    case when c.codice_campo = 'num08' then m.importo else 0 end,
+    case when c.codice_campo = 'num09' then m.importo else 0 end,
+    case when c.codice_campo = 'num10' then m.importo else 0 end,
+    case when c.codice_campo = 'num11' then m.importo else 0 end,
+    case when c.codice_campo = 'num12' then m.importo else 0 end,
+    case when c.codice_campo = 'num13' then m.importo else 0 end,
+    case when c.codice_campo = 'num14' then m.importo else 0 end,
+    case when c.codice_campo = 'num15' then m.importo else 0 end,
+    case when c.codice_campo = 'num16' then 0 else 0 end, --(num01+num02+num03+num04+num05+num06+num07+num08+num09+num10+num11+num12+num13+num14+num15)
+    case when c.codice_campo = 'num17' then m.importo else 0 end,
+    case when c.codice_campo = 'num18' then 0 else 0 end, --num17
+    case when c.codice_campo = 'num19' then m.importo else 0 end,
+    case when c.codice_campo = 'num20' then 0 else 0 end,--num19
+    case when c.codice_campo = 'num21' then m.importo else 0 end,
+    case when c.codice_campo = 'num22' then m.importo else 0 end,
+    case when c.codice_campo = 'num23' then m.importo else 0 end,
+    case when c.codice_campo = 'num24' then m.importo else 0 end,
+    case when c.codice_campo = 'num25' then 0 else 0 end,--(num21+num22+num23+num24)
+    case when c.codice_campo = 'num26' then m.importo else 0 end,
+    case when c.codice_campo = 'num27' then 0 else 0 end, --num26
+    case when c.codice_campo = 'num28' then 0 else 0 end); --(num16+num18+num20+num25+num27)
+    else
+    update tmp_tabulati2 set 
+    num04 = case when c.codice_campo = 'num01' then m.importo else num04 end,
+    num05 = case when c.codice_campo = 'num02' then m.importo else num05 end,
+    num06 = case when c.codice_campo = 'num03' then m.importo else num06 end,
+    num07 = case when c.codice_campo = 'num04' then m.importo else num07 end,
+    num08 = case when c.codice_campo = 'num05' then m.importo else num08 end,
+    num09 = case when c.codice_campo = 'num06' then m.importo else num09 end,
+    num10 = case when c.codice_campo = 'num07' then m.importo else num10 end,
+    num11 = case when c.codice_campo = 'num08' then m.importo else num11 end,
+    num12 = case when c.codice_campo = 'num09' then m.importo else num12 end,
+    num13 = case when c.codice_campo = 'num10' then m.importo else num13 end,
+    num14 = case when c.codice_campo = 'num11' then m.importo else num14 end,
+    num15 = case when c.codice_campo = 'num12' then m.importo else num15 end,
+    num16 = case when c.codice_campo = 'num13' then m.importo else num16 end,
+    num17 = case when c.codice_campo = 'num14' then m.importo else num17 end,
+    num18 = case when c.codice_campo = 'num15' then m.importo else num18 end,
+    num19 = case when c.codice_campo = 'num16' then (nvl(num04,0)+nvl(num05,0)+nvl(num06,0)+nvl(num07,0)+nvl(num08,0)+nvl(num09,0)+nvl(num10,0)+nvl(num11,0)+nvl(num12,0)+nvl(num13,0)+nvl(num14,0)+nvl(num15,0)+nvl(num16,0)+nvl(num17,0)+nvl(num18,0)) else num19 end,
+    num20 = case when c.codice_campo = 'num17' then m.importo else num20 end,
+    num21 = case when c.codice_campo = 'num18' then nvl(num20,0) else num21 end,
+    num22 = case when c.codice_campo = 'num19' then m.importo else num22 end,
+    num23 = case when c.codice_campo = 'num20' then nvl(num22,0) else num23 end,
+    num24 = case when c.codice_campo = 'num21' then m.importo else num24 end,
+    num25 = case when c.codice_campo = 'num22' then m.importo else num25 end,
+    num26 = case when c.codice_campo = 'num23' then m.importo else num26 end,
+    num27 = case when c.codice_campo = 'num24' then m.importo else num27 end,
+    num28 = case when c.codice_campo = 'num25' then (nvl(num24,0)+nvl(num25,0)+nvl(num26,0)+nvl(num27,0)) else num28 end,
+    num29 = case when c.codice_campo = 'num26' then m.importo else num29 end,
+    num30 = case when c.codice_campo = 'num27' then nvl(num29,0) else num30 end,
+    num31 = case when c.codice_campo = 'num28' then (nvl(num19,0)+nvl(num21,0)+nvl(num23,0)+nvl(num28,0)+nvl(num30,0)) else num31 end
+    where UTENTE = p_utente
+    and upper(car01) = 'COSTI PER MISSIONI'
+    and car02 = m.miss
+    and car03 = m.desc_missione;
+    end if;
+  end loop;
+  commit;
+ end loop;
+ 
+ -- inserisco le missioni a 0
+
+insert into tmp_tabulati2(UTENTE, NUM_ORD_RIGA, CAR01, CAR02 
+,CAR03
+,NUM04
+,NUM05
+,NUM06
+,NUM07
+,NUM08
+,NUM09
+,NUM10
+,NUM11
+,NUM12
+,NUM13
+,NUM14
+,NUM15
+,NUM16
+,NUM17
+,NUM18
+,NUM19
+,NUM20
+,NUM21
+,NUM22
+,NUM23
+,NUM24
+,NUM25
+,NUM26
+,NUM27
+,NUM28
+,NUM29
+,NUM30
+,NUM31) 
+select distinct
+p_utente
+,((select max(num_ord_riga)
+  from tmp_tabulati2)+ to_number(n.liv1))
+,'COSTI PER MISSIONI'
+,n.liv1
+,n.desc_liv1
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+,0
+from vw_nb_articoli n
+where n.anno = p_anno
+  and n.eu = 'U'
+and n.liv1||n.desc_liv1 not in (
+select car02||car03 
+from tmp_tabulati2
+where utente = p_utente
+and num_ord_riga > 1);
+
+ 
+ update tmp_tabulati2
+ set  
+ num19 = nvl(num04,0)+nvl(num05,0)+nvl(num06,0)+nvl(num07,0)+nvl(num08,0)+nvl(num09,0)+nvl(num10,0)+nvl(num11,0)+nvl(num12,0)+nvl(num13,0)+nvl(num14,0)+nvl(num15,0)+nvl(num16,0)+nvl(num17,0)+nvl(num18,0)
+ where num_ord_riga > 1;
+
+ update tmp_tabulati2
+ set  
+ num21 = nvl(num20,0),
+ num23 = nvl(num22,0)
+ where num_ord_riga > 1;
+
+ update tmp_tabulati2
+ set  
+ num28 = nvl(num24,0)+nvl(num25,0)+nvl(num26,0)+nvl(num27,0)
+ where num_ord_riga > 1;
+ 
+ update tmp_tabulati2
+ set  
+ num30 = nvl(num29,0)
+ where num_ord_riga > 1;
+
+ update TMP_TABULATI2
+ set  
+ num31 = (nvl(num19,0)+nvl(num21,0)+nvl(num23,0)+nvl(num28,0)+nvl(num30,0))
+ where num_ord_riga > 1; 
+ 
+ insert into tmp_tabulati2(UTENTE
+    ,NUM_ORD_RIGA
+    ,CAR01
+    ,CAR03
+    ,CAR04
+    ,CAR05
+    ,CAR06
+    ,CAR07
+    ,CAR08
+    ,CAR09
+    ,CAR10
+    ,CAR11
+    ,CAR12
+    ,CAR13
+    ,CAR14
+    ,CAR15
+    ,CAR16
+    ,CAR17
+    ,CAR18
+    ,CAR19
+    ,CAR20
+    ,CAR21
+    ,CAR22
+    ,CAR23
+    ,CAR24
+    ,CAR25
+    ,CAR26
+    ,CAR27
+    ,CAR28
+    ,CAR29
+    ,CAR30
+    ,CAR31
+    ,NUM04
+    ,NUM05
+    ,NUM06
+    ,NUM07
+    ,NUM08
+    ,NUM09
+    ,NUM10
+    ,NUM11
+    ,NUM12
+    ,NUM13
+    ,NUM14
+    ,NUM15
+    ,NUM16
+    ,NUM17
+    ,NUM18
+    ,NUM19
+    ,NUM20
+    ,NUM21
+    ,NUM22
+    ,NUM23
+    ,NUM24
+    ,NUM25
+    ,NUM26
+    ,NUM27
+    ,NUM28
+    ,NUM29
+    ,NUM30
+    ,NUM31)
+    (select 
+    utente
+    ,1000
+    ,car01
+    ,'TOTALE GENERALE'
+    ,'COSTIMIS_TotaleCostiOneri_AcquistoMateriePrime'
+    ,'COSTIMIS_TotaleCostiOneri_VarRimanenze'
+    ,'COSTIMIS_TotaleCostiOneri_PrestServizi'
+    ,'COSTIMIS_TotaleCostiOneri_TrasfCorrenti'
+    ,'COSTIMIS_TotaleCostiOneri_Personale'
+    ,'COSTIMIS_TotaleCostiOneri_QuotaContrInvestPA'
+    ,'COSTIMIS_TotaleCostiOneri_ContrInvestAltriSogg'
+    ,'COSTIMIS_TotaleCostiOneri_UtilizzoBeniTerzi'
+    ,'COSTIMIS_TotaleCostiOneri_AmmortImmobImm'
+    ,'COSTIMIS_TotaleCostiOneri_AmmortImmobMat'
+    ,'COSTIMIS_TotaleCostiOneri_AltreSvalImmob'
+    ,'COSTIMIS_TotaleCostiOneri_SvalCrediti'
+    ,'COSTIMIS_TotaleCostiOneri_AccantRischi'
+    ,'COSTIMIS_TotaleCostiOneri_AltriAccant'
+    ,'COSTIMIS_TotaleCostiOneri_OneriDiversiGest'
+    ,'COSTIMIS_TotaleCostiOneri_TotCompNegGestione'
+    ,'COSTIMIS_TotaleCostiOneri_InteressiAltriOneriFinanz'
+    ,'COSTIMIS_TotaleCostiOneri_TotOneriFinanz'
+    ,'COSTIMIS_TotaleCostiOneri_Svalutazioni'
+    ,'COSTIMIS_TotaleCostiOneri_TotRettValoreAttFinanz'
+    ,'COSTIMIS_TotaleCostiOneri_SopravvPassiveInsussAttivo'
+    ,'COSTIMIS_TotaleCostiOneri_MinusvalPatr'
+    ,'COSTIMIS_TotaleCostiOneri_TrasfCCapitale'
+    ,'COSTIMIS_TotaleCostiOneri_AltriOneriStr'
+    ,'COSTIMIS_TotaleCostiOneri_TotOneriStr'
+    ,'COSTIMIS_TotaleCostiOneri_Imposte'
+    ,'COSTIMIS_TotaleCostiOneri_TotImposte'
+    ,'COSTIMIS_TotaleCostiOneri_TotCosti'
+    ,sum(nvl(NUM04,0))
+    ,sum(nvl(NUM05,0))
+    ,sum(nvl(NUM06,0))
+    ,sum(nvl(NUM07,0))
+    ,sum(nvl(NUM08,0))
+    ,sum(nvl(NUM09,0))
+    ,sum(nvl(NUM10,0))
+    ,sum(nvl(NUM11,0))
+    ,sum(nvl(NUM12,0))
+    ,sum(nvl(NUM13,0))
+    ,sum(nvl(NUM14,0))
+    ,sum(nvl(NUM15,0))
+    ,sum(nvl(NUM16,0))
+    ,sum(nvl(NUM17,0))
+    ,sum(nvl(NUM18,0))
+    ,sum(nvl(NUM19,0))
+    ,sum(nvl(NUM20,0))
+    ,sum(nvl(NUM21,0))
+    ,sum(nvl(NUM22,0))
+    ,sum(nvl(NUM23,0))
+    ,sum(nvl(NUM24,0))
+    ,sum(nvl(NUM25,0))
+    ,sum(nvl(NUM26,0))
+    ,sum(nvl(NUM27,0))
+    ,sum(nvl(NUM28,0))
+    ,sum(nvl(NUM29,0))
+    ,sum(nvl(NUM30,0))
+    ,sum(nvl(NUM31,0))
+    from tmp_tabulati2
+    where num_ord_riga > 1
+    and utente = p_utente
+    group by utente
+    ,1000
+    ,car01
+    ,'TOTALE GENERALE'
+    );
+
+  commit;  
+end;</pre>	</td></tr>
+</table></div>

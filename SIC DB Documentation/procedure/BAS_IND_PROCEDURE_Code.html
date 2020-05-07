@@ -1,0 +1,193 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BAS_IND_PROCEDURE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BAS_IND_PROCEDURE.html">Details</a></div></div>
+<div class="tab"><div><a href="BAS_IND_PROCEDURE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BAS_IND_PROCEDURE_References.html">References</a></div></div>
+<div class="tab"><div><a href="BAS_IND_PROCEDURE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BAS_IND_PROCEDURE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE bas_ind_procedure (wanno in NUMBER, wutente in varchar2, wtipo in varchar2, risposta out varchar2) IS
+
+ cursor articoli is 
+  select 
+  anno,
+  eu||codice attuale,
+  decode(codice_precedente,null ,eu||'00000',codice_precedente)   precedente1,
+  decode(codice_precedente2,null,eu||'00000',codice_precedente2)  precedente2,
+  decode(codice_precedente3,null,eu||'00000',codice_precedente3)  precedente3,
+  decode(codice_precedente4,null,eu||'00000',codice_precedente4)  precedente4,
+  decode(codice_precedente5,null,eu||'00000',codice_precedente5)  precedente5
+  from fin_t_articoli 
+  where anno = wanno 
+  and eu=wtipo
+  and nvl(abilitato,'S') &lt;> 'N' 
+  order by eu||codice;
+
+  a articoli%ROWTYPE;
+
+  appoggio_partita_iva varchar2(20);
+
+  CURSOR b_i_forzature IS
+   SELECT doc_id,
+          ind_cap,
+          ind_anno
+   FROM bas_ind_forzature;
+
+  wrecord_letti number;
+  wcapitolo_letto varchar2(6);
+  wtotale_record number;
+
+BEGIN
+
+delete tmp_risposte_procedure where funzione='Genera Bas Ind' and utente = wutente;
+commit;
+
+select partita_iva into appoggio_partita_iva
+from fin_t_dati_generali
+where anno_finanziario = wanno;
+
+if appoggio_partita_iva = '80002950766' and 
+   wanno=2013
+  then risposta :='Generazione non possibile nell''anno 2013 per la Giunta a causa di spostamenti manuali di alcuni impegni';
+	   return;
+end if;	
+
+wrecord_letti := 0;
+
+ begin
+  select count(*) 
+  into wtotale_record
+  from fin_t_articoli where anno = wanno	 
+  and eu=wtipo
+  and nvl(abilitato,'S') &lt;> 'N' ;
+ end;
+
+risposte_procedure ('Genera Bas Ind',wutente,'Totale Record '||wtotale_record);
+
+ begin
+	delete bas_ind where ind_anno = wanno and substr(ind_cap,1,1) = wtipo;
+	commit;
+ end;
+
+risposte_procedure ('Genera Bas Ind',wutente,'Cancellati Record Precedenti - Inizio Elaborazione');
+
+	OPEN articoli;
+   LOOP
+    FETCH articoli INTO a;
+    EXIT WHEN articoli%NOTFOUND;
+    wrecord_letti := wrecord_letti + 1;
+    wcapitolo_letto := a.attuale;
+
+	if mod(wrecord_letti,100) = 0 
+       then
+       risposte_procedure ('Genera Bas Ind',wutente,'Cap.'||a.attuale||' Record '||wrecord_letti||'/'||wtotale_record);
+    end if;
+
+-- cap 1
+     begin
+      insert into bas_ind 
+      select doc_id,a.attuale,wanno 
+      from bas_ind 
+      where ind_anno = (wanno -1) and
+      substr(ind_cap,1,6) = a.precedente1;
+      exception when dup_val_on_index then null;
+     end;
+      commit;
+-- cap 2
+     begin
+      insert into bas_ind 
+      select doc_id,a.attuale,wanno 
+      from bas_ind 
+      where ind_anno = (wanno -1) and
+      substr(ind_cap,1,6) = a.precedente2;
+      exception when dup_val_on_index then null;
+     end;      
+      commit; 
+-- cap 3
+     begin
+      insert into bas_ind 
+      select doc_id,a.attuale,wanno 
+      from bas_ind 
+      where ind_anno = (wanno -1) and
+      substr(ind_cap,1,6) = a.precedente3;
+      exception when dup_val_on_index then null;
+     end;      
+      commit;
+-- cap 4
+     begin
+      insert into bas_ind 
+      select doc_id,a.attuale,wanno 
+      from bas_ind 
+      where ind_anno = (wanno -1) and
+      substr(ind_cap,1,6) = a.precedente4;
+      exception when dup_val_on_index then null;
+     end;      
+      commit;
+-- cap 5
+     begin
+      insert into bas_ind 
+      select doc_id,a.attuale,wanno 
+      from bas_ind 
+      where ind_anno = (wanno -1) and
+      substr(ind_cap,1,6) = a.precedente5;
+      exception when dup_val_on_index then null;
+     end;      
+      commit;
+-- movimenti dell'anno in corso
+     begin
+      insert into bas_ind 
+      select doc_id,a.attuale,wanno 
+      from fina_documenti  
+      where segment8 = wanno and
+      segment2 = a.attuale and 
+      doc_type in ('IMP-DEF','IMP','IMP-PER','ACC');
+      commit;
+     end;    
+
+--     risposte_procedure ('Genera Bas Ind',wutente,'Cap.'||a.attuale||' completato');
+
+   END LOOP;
+
+risposte_procedure ('Genera Bas Ind',wutente,'Cap.'||a.attuale||' Record '||wrecord_letti||'/'||wtotale_record);
+
+risposte_procedure ('Genera Bas Ind',wutente,'Inserimento Forzature');
+
+   -- 13/02/2103 f.coretti 
+   -- in alcuni casi c'è la necessità di disambiguare/forzare 
+   -- (tipicamente quando un capitolo, negll'anno successivo, dà origine a più capitoli);
+   -- per esempio: ho nell'anno 2012 un impegno sul cap.U00153, con residuo;
+   -- l'utente stabilisce che il residuo nel 2013 vada sul cap.U00156,
+   -- quindi in fin_t_articoli, per codice U00156 ed anno 2013, imposta codice_precedente = U00153;
+   -- in fin_t_articoli, però, nel 2013, c'è ancora il codice U00153, quindi il pl/sql che sta qui sopra,
+   -- se lanciato, nel creare le due righe di bas_ind per l'impegno, 
+   -- imposterebbe il capitolo U00153 per entrambe, cosa che non va bene, perchè le righe devono essere 
+   -- 2012/U00153 e 2013/U00156
+   FOR f IN b_i_forzature LOOP
+   	 UPDATE bas_ind
+   	 SET ind_cap = f.ind_cap
+   	 WHERE doc_id = f.doc_id 	AND
+   	       ind_anno = f.ind_anno;
+    if SQL%NOTFOUND 
+        then insert into bas_ind values (f.doc_id,f.ind_cap,f.ind_anno);
+     end if;
+   END LOOP; 
+
+risposte_procedure ('Genera Bas Ind',wutente,'Termine Procedura');
+
+   COMMIT;
+
+END;</pre>	</td></tr>
+</table></div>

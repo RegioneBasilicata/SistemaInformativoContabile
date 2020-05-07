@@ -1,0 +1,669 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CREA_ANAGRAFICA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CREA_ANAGRAFICA.html">Details</a></div></div>
+<div class="tab"><div><a href="CREA_ANAGRAFICA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CREA_ANAGRAFICA_References.html">References</a></div></div>
+<div class="tab"><div><a href="CREA_ANAGRAFICA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CREA_ANAGRAFICA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE crea_anagrafica(
+    PI_TIPO_ANAGRAFICA IN VARCHAR2,                                                                                                            
+    PI_PARTITA_IVA IN VARCHAR2,                                                                                                                
+    PI_DENOMINAZIONE IN VARCHAR2,                                                                                                              
+    PI_COGNOME_LR IN VARCHAR2,                                                                                                                 
+    PI_NOME_LR IN VARCHAR2,                                                                                                                    
+    PI_SESSO_LR IN VARCHAR2,                                                                                                                   
+    PI_COMUNE_NS_LR IN VARCHAR2,                                                                                                               
+    PI_DATA_NS_LR IN DATE,                                                                                                                     
+    PI_INDIRIZZO_LR IN VARCHAR2,                                                                                                               
+    PI_COMUNE_RES_LR IN VARCHAR2,                                                                                                              
+    PI_CAP_RES_LR IN VARCHAR2,                                                                                                                 
+    PI_CF_LR IN VARCHAR2,                                                                                                                      
+    PI_CODICE_FISCALE IN VARCHAR2,                                                                                                             
+    PI_COGNOME IN VARCHAR2,                                                                                                                    
+    PI_NOME IN VARCHAR2,                                                                                                                       
+    PI_ALTRI_NOMI IN VARCHAR2,                                                                                                                 
+    PI_SESSO IN VARCHAR2,                                                                                                                      
+    PI_DATA_NS IN DATE,                                                                                                                        
+    PI_COMUNE_NS IN VARCHAR2,                                                                                                                  
+    PI_PIGNORAMENTO IN VARCHAR2,                                                                                                               
+    PI_NOTA_PIGNORAMENTO IN VARCHAR2,                                                                                                          
+    PI_ESTERO IN VARCHAR2,                                                                                                                     
+    PI_COMMISSIONI IN VARCHAR2,                                                                                                                
+    PI_INDIRIZZO IN VARCHAR2,                                                                                                                  
+    PI_COMUNE_SEDE IN VARCHAR2,                                                                                                                
+    PI_CAP_SEDE IN VARCHAR2,                                                                                                                   
+    PI_TELEFONO IN VARCHAR2,                                                                                                                   
+    PI_E_MAIL IN VARCHAR2,                                                                                                                     
+    PI_FAX IN VARCHAR2,                                                                                                                        
+    PI_BOLLO IN VARCHAR2,                                                                                                                      
+    PI_TIPO_PAGAMENTO IN VARCHAR2,                                                                                                             
+    PI_CONTO_CORRENTE IN VARCHAR2,                                                                                                             
+    PI_MODALITA_PRINCIPALE_SN IN VARCHAR2,                                                                                                     
+    PI_NOME_BANCA IN VARCHAR2,                                                                                                                 
+    PI_SEDE_AGENZIA IN VARCHAR2,                                                                                                               
+    PI_INDIRIZZO_AGENZIA IN VARCHAR2,                                                                                                                  
+    PI_CITTA IN VARCHAR2,                                                                                                                      
+    PI_CAP_AGENZIA IN VARCHAR2,                                                                                                                
+    PI_PROVINCIA_AGENZIA IN VARCHAR2,                                                                                                          
+    PI_ABI IN VARCHAR2,                                                                                                                        
+    PI_CAB IN VARCHAR2,                                                                                                                        
+    PI_CIN IN VARCHAR2,                                                                                                                        
+    PI_IBAN IN VARCHAR2,                                                                                                                       
+    PI_COD_FISC_UTENTE IN VARCHAR2,
+    PO_ID_ANAGRAFICA IN OUT NUMBER,                                                                                                               
+    PO_ID_SEDE IN OUT NUMBER,                                                                                                                     
+    PO_ID_TIPO_PAGAMENTO IN OUT NUMBER,                                                                                                           
+    PO_ID_CONTO_CORRENTE IN OUT NUMBER,                                                                                                           
+    PO_CODICE_RISPOSTA IN OUT NUMBER,                                                                                                             
+    PO_DESCRIZIONE_RISPOSTA IN OUT VARCHAR2)                                                                                                      
+IS                                                                                                                                             
+                                                                                                                                               
+	conta number := 0;                                                                                                                           
+    id_com_ns number := 0;                                                                                                                       
+	id_com_ns_lr number := 0;                                                                                                                    
+    id_com_res_lr number := 0;                                                                                                                   
+	id_com_sede number := 0;                                                                                                                          
+	appoggio number := 0;                                                                                                                        
+	--a number;                                                                                                                                    
+	--s number;                                                                                                                                    
+	PI varchar2(11);                                                                                                                             
+	DEN varchar2(2000);                                                                                                                          
+	CF_LR varchar2(16);                                                                                                                          
+	CF varchar2(16);                                                                                                                             
+	ana_id number;	                                                                                                                             
+	SESSO varchar2(1);                                                                                                                           
+	DATA_NS date;                                                                                                                                
+	contatore	number := 0;                                                                                                                       
+	err varchar2(1);                                                                                                                             
+	num number;                                                                                                                                  
+	PIGN varchar2(1);                                                                                                                            
+	inattivo DATE;                                                                                                                               
+  cc_si_no number := 0;                                                                                                                        
+  abi_si_no number := 0;                                                                                                                       
+  cab_si_no number := 0;                                                                                                                       
+  id_agenzia number := 0;
+  id_conto_corrente number := 0;
+  nome_utente varchar2(240) := 'XX' ;  
+  id_tipo_pagamento number := 0;
+  val_iban varchar2(1) := '0';
+  conta_piva number;
+  v_banca_id number;
+  provincia_sede varchar2(3);
+  cod_vers_bonifici varchar2(10);
+  COMMISSIONI varchar2(1); -- in attesa che l'XSD SicAnagraficaInterface sia aggiornata gestiamo qui la scomparsa dell'opzione N = "a Carico Beneficiario"
+                                                                                                                                               
+BEGIN                                                                                                                                          
+PO_ID_ANAGRAFICA := 0;                                                                                                                         
+PO_ID_SEDE := 0;                                                                                                                               
+PO_ID_TIPO_PAGAMENTO := 0;                                                                                                                     
+PO_ID_CONTO_CORRENTE := 0;                                                                                                                     
+PO_CODICE_RISPOSTA := 1;                                                                                                                       
+PO_DESCRIZIONE_RISPOSTA := 'Operazione terminata con successo!'; 
+
+
+-- ***** in attesa che l'XSD SicAnagraficaInterface sia aggiornata gestiamo qui la scomparsa dell'opzione N = "a Carico Beneficiario"
+if nvl(PI_COMMISSIONI,'E') = 'N'
+ then COMMISSIONI := 'E';
+ else COMMISSIONI := nvl(PI_COMMISSIONI,'E');
+end if;
+
+-- **** Fine
+
+  -- ****************** VERIFICA UTENTE ************************                                                                               
+  begin                                                                                                                                        
+    select user_name into nome_utente                                                                                                              
+    from fnd_user                                                                                                                              
+    where upper(nvl(cod_fiscale,'')) = upper(PI_COD_FISC_UTENTE);                                                                                            
+    exception when others then nome_utente := 'XX';                                                                                                 
+  end;                                                                                                                                         
+  if nome_utente = 'XX'                                                                                                                            
+    then PO_CODICE_RISPOSTA := 0;                                                                                                              
+    PO_DESCRIZIONE_RISPOSTA := 'Utente non presente o non autorizzato ad operare nel SIC!';                                                    
+    return;                                                                                                                                      
+   --	Controllo il comune della sede		                                                                                                 
+  end if;                                                                                                                                      
+   
+  -- ******** Controlli da fare a prescindere che si tratti di PG o PF *******************
+					begin                                                                                                                                
+						select id into id_com_sede from fin_t_comuni where upper(replace(descrizione,' ')) = upper(replace(nvl(PI_COMUNE_SEDE,'X'),' '));           
+						exception when others then                                                                                                         
+              PO_CODICE_RISPOSTA := 0;                                                                                                         
+              PO_DESCRIZIONE_RISPOSTA := 'Il comune della sede non esiste nella tabella Comuni.';                                              
+							return;                                                                                                                            
+					end;                                                                                                                                 
+        -- FINE Controllo comune sede    
+        
+        -- *** controllo il Tipo Pagamento ***********
+         begin                                                                                                                                
+						select id into id_tipo_pagamento 
+            from fin_t_tipo_pagamenti 
+            where  upper(replace(descrizione,' ')) = 
+            upper(replace(decode(PI_TIPO_PAGAMENTO,'Accredito su c/c bancario','BONIFICO BANCARIO E POSTALE','Assegno circolare non trasferibile da inviare al beneficiario','ASSEGNO CIRCOLARE',PI_TIPO_PAGAMENTO),' '))
+            and (nvl(attivo,'N') = 'S' OR id = 32);            
+            exception when no_data_found then
+              begin
+                  select id into id_tipo_pagamento
+                  from fin_t_tipo_pagamenti
+                  where id = to_number(PI_TIPO_PAGAMENTO);
+                  exception when others then
+                      PO_CODICE_RISPOSTA := 0;                                                                                                         
+                      PO_DESCRIZIONE_RISPOSTA := 'Il tipo pagamento non è tra quelli consentiti.'; 
+                      return;   
+              end;
+					end;  
+        -- *** FIne controllo Tipo Pagamento *********
+        
+        -- *** controllo il campo COMMISSIONI ********
+        if nvl(COMMISSIONI,'E') not in ('S','E')
+          then PO_CODICE_RISPOSTA := 0;                                                                                                         
+               PO_DESCRIZIONE_RISPOSTA := 'Il campo Commissioni può contenere solo i seguenti valori S = ESENTE, E = A CARICO ENTE';                                              
+							return;      
+        end if;
+        -- *** fine controllo COMMISIIONI
+        
+        
+        -- ***** controllo il Comune di ns in caso di persona fisica ************
+       if PI_TIPO_ANAGRAFICA = 'F'
+         then
+                PO_CODICE_RISPOSTA := 0;                                                                                                         
+          begin                                                                                                                                
+              select id into id_com_ns from fin_t_comuni where upper(replace(descrizione,' ')) = upper(replace(PI_COMUNE_NS,' '));           
+              exception when others then                                                                                                         
+                PO_DESCRIZIONE_RISPOSTA := 'Il comune di nascita non esiste nella tabella Comuni.';                                              
+                return;                                                                                                                            
+          end; 
+        end if;
+          
+        -- ***** FINE controllo il Comune di ns in caso di persona fisica ************
+                                                                                                                                              
+        -- Controlli per il conto corrente                                                                                                     
+        begin                                                                                                                                  
+          select count(*) into cc_si_no                                                                                                        
+          from fin_t_tipo_pagamenti                                                                                                            
+          where upper(descrizione) = upper(PI_TIPO_PAGAMENTO)                                                                                  
+          and nvl(cc_sn,'N') = 'S';                                                                                                            
+          exception when no_data_found then cc_si_no := 0;                                                                                     
+        end;                                                                                                                                  
+                                                                                                                                               
+        if cc_si_no > 0 and (PI_IBAN is null and id_tipo_pagamento not in (3,25))                                                                                        
+          then PO_CODICE_RISPOSTA := 0;                                                                                                        
+              PO_DESCRIZIONE_RISPOSTA := 'Per la modalità di pagamento scelta è necessario inserire almeno un conto corrente.';                
+							return;                                                                                                                            
+        end if;                                                                                                                                
+                                                                                                                                               
+             if cc_si_no > 0 and (PI_MODALITA_PRINCIPALE_SN is null or (PI_IBAN is null and id_tipo_pagamento not in (3,25)))                           
+              then PO_CODICE_RISPOSTA := 0;                                                                                                    
+              PO_DESCRIZIONE_RISPOSTA := 'Mancano informazioni necessarie (IBAN, modalità principale o c/c postale) alla creazione del conto corrente.';                                 
+							return;                                                                                                                            
+             end if;                                                                                                                           
+    -- ******* FINE Controlli da fare a prescindere che si tratti di PG o PF **************
+                                                                                                                                             
+  -- ******************* PERSONA GIURIDICA ****************************                                                                  
+  if PI_TIPO_ANAGRAFICA = 'G'  then 
+     into PO_ID_ANAGRAFICA,PO_ID_SEDE,PO_ID_CONTO_CORRENTE
+     -- controllo se trattasi di Comune Lucano già presente, in caso positivo restituisci i dati standard nella tabella TB_COMUNI_LUCANO ed esco
+     begin
+     select id_sic,id_sede,id_conto
+     from TB_COMUNI_LUCANI
+     where (upper(denominazione_ente) = upper(PI_DENOMINAZIONE) OR codice_fiscale = PI_PARTITA_IVA);
+     exception when no_data_found then PO_ID_ANAGRAFICA := 0; PO_ID_SEDE := 0; PO_ID_CONTO_CORRENTE := 0;
+     end;
+     
+     if PO_ID_ANAGRAFICA > 0
+      then return;
+     end if;
+     
+      --Verifico che la partita iva e denominazione  non siano  nulli                                                                                            
+     if nvl(PI_ESTERO,'N') = 'N'
+       then 
+          if (PI_PARTITA_IVA is null or pi_denominazione is null) 
+              then                                                                                                         
+              PO_CODICE_RISPOSTA := 0;                                                                                                             
+              PO_DESCRIZIONE_RISPOSTA := 'Per le persone giuridiche la Partita IVA e la Denominazione sono obbligatori!';                                               
+          return;
+          end if;
+      end if;                                                                                                                                
+	                                                                                                                                             
+  	--Controllo la validità della Partita Iva 
+    if nvl(PI_ESTERO,'N') = 'N'
+    then
+      err := '';
+			CTRL_FORM_PI (PI_PARTITA_IVA, err);                                                                                                 
+				if err = 'S'  then                                                                                                                     
+					PO_CODICE_RISPOSTA := 0;                                                                                                             
+          PO_DESCRIZIONE_RISPOSTA := 'La partita iva è errata!';                                         
+					return;                                                                                                                                
+				end if;    
+     end if;
+		--Fine controllo Partita Iva                                                                                                               
+                                                                                                                                               
+    	--Controllo l'esistenza della Partita Iva    
+      if nvl(PI_ESTERO,'N') = 'N'
+        then
+			  	BEGIN                                                                                                                                  
+            select count(*) into conta_piva                                                                                                              
+            from fin_t_anagrafica a                                                                                                               
+            where (nvl(a.PARTITA_IVA,'') = PI_PARTITA_IVA OR nvl(a.CODICE_FISCALE,'') = PI_PARTITA_IVA)
+            and inattivo_dal is null;                                                                                        
+          exception                                                                                                                            
+						when NO_DATA_FOUND THEN conta_piva := 0; 
+          END; 
+            if conta_piva > 0
+              then PO_CODICE_RISPOSTA := 0;                                                                                                           
+            PO_DESCRIZIONE_RISPOSTA := 'Ci sono già persone giuridiche/enti con la stessa partita iva (o codice fiscale).';
+            return;
+            end if;
+        end if;
+                     
+				--Fine Controllo esistenza Partita Iva                                                                                                 
+       	--Controllo la correttezza del codice fiscale del legale rappresentante                                                                
+					if (PI_CF_LR is not null)  then                                                                                                      
+						if (length(PI_CF_LR) &lt; 16) or (length(PI_CF_LR) > 16) or (PI_CF_LR = '****************' ) then                                     
+							err := 'S';                                                                                                                      
+						else	
+              err := '';
+							CTRL_FORM_CF(upper(PI_CF_LR),err);                                                                                               
+							begin                                                                                                                            
+								select id into id_com_ns_lr from fin_t_comuni where upper(replace(descrizione,' ')) = upper(replace(PI_COMUNE_NS_LR,' '));      
+								exception when others then                                                                                                     
+								PO_CODICE_RISPOSTA := 0;                                                                                                       
+                PO_DESCRIZIONE_RISPOSTA := 'Il comune di nascita del Rappresentante Legale non esiste nella tabella Comuni.';                  
+								return;                                                                                                                          
+							end;                                                                                                                             
+                    select id into id_com_res_lr from fin_t_comuni where upper(replace(descrizione,' ')) = upper(replace(PI_COMUNE_RES_LR,' '));
+              if PI_COMUNE_RES_LR is not null                                                                                                  
+                then                                                                                                                           
+                  begin                                                                                                                        
+                    exception when others then                                                                                                 
+                    PO_CODICE_RISPOSTA := 0;                                                                                                   
+                    PO_DESCRIZIONE_RISPOSTA := 'Il comune di residenza del Rappresentante Legale non esiste nella tabella Comuni.';            
+                    return;                                                                                                                      
+                  end;                                                                                                                      
+              end if;                                                                                                                          
+						end if;                                                                                                                            
+						if err = 'S'  then                                                                                                                 
+                PO_CODICE_RISPOSTA := 0;                                                                                                       
+                PO_DESCRIZIONE_RISPOSTA := 'Il codice fiscale del rappresentante legale è errato.';                                            
+								return;                                                                                                                          
+						end if;                                                                                                                            
+					end if;                                                                                                                              
+				--Fine Controllo del codice fiscale del legale rappresentante                                                                          
+
+        -- INSERT PERSONA GIURIDICA faccio la insert dell'anagrafica, della relativa sede e dell'eventuale conto corrente                      
+        	select (nvl(max(id),0)+1) into conta from fin_t_anagrafica;                                                                         
+         	INSERT                                                                                                                               
+              INTO                                                                                                                                          
+              fin_t_anagrafica                                                                                                                 
+              (                                                                                                                                
+                ID,                                                                                                                            
+                TIPO_ANAGRAFICA,                                                                                                               
+                PARTITA_IVA,                                                                                                                   
+                DENOMINAZIONE,                                                                                                                 
+                COGNOME_LR,                                                                                                                    
+                NOME_LR,                                                                                                                       
+                SESSO_LR,                                                                                                                      
+                ID_COMUNE_NS_LR,                                                                                                               
+                DATA_NS_LR,                                                                                                                    
+                INDIRIZZO_LR,                                                                                                                                 
+                ID_COMUNE_RES_LR,                                                                                                              
+                CAP_RES_LR,                                                                                                                    
+                CF_LR,                                                                                                                         
+                CODICE_FISCALE,                                                                                                                
+                COGNOME,                                                                                                                       
+                NOME,                                                                                                                          
+                ALTRI_NOMI,                                                                                                                    
+                SESSO,                                                                                                                         
+                OLD_CODICE,                                                                                                                    
+                DATA_NS,                                                                                                                       
+                ID_COMUNE_NS,                                                                                                                  
+                INATTIVO_DAL,                                                                                                                                 
+                OLD_PARTITA_IVA,                                                                                                               
+                ID_OA,                                                                                                                         
+                COMUNE_NS_LR_OA,                                                                                                               
+                COMUNE_NS_OA,                                                                                                                  
+                PIGNORAMENTO,                                                                                                                  
+                NOTA_PIGNORAMENTO,                                                                                                             
+                UTENTE_CREAZIONE,                                                                                                              
+                UTENTE_AGGIORNAMENTO,                                                                                                          
+                DATA_AGGIORNAMENTO,                                                                                                            
+                DATA_CREAZIONE,                                                                                                                
+                ESTERO,                                                                                                                        
+                COMMISSIONI                                                                                                                    
+              )                                                                                                                                
+              VALUES                                                                                                                           
+              (                                                                                                                                
+                conta,                                                                                                                         
+                PI_TIPO_ANAGRAFICA,                                                                                                            
+                PI_PARTITA_IVA,                                                                                                                
+                PI_DENOMINAZIONE,                                                                                                              
+                PI_COGNOME_LR,                                                                                                                 
+                PI_NOME_LR,                                                                                                                    
+                PI_SESSO_LR,                                                                                                                   
+                NULL,--ID_COM_NS_LR,                                                                                                               
+                PI_DATA_NS_LR,                                                                                                                 
+                PI_INDIRIZZO_LR,                                                                                                               
+                NULL,--ID_COM_RES_LR,                                                                                                              
+                PI_CAP_RES_LR,                                                                                                                 
+                upper(PI_CF_LR),                                                                                                               
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                PI_NOTA_PIGNORAMENTO,                                                                                                          
+                null,                                                                                                                          
+                null,                                                                                                                          
+                PI_PIGNORAMENTO,                                                                                                               
+                nome_utente,                                                                                                                     
+                null,                                                                                                                          
+                null,                                                                                                                          
+                sysdate,                                                                                                                       
+                nvl(PI_ESTERO,'N'),                                                                                                                     
+                nvl(COMMISSIONI,'E')                                                                                                         
+                );                                                                                                                             
+            COMMIT;   
+            PO_ID_ANAGRAFICA := conta;                                                                                                                         
+  end if;                                                                                                                               
+  -- ********* FINE Persona Giuridica ****************  
+  
+  -- ******************* PERSONA FISICA ************************
+  if PI_TIPO_ANAGRAFICA = 'F'  then
+				--Verifico che il codice fiscale non sia nullo
+				if PI_CODICE_FISCALE is null 
+           or pi_cognome is null
+           or pi_nome is null
+           or pi_sesso is null
+           or pi_data_ns is null
+          then PO_CODICE_RISPOSTA := 0;                                                                                                             
+          PO_DESCRIZIONE_RISPOSTA := 'Per le persone fisiche il Codice Fiscale,il Cognome, il Nome, il sesso, la data di nascita e il comune di nascita sono obbligatori!';                                               
+          return;            
+				end if;
+       			
+				--Controllo la correttezza del codice fiscale
+				if (length(PI_CODICE_FISCALE) &lt; 16) or (length(PI_CODICE_FISCALE) > 16) or (PI_CODICE_FISCALE = '****************' ) then
+					err := 'S';
+				else	
+         CTRL_FORM_CF(upper(PI_CODICE_FISCALE),err);
+				end if;
+				if err = 'S'  then
+          PO_CODICE_RISPOSTA := 0;                                                                                                             
+          PO_DESCRIZIONE_RISPOSTA := 'Il codice fiscale è errato!';                                               
+          return;
+				end if;
+        cf := '';  
+        cf := REPLACE(GENERA_CF(PI_COGNOME,PI_NOME,PI_ALTRI_NOMI,PI_SESSO,trunc(PI_DATA_NS,'dd'),ID_COM_NS),' '); 
+        if upper(cf) &lt;> upper(PI_CODICE_FISCALE) then
+          PO_CODICE_RISPOSTA := 0;                                                                                                             
+          PO_DESCRIZIONE_RISPOSTA := 'Il codice fiscale non è coerente con i dati immessi. Il codice fiscale dovrebbe essere '||upper(cf);                                               
+          return;
+				end if;
+				--Fine Controllo del codice fiscale
+
+        appoggio:=0;
+				--Verifico l'esistenza del Codice Fiscale
+				BEGIN
+					select count(*)
+					INTO appoggio
+					from fin_t_anagrafica a
+					where upper(a.CODICE_FISCALE) = upper(PI_CODICE_FISCALE)
+                    and inattivo_dal is null;
+				END;
+        if appoggio > 0
+          then PO_CODICE_RISPOSTA := 0;                                                                                                             
+          PO_DESCRIZIONE_RISPOSTA := 'Il Codice Fiscale è già presente in anagrafica';                                               
+          return;
+				end if;
+				--Fine Verifica dell'esistenza del Codice Fiscale
+        
+        -- ************ inserimento anagrafica *************
+        select (nvl(max(id),0)+1) into conta from fin_t_anagrafica;
+         	INSERT
+            INTO
+              fin_t_anagrafica
+              (
+                ID,
+                TIPO_ANAGRAFICA,
+                PARTITA_IVA,
+                DENOMINAZIONE,
+                COGNOME_LR,
+                NOME_LR,
+                SESSO_LR,
+                ID_COMUNE_NS_LR,
+                DATA_NS_LR,
+                INDIRIZZO_LR,
+                ID_COMUNE_RES_LR,
+                CAP_RES_LR,
+                CF_LR,
+                CODICE_FISCALE,
+                COGNOME,
+                NOME,
+                ALTRI_NOMI,
+                SESSO,
+                DATA_NS,
+                ID_COMUNE_NS,
+                INATTIVO_DAL,
+                OLD_CODICE,
+                OLD_PARTITA_IVA,
+                ID_OA,
+                COMUNE_NS_LR_OA,
+                COMUNE_NS_OA,
+                PIGNORAMENTO,
+                NOTA_PIGNORAMENTO,
+                DATA_CREAZIONE,
+                UTENTE_CREAZIONE,
+                UTENTE_AGGIORNAMENTO,
+                DATA_AGGIORNAMENTO,
+                ESTERO,
+                COMMISSIONI
+              )
+              VALUES
+              (
+                conta,
+                upper(PI_TIPO_ANAGRAFICA),
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                upper(PI_CODICE_FISCALE),
+                upper(PI_COGNOME),
+                upper(PI_NOME),
+                upper(PI_ALTRI_NOMI),
+                upper(PI_SESSO),
+                PI_DATA_NS,
+                id_com_ns,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                PI_PIGNORAMENTO, 
+                PI_NOTA_PIGNORAMENTO,
+                nome_utente,
+                null,
+                null,
+                sysdate,
+                PI_ESTERO,
+                nvl(COMMISSIONI,'E'));
+            COMMIT;
+            PO_ID_ANAGRAFICA := conta;
+     end if;
+        -- *********** FINE inserimento anagrafica *********
+  
+  
+  -- **************** FINE Persona Fisica ********************** 
+ 
+  -- ************** carico la SEDE **************
+          PO_DESCRIZIONE_RISPOSTA := 'Carica sede';
+           INSERT
+              INTO
+                fin_t_ana_sedi
+                (
+                  ID_ANA,
+                  ID_SEDE,
+                  INDIRIZZO,
+                  ID_COMUNE_SEDE,
+                  CAP_SEDE,
+                  COGNOME_LR,
+                  NOME_LR,
+                  SESSO_LR,
+                  ID_COMUNE_NS_LR,
+                  DATA_NS_LR,
+                  CF_LR,
+                  INDIRIZZO_LR,
+                  ID_COMUNE_RES_LR,
+                  CAP_RES_LR,
+                  TELEFONO,
+                  E_MAIL,
+                  FAX,
+                  BOLLO,
+                  DATA_CREAZIONE,
+                  ID_SEDE_OA,
+                  ID_VENDOR_OA,
+                  NOME_SEDE,
+                  ID_TIPO_PAGAMENTO,
+                  INATTIVO_DAL,
+                  COMUNE_SEDE_OA,
+                  UTENTE_CREAZIONE,
+                  UTENTE_AGGIORNAMENTO,
+                  DATA_AGGIORNAMENTO
+                )
+                VALUES
+                (
+                  conta,                           
+                  1,                               
+                  upper(PI_INDIRIZZO),                    
+                  ID_COM_SEDE,                     
+                  PI_CAP_SEDE,                     
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  PI_TELEFONO,                     
+                  PI_E_MAIL,                       
+                  PI_FAX,                          
+                  DECODE(PI_BOLLO,'Y','S','N'),    
+                  sysdate,                          
+                  NULL,                            
+                  NULL,                            
+                  'SEDE N.1',                      
+                  ID_TIPO_PAGAMENTO,               
+                  null,                            
+                  null,                            
+                  nome_utente,        
+                  null,--:global.utente_collegato, 
+                  null--sysdate                    
+                );
+              COMMIT;
+              PO_ID_SEDE := 1;                                                                                                                               
+              PO_ID_TIPO_PAGAMENTO := ID_TIPO_PAGAMENTO;
+  -- ************ FINE carico SEDE ************    
+  
+  -- ************ verifico se la modalità di pagamento è BOLLETTINO POSTALE = 3 ***********************
+              if ID_TIPO_PAGAMENTO = 3
+                then v_banca_id := 34003;
+                PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' c/c POSTALE';
+               elsif ID_TIPO_PAGAMENTO = 25
+                then 
+                begin
+                select upper(c.provincia) into provincia_sede
+                from fin_t_comuni c
+                where c.id = id_com_sede;
+                exception when no_data_found then provincia_sede :='';
+                end;
+                v_banca_id := 5015;
+                PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' Mod. F24';
+                else v_banca_id := null;
+              end if;
+  
+        if PI_IBAN is not null                                                                                                     
+  -- ************ FINE verifica BOLLETTINO POSTALE **********************************************
+ 
+  -- *********** carico il CONTO CORRENTE ****
+          then 
+            val_iban := valida_iban(UPPER(PI_IBAN),NVL(PI_ESTERO,'N'));
+            if val_iban &lt;> '0'
+              then --PO_CODICE_RISPOSTA := 0;                                                                                                                       
+              PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' '||'Non è stato possibile validare l''IBAN!';
+              return;
+            end if;
+            PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' c/c BANCARIO';
+        end if;
+        
+        if translate(PI_CONTO_CORRENTE,'$0123456789','$') is not null
+         then PO_CODICE_RISPOSTA := 0;                                                                                                    
+         PO_DESCRIZIONE_RISPOSTA := 'Il numero del conto deve essere numerico.';                                 
+			  	return;                                                                                                                            
+         end if;
+        
+       if (PI_IBAN is not null or (ID_TIPO_PAGAMENTO in (3,25) and PI_CONTO_CORRENTE is not null))
+           then
+              select (nvl(max(id),0) + 1) into id_conto_corrente                                                                                   
+              from fin_t_ana_conti_bancari;   
+              insert into fin_t_ana_conti_bancari (
+              ID                     
+              ,ID_ANA                
+              ,ID_SEDE               
+              ,BANCA_ID								
+              ,CONTO_CORRENTE        
+              ,MODALITA_PRINCIPALE_SN
+              ,DATA_CREAZIONE        
+              ,CIN                   
+              ,IBAN                  
+              ,DATA_AGGIORNAMENTO    
+              ,UTENTE_CREAZIONE      
+              ,UTENTE_AGGIORNAMENTO
+              ,PROVINCIA_TESORERIA) 
+              values (
+              id_conto_corrente         
+              ,conta                    
+              ,1                        
+              ,v_banca_id              
+              ,PI_CONTO_CORRENTE        
+              ,'S'--PI_MODALITA_PRINCIPALE_SN
+              ,sysdate                  
+              ,PI_CIN                   
+              ,UPPER(PI_IBAN)                  
+              ,null                     
+              ,nome_utente                
+              ,null
+              ,nvl(provincia_sede,''));
+              commit;
+              PO_ID_CONTO_CORRENTE := id_conto_corrente;
+      end if;           
+            -- **** FINE CONTO CORRENTE *******
+  
+END;</pre>	</td></tr>
+</table></div>

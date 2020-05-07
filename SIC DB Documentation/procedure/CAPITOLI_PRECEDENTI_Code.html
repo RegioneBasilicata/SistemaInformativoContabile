@@ -1,0 +1,56 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CAPITOLI_PRECEDENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CAPITOLI_PRECEDENTI.html">Details</a></div></div>
+<div class="tab"><div><a href="CAPITOLI_PRECEDENTI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CAPITOLI_PRECEDENTI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CAPITOLI_PRECEDENTI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CAPITOLI_PRECEDENTI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure capitoli_precedenti (p_anno in number) is 
+
+esiste number := 0;
+
+cursor cap is 
+select eu
+,codice 
+,codice_precedente
+from fin_t_articoli
+where anno  = p_anno
+and nvl(abilitato,'N') = 'S';
+
+begin
+ for c in cap loop
+
+   select count(*) into esiste
+   from fin_t_articoli
+   where anno = p_anno -1
+   and eu = c.eu
+   and codice = c.codice;
+
+   if esiste > 0 --quindi se il capitolo esiste nell'anno precedente inserisco come codice precedente il capitolo stesso
+    then 
+    update fin_t_articoli set codice_precedente = c.eu||c.codice
+    where anno = p_anno 
+    and eu = c.eu
+    and codice = c.codice
+    and codice_precedente &lt;> c.eu||c.codice;
+    commit;
+  end if;
+
+
+ end loop;
+end;</pre>	</td></tr>
+</table></div>

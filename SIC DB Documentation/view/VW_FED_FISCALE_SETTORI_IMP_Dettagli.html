@@ -1,0 +1,237 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_FED_FISCALE_SETTORI_IMP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_FED_FISCALE_SETTORI_IMP.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_FED_FISCALE_SETTORI_IMP_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_FED_FISCALE_SETTORI_IMP_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_FED_FISCALE_SETTORI_IMP_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_FED_FISCALE_SETTORI_IMP_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_FED_FISCALE_SETTORI_IMP</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>2800</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+    ANNO ,
+    NUMERO_ORDINE,
+    SIOPE1,
+    SIOPE2,
+    SIOPE3,
+    SIOPE_DESCRIZIONE ,
+    COL1,
+    COL2,
+    COL3,
+    COL4,
+    COL5,
+    COL6,
+    COL7,
+    COL8,
+    COL9,
+    COL10,
+    COL11 ,
+    COL12,
+    COL13,
+    COL14,
+    COL15,
+    COL16,
+    COL17,
+    COL18,
+    COL19,
+    COL20 ,
+    COL21,
+    COL22,
+    COL23,
+    COL24,
+    COL25,
+    COL26,
+    COL27,
+    COL28,
+    COL29 ,
+    COL30,
+    COL31,
+    COL32,
+    COL33,
+    COL34,
+    COL35
+  FROM
+    fin_t_descrizioni_fed_fiscale
+  WHERE
+    codice_rigo = 2
+  UNION
+  SELECT
+    ANNO ,
+    NUMERO_ORDINE ,
+    SIOPE1 ,
+    SIOPE2 ,
+    SIOPE3 ,
+    SIOPE_DESCRIZIONE ,
+    TO_CHAR(COL1) ,
+    TO_CHAR(COL2) ,
+    TO_CHAR(COL3) ,
+    TO_CHAR(COL4) ,
+    TO_CHAR(COL5) ,
+    TO_CHAR(COL6) ,
+    TO_CHAR(COL7) ,
+    TO_CHAR(COL8) ,
+    TO_CHAR(COL9) ,
+    TO_CHAR(COL10) ,
+    TO_CHAR(COL11) ,
+    TO_CHAR(COL12) ,
+    TO_CHAR(COL13) ,
+    TO_CHAR(COL14) ,
+    TO_CHAR(COL15) ,
+    TO_CHAR(COL16) ,
+    TO_CHAR(COL17) ,
+    TO_CHAR(COL18) ,
+    TO_CHAR(COL19) ,
+    TO_CHAR(COL20) ,
+    TO_CHAR(COL21) ,
+    TO_CHAR(COL22) ,
+    TO_CHAR(COL23) ,
+    TO_CHAR(COL24) ,
+    TO_CHAR(COL25) ,
+    TO_CHAR(COL26) ,
+    TO_CHAR(COL27) ,
+    TO_CHAR(COL28) ,
+    TO_CHAR(COL29) ,
+    TO_CHAR(COL30) ,
+    TO_CHAR(COL31) ,
+    TO_CHAR(COL32) ,
+    TO_CHAR(COL33) ,
+    TO_CHAR(COL34) ,
+    TO_CHAR(COL35)
+  FROM
+    fin_t_importi_fed_fiscale
+  WHERE
+    eu               = 'U'
+  AND tipo_importi   = 'I'
+  AND NVL(cofog,'X') = 'S'
+  UNION
+  SELECT
+    ANNO ,
+    900 ,
+    NULL ,
+    NULL ,
+    NULL ,
+    'TOTALE USCITE' ,
+    TO_CHAR(SUM(COL1)) ,
+    TO_CHAR(SUM(COL2)) ,
+    TO_CHAR(SUM(COL3)) ,
+    TO_CHAR(SUM(COL4)) ,
+    TO_CHAR(SUM(COL5)) ,
+    TO_CHAR(SUM(COL6)) ,
+    TO_CHAR(SUM(COL7)) ,
+    TO_CHAR(SUM(COL8)) ,
+    TO_CHAR(SUM(COL9)) ,
+    TO_CHAR(SUM(COL10)) ,
+    TO_CHAR(SUM(COL11)) ,
+    TO_CHAR(SUM(COL12)) ,
+    TO_CHAR(SUM(COL13)) ,
+    TO_CHAR(SUM(COL14)) ,
+    TO_CHAR(SUM(COL15)) ,
+    TO_CHAR(SUM(COL16)) ,
+    TO_CHAR(SUM(COL17)) ,
+    TO_CHAR(SUM(COL18)) ,
+    TO_CHAR(SUM(COL19)) ,
+    TO_CHAR(SUM(COL20)) ,
+    TO_CHAR(SUM(COL21)) ,
+    TO_CHAR(SUM(COL22)) ,
+    TO_CHAR(SUM(COL23)) ,
+    TO_CHAR(SUM(COL24)) ,
+    TO_CHAR(SUM(COL25)) ,
+    TO_CHAR(SUM(COL26)) ,
+    TO_CHAR(SUM(COL27)) ,
+    TO_CHAR(SUM(COL28)) ,
+    TO_CHAR(SUM(COL29)) ,
+    TO_CHAR(SUM(COL30)) ,
+    TO_CHAR(SUM(COL31)) ,
+    TO_CHAR(SUM(COL32)) ,
+    TO_CHAR(SUM(COL33)) ,
+    TO_CHAR(SUM(COL34)) ,
+    TO_CHAR(SUM(COL35))
+  FROM
+    fin_t_importi_fed_fiscale
+  WHERE
+    eu               = 'U'
+  AND SIOPE2         = '0'
+  AND SIOPE3         = '0'
+  AND tipo_importi   = 'I'
+  AND NVL(cofog,'X') = 'S'
+  GROUP BY
+    ANNO ,
+    900 ,
+    NULL ,
+    NULL ,
+    NULL ,
+    'TOTALE USCITE'
+  ORDER BY
+    anno,
+    numero_ordine</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

@@ -1,0 +1,774 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>QUADRO_GENERALE_RIASSUNTIVO_LR</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="QUADRO_GENERALE_RIASSUNTIVO_LR.html">Details</a></div></div>
+<div class="tab"><div><a href="QUADRO_GENERALE_RIASSUNTIVO_LR_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="QUADRO_GENERALE_RIASSUNTIVO_LR_References.html">References</a></div></div>
+<div class="tab"><div><a href="QUADRO_GENERALE_RIASSUNTIVO_LR_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="QUADRO_GENERALE_RIASSUNTIVO_LR_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      QUADRO_GENERALE_RIASSUNTIVO_LR (p_anno in number,p_tipo_calcolo in varchar2,p_utente in varchar2,p_id_report in number) as
+
+
+assestamento varchar2(1);
+
+p74_fondo_vinc_compe number(15,2) :=0;
+p74_fondo_vinc_plur1 number(15,2) :=0;
+p74_fondo_vinc_plur2 number(15,2) :=0;
+p74_cassa1 number(15,2) :=0;
+p74_compe1 number(15,2) :=0;
+p74_plur11 number(15,2) :=0;
+p74_plur21 number(15,2) :=0;
+p74_titolo1 varchar2(1000);
+
+p74_cassa2 number(15,2) :=0;
+p74_compe2 number(15,2) :=0;
+p74_plur12 number(15,2) :=0;
+p74_plur22 number(15,2) :=0;
+p74_titolo2 varchar2(1000);
+
+p74_cassa3 number(15,2) :=0;
+p74_compe3 number(15,2) :=0;
+p74_plur13 number(15,2) :=0;
+p74_plur23 number(15,2) :=0;
+p74_titolo3 varchar2(1000);
+
+p74_cassa4 number(15,2) :=0;
+p74_compe4 number(15,2) :=0;
+p74_plur14 number(15,2) :=0;
+p74_plur24 number(15,2) :=0;
+p74_titolo4 varchar2(1000);
+
+p74_cassa5 number(15,2) :=0;
+p74_compe5 number(15,2) :=0;
+p74_plur15 number(15,2) :=0;
+p74_plur25 number(15,2) :=0;
+p74_titolo5 varchar2(1000);
+
+p74_cassa6 number(15,2) :=0;
+p74_compe6 number(15,2) :=0;
+p74_plur16 number(15,2) :=0;
+p74_plur26 number(15,2) :=0;
+p74_titolo6 varchar2(1000);
+
+p74_cassa7 number(15,2) :=0;
+p74_compe7 number(15,2) :=0;
+p74_plur17 number(15,2) :=0;
+p74_plur27 number(15,2) :=0;
+p74_titolo7 varchar2(1000);
+
+p74_cassa9 number(15,2) :=0;
+p74_compe9 number(15,2) :=0;
+p74_plur19 number(15,2) :=0;
+p74_plur29 number(15,2) :=0;
+p74_titolo9 varchar2(1000);
+
+p74_avanzo_amministrazione number(15,2) :=0;
+p74_fondo_cassa number(15,2) :=0;
+
+p74_edesc_fondo_cassa varchar2(1000);
+p74_edesc_avanzo varchar2(1000);
+p74_edesc_fondo_plur_vinc varchar2(1000);
+
+p74_cassa_entr1 number(15,2) :=0;
+p74_compe_entr1 number(15,2) :=0;
+p74_plur1_entr1 number(15,2) :=0;
+p74_plur2_entr1 number(15,2) :=0;
+p74_desc_totale_entrate1 varchar2(1000);
+
+p74_cassa_entr2 number(15,2) :=0;
+p74_compe_entr2 number(15,2) :=0;
+p74_plur1_entr2 number(15,2) :=0;
+p74_plur2_entr2 number(15,2) :=0;
+p74_desc_totale_entrate2 varchar2(1000);
+
+p74_cassa_tot number(15,2) :=0;
+p74_compe_tot number(15,2) :=0;
+p74_plur1_tot number(15,2) :=0;
+p74_plur2_tot number(15,2) :=0;
+p74_desc_totale_entrate_compl varchar2(1000);
+
+p78_ucassa1 number(15,2) :=0;
+p78_ucompe1 number(15,2) :=0;
+p78_uplur11 number(15,2) :=0;
+p78_uplur21 number(15,2) :=0;
+p78_fv_titolo1 varchar2(1000);
+
+p78_fv_tit1_compe number(15,2) :=0;
+p78_fv_tit1_plur1 number(15,2) :=0;
+p78_fv_tit1_plur2 number(15,2) :=0;
+p78_utitolo1 varchar2(1000);
+
+p78_ucassa2 number(15,2) :=0;
+p78_ucompe2 number(15,2) :=0;
+p78_uplur12 number(15,2) :=0;
+p78_uplur22 number(15,2) :=0;
+p78_fv_titolo2 varchar2(1000);
+
+p78_fv_tit2_compe number(15,2) :=0;
+p78_fv_tit2_plur1 number(15,2) :=0;
+p78_fv_tit2_plur2 number(15,2) :=0;
+p78_utitolo2 varchar2(1000);
+
+p78_ucassa3 number(15,2) :=0;
+p78_ucompe3 number(15,2) :=0;
+p78_uplur13 number(15,2) :=0;
+p78_uplur23 number(15,2) :=0;
+p78_fv_titolo3 varchar2(1000);
+
+p78_fv_tit3_compe number(15,2) :=0;
+p78_fv_tit3_plur1 number(15,2) :=0;
+p78_fv_tit3_plur2 number(15,2) :=0;
+p78_utitolo3 varchar2(1000);
+
+p78_ucassa4 number(15,2) :=0;
+p78_ucompe4 number(15,2) :=0;
+p78_uplur14 number(15,2) :=0;
+p78_uplur24 number(15,2) :=0;
+p78_utitolo4 varchar2(1000);
+
+p78_ucassa5 number(15,2) :=0;
+p78_ucompe5 number(15,2) :=0;
+p78_uplur15 number(15,2) :=0;
+p78_uplur25 number(15,2) :=0;
+p78_utitolo5 varchar2(1000);
+
+p78_ucassa7 number(15,2) :=0;
+p78_ucompe7 number(15,2) :=0;
+p78_uplur17 number(15,2) :=0;
+p78_uplur27 number(15,2) :=0;
+p78_utitolo7 varchar2(1000);
+
+p78_disa_compe number(15,2) :=0;
+p78_disa_plur1 number(15,2) :=0;
+p78_disa_plur2 number(15,2) :=0;
+
+p78_desc_disa varchar2(1000);
+                                   
+                                  
+p78_ucassa_usc1 number(15,2) :=0;
+p78_ucompe_usc1 number(15,2) :=0;
+p78_uplur1_usc1 number(15,2) :=0;
+p78_uplur2_usc1 number(15,2) :=0;
+p78_desc_totale_uscite1 varchar2(1000);
+                                  
+p78_ucassa_usc2 number(15,2) :=0;
+p78_ucompe_usc2 number(15,2) :=0;
+p78_uplur1_usc2 number(15,2) :=0;
+p78_uplur2_usc2 number(15,2) :=0;
+p78_desc_totale_uscite2 varchar2(1000);
+                                  
+p78_ucassa_tot number(15,2) :=0;
+p78_ucompe_tot number(15,2) :=0;
+p78_uplur1_tot number(15,2) :=0;
+p78_uplur2_tot number(15,2) :=0;
+p78_desc_totale_uscite_compl varchar2(1000);
+
+
+ap_avanzo_amministrazione number(15,2) :=0;
+ap_avanzo_amministrazione_fin number(15,2) :=0;
+ap_avanzo_regionale number(15,2) :=0;
+ap_fondo_cassa number(15,2) :=0;
+ap_fondo_cassa_finale number(15,2) :=0;
+ap_disavanzo number(15,2) :=0;
+
+dg_disavanzo_amministrazione number(15,2) :=0;
+dg_avanzo_amministrazione number(15,2) :=0;
+dg_cassa number(15,2) :=0;
+
+capitolo varchar2(20);
+etitolo  varchar2(20);
+edesc_titolo varchar2(200);
+ecassa number(15,2) :=0;
+ecompe number(15,2) :=0;
+eplur1 number(15,2) :=0;
+eplur2 number(15,2) :=0;
+
+ass_ecassa number(15,2) :=0;
+ass_ecompe number(15,2) :=0;
+ass_eplur1 number(15,2) :=0;
+ass_eplur2 number(15,2) :=0;
+
+
+utitolo varchar2(20);
+udesc_titolo varchar2(200);
+Ucassa number(15,2) :=0;
+Ucompe number(15,2) :=0;
+Uplur1 number(15,2) :=0;
+Uplur2 number(15,2) :=0;
+Ufv_compe number(15,2) :=0;
+Ufv_plur1 number(15,2) :=0;
+Ufv_plur2 number(15,2) :=0;
+
+ass_Ucassa number(15,2) :=0;
+ass_Ucompe number(15,2) :=0;
+ass_Uplur1 number(15,2) :=0;
+ass_Uplur2 number(15,2) :=0;
+ass_Ufv_compe number(15,2) :=0;
+ass_Ufv_plur1 number(15,2) :=0;
+ass_Ufv_plur2 number(15,2) :=0;
+
+
+ebq122 number(15,2) :=0;
+ebq222 number(15,2) :=0;
+ebq123 number(15,2) :=0;
+ebq223 number(15,2) :=0;
+ebq124 number(15,2) :=0;
+ebq224 number(15,2) :=0;
+
+imp_man0 number(15,2):=0;
+imp_man1 number(15,2):=0;
+imp_man2 number(15,2):=0;
+desc_man varchar2(1000);
+
+cursor entrate is 
+ select 
+ a.capitolo Ecapitolo
+ ,nvl(substr(a.etitolo_umissione,1,1),'1') Etitolo
+ ,a.desc_titolo_missione Edesc_titolo
+ ,nvl(a.cassa_anno0,0) Ecassa
+ ,nvl(a.competenza_anno0,0) Ecompe
+ ,nvl(a.competenza_anno1,0) Eplur1
+ ,nvl(a.competenza_anno2,0) Eplur2
+from 
+fin_t_previsione a
+where a.eu = 'E' 
+and utente = p_utente
+and nvl(substr(a.etitolo_umissione,1,1),'1')&lt;>0
+and anno=p_anno;
+
+cursor uscite is 
+select 
+  a.capitolo Ucapitolo
+ ,a.titolo_uscite UTitolo
+ ,a.desc_titolo_uscite Udesc_titolo
+ ,nvl(a.cassa_anno0,0) Ucassa
+ ,nvl(a.competenza_anno0,0) Ucompe
+ ,nvl(a.competenza_anno1,0) Uplur1
+ ,nvl(a.competenza_anno2,0) Uplur2
+ ,nvl(a.dicui_fpv_anno0,0) Ufv_compe
+ ,nvl(a.dicui_fpv_anno1,0) Ufv_plur1
+ ,nvl(a.dicui_fpv_anno2,0) Ufv_plur2
+from 
+fin_t_previsione a
+where a.eu = 'U' 
+and utente = p_utente
+and a.titolo_uscite&lt;>0
+and anno=p_anno;
+
+BEGIN
+
+assestamento := 'A';-- per prendere in considerazione i movimenti Assestamento utilizzati per le variazioni -- nvl(p_tipo_calcolo,'P');
+
+-- ex procedura dati_generali
+begin  
+select 
+ nvl((dg.avanzo_amministrazione + dg.variazione_avanzo_delibera),0) avanzo_amministrazione,
+ nvl(((abs(dg.avanzo_amministrazione) + dg.variazione_avanzo_delibera) + nvl(dg.variazione_avanzo_piu,0) - nvl(dg.variazione_avanzo_meno,0)),0)  avanzo_amministrazione_fin,
+ nvl(dg.avanzo_regionale,0),
+ nvl(dg.cassa,0) fondo_cassa, 
+ nvl((abs(dg.cassa) + nvl(dg.variazione_cassa_piu,0) - nvl(dg.variazione_cassa_meno,0)),0) fondo_cassa_finale,
+ nvl(dg.DISAVANZO_AMMINISTRAZIONE,0) + nvl(dg.DISAVANZO_EFFETTIVO_ANNI_PREC,0) + nvl(dg.DISAVANZO_REGIONALE,0) + nvl(dg.variazione_disavanzo_piu,0) - nvl(dg.variazione_disavanzo_meno,0) nb_disavanzo,
+ decode(assestamento,'A', nvl(fpv_corrente,0) + nvl(variazione_fpv_corrente,0),nvl(fpv_corrente,0)), 
+ decode(assestamento,'A', nvl(fpv_capitale,0) + nvl(variazione_fpv_capitale,0),nvl(fpv_capitale,0))
+-- nvl(fpv_corrente,0), -- per il bilancio di previsione le variazioni non vanno inserite
+-- nvl(fpv_capitale,0) -- per il bilancio di previsione le variazioni non vanno inserite
+into
+ ap_avanzo_amministrazione,
+ ap_avanzo_amministrazione_fin,
+ ap_avanzo_regionale,
+ ap_fondo_cassa,
+ ap_fondo_cassa_finale,
+ ap_disavanzo,
+ ebq122,
+ ebq222  
+from     fina_dati_generali dg
+where    dg.anno_finanziario = p_anno;
+exception when no_data_found 
+    then ap_avanzo_amministrazione :=0;
+        ap_avanzo_amministrazione_fin :=0;
+        ap_avanzo_regionale:=0;
+        ap_fondo_cassa:=0;
+        ap_fondo_cassa_finale:=0;
+        ap_disavanzo := 0;
+        ebq122 := 0;
+        ebq222 := 0;                 
+end;
+
+begin  
+select 
+ decode(assestamento,'A', nvl(fpv_corrente,0) + nvl(variazione_fpv_corrente,0),nvl(fpv_corrente,0)) 
+ ,decode(assestamento,'A', nvl(fpv_capitale,0) + nvl(variazione_fpv_capitale,0),nvl(fpv_capitale,0))
+-- nvl(fpv_corrente,0), -- per il bilancio di previsione le variazioni non vanno inserite 
+-- nvl(fpv_capitale,0) -- per il bilancio di previsione le variazioni non vanno inserite
+into
+ ebq123,
+ ebq223 
+from  fin_t_dati_generali dg
+where dg.anno_finanziario = p_anno + 1;
+exception when no_data_found 
+  then ebq123 := 0;
+       ebq223 := 0;
+end;
+
+begin  
+select 
+ decode(assestamento,'A', nvl(fpv_corrente,0) + nvl(variazione_fpv_corrente,0),nvl(fpv_corrente,0)) 
+ ,decode(assestamento,'A', nvl(fpv_capitale,0) + nvl(variazione_fpv_capitale,0),nvl(fpv_capitale,0))
+-- nvl(fpv_corrente,0), -- per il bilancio di previsione le variazioni non vanno inserite 
+-- nvl(fpv_capitale,0) -- per il bilancio di previsione le variazioni non vanno inserite
+into
+ ebq124,
+ ebq224
+from  fin_t_dati_generali dg
+where dg.anno_finanziario = p_anno + 2;
+exception when no_data_found 
+  then ebq124 := 0;
+       ebq224 := 0;
+end;
+
+begin
+  p74_FONDO_VINC_COMPE :=  ebq122 + ebq222;
+  p74_FONDO_VINC_PLUR1 :=  ebq123 + ebq223;
+  p74_FONDO_VINC_PLUR2 :=  ebq124 + ebq224;
+end; 
+
+begin
+ dg_avanzo_amministrazione := 0;
+ if ap_avanzo_amministrazione >= 0
+     then dg_avanzo_amministrazione := dg_avanzo_amministrazione + ap_avanzo_amministrazione_fin;
+ end if;
+ if ap_avanzo_regionale >= 0
+     then dg_avanzo_amministrazione := dg_avanzo_amministrazione + ap_avanzo_regionale;
+ end if;
+ 
+ if ap_fondo_cassa > 0
+       then dg_cassa := ap_fondo_cassa_finale;
+ end if;
+
+ dg_disavanzo_amministrazione := ap_disavanzo;
+ 
+end;
+-- end ex procedura dati_generali
+
+-- ex procedura capitoli_e
+for c in entrate loop
+ capitolo := c.ecapitolo;
+ etitolo := c.etitolo;
+ edesc_titolo := c.edesc_titolo;
+
+    ecassa := c.ecassa;
+    ecompe := c.ecompe;
+    eplur1 := c.eplur1;
+    eplur2 := c.eplur2;
+
+-- ex procedura qgr7e_dettaglio
+ if etitolo = 1 then
+    p74_cassa1 := p74_cassa1 + ecassa;
+    p74_compe1 := p74_compe1 + ecompe;
+    p74_plur11 := p74_plur11 + eplur1;
+    p74_plur21 := p74_plur21 + eplur2;
+    p74_titolo1 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 2 then
+    p74_cassa2 := p74_cassa2 + ecassa;
+    p74_compe2 := p74_compe2 + ecompe;
+    p74_plur12 := p74_plur12 + eplur1;
+    p74_plur22 := p74_plur22 + eplur2;
+    p74_titolo2 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 3 then
+    p74_cassa3 := p74_cassa3 + ecassa;
+    p74_compe3 := p74_compe3 + ecompe;
+    p74_plur13 := p74_plur13 + eplur1;
+    p74_plur23 := p74_plur23 + eplur2;
+    p74_titolo3 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 4 then
+    p74_cassa4 := p74_cassa4 + ecassa;
+    p74_compe4 := p74_compe4 + ecompe;
+    p74_plur14 := p74_plur14 + eplur1;
+    p74_plur24 := p74_plur24 + eplur2;
+    p74_titolo4 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 5 then
+    p74_cassa5 := p74_cassa5 + ecassa;
+    p74_compe5 := p74_compe5 + ecompe;
+    p74_plur15 := p74_plur15 + eplur1;
+    p74_plur25 := p74_plur25 + eplur2;
+    p74_titolo5 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 6 then
+    p74_cassa6 := p74_cassa6 + ecassa;
+    p74_compe6 := p74_compe6 + ecompe;
+    p74_plur16 := p74_plur16 + eplur1;
+    p74_plur26 := p74_plur26 + eplur2;
+    p74_titolo6 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 7 then
+    p74_cassa7 := p74_cassa7 + ecassa;
+    p74_compe7 := p74_compe7 + ecompe;
+    p74_plur17 := p74_plur17 + eplur1;
+    p74_plur27 := p74_plur27 + eplur2;
+    p74_titolo7 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+
+ if etitolo = 9 then
+    p74_cassa9 := p74_cassa9 + ecassa;
+    p74_compe9 := p74_compe9 + ecompe;
+    p74_plur19 := p74_plur19 + eplur1;
+    p74_plur29 := p74_plur29 + eplur2;
+    p74_titolo9 := 'Titolo '||etitolo||' '||edesc_titolo;
+ end if;
+-- end ex procedura qgr7e_dettaglio
+end loop;
+
+-- ex procedura qgr7e_totali
+p74_avanzo_amministrazione := dg_avanzo_amministrazione;
+p74_fondo_cassa := nvl(dg_cassa,0);
+p74_edesc_fondo_cassa := 'Fondo di Cassa Presunto all''inizio dell''esercizio';
+p74_edesc_avanzo := 'Utilizzo Avanzo Presunto di Amministrazione';
+p74_edesc_fondo_plur_vinc := 'Fondo Pluriennale Vincolato';
+
+p74_cassa_entr1 := p74_cassa1 + p74_cassa2 + p74_cassa3 + p74_cassa4 + p74_cassa5;
+p74_compe_entr1 := p74_compe1 + p74_compe2 + p74_compe3 + p74_compe4 + p74_compe5;
+p74_plur1_entr1 := p74_plur11 + p74_plur12 + p74_plur13 + p74_plur14 + p74_plur15;
+p74_plur2_entr1 := p74_plur21 + p74_plur22 + p74_plur23 + p74_plur24 + p74_plur25;
+p74_desc_totale_entrate1 := 'Totale Entrate Finali ';
+
+p74_cassa_entr2 := p74_cassa6 + p74_cassa7 + p74_cassa9 + p74_cassa_entr1;
+p74_compe_entr2 := p74_compe6 + p74_compe7 + p74_compe9 + p74_compe_entr1;
+p74_plur1_entr2 := p74_plur16 + p74_plur17 + p74_plur19 + p74_plur1_entr1;
+p74_plur2_entr2 := p74_plur26 + p74_plur27 + p74_plur29 + p74_plur2_entr1;
+p74_desc_totale_entrate2 := 'Totale Titoli ';
+
+p74_cassa_tot := p74_cassa_entr2 + p74_fondo_cassa;
+p74_compe_tot := p74_compe_entr2 + p74_avanzo_amministrazione + p74_fondo_vinc_compe;
+p74_plur1_tot := p74_plur1_entr2 + p74_fondo_vinc_plur1;
+p74_plur2_tot := p74_plur2_entr2 + p74_fondo_vinc_plur2;
+
+
+p74_desc_totale_entrate_compl := 'TOTALE COMPLESSIVO ENTRATE ';
+
+for c in uscite loop
+ capitolo := c.ucapitolo;
+ utitolo := c.utitolo;
+ Udesc_titolo := c.udesc_titolo;
+ 
+    Ucassa := c.ucassa;
+    Ucompe := c.ucompe;
+    Uplur1 := c.uplur1;
+    Uplur2 := c.uplur2;
+    Ufv_compe := c.ufv_compe;
+                 
+    Ufv_plur1 := c.ufv_plur1;
+    Ufv_plur2 := c.ufv_plur2;
+                     
+ if utitolo = 0 -- l'eventuale titolo 0 (non ancora assegnato) e lo butto nell'1
+    then p78_ucassa1 := p78_ucassa1 + ucassa;
+         p78_ucompe1 := p78_ucompe1 + ucompe;
+         p78_uplur11 := p78_uplur11 + uplur1;
+         p78_uplur21 := p78_uplur21 + uplur2;
+         p78_fv_titolo1 := ' di cui fondo pluriennale vincolato';
+         p78_fv_tit1_compe := p78_fv_tit1_compe + ufv_compe;
+         p78_fv_tit1_plur1 := p78_fv_tit1_plur1 + ufv_plur1;
+         p78_fv_tit1_plur2 := p78_fv_tit1_plur2 + ufv_plur2;
+         p78_utitolo1 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if;
+
+ if utitolo = 1 
+    then p78_ucassa1 := p78_ucassa1 + ucassa;
+         p78_ucompe1 := p78_ucompe1 + ucompe;
+         p78_uplur11 := p78_uplur11 + uplur1;
+         p78_uplur21 := p78_uplur21 + uplur2;
+         p78_fv_titolo1 := ' di cui fondo pluriennale vincolato';
+         p78_fv_tit1_compe := p78_fv_tit1_compe + ufv_compe;
+         p78_fv_tit1_plur1 := p78_fv_tit1_plur1 + ufv_plur1;
+         p78_fv_tit1_plur2 := p78_fv_tit1_plur2 + ufv_plur2;
+         p78_utitolo1 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if; 
+ 
+ if utitolo = 2                   
+       then  p78_ucassa2 := p78_ucassa2 + ucassa;
+            p78_ucompe2 := p78_ucompe2 + ucompe;
+            p78_uplur12 := p78_uplur12 + uplur1;
+            p78_uplur22 := p78_uplur22 + uplur2;
+            p78_fv_titolo2 := ' di cui fondo pluriennale vincolato';
+            p78_fv_tit2_compe := p78_fv_tit2_compe + ufv_compe;
+            p78_fv_tit2_plur1 := p78_fv_tit2_plur1 + ufv_plur1;
+            p78_fv_tit2_plur2 := p78_fv_tit2_plur2 + ufv_plur2;
+            p78_utitolo2 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if;                           
+                                   
+ if utitolo = 3                   
+       then  p78_ucassa3 := p78_ucassa3 + ucassa;
+            p78_ucompe3 := p78_ucompe3 + ucompe;
+            p78_uplur13 := p78_uplur13 + uplur1;
+            p78_uplur23 := p78_uplur23 + uplur2;
+            p78_fv_titolo3 := ' di cui fondo pluriennale vincolato';
+            p78_fv_tit3_compe := p78_fv_tit3_compe + ufv_compe;
+            p78_fv_tit3_plur1 := p78_fv_tit3_plur1 + ufv_plur1;
+            p78_fv_tit3_plur2 := p78_fv_tit3_plur2 + ufv_plur2;
+            
+            p78_utitolo3 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if;                           
+                                   
+ if utitolo = 4                   
+       then  p78_ucassa4 := p78_ucassa4 + ucassa;
+            p78_ucompe4 := p78_ucompe4 + ucompe;
+            p78_uplur14 := p78_uplur14 + uplur1;
+            p78_uplur24 := p78_uplur24 + uplur2;
+            p78_utitolo4 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if;                           
+                                   
+ if utitolo = 5                   
+       then  p78_ucassa5 := p78_ucassa5 + ucassa;
+            p78_ucompe5 := p78_ucompe5 + ucompe;
+            p78_uplur15 := p78_uplur15 + uplur1;
+            p78_uplur25 := p78_uplur25 + uplur2;
+            p78_utitolo5 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if;                           
+                                   
+ if utitolo = 7                   
+       then  p78_ucassa7 := p78_ucassa7 + ucassa;
+            p78_ucompe7 := p78_ucompe7 + ucompe;
+            p78_uplur17 := p78_uplur17 + uplur1;
+            p78_uplur27 := p78_uplur27 + uplur2;
+            p78_utitolo7 := 'Titolo '||utitolo||' '||udesc_titolo;
+ end if;                           
+ -- end ex procedura qgr7u_dettaglio
+end loop;                          
+                                   
+-- ex procedura qgr7u_totali       
+p78_disa_compe :=  dg_disavanzo_amministrazione;
+p78_desc_disa := 'Disavanzo di Amministrazione';
+                                   
+                                   
+p78_ucassa_usc1 := p78_ucassa1 + p78_ucassa2 + p78_ucassa3 ;
+p78_ucompe_usc1 := p78_ucompe1 + p78_ucompe2 + p78_ucompe3 ;
+p78_uplur1_usc1 := p78_uplur11 + p78_uplur12 + p78_uplur13 ;
+p78_uplur2_usc1 := p78_uplur21 + p78_uplur22 + p78_uplur23 ;
+p78_desc_totale_uscite1 := 'Totale Spese Finali ';
+                                   
+p78_ucassa_usc2 := p78_ucassa4 + p78_ucassa5 + p78_ucassa7 + p78_ucassa_usc1;
+p78_ucompe_usc2 := p78_ucompe4 + p78_ucompe5 + p78_ucompe7 + p78_ucompe_usc1;
+p78_uplur1_usc2 := p78_uplur14 + p78_uplur15 + p78_uplur17 + p78_uplur1_usc1;
+p78_uplur2_usc2 := p78_uplur24 + p78_uplur25 + p78_uplur27 + p78_uplur2_usc1;
+
+
+p78_desc_totale_uscite2 := 'Totale Titoli ';  
+                                   
+p78_ucassa_tot := p78_ucassa_usc2 ;
+p78_ucompe_tot := p78_ucompe_usc2 + p78_disa_compe ;
+p78_uplur1_tot := p78_uplur1_usc2 + p78_disa_plur1;
+p78_uplur2_tot := p78_uplur2_usc2 + p78_disa_plur2;
+
+
+p78_desc_totale_uscite_compl := 'TOTALE COMPLESSIVO SPESE ';
+
+
+-- end ex procedura qgr7u_totali   
+
+DELETE tmp_tabulati               
+ WHERE utente = UPPER(p_utente) and car20='QGR';
+ 
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),10,p74_EDESC_FONDO_CASSA,to_char(p74_FONDO_CASSA,'999G999G999G990D00'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'QGR');
+  
+  (UPPER(p_utente),20,p74_EDESC_AVANZO,NULL,to_char(p74_AVANZO_AMMINISTRAZIONE,'999G999G999G990D00'),NULL,NULL,p78_DESC_DISA,NULL,to_char(p78_DISA_COMPE,'999G999G999G990D00'),to_char(p78_DISA_PLUR1,'999G999G999G990D00'),to_char(p78_DISA_PLUR2,'999G999G999G990D00'),'QGR');
+ 
+ BEGIN 
+  SELECT descrizione_campo_report,NVL(importo,0) importo
+  INTO desc_man,imp_man0
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'UFADL_ENTRATE_ANNO';
+  SELECT NVL(importo,0) importo
+  INTO imp_man1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'UFADL_ENTRATE_ANNO1';
+  SELECT NVL(importo,0) importo
+  INTO imp_man2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'UFADL_ENTRATE_ANNO2';
+ EXCEPTION 
+  WHEN OTHERS THEN desc_man := null;
+ END;      
+ if desc_man is not null
+    then 
+    INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+     (UPPER(p_utente),25,desc_man,NULL,to_char(imp_man0,'999G999G999G990D00'),to_char(imp_man1,'999G999G999G990D00'),to_char(imp_man2,'999G999G999G990D00'),NULL,NULL,NULL,NULL,NULL,'QGR');
+ end if;
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),30,p74_EDESC_FONDO_PLUR_VINC,NULL,to_char(p74_FONDO_VINC_COMPE,'999G999G999G990D00'),to_char(p74_FONDO_VINC_PLUR1,'999G999G999G990D00'),to_char(p74_FONDO_VINC_PLUR2,'999G999G999G990D00'),NULL,NULL,NULL,NULL,NULL,'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),40,p74_TITOLO1,to_char(p74_CASSA1,'999G999G999G990D00'),to_char(p74_COMPE1,'999G999G999G990D00'),to_char(p74_PLUR11,'999G999G999G990D00'),to_char(p74_PLUR21,'999G999G999G990D00'),NULL,NULL,NULL,NULL,NULL,'QGR');
+ 
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),50,NULL,NULL,NULL,NULL,NULL,p78_UTITOLO1,to_char(p78_UCASSA1,'999G999G999G990D00'),to_char(p78_UCOMPE1,'999G999G999G990D00'),to_char(p78_UPLUR11,'999G999G999G990D00'),to_char(p78_UPLUR21,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),60,p74_TITOLO2,to_char(p74_CASSA2,'999G999G999G990D00'),to_char(p74_COMPE2,'999G999G999G990D00'),to_char(p74_PLUR12,'999G999G999G990D00'),to_char(p74_PLUR22,'999G999G999G990D00'),p78_FV_TITOLO1,NULL,to_char(p78_FV_TIT1_COMPE,'999G999G999G990D00'),to_char(p78_FV_TIT1_PLUR1,'999G999G999G990D00'),to_char(p78_FV_TIT1_PLUR2,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),70,p74_TITOLO3,to_char(p74_CASSA3,'999G999G999G990D00'),to_char(p74_COMPE3,'999G999G999G990D00'),to_char(p74_PLUR13,'999G999G999G990D00'),to_char(p74_PLUR23,'999G999G999G990D00'),NULL,NULL,NULL,NULL,NULL,'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),80,p74_TITOLO4,to_char(p74_CASSA4,'999G999G999G990D00'),to_char(p74_COMPE4,'999G999G999G990D00'),to_char(p74_PLUR14,'999G999G999G990D00'),to_char(p74_PLUR24,'999G999G999G990D00'),p78_UTITOLO2,to_char(p78_UCASSA2,'999G999G999G990D00'),to_char(p78_UCOMPE2,'999G999G999G990D00'),to_char(p78_UPLUR12,'999G999G999G990D00'),to_char(p78_UPLUR22,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),90,NULL,NULL,NULL,NULL,NULL,p78_FV_TITOLO2,NULL,to_char(p78_FV_TIT2_COMPE,'999G999G999G990D00'),to_char(p78_FV_TIT2_PLUR1,'999G999G999G990D00'),to_char(p78_FV_TIT2_PLUR2,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),100,p74_TITOLO5,to_char(p74_CASSA5,'999G999G999G990D00'),to_char(p74_COMPE5,'999G999G999G990D00'),to_char(p74_PLUR15,'999G999G999G990D00'),to_char(p74_PLUR25,'999G999G999G990D00'),p78_UTITOLO3,to_char(p78_UCASSA3,'999G999G999G990D00'),to_char(p78_UCOMPE3,'999G999G999G990D00'),to_char(p78_UPLUR13,'999G999G999G990D00'),to_char(p78_UPLUR23,'999G999G999G990D00'),'QGR');
+
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),105,NULL,NULL,NULL,NULL,NULL,p78_FV_TITOLO3,NULL,to_char(p78_FV_TIT3_COMPE,'999G999G999G990D00'),to_char(p78_FV_TIT3_PLUR1,'999G999G999G990D00'),to_char(p78_FV_TIT3_PLUR2,'999G999G999G990D00'),'QGR');
+    
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),120,p74_TITOLO6,to_char(p74_CASSA6,'999G999G999G990D00'),to_char(p74_COMPE6,'999G999G999G990D00'),to_char(p74_PLUR16,'999G999G999G990D00'),to_char(p74_PLUR26,'999G999G999G990D00'),p78_UTITOLO4,to_char(p78_UCASSA4,'999G999G999G990D00'),to_char(p78_UCOMPE4,'999G999G999G990D00'),to_char(p78_UPLUR14,'999G999G999G990D00'),to_char(p78_UPLUR24,'999G999G999G990D00'),'QGR');
+  (UPPER(p_utente),110,p74_DESC_TOTALE_ENTRATE1,to_char(p74_CASSA_ENTR1,'999G999G999G990D00'),to_char(p74_COMPE_ENTR1,'999G999G999G990D00'),to_char(p74_PLUR1_ENTR1,'999G999G999G990D00'),to_char(p74_PLUR2_ENTR1,'999G999G999G990D00'),p78_DESC_TOTALE_USCITE1,to_char(p78_UCASSA_USC1,'999G999G999G990D00'),to_char(p78_UCOMPE_USC1,'999G999G999G990D00'),to_char(p78_UPLUR1_USC1,'999G999G999G990D00'),to_char(p78_UPLUR2_USC1,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+ 
+ BEGIN 
+  SELECT descrizione_campo_report,NVL(importo,0) importo
+  INTO desc_man,imp_man0
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'UFADL_USCITE_ANNO';
+  SELECT NVL(importo,0) importo
+  INTO imp_man1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'UFADL_USCITE_ANNO1';
+  SELECT NVL(importo,0) importo
+  INTO imp_man2
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = TO_NUMBER(p_id_report) AND
+        nome_campo_report = 'UFADL_USCITE_ANNO2';
+ EXCEPTION 
+  WHEN OTHERS THEN desc_man := null;
+ END;      
+ if desc_man is not null
+    then 
+    INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+     (UPPER(p_utente),125,null,null,null,null,null,desc_man,NULL,to_char(imp_man0,'999G999G999G990D00'),to_char(imp_man1,'999G999G999G990D00'),to_char(imp_man2,'999G999G999G990D00'),'QGR');
+ end if;
+   
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),130,p74_TITOLO7,to_char(p74_CASSA7,'999G999G999G990D00'),to_char(p74_COMPE7,'999G999G999G990D00'),to_char(p74_PLUR17,'999G999G999G990D00'),to_char(p74_PLUR27,'999G999G999G990D00'),p78_UTITOLO5,to_char(p78_UCASSA5,'999G999G999G990D00'),to_char(p78_UCOMPE5,'999G999G999G990D00'),to_char(p78_UPLUR15,'999G999G999G990D00'),to_char(p78_UPLUR25,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),140,p74_TITOLO9,to_char(p74_CASSA9,'999G999G999G990D00'),to_char(p74_COMPE9,'999G999G999G990D00'),to_char(p74_PLUR19,'999G999G999G990D00'),to_char(p74_PLUR29,'999G999G999G990D00'),p78_UTITOLO7,to_char(p78_UCASSA7,'999G999G999G990D00'),to_char(p78_UCOMPE7,'999G999G999G990D00'),to_char(p78_UPLUR17,'999G999G999G990D00'),to_char(p78_UPLUR27,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),150,p74_DESC_TOTALE_ENTRATE2,to_char(p74_CASSA_ENTR2,'999G999G999G990D00'),to_char(p74_COMPE_ENTR2,'999G999G999G990D00'),to_char(p74_PLUR1_ENTR2,'999G999G999G990D00'),to_char(p74_PLUR2_ENTR2,'999G999G999G990D00'),p78_DESC_TOTALE_USCITE2,to_char(p78_UCASSA_USC2,'999G999G999G990D00'),to_char(p78_UCOMPE_USC2,'999G999G999G990D00'),to_char(p78_UPLUR1_USC2,'999G999G999G990D00'),to_char(p78_UPLUR2_USC2,'999G999G999G990D00'),'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),160,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'QGR');
+  
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),170,p74_DESC_TOTALE_ENTRATE_COMPL,to_char(p74_CASSA_TOT,'999G999G999G990D00'),to_char(p74_COMPE_TOT,'999G999G999G990D00'),to_char(p74_PLUR1_TOT,'999G999G999G990D00'),to_char(p74_PLUR2_TOT,'999G999G999G990D00'),p78_DESC_TOTALE_USCITE_COMPL,to_char(p78_UCASSA_TOT,'999G999G999G990D00'),to_char(p78_UCOMPE_TOT,'999G999G999G990D00'),to_char(p78_UPLUR1_TOT,'999G999G999G990D00'),to_char(p78_UPLUR2_TOT,'999G999G999G990D00'),'QGR');
+
+ INSERT INTO tmp_tabulati(utente,num_ord_riga,car01,car02,car03,car04,car05,car06,car07,car08,car09,car10,car20) VALUES
+  (UPPER(p_utente),180,'Fondo di Cassa Finale Presunto' ,to_char((nvl(p74_CASSA_TOT,0) - nvl(p78_UCASSA_TOT,0)),'999G999G999G990D00'),null,null,null,null,null,null,null,null,'QGR');
+
+ COMMIT;
+
+-- inserisco valore nella tabella fin_t_previsione_qgr
+
+ delete fin_t_previsione_qgr where anno=p_anno and utente=upper(p_utente);
+ commit;
+ 
+ begin 
+ insert into fin_t_previsione_qgr
+  (data_generazione 
+  ,utente           
+  ,riga             
+  ,anno             
+  ,desc_rigo_entrata
+  ,e_cassa          
+  ,e_anno0          
+  ,e_anno1          
+  ,e_anno2          
+  ,e_tag_bdap_cassa 
+  ,e_tag_bdap_anno0 
+  ,e_tag_bdap_anno1 
+  ,e_tag_bdap_anno2 
+  ,desc_rigo_uscita 
+  ,u_cassa          
+  ,u_anno0          
+  ,u_anno1          
+  ,u_anno2          
+  ,u_tag_bdap_cassa 
+  ,u_tag_bdap_anno0 
+  ,u_tag_bdap_anno1 
+  ,u_tag_bdap_anno2) 
+ select
+   sysdate
+  ,upper(p_utente)
+  ,a.num_ord_riga
+  ,p_anno
+  ,a.car01
+  ,to_number(a.car02,'9999999999990D00')
+  ,to_number(a.car03,'9999999999990D00')
+  ,to_number(a.car04,'9999999999990D00')
+  ,to_number(a.car05,'9999999999990D00')
+  ,b.e_tag_bdap_cassa
+  ,b.e_tag_bdap_anno0
+  ,b.e_tag_bdap_anno1
+  ,b.e_tag_bdap_anno2
+  ,a.car06
+  ,to_number(a.car07,'9999999999990D00')
+  ,to_number(a.car08,'9999999999990D00')
+  ,to_number(a.car09,'9999999999990D00')
+  ,to_number(a.car10,'9999999999990D00')
+  ,b.u_tag_bdap_cassa
+  ,b.u_tag_bdap_anno0
+  ,b.u_tag_bdap_anno1
+  ,b.u_tag_bdap_anno2
+ from 
+  tmp_tabulati a
+ ,fin_t_previsione_qgr b 
+ where a.utente=upper(p_utente)
+ and a.car20='QGR'
+ and a.num_ord_riga=b.riga
+ and b.anno=2000
+ and to_char(b.data_generazione,'ddmmyyyy')='01012000'
+ order by num_ord_riga;
+ end;
+ commit;
+ 
+END;</pre>	</td></tr>
+</table></div>

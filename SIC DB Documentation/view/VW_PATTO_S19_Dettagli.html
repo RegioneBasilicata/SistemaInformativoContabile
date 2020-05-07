@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_PATTO_S19</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_PATTO_S19.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_PATTO_S19_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_PATTO_S19_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_PATTO_S19_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_PATTO_S19_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2013-10-02</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_PATTO_S19</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>733</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select 
+ 'S19' voce_PSI,
+ b.segment8 anno_doc,
+ b.doc_type tipo_doc,
+ b.doc_sequence_value numero_doc,
+ b.date_created data_doc,
+ b.segment2 capitolo_doc,
+ b.description oggetto_doc,
+ nvl(b.open_balance_proposed,0) importo_doc,
+ nvl(p.p_anno_cor,0) perc_esclusione,
+ nvl(b.open_balance_proposed,0)*nvl(p.p_anno_cor,0) importo_esclusione 
+ from fin_t_documenti b
+      ,fin_t_por_patto p
+      ,fin_t_articoli a
+      where b.doc_type = 'MAND'
+      and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+      and nvl(b.open_balance_proposed,0) > 0
+      and p.anno = b.segment8
+      and p.capitolo = b.segment2
+      and a.anno = b.segment8
+      and a.eu||a.codice = b.segment2
+      and a.nb_titolo = 1 
+      and a.nb_macroaggregato = '104'</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

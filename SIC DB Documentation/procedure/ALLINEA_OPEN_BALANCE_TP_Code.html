@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ALLINEA_OPEN_BALANCE_TP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ALLINEA_OPEN_BALANCE_TP.html">Details</a></div></div>
+<div class="tab"><div><a href="ALLINEA_OPEN_BALANCE_TP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ALLINEA_OPEN_BALANCE_TP_References.html">References</a></div></div>
+<div class="tab"><div><a href="ALLINEA_OPEN_BALANCE_TP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ALLINEA_OPEN_BALANCE_TP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure allinea_open_balance_tp as
+
+residuo_acc number := 0;
+
+-- allineo prime le uscite 
+--LIQ
+cursor liq is
+select d.doc_id
+,t.id_ana
+,t.ID_SEDE
+,open_balance_liq_tp(d.doc_id,t.ID_ANA,t.ID_SEDE) residuo_effettivo
+from fin_t_documenti d
+,fin_t_documenti_terze_parti t
+where d.doc_type = 'LIQ'
+and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+and t.doc_id = d.doc_id
+and nvl(t.OPEN_BALANCE_PROPOSED,0) &lt;> open_balance_liq_tp(d.doc_id,t.ID_ANA,t.ID_SEDE);
+
+--IMP
+cursor imp is
+select d.doc_id
+,t.id_ana
+,t.ID_SEDE
+,open_balance_imp_tp(d.doc_id,t.ID_ANA,t.ID_SEDE) residuo_effettivo
+from fin_t_documenti d
+,fin_t_documenti_terze_parti t
+where d.doc_type like 'IMP%'
+and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+and t.doc_id = d.doc_id
+and nvl(t.OPEN_BALANCE_PROPOSED,0) &lt;> open_balance_imp_tp(d.doc_id,t.ID_ANA,t.ID_SEDE);
+
+-- allineo gli accertamenti
+cursor accertamenti is
+select d.doc_id
+,t.id_ana
+,t.ID_SEDE
+,open_balance_acc_tp(d.doc_id,t.ID_ANA,t.ID_SEDE) residuo_effettivo
+from fin_t_documenti d
+,fin_t_documenti_terze_parti t
+where d.doc_type = 'ACC'
+and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+and t.doc_id = d.doc_id
+and nvl(t.OPEN_BALANCE_PROPOSED,0) &lt;> open_balance_acc_tp(d.doc_id,t.ID_ANA,t.ID_SEDE);
+
+
+begin
+
+ for l in liq loop
+  update fin_t_documenti_terze_parti t set t.OPEN_BALANCE_PROPOSED = l.residuo_effettivo
+  where t.doc_id = l.doc_id
+  and t.id_ana = l.id_ana
+  and t.ID_SEDE = l.id_sede;
+ end loop;
+ commit;
+
+ for i in imp loop
+ if i.residuo_effettivo &lt; 0
+ then 
+  update fin_t_documenti_terze_parti t set t.AMOUNT = (t.AMOUNT - i.residuo_effettivo),t.OPEN_BALANCE_PROPOSED = 0
+  where t.doc_id = i.doc_id
+  and t.id_ana = i.id_ana
+  and t.ID_SEDE = i.id_sede;
+ else
+  update fin_t_documenti_terze_parti t set t.OPEN_BALANCE_PROPOSED = i.residuo_effettivo
+  where t.doc_id = i.doc_id
+  and t.id_ana = i.id_ana
+  and t.ID_SEDE = i.id_sede;
+ end if;
+ end loop;
+ commit;
+
+ for a in accertamenti loop
+     if a.residuo_effettivo &lt; 0
+      then residuo_acc := 0;
+      else residuo_acc := a.residuo_effettivo;
+     end if;
+ update fin_t_documenti_terze_parti t set t.OPEN_BALANCE_PROPOSED = residuo_acc
+  where t.doc_id = a.doc_id
+  and t.id_ana = a.id_ana
+  and t.ID_SEDE = a.id_sede;
+ end loop;
+ commit;
+
+
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,176 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_NB_COMPOSIZIONE_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_NB_COMPOSIZIONE_BILANCIO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_NB_COMPOSIZIONE_BILANCIO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_NB_COMPOSIZIONE_BILANCIO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_NB_COMPOSIZIONE_BILANCIO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_NB_COMPOSIZIONE_BILANCIO_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2015-04-24</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_NB_COMPOSIZIONE_BILANCIO</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>2471</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+  d.segment8 anno ,
+  d.segment2 capitolo1 ,
+  d.segment11 capitolo2 ,
+  d.segment9 tipo_vincolo ,
+  'PREV' tipo_stanziamento ,
+  NVL(SUM(DECODE(SUBSTR(d.doc_type,7,3),'NEG',(d.document_amount * -1),
+  d.document_amount)),0) importo
+FROM
+  fin_t_documenti d,
+  fin_t_articoli a 
+WHERE
+  d.doc_type IN ('B_COM_POS' ,'B_PL1_POS' ,'V_PL1_POS' ,'A_PL1_POS' ,
+  'B_PL2_POS' ,'V_PL2_POS' ,'A_PL2_POS' ,'B_COM_NEG' ,'B_PL1_NEG' ,'V_PL1_NEG'
+  ,'A_PL1_NEG' ,'B_PL2_NEG' ,'V_PL2_NEG' ,'A_PL2_NEG' )
+AND NVL(d.deletion_status_flag,'N') = 'N'
+AND d.segment8                      > 2011
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2
+and nvl(a.abilitato,'N') = 'S'
+GROUP BY
+  d.segment8 ,
+  d.segment2 ,
+  d.segment11 ,
+  d.segment9 ,
+  'PREV'
+UNION
+SELECT
+  d.segment8 anno ,
+  d.segment2 capitolo1 ,
+  d.segment11 capitolo2 ,
+  d.segment9 tipo_vincolo ,
+  'ASS' tipo_stanziamento ,
+  NVL(SUM(DECODE(SUBSTR(d.doc_type,7,3),'NEG',(d.document_amount * -1),
+  d.document_amount)),0) importo
+FROM
+  fin_t_documenti d,
+  fin_t_articoli a
+WHERE
+  (
+    d.doc_type IN ('A_COM_POS','A_COM_NEG' )
+  OR
+    (
+      d.doc_type IN ('V_COM_POS','V_COM_NEG')
+    ) --AND NVL(d.attribute10,'N')    &lt;>'Y')
+  AND TRUNC(d.date_created,'dd') &lt; TRUNC(NVL(
+    (
+      SELECT
+        data_atto_assestamento
+      FROM
+        fin_t_dati_generali
+      WHERE
+        anno_finanziario=d.segment8
+    )
+    ,d.date_created+1),'dd')
+  )
+AND NVL(d.deletion_status_flag,'N') = 'N'
+AND d.segment8                      > 2011
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2
+and nvl(a.abilitato,'N') = 'S'
+GROUP BY
+  d.segment8 ,
+  d.segment2 ,
+  d.segment11 ,
+  d.segment9 ,
+  'ASS'
+UNION
+SELECT
+  d.segment8 anno ,
+  d.segment2 capitolo1 ,
+  d.segment11 capitolo2 ,
+  d.segment9 tipo_vincolo ,
+  'DEF' tipo_stanziamento ,
+  NVL(SUM(DECODE(SUBSTR(d.doc_type,7,3),'NEG',(d.document_amount * -1),
+  d.document_amount)),0) importo
+FROM
+  fin_t_documenti d,
+  fin_t_articoli a
+WHERE
+  d.doc_type IN ('B_COM_POS' ,'V_COM_POS' ,'A_COM_POS' ,'B_PL1_POS' ,
+  'V_PL1_POS' ,'A_PL1_POS' ,'B_PL2_POS' ,'V_PL2_POS' ,'A_PL2_POS' ,'B_COM_NEG'
+  ,'V_COM_NEG' ,'A_COM_NEG' ,'B_PL1_NEG' ,'V_PL1_NEG' ,'A_PL1_NEG' ,'B_PL2_NEG'
+  ,'V_PL2_NEG' ,'A_PL2_NEG' )
+AND NVL(d.deletion_status_flag,'N') = 'N'
+AND d.segment8                      > 2011
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2
+and nvl(a.abilitato,'N') = 'S'
+GROUP BY
+  d.segment8 ,
+  d.segment2 ,
+  d.segment11 ,
+  d.segment9 ,
+  'DEF'</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

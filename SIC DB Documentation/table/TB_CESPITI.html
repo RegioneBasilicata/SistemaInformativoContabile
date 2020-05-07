@@ -1,0 +1,167 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TB_CESPITI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="TB_CESPITI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="TB_CESPITI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>DOC_ACQ</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>Documento acquisto</td>
+	</tr>
+	<tr>
+<td>FONDO_PERD</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>Parte del costo perduto per ammortamento minore dei termini di legge</td>
+	</tr>
+	<tr>
+<td>ALIQ_AMM</td>
+<td>NUMBER(3,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>Percentuale ammortamento anni successivi</td>
+	</tr>
+	<tr>
+<td>COSTO_STOR_CIVIL</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>Costo storico ai fini civilistici</td>
+	</tr>
+	<tr>
+<td>COSTO_INDETR</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>Costo non fiscalmente deducibile</td>
+	</tr>
+	<tr>
+<td>CODICE</td>
+<td>VARCHAR2(30 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ANNO_INI_UTIL</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>Anno inizio utilizzo</td>
+	</tr>
+	<tr>
+<td>FONDO_ORD</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>Parte del costo gia' girata a fondo</td>
+	</tr>
+	<tr>
+<td>ALIQ_1</td>
+<td>NUMBER(3,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>Percentuale ammortamento I anno</td>
+	</tr>
+	<tr>
+<td>FONDO_CIVIL</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>Parte del costo girato al fondo con calcolo civilistico</td>
+	</tr>
+	<tr>
+<td>FONDO_IND</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>Parte del costo non fiscalmente deducibile</td>
+	</tr>
+	<tr>
+<td>COSTO_STORICO</td>
+<td>NUMBER(10,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>Costo storico del cespite</td>
+	</tr>
+	<tr>
+<td>DATA_ACQ</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FONDO_ANT</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SIT_AL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ALIQ_CIV</td>
+<td>NUMBER(4,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AUT_PROM</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+</table></div>

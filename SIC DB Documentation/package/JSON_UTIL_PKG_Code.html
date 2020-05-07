@@ -1,0 +1,52 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>JSON_UTIL_PKG</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="JSON_UTIL_PKG.html">Details</a></div></div>
+<div class="tab"><div><a href="JSON_UTIL_PKG_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="JSON_UTIL_PKG_References.html">References</a></div></div>
+<div class="tab"><div><a href="JSON_UTIL_PKG_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="JSON_UTIL_PKG_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+package json_util_pkg authid current_user as
+
+  /*
+
+  Purpose:    JSON utilities for PL/SQL
+  see http://ora-00001.blogspot.com/
+
+  Remarks:
+
+  Who     Date        Description
+  ------  ----------  -------------------------------------
+  MBR     30.01.2010  Created
+  JKR     01.05.2010  Edited to fit in PL/JSON
+  JKR     19.01.2011  Newest stylesheet + bugfix handling
+
+  */
+
+  -- generate JSON from REF Cursor
+  function ref_cursor_to_json (p_ref_cursor in sys_refcursor,
+                               p_max_rows in number := null,
+                               p_skip_rows in number := null) return json_list;
+
+  -- generate JSON from SQL statement
+  function sql_to_json (p_sql in varchar2,
+                        p_max_rows in number := null,
+                        p_skip_rows in number := null) return json_list;
+
+
+end json_util_pkg;
+</pre>	</td></tr>
+</table></div>

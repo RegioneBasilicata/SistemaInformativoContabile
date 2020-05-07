@@ -1,0 +1,94 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_MANUTENZIONI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_MANUTENZIONI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_MANUTENZIONI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_MANUTENZIONI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_MANUTENZIONI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_MANUTENZIONI_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_MANUTENZIONI</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>656</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select m.data,m.cod_bene,m.tipo_bene,l.descrizione||' '||r.descrizione descr_man,m.effettuata_da,f.ragione_sociale,m.data_chiusura,m.bene_in_sostituzione
+,at.ass_matricola,at.ass_cognome,at.ass_nome,at.ass_ufficio,at.data_ass, at.data_fine_ass
+--,am.ass_matricola,am.ass_cognome,am.ass_nome,am.ass_ufficio
+from tb_manutenzioni m, tb_righi_manutenzioni r, tb_lav_prest l,vw_fornitori f
+,tb_beni_ass at
+--,tb_beni_ass am
+where r.id_manutenzione=m.id and
+l.codice= r.articolo and
+m.fornitore=f.fornitore(+) and
+at.codice=m.cod_bene and
+at.data_ass=(select max(at2.data_ass) 
+                 from tb_beni_ass at2
+                 where at2.codice= m.cod_bene)</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_ABIL_RIACCERTAMENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_ABIL_RIACCERTAMENTI.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_ABIL_RIACCERTAMENTI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_ABIL_RIACCERTAMENTI_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_ABIL_RIACCERTAMENTI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_ABIL_RIACCERTAMENTI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure AGGIORNA_ABIL_RIACCERTAMENTI is
+vDipartimento varchar2(2);
+
+-- Dipendenti R o D
+cursor dipendenti_abilitati is
+select 
+fu.USER_ID
+,fu.RUOLO_RICHIESTA
+,fu.UFFICIO
+from FND_USER fu
+,AP_UTENTI au
+where fu.MATRICOLA = au.MATRICOLA
+and fu.RUOLO_RICHIESTA in ('R', 'D')
+and (
+    fu.MATRICOLA not in ( select MATRICOLA from FIN_T_CDG_DIRIGENTI )
+    or
+    substr(fu.UFFICIO,-2) = 'A2'
+);
+
+cursor strutture is
+select 
+CODICE
+from FIN_T_STRUTTURE fts
+where ANNO = to_number(to_char(sysdate,'yyyy'))
+and FIN_T_DIPARTIMENTI_CODICE = vDipartimento
+and ATTIVO = 'S';
+
+-- Dirigenti
+cursor dirigenti is
+select 
+fu.USER_ID,
+ftcd.UFFICIO, 
+ftcd.MATRICOLA
+from FIN_T_CDG_DIRIGENTI ftcd
+,FND_USER fu
+where ftcd.MATRICOLA = fu.MATRICOLA
+and substr(fu.UFFICIO, -2) != 'A2';
+
+begin
+
+delete from FIN_T_RIC_ABILITAZIONE where USER_ID not in ( select USER_ID from FND_USER where RUOLO_RICHIESTA = 'G' );
+
+-- Gestione dei dirigenti
+for k in dirigenti loop
+    update FND_USER set RUOLO_RICHIESTA = 'R' where USER_ID = k.USER_ID;
+    insert into FIN_T_RIC_ABILITAZIONE (USER_ID, RUOLO_RICHIESTA, UFFICIO) values (k.USER_ID, 'DIRIGENTE', k.UFFICIO);
+end loop;
+
+for i in dipendenti_abilitati loop
+    vDipartimento := substr(i.UFFICIO,1,2);    
+    -- Se nella FND_USER ha ruolo_richiesta = 'R'
+    if i.RUOLO_RICHIESTA = 'R' then
+        -- Controllo che l'utente non abbia come ufficio la DIREZIONE GENERALE (ultimi 2 caratteri 'A2')
+        --if substr(i.UFFICIO, -2) = 'A2' then
+            -- Se direzione generale, aggiorno il valore nella FND_USER e abilito su tutti gli uffici del dipartimento
+            --update FND_USER set RUOLO_RICHIESTA = 'D' where USER_ID = i.USER_ID;
+            --for j in strutture loop
+                --insert into FIN_T_RIC_ABILITAZIONE (USER_ID, RUOLO_RICHIESTA, UFFICIO) values (i.USER_ID, 'D', j.CODICE);
+            --end loop;
+        --else
+            -- Se NON direzione generale, abilito l'utente come UFFICIO ('R')
+            update FND_USER set RUOLO_RICHIESTA = 'R' where USER_ID = i.USER_ID;
+            insert into FIN_T_RIC_ABILITAZIONE (USER_ID, RUOLO_RICHIESTA, UFFICIO) values (i.USER_ID, i.RUOLO_RICHIESTA, i.UFFICIO);
+        --end if;
+    -- Se nella FND_USER ha ruolo_richiesta = 'D'
+    else        
+        -- Abilito come DIREZIONE_GENERALE su tutte le strutture del dipartimento
+        for j in strutture loop
+            insert into FIN_T_RIC_ABILITAZIONE (USER_ID, RUOLO_RICHIESTA, UFFICIO) values (i.USER_ID, 'D', j.CODICE);
+        end loop;
+    end if;
+end loop;
+
+end;</pre>	</td></tr>
+</table></div>

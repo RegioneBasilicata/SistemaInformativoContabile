@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_V_AVANZI_INIZIALI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_V_AVANZI_INIZIALI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_V_AVANZI_INIZIALI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_V_AVANZI_INIZIALI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_V_AVANZI_INIZIALI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_V_AVANZI_INIZIALI_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2015-05-20</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_V_AVANZI_INIZIALI</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>820</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select 
+  d.segment8 anno
+ ,decode(d.segment9,'AVANZO','A','AV_REG','B','AV_RP','C') TIPO
+ ,'U' EU
+ ,substr(d.segment2,2,5) capitolo_uscita
+ ,d.segment11 capitolo_entrata
+ ,nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) quota_avanzo
+ ,nvl(d.attribute10,'N') utilizzo_anticipato
+ from fin_t_documenti d
+ where d.doc_type in ('B_COM_POS','B_COM_NEG')
+ and d.segment9 in ('AVANZO','AV_REG','AV_RP')
+-- and d.segment8 = to_number(:p116_anno)
+ and substr(d.segment2,1,1)='U' 
+ and to_number(to_char(d.date_created,'yyyymmdd'))&lt;= (select to_number(to_char(nvl(a.data_approvazione_previsione,d.date_created),'yyyymmdd')) from fin_t_dati_generali a where a.anno_finanziario= d.segment8)
+ group by d.segment8, d.segment9, 'U',substr(d.segment2,2,5),d.segment11,nvl(d.attribute10,'N') </td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

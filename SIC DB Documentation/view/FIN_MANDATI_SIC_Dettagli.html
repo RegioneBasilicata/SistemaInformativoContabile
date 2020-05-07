@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_MANDATI_SIC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_MANDATI_SIC.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_MANDATI_SIC_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_MANDATI_SIC_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_MANDATI_SIC_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_MANDATI_SIC_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-02-12</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_MANDATI_SIC</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1442</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+    jugd.segment8 anno,
+    jugd.segment2 capitolo,
+    jugd.date_created data_mandato,
+    TO_NUMBER (SUBSTR (jugd.doc_sequence_value, 5, 5)) numero_mandato,
+    jugd.description oggetto_mandato,
+    NVL (pv.denominazione, pv.cognome
+    || ' '
+    || pv.nome) nome_fornitore,
+    pv.codice_fiscale codice_fiscale,
+    pv.partita_iva partita_iva,
+    jugd2.segment8 anno_impegno,
+    TO_NUMBER (SUBSTR (jugd2.doc_sequence_value, 5, 5)) numero_impegno,
+    NVL (jugdtp.amount, 0) importo_mandato,
+    NVL (pv.data_ns, '') data_nascita,
+    pv.ID codice_fornitore,
+    DECODE (jugd2.administrative_expedient, NULL, NVL (jugd2.ext_document_ref,
+    ''), jugd2.administrative_expedient ) numero_mainframe
+  FROM
+    fin_t_documenti jugd,
+    fin_t_documenti_terze_parti jugdtp,
+    fin_t_anagrafica pv,
+    fin_t_documenti jugd2,
+    fin_t_documenti jugd1
+  WHERE
+    UPPER (jugd.doc_type) IN ('MAND')
+    --  AND jugd.segment8                             >= to_number(TO_CHAR(
+    -- sysdate,'yyyy')) - 1
+  AND jugd.segment8                                >= 2002
+  and jugd.open_balance_proposed >0
+  AND UPPER (NVL (jugd.deletion_status_flag, 'N')) &lt;> 'Y'
+  AND jugdtp.doc_id(+)                              = jugd.doc_id
+  AND jugd.previous_doc_id                          = jugd1.doc_id
+  AND jugd2.doc_id                                  = jugd1.previous_doc_id(+)
+  AND pv.ID(+)                                      = jugdtp.id_ana</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

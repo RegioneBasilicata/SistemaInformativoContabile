@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_TITOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_TITOLI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_TITOLI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_TITOLI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_TITOLI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_TITOLI_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_TITOLI</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>448</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select   cap_anno,
+	substr(cap_s4,1,1),
+	substr(cap_s4,2,1),
+	cap_des_s4,
+	to_number(substr(cap_s4,2,1))
+from	bas_capitoli
+where	substr(cap_s4,1,1)= 'U' 			and
+	substr(cap_s4,2,1) &lt;> '0'	and
+	substr(cap_s4,3,7)= '0000_00'
+union
+select   cap_anno,
+	substr(cap_s4,1,1),
+	substr(cap_s4,2,1),
+	cap_des_s4,
+	to_number(substr(cap_s4,2,1))
+from	bas_capitoli
+where	substr(cap_s4,1,1)= 'E' 			and
+	substr(cap_s4,2,1) &lt;> '0'	and
+	substr(cap_s4,3,5)= '00_00'
+</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

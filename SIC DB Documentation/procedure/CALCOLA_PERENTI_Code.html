@@ -1,0 +1,189 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLA_PERENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLA_PERENTI.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLA_PERENTI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLA_PERENTI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLA_PERENTI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLA_PERENTI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure calcola_perenti(w_anno in number) is
+
+impegni number := 0;
+eco_perente number := 0;
+eco_impper number := 0;
+economie number := 0;
+prescrizioni number := 0;
+
+conta_capitoli number := 0;
+
+p_cap_perenzioni varchar2(6);
+
+cursor perenti is
+SELECT DISTINCT
+    nvl(d.document_amount, 0) p_importo_impegno,
+    nvl(d.closed_amount_proposed, 0) p_importo_perenzione,
+    nvl(p.perenzione_attuale,0) p_residuo_perenzione,
+    to_number(TO_CHAR(d.date_created, 'yyyy')) p_anno,
+    d.doc_type                p_tipo_impegno,
+    substr(bi.ind_cap, 1, 6) p_capitolo_corrente,
+    cap.descrizione           p_oggetto_capitolo,
+    cap.nb_piano_conti_fina   p_pcf_capitolo,
+    d.segment2                p_capitolo_spesa,
+    d.doc_sequence_value      p_numero_perente,
+    d.previous_doc_id         p_ndp_impegno,
+    d.doc_id                  p_doc_id_impegno,
+    d.attribute13             tipo_provvedimento,
+    d.attribute14             numero_provvedimento,
+    d.data_atto_autorizzativo data_provvedimento,
+    upper(d.auditing_status_flag) p_auditing_status_flag,
+    -- DECODE(TO_CHAR(w_anno)|| d.doc_sequence_value, '2005200100432', 'B', upper(d.auditing_status_flag)) p_auditing_status_flag,
+    -- DECODE(TO_CHAR(w_anno)|| d.doc_sequence_value, '2005200100432', 'PRESCRIZIONE', 'PERENZIONE') p_approval_action,
+    to_number(TO_CHAR(d.data_perenzione, 'yyyy')) p_data_perenzione,
+     to_number(DECODE(TO_CHAR(w_anno)
+           || d.doc_sequence_value, '2005200100432', 2006, to_number(TO_CHAR(d.data_prescrizione, 'yyyy')))) p_data_prescrizione,
+    upper(cap.fonte_finanziamento) p_fonte_finanziamento,
+    upper(t.descrizione) p_tipo_spesa
+FROM
+    fin_t_documenti     d,
+    fin_t_articoli      cap,
+    fin_t_perenti_excel p,
+    bas_ind            bi,
+    nb_titoli_uscite   t
+WHERE
+    p.anno = (w_anno-1)
+    AND nvl(p.perenzione_attuale,0) > 0
+    AND d.doc_id = p.doc_id
+    --AND upper(nvl(d.proposal_status_flag, 'B')) &lt;> 'B'
+    AND cap.eu || cap.codice = bi.ind_cap
+    AND cap.anno = w_anno
+    AND upper(nvl(d.deletion_status_flag, 'N')) &lt;> 'Y'
+    AND (d.auditing_status_flag = 'T' or (d.auditing_status_flag = 'B' and to_char(d.data_prescrizione,'yyyy') > w_anno))
+    AND bi.ind_anno = w_anno
+    AND bi.doc_id = d.doc_id
+    AND t.anno = bi.ind_anno
+    AND t.id = cap.nb_titolo
+   ORDER BY 5,7;
+
+
+
+
+BEGIN
+
+if w_anno >= (to_char(sysdate,'yyyy') - 1)
+then
+delete FIN_T_PERENTI_EXCEL where anno = w_anno;
+    commit;
+
+select count(*) into conta_capitoli
+from fin_t_capitoli_perenti
+where anno = w_anno;
+
+if conta_capitoli = 0
+then 
+insert into fin_t_capitoli_perenti
+select w_anno,CAP_PERENZIONI, CAP_ORIGINARIO, CAP_CORR, CAPITOLO_OR_RINUMERATO
+from fin_t_capitoli_perenti 
+where anno = (w_anno - 1);
+commit;
+end if;
+
+--collega_capitoli_perenti(w_anno);
+
+
+
+for p in perenti loop
+
+ select nvl(sum(nvl(d.document_amount,0)),0)
+ into impegni
+ from fin_t_documenti d
+ where d.doc_type = 'IMP-PER'
+ and nvl(d.deletion_status_flag,'N') = 'N'
+ and d.segment8 = w_anno
+ and d.previous_doc_id = p.p_doc_id_impegno;
+
+ select nvl(sum(nvl(d.document_amount,0)),0)
+ into economie
+ from fin_t_documenti d
+ where d.doc_type in ('ECO','DIS')
+ and nvl(d.deletion_status_flag,'N') = 'N'
+ and d.segment8 = w_anno
+ and d.previous_doc_id = p.p_doc_id_impegno;
+
+ if nvl(p.p_auditing_status_flag,'X') = 'B' and nvl(p.p_data_prescrizione,0) = (w_anno + 1)
+  then prescrizioni := residuo_perenti(p.p_doc_id_impegno,w_anno);
+ end if;
+
+begin
+ select cap_perenzioni into p_cap_perenzioni
+ from fin_t_capitoli_perenti
+ where anno = w_anno
+ and cap_originario = p.p_capitolo_corrente;
+exception when no_data_found then p_cap_perenzioni := null;
+end;
+
+
+
+--SCRIVI TABELLA
+insert into FIN_T_PERENTI_EXCEL(ANNO,
+CAPITOLO_CORR,
+CAPITOLO_ORIG,
+NUMERO_IMP,
+TIPO_ATTO,
+NUMERO_ATTO,
+DATA_ATTO,
+INIZIALE_ECO,
+IMPEGNI,
+ECONOMIE,
+PRESCRIZIONI,
+PERENZIONE_ANNO,
+PERENZIONE_ATTUALE,
+fonte_finanziamento,
+tipo_spesa,
+oggetto_capitolo,pcf
+,doc_id
+,cap_perenzioni)
+values (w_anno,
+p.p_capitolo_corrente,
+p.p_capitolo_spesa,
+p.p_numero_perente,
+p.tipo_provvedimento,
+p.numero_provvedimento,
+p.data_provvedimento,
+nvl(p.p_residuo_perenzione,0),
+nvl(impegni,0),
+nvl(economie,0),
+nvl(prescrizioni,0),
+0,
+(nvl(p.p_residuo_perenzione,0) - nvl(impegni,0) - nvl(economie,0) - nvl(prescrizioni,0)),
+p.p_fonte_finanziamento,
+p.p_tipo_spesa,
+p.p_oggetto_capitolo,
+p.p_pcf_capitolo,
+p.p_doc_id_impegno,
+p_cap_perenzioni);
+commit;
+--
+impegni := 0;
+economie  := 0;
+prescrizioni := 0;
+p_cap_perenzioni :='';
+
+end loop;
+
+end if;
+
+END;</pre>	</td></tr>
+</table></div>

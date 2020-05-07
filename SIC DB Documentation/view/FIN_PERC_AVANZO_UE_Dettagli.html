@@ -1,0 +1,93 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_PERC_AVANZO_UE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_PERC_AVANZO_UE.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_PERC_AVANZO_UE_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_PERC_AVANZO_UE_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_PERC_AVANZO_UE_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_PERC_AVANZO_UE_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_PERC_AVANZO_UE</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>327</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+    qa.anno ,
+    qa.capitolo ,
+    qa.quota_avanzo quota_avanzo,
+    nvl(qu.quota_avanzo_ue,0) quota_avanzo_ue,
+    ROUND((NVL(qu.quota_avanzo_ue,0)/NVL(qa.quota_avanzo,1)),4) percentuale
+  FROM
+    fin_quote_avanzi qa ,
+    fin_quote_avanzi_ue qu
+  WHERE
+    qa.anno   = qu.anno(+)
+    AND qa.capitolo = qu.capitolo(+)</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

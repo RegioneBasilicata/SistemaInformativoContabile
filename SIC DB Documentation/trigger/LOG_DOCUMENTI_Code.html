@@ -1,0 +1,176 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LOG_DOCUMENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LOG_DOCUMENTI.html">Details</a></div></div>
+<div class="tab"><div><a href="LOG_DOCUMENTI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LOG_DOCUMENTI_References.html">References</a></div></div>
+<div class="tab"><div><a href="LOG_DOCUMENTI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LOG_DOCUMENTI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER GAT2.LOG_DOCUMENTI
+AFTER DELETE OR UPDATE
+ON FIN_T_DOCUMENTI 
+REFERENCING NEW AS NEW OLD AS OLD
+FOR EACH ROW
+declare
+tipo_aggiornamento varchar2(1);
+begin
+if updating
+   then tipo_aggiornamento := 'U';
+   else tipo_aggiornamento := 'D';
+end if;
+insert into fin_t_log_documenti values
+(:old.doc_id,
+:old.code_combination_id,
+:old.currency_code,
+:old.budg_code_combination_id,
+:old.doc_type,
+:old.expedient_id,
+:old.doc_sequence_id,
+:old.doc_sequence_value,
+:old.base_document_flag,
+:old.date_created,
+:old.actual_flag,
+:old.budgetary_control_status,
+:old.set_of_books_id,
+:old.gl_date,
+:old.period_name,
+:old.check_stock_id,
+:old.bank_account_id,
+:old.previous_doc_id,
+:old.batch_id,
+:old.ext_document_ref,
+:old.ext_doc_application_source,
+:old.je_batch_id,
+:old.packet_id,
+:old.unreservation_packet_id,
+:old.remarks,
+:old.currency_conversion_rate,
+:old.currency_conversion_type,
+:old.currency_conversion_date,
+:old.open_balance_proposed,
+:old.open_balance_posted,
+:old.closed_amount_proposed,
+:old.closed_amount_posted,
+:old.exp_phase_amount_proposed,
+:old.exp_phase_amount_posted,
+:old.ext_budget_amount,
+:old.document_amount,
+:old.document_base_amount,
+:old.approval_status_flag,
+:old.proposal_status_flag,
+:old.auditing_status_flag,
+:old.posting_status_flag,
+:old.deletion_status_flag,
+:old.payment_status_flag,
+:old.group_payments_flag,
+:old.deletion_reason,
+:old.revertion_reason,
+:old.commitment_year,
+:old.description,
+:old.attribute_category,
+:old.attribute1,
+:old.attribute2,
+:old.attribute3,
+:old.attribute4,
+:old.attribute5,
+:old.attribute6,
+:old.attribute7,
+:old.attribute8,
+:old.attribute9,
+:old.attribute10,
+:old.attribute11,
+:old.attribute12,
+:old.attribute13,
+:old.attribute14,
+:old.attribute15,
+:old.attribute16,
+:old.attribute17,
+:old.attribute18,
+:old.attribute19,
+:old.attribute20,
+:old.attribute21,
+:old.attribute22,
+:old.attribute23,
+:old.attribute24,
+:old.attribute25,
+:old.attribute26,
+:old.attribute27,
+:old.attribute28,
+:old.attribute29,
+:old.attribute30,
+:old.attribute31,
+:old.attribute32,
+:old.attribute33,
+:old.attribute34,
+:old.attribute35,
+:old.attribute36,
+:old.attribute37,
+:old.attribute38,
+:old.attribute39,
+:old.attribute40,
+:old.attribute41,
+:old.attribute42,
+:old.attribute43,
+:old.attribute44,
+:old.attribute45,
+:old.attribute46,
+:old.attribute47,
+:old.attribute48,
+:old.attribute49,
+:old.attribute50,
+:old.concurrent_request_id,
+:old.created_by,
+:old.creation_date,
+:old.last_updated_by,
+sysdate,
+:old.wf_item_type,
+:old.wf_item_key,
+:old.administrative_expedient,
+:old.pluriannual_year,
+:old.latest_commitment_year,
+:old.pending_obligation_year,
+:old.budget_type,
+:old.funds_check_gl_date,
+:old.latest_pending_obligation_year,
+:old.workflow_flag,
+:old.registry_status_flag,
+:old.perenti_status,
+:old.perenti_request_id,
+:old.segment2,
+:old.segment4,
+:old.segment8,
+:old.segment3,
+:old.segment7,
+:old.data_approvazione,
+:old.data_perenzione,
+:old.data_prescrizione,
+:old.data_atto_autorizzativo,
+:old.codice_asp,
+:old.codice_direttrice,
+:old.codice_risultati,
+:old.codice_og_parte1,
+:old.codice_og_parte2,
+:old.codice_og_parte3,
+:old.doc_id_capo_filiera,
+tipo_aggiornamento,
+:old.segment9,
+:old.segment11,
+:old.preimpegno_automatico,
+:old.codice_gestionale_siope,
+:old.mandrev_sostituito,
+:old.stampa_avviso_mandato);
+end;</pre>	</td></tr>
+</table></div>

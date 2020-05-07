@@ -1,0 +1,2481 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BDAP_REND</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BDAP_REND.html">Details</a></div></div>
+<div class="tab"><div><a href="BDAP_REND_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BDAP_REND_References.html">References</a></div></div>
+<div class="tab"><div><a href="BDAP_REND_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BDAP_REND_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure bdap_rend (p_anno in number) as
+-- dagli schemi sembra che anche gli Enti strumentali seguano gli schemi Regione
+--'899342930540086001' -- codice BDAP REGIONE
+--variabili generali
+c_riga number:= 0;
+link_href varchar2(2000);
+fpv_rend number := 0;
+
+p_id_ente varchar2(20);
+p_utente  varchar2(20) := 'CONS'||p_anno;
+
+risultato_es_prec number := 0;
+
+-- **** Variabili per SDB Schemi di Bilancio 
+
+
+--*** FIne Sezione Variabili Schemi di Bilanco
+
+-- **************  Entrate ENT (Allegato 1) *********
+cursor entrate is
+select Titolo,nvl(Tipologia,0)
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_RS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_RS>' RS
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_CP>' CP
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_CS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_CS>' CS
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_RR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RR,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_RR>' RR
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_RC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RC,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_RC>' RC
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_TR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_TR>' TR
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_R'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_R>' R
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_A'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(A,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_A>' A
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_MCS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCS,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_MCS>' MCS
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_MCP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCP,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_MCP>' MCP
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_EP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_EP>' EP
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_EC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_EC>' EC
+,'&lt;sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_TRR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TRR,0),'9999999990.00'))||'&lt;/sr:ENT_E.'||decode(Tipologia,null,substr(Titolo,1,1)||'.00.00.00.000',substr(Tipologia,1,1)||'.'||substr(Tipologia,2,2)||'.'||substr(Tipologia,4,2)||'.00.000')||'_TRR>' TRR
+from
+(SELECT
+  NB_LIVELLO1 Titolo,
+  NB_LIVELLO2 Tipologia,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) RR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) RC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TR,
+  sum(VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) A,
+  sum(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)-nvl(PREVISIONI_DEFINITIVE_CASSA,0))  MCS,
+  sum(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) - nvl(PREVISIONI_DEFINITIVE_COMPE,0)) MCP,
+  sum(RIMANENZE_RESIDUI) EP,
+  sum(RESIDUI_COMPETENZA) EC,
+  sum(RESIDUI_FINALI) TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by rollup (NB_LIVELLO1
+,NB_LIVELLO2))
+where titolo is not null
+-- **** TOTALE TITOLI
+UNION
+select '99999991' Titolo, '0' Tipologia
+,'&lt;sr:ENT_TotaleTitoli_RS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_RS>' RS
+,'&lt;sr:ENT_TotaleTitoli_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_CP>' CP
+,'&lt;sr:ENT_TotaleTitoli_CS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_CS>' CS
+,'&lt;sr:ENT_TotaleTitoli_RR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RR ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_RR>' RR
+,'&lt;sr:ENT_TotaleTitoli_RC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RC ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_RC>' RC
+,'&lt;sr:ENT_TotaleTitoli_TR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_TR>' TR
+,'&lt;sr:ENT_TotaleTitoli_R'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_R>' R
+,'&lt;sr:ENT_TotaleTitoli_A'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(A  ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_A>' A
+,'&lt;sr:ENT_TotaleTitoli_MCS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCS,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_MCS>' MCS
+,'&lt;sr:ENT_TotaleTitoli_MCP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCP,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_MCP>' MCP
+,'&lt;sr:ENT_TotaleTitoli_EP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_EP>' EP
+,'&lt;sr:ENT_TotaleTitoli_EC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_EC>' EC
+,'&lt;sr:ENT_TotaleTitoli_TRR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TRR,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleTitoli_TRR>' TRR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) RR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) RC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TR,
+  sum(VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) A,
+  sum(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(PREVISIONI_DEFINITIVE_CASSA,0))  MCS,
+  sum(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) - nvl(PREVISIONI_DEFINITIVE_COMPE,0)) MCP,
+  sum(RIMANENZE_RESIDUI) EP,
+  sum(RESIDUI_COMPETENZA) EC,
+  sum(RESIDUI_FINALI) TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+)
+-- **** FPV CORRENTE
+UNION
+select '99999992' Titolo,'0' Tipologia
+,null RS
+,'&lt;sr:ENT_FondoPluriennaleVincolatoSpeseCorrenti_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:ENT_FondoPluriennaleVincolatoSpeseCorrenti_CP>' CP
+,null CS
+,null RR
+,null RC
+,null TR
+,null R
+,null A
+,null MCS
+,null MCP
+,null EP
+,null EC
+,null TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  upper(DESC_CAPITOLO) = 'FONDO PLURIENNALE VINCOLATO PER SPESE CORRENTI'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+-- *** FPV CAPITALE
+UNION
+select '99999993' Titolo,'0' Tipologia
+,null RS
+,'&lt;sr:ENT_FondoPluriennaleVincolatoSpeseContoCapitale_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:ENT_FondoPluriennaleVincolatoSpeseContoCapitale_CP>' CP
+,null CS
+,null RR
+,null RC
+,null TR
+,null R
+,null A
+,null MCS
+,null MCP
+,null EP
+,null EC
+,null TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  upper(DESC_CAPITOLO) = 'FONDO PLURIENNALE VINCOLATO PER SPESE IN CONTO CAPITALE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+
+-- *** UTILIZZO AVANZO
+UNION
+select '99999994' Titolo,'0' Tipologia
+,null RS
+,'&lt;sr:ENT_UtilizzoAvanzoAmministrazione_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:ENT_UtilizzoAvanzoAmministrazione_CP>' CP
+,null CS
+,null RR
+,null RC
+,null TR
+,null R
+,null A
+,null MCS
+,null MCP
+,null EP
+,null EC
+,null TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  upper(DESC_CAPITOLO) = 'UTILIZZO AVANZO DI AMMINISTRAZIONE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+-- **** TOTALE GENERALE
+UNION
+select nvl(Titolo,99999999),nvl(Tipologia,0)
+,'&lt;sr:ENT_TotaleGenerale_RS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_RS>' RS
+,'&lt;sr:ENT_TotaleGenerale_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_CP>' CP
+,'&lt;sr:ENT_TotaleGenerale_CS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_CS>' CS
+,'&lt;sr:ENT_TotaleGenerale_RR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RR ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_RR>' RR
+,'&lt;sr:ENT_TotaleGenerale_RC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RC ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_RC>' RC
+,'&lt;sr:ENT_TotaleGenerale_TR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_TR>' TR
+,'&lt;sr:ENT_TotaleGenerale_R'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_R>' R
+,'&lt;sr:ENT_TotaleGenerale_A'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(A  ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_A>' A
+,'&lt;sr:ENT_TotaleGenerale_MCS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCS,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_MCS>' MCS
+,'&lt;sr:ENT_TotaleGenerale_MCP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCP,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_MCP>' MCP
+,'&lt;sr:ENT_TotaleGenerale_EP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_EP>' EP
+,'&lt;sr:ENT_TotaleGenerale_EC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_EC>' EC
+,'&lt;sr:ENT_TotaleGenerale_TRR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TRR,0),'9999999990.00'))||'&lt;/sr:ENT_TotaleGenerale_TRR>' TRR
+from
+(SELECT
+  NB_LIVELLO1 Titolo,
+  NB_LIVELLO2 Tipologia,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TR,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) RR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) RC,
+  sum(VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) A,
+  sum(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(PREVISIONI_DEFINITIVE_CASSA,0))  MCS,
+  sum(decode(NB_LIVELLO1,'0',0,nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) - nvl(PREVISIONI_DEFINITIVE_COMPE,0))) MCP,
+  sum(RIMANENZE_RESIDUI) EP,
+  sum(RESIDUI_COMPETENZA) EC,
+  sum(RESIDUI_FINALI) TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+--and  NB_LIVELLO1 != '0' nel totale va preso anche FPV corr, cap e Avanzo
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by rollup (NB_LIVELLO1
+,NB_LIVELLO2))
+where titolo is null
+order by 1,2;
+
+-- *******************************************
+
+-- ************ ENTRATE TITOLI (Allegato 2) ***************
+cursor entrate_titoli is
+select Titolo
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_RS'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_RS>' RS
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_CP'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_CP>' CP
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_CS'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_CS>' CS
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_RR'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RR,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_RR>' RR
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_RC'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RC,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_RC>' RC
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_TR'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_TR>' TR
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_R'   ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||  '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_R>' R
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_A'   ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(A,0),'9999999990.00'))||  '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_A>' A
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_MCS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCS,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_MCS>' MCS
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_MCP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCP,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_MCP>' MCP
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_EP'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_EP>' EP
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_EC'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))|| '&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_EC>' EC
+,'&lt;sr:ENT-TIT_E.'||substr(Titolo,1,1)||'.00.00.00.000_TRR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TRR,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_E.'  ||substr(Titolo,1,1)||'.00.00.00.000_TRR>' TRR
+from
+(SELECT
+  NB_LIVELLO1 Titolo,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) RR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) RC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TR,
+  sum(VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) A,
+  sum(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(PREVISIONI_DEFINITIVE_CASSA,0))  MCS,
+  sum(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) - nvl(PREVISIONI_DEFINITIVE_COMPE,0)) MCP,
+  sum(RIMANENZE_RESIDUI) EP,
+  sum(RESIDUI_COMPETENZA) EC,
+  sum(RESIDUI_FINALI) TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by NB_LIVELLO1)
+where titolo is not null
+-- **** TOTALE TITOLI
+UNION
+select '99999991' Titolo
+,'&lt;sr:ENT-TIT_TotaleTitoli_RS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_RS>' RS
+,'&lt;sr:ENT-TIT_TotaleTitoli_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_CP>' CP
+,'&lt;sr:ENT-TIT_TotaleTitoli_CS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_CS>' CS
+,'&lt;sr:ENT-TIT_TotaleTitoli_RR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RR ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_RR>' RR
+,'&lt;sr:ENT-TIT_TotaleTitoli_RC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RC ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_RC>' RC
+,'&lt;sr:ENT-TIT_TotaleTitoli_MCS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCS,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_MCS>' MCS
+,'&lt;sr:ENT-TIT_TotaleTitoli_TR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_TR>' TR
+,'&lt;sr:ENT-TIT_TotaleTitoli_R'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_R>' R
+,'&lt;sr:ENT-TIT_TotaleTitoli_A'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(A  ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_A>' A
+,'&lt;sr:ENT-TIT_TotaleTitoli_MCP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCP,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_MCP>' MCP
+,'&lt;sr:ENT-TIT_TotaleTitoli_EP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_EP>' EP
+,'&lt;sr:ENT-TIT_TotaleTitoli_EC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_EC>' EC
+,'&lt;sr:ENT-TIT_TotaleTitoli_TRR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TRR,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleTitoli_TRR>' TRR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) RR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) RC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TR,
+  sum(VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) A,
+  sum(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(PREVISIONI_DEFINITIVE_CASSA,0))  MCS,
+  sum(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) - nvl(PREVISIONI_DEFINITIVE_COMPE,0)) MCP,
+  sum(RIMANENZE_RESIDUI) EP,
+  sum(RESIDUI_COMPETENZA) EC,
+  sum(RESIDUI_FINALI) TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+)
+-- **** FPV CORRENTE
+UNION
+select '99999992' Titolo
+,null RS
+,'&lt;sr:ENT-TIT_FondoPluriennaleVincolatoSpeseCorrenti_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_FondoPluriennaleVincolatoSpeseCorrenti_CP>' CP
+,null CS
+,null RR
+,null RC
+,null TR
+,null R
+,null A
+,null MCS
+,null MCP
+,null EP
+,null EC
+,null TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  upper(DESC_CAPITOLO) = 'FONDO PLURIENNALE VINCOLATO PER SPESE CORRENTI'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+
+-- *** FPV CAPITALE
+UNION
+select '99999993' Titolo
+,null RS
+,'&lt;sr:ENT-TIT_FondoPluriennaleVincolatoSpeseContoCapitale_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_FondoPluriennaleVincolatoSpeseContoCapitale_CP>' CP
+,null CS
+,null RR
+,null RC
+,null TR
+,null R
+,null A
+,null MCS
+,null MCP
+,null EP
+,null EC
+,null TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  upper(DESC_CAPITOLO) = 'FONDO PLURIENNALE VINCOLATO PER SPESE IN CONTO CAPITALE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+
+-- *** UTILIZZO AVANZO
+UNION
+select '99999994' Titolo
+,null RS
+,'&lt;sr:ENT-TIT_UtilizzoAvanzoAmministrazione_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_UtilizzoAvanzoAmministrazione_CP>' CP
+,null CS
+,null RR
+,null RC
+,null TR
+,null R
+,null A
+,null MCS
+,null TRR
+,null MCP
+,null EP
+,null EC
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+and  upper(DESC_CAPITOLO) = 'UTILIZZO AVANZO DI AMMINISTRAZIONE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+-- **** TOTALE GENERALE
+UNION
+select nvl(Titolo,99999999)
+,'&lt;sr:ENT-TIT_TotaleGenerale_RS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_RS>' RS
+,'&lt;sr:ENT-TIT_TotaleGenerale_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_CP>' CP
+,'&lt;sr:ENT-TIT_TotaleGenerale_CS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_CS>' CS
+,'&lt;sr:ENT-TIT_TotaleGenerale_RR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RR ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_RR>' RR
+,'&lt;sr:ENT-TIT_TotaleGenerale_RC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RC ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_RC>' RC
+,'&lt;sr:ENT-TIT_TotaleGenerale_TR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_TR>' TR
+,'&lt;sr:ENT-TIT_TotaleGenerale_R'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_R>' R
+,'&lt;sr:ENT-TIT_TotaleGenerale_A'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'  ||LTRIM(TO_CHAR(NVL(A  ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_A>' A
+,'&lt;sr:ENT-TIT_TotaleGenerale_MCS'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCS,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_MCS>' MCS
+,'&lt;sr:ENT-TIT_TotaleGenerale_MCP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(MCP,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_MCP>' MCP
+,'&lt;sr:ENT-TIT_TotaleGenerale_EP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_EP>' EP
+,'&lt;sr:ENT-TIT_TotaleGenerale_EC'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_EC>' EC
+,'&lt;sr:ENT-TIT_TotaleGenerale_TRR'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TRR,0),'9999999990.00'))||'&lt;/sr:ENT-TIT_TotaleGenerale_TRR>' TRR
+from
+(SELECT
+  NB_LIVELLO1 Titolo,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) RR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) RC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TR,
+  sum(VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) A,
+  sum(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(PREVISIONI_DEFINITIVE_CASSA,0))  MCS,
+  sum(decode(NB_LIVELLO1,'0',0,nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) - nvl(PREVISIONI_DEFINITIVE_COMPE,0))) MCP,sum(RIMANENZE_RESIDUI) EP,
+  sum(RESIDUI_COMPETENZA) EC,
+  sum(RESIDUI_FINALI) TRR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'E' 
+--and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by rollup (NB_LIVELLO1
+,NB_LIVELLO2))
+where titolo is null
+order by 1,2;
+
+-- *******************************************
+
+
+-- ******* SPESE (Allegato 3) ***************
+cursor spese is 
+select Missione,nvl(Programma,0),nvl(Titolo,0),
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_RS>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_RS>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_RS>'
+end as RS,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_CP>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_CP>'
+end as CP,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CS>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_CS>'
+when Programma is null then
+when Titolo is not null then 
+'&lt;sr:SPE_Miss'||Missione||'_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_CS>'
+end as CS,
+case 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PR>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_PR>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_PR>'
+end as PR,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PC>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_PC>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_PC>'
+end as PC,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_TP>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_TP>'
+end as TP,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_R>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_R>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_R>'
+end as R,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_I>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_I>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_I>'
+end as I,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_FPV>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_FPV>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_FPV>'
+end as FPV,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_ECP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_ECP>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_ECP>'
+end as ECP,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_EP>'
+case 
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_EP>'
+end as EP,
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EC>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_EC>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_EC>'
+end as EC,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TR>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE_Prog'||Missione||'.'||Programma||'_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:SPE_Prog'||Missione||'.'||Programma||'_TR>'
+when Programma is null then
+'&lt;sr:SPE_Miss'||Missione||'_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:SPE_Miss'||Missione||'_TR>'
+end as TR
+from
+(SELECT
+  NB_LIVELLO1 Missione,
+  NB_LIVELLO2 Programma,
+  NB_TITOLO Titolo,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by rollup (NB_LIVELLO1
+,NB_LIVELLO2,NB_TITOLO))
+where Missione is not null
+UNION
+-- ********* TOTALE MISSIONI ***********
+select '99999991' Missione, '0' Programma, 0 Titolo
+,'&lt;sr:SPE_TotaleMissioni_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_RS>' RS
+,'&lt;sr:SPE_TotaleMissioni_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_CP>' CP
+,'&lt;sr:SPE_TotaleMissioni_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_CS>' CS
+,'&lt;sr:SPE_TotaleMissioni_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_PR>' PR
+,'&lt;sr:SPE_TotaleMissioni_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_PC>' PC
+,'&lt;sr:SPE_TotaleMissioni_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_TP>' TP
+,'&lt;sr:SPE_TotaleMissioni_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_R>' R
+,'&lt;sr:SPE_TotaleMissioni_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_I>' I
+,'&lt;sr:SPE_TotaleMissioni_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_FPV>' FPV
+,'&lt;sr:SPE_TotaleMissioni_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_ECP>' ECP
+,'&lt;sr:SPE_TotaleMissioni_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_EP>' EP
+,'&lt;sr:SPE_TotaleMissioni_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleMissioni_EC>' EC
+,'&lt;sr:SPE_TotaleMissioni_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE_TotaleMissioni_TR>' TR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente))
+-- ***** DISAVANZO di AMMINISTRAZIONE ******
+UNION
+select '99999992' Missione,'0' Programma, 0 Titolo
+,null RS
+,'&lt;sr:SPE_DisavanzoAmministrazione_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:SPE_DisavanzoAmministrazione_CP>' CP
+,null CS
+,null PR
+,null PC
+,null TP
+,null R
+,null I
+,null EC
+,null FPV
+,null ECP
+,null EP
+,null TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  upper(DESC_CAPITOLO) = 'DISAVANZO DI AMMINISTRAZIONE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+-- ***** TOTALE GENERALE **********
+UNION
+select '99999999' Missione, '0' Programma, 0 Titolo
+,'&lt;sr:SPE_TotaleGenerale_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_RS>' RS
+,'&lt;sr:SPE_TotaleGenerale_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_CP>' CP
+,'&lt;sr:SPE_TotaleGenerale_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_CS>' CS
+,'&lt;sr:SPE_TotaleGenerale_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_PR>' PR
+,'&lt;sr:SPE_TotaleGenerale_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_PC>' PC
+,'&lt;sr:SPE_TotaleGenerale_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_TP>' TP
+,'&lt;sr:SPE_TotaleGenerale_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_R>' R
+,'&lt;sr:SPE_TotaleGenerale_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_I>' I
+,'&lt;sr:SPE_TotaleGenerale_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_FPV>' FPV
+,'&lt;sr:SPE_TotaleGenerale_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_ECP>' ECP
+,'&lt;sr:SPE_TotaleGenerale_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_EP>' EP
+,'&lt;sr:SPE_TotaleGenerale_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE_TotaleGenerale_EC>' EC
+,'&lt;sr:SPE_TotaleGenerale_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE_TotaleGenerale_TR>' TR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente))
+order by 1,2,3;
+
+-- ******************************************
+
+-- ****** Spese Politica Regionale Unitaria (Allegato3_1) ********
+
+-- ******* SPESE Politica Regionale Unitaria (Allegato 3 bis) ***************
+cursor spese_pru is 
+select Missione,nvl(Programma,0),nvl(Titolo,0),
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_RS>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_RS>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_RS>'
+end as RS,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_CP>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_CP>'
+end as CP,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_CS>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_CS>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_CS>'
+end as CS,
+case 
+when Titolo is not null then 
+when Programma is null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PR>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_PR>'
+'&lt;sr:SPE-PRU_Miss'||Missione||'_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_PR>'
+end as PR,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_PC>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_PC>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_PC>'
+end as PC,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_TP>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_TP>'
+end as TP,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_R>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_R>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_R>'
+end as R,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_I>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_I>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_I>'
+end as I,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_FPV>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_FPV>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_FPV>'
+end as FPV,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_ECP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_ECP>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_ECP>'
+end as ECP,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EP>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_EP>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_EP>'
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_EC>'
+end as EP,
+case 
+when Titolo is not null then 
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_EC>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_EC>'
+end as EC,
+case 
+when Titolo is not null then 
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'-U.'||Titolo||'.00.00.00.000_TR>'
+when Titolo is null and Programma is not null then
+'&lt;sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Prog'||Missione||'.'||Programma||'_TR>'
+when Programma is null then
+'&lt;sr:SPE-PRU_Miss'||Missione||'_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_Miss'||Missione||'_TR>'
+end as TR
+from
+(SELECT
+  c.NB_LIVELLO1 Missione,
+  c.NB_LIVELLO2 Programma,
+  c.NB_TITOLO Titolo,
+  sum(c.RESIDUI_INIZIALI) RS,
+  sum(c.PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(c.PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(c.RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(c.RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(c.RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-c.VARIAZIONE_RESIDUI) R,
+  sum(c.ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(c.FPV) FPV,
+  sum(c.ECONOMIE_COMPETENZA) ECP,
+  sum(c.RES_PASS_PREC) EP,
+  sum(c.RES_PASS_COMPE) EC,
+  sum(c.TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL c
+  ,FIN_T_ARTICOLI a
+WHERE
+ c.TIPO_CAPITOLO = 'U' 
+and  c.NB_LIVELLO1 != '0'
+and  c.ANNO_CONSUNTIVO = p_anno
+and  c.Utente = upper(p_utente)
+and a.anno = c.ANNO_CONSUNTIVO
+and a.eu = c.TIPO_CAPITOLO
+and a.codice = c.capitolo
+and nvl(a.nb_pru,'000') in ('07','08','09','10','15')
+group by rollup (c.NB_LIVELLO1
+,c.NB_LIVELLO2,c.NB_TITOLO))
+where Missione is not null
+UNION
+-- ********* TOTALE MISSIONI ***********
+select '99999991' Missione, '0' Programma, 0 Titolo
+,'&lt;sr:SPE-PRU_TotaleMissioni_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_RS>' RS
+,'&lt;sr:SPE-PRU_TotaleMissioni_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_CP>' CP
+,'&lt;sr:SPE-PRU_TotaleMissioni_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_CS>' CS
+,'&lt;sr:SPE-PRU_TotaleMissioni_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_PR>' PR
+,'&lt;sr:SPE-PRU_TotaleMissioni_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_PC>' PC
+,'&lt;sr:SPE-PRU_TotaleMissioni_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_TP>' TP
+,'&lt;sr:SPE-PRU_TotaleMissioni_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_R>' R
+,'&lt;sr:SPE-PRU_TotaleMissioni_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_I>' I
+,'&lt;sr:SPE-PRU_TotaleMissioni_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_FPV>' FPV
+,'&lt;sr:SPE-PRU_TotaleMissioni_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_ECP>' ECP
+,'&lt;sr:SPE-PRU_TotaleMissioni_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_EP>' EP
+,'&lt;sr:SPE-PRU_TotaleMissioni_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleMissioni_EC>' EC
+,'&lt;sr:SPE-PRU_TotaleMissioni_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE-PRU_TotaleMissioni_TR>' TR
+from
+(SELECT
+  sum(c.RESIDUI_INIZIALI) RS,
+  sum(c.PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(c.PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(c.RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(c.RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(c.RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-c.VARIAZIONE_RESIDUI) R,
+  sum(c.ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(c.FPV) FPV,
+  sum(c.ECONOMIE_COMPETENZA) ECP,
+  sum(c.RES_PASS_PREC) EP,
+  sum(c.RES_PASS_COMPE) EC,
+  sum(c.TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL c
+  ,FIN_T_ARTICOLI a
+WHERE
+ c.TIPO_CAPITOLO = 'U' 
+and  c.NB_LIVELLO1 != '0'
+and  c.ANNO_CONSUNTIVO = p_anno
+and  c.Utente = upper(p_utente)
+and nvl(a.nb_pru,'000') in ('07','08','09','10','15'))
+and a.anno = c.ANNO_CONSUNTIVO
+and a.eu = c.TIPO_CAPITOLO
+and a.codice = c.capitolo
+-- ***** DISAVANZO di AMMINISTRAZIONE ******
+UNION
+select '99999992' Missione,'0' Programma, 0 Titolo
+,null RS
+,'&lt;sr:SPE-PRU_DisavanzoAmministrazione_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(c.PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_DisavanzoAmministrazione_CP>' CP
+,null CS
+,null PR
+,null PC
+,null TP
+,null R
+,null I
+,null FPV
+,null ECP
+,null EP
+,null EC
+,null TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL c
+  ,FIN_T_ARTICOLI a
+WHERE
+ c.TIPO_CAPITOLO = 'U' 
+and  upper(c.DESC_CAPITOLO) = 'DISAVANZO DI AMMINISTRAZIONE'
+and  c.ANNO_CONSUNTIVO = p_anno
+and  c.Utente = upper(p_utente)
+and a.anno = c.ANNO_CONSUNTIVO
+and a.eu = c.TIPO_CAPITOLO
+and a.codice = c.capitolo
+and nvl(a.nb_pru,'000') in ('07','08','09','10','15')
+-- ***** TOTALE GENERALE **********
+UNION
+select '99999999' Missione, '0' Programma, 0 Titolo
+,'&lt;sr:SPE-PRU_TotaleGenerale_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_RS>' RS
+,'&lt;sr:SPE-PRU_TotaleGenerale_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_CP>' CP
+,'&lt;sr:SPE-PRU_TotaleGenerale_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_CS>' CS
+,'&lt;sr:SPE-PRU_TotaleGenerale_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_PR>' PR
+,'&lt;sr:SPE-PRU_TotaleGenerale_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_PC>' PC
+,'&lt;sr:SPE-PRU_TotaleGenerale_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_TP>' TP
+,'&lt;sr:SPE-PRU_TotaleGenerale_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_R>' R
+,'&lt;sr:SPE-PRU_TotaleGenerale_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_I>' I
+,'&lt;sr:SPE-PRU_TotaleGenerale_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_FPV>' FPV
+,'&lt;sr:SPE-PRU_TotaleGenerale_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_ECP>' ECP
+,'&lt;sr:SPE-PRU_TotaleGenerale_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_EP>' EP
+,'&lt;sr:SPE-PRU_TotaleGenerale_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE-PRU_TotaleGenerale_EC>' EC
+,'&lt;sr:SPE-PRU_TotaleGenerale_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE-PRU_TotaleGenerale_TR>' TR
+from
+(SELECT
+  sum(c.RESIDUI_INIZIALI) RS,
+  sum(c.PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(c.PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(c.RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(c.RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(c.RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-c.VARIAZIONE_RESIDUI) R,
+  sum(c.ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(c.FPV) FPV,
+  sum(c.ECONOMIE_COMPETENZA) ECP,
+  sum(c.RES_PASS_PREC) EP,
+  sum(c.RES_PASS_COMPE) EC,
+  sum(c.TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL c
+  ,FIN_T_ARTICOLI a
+WHERE
+ c.TIPO_CAPITOLO = 'U' 
+and  c.ANNO_CONSUNTIVO = p_anno
+and  c.Utente = upper(p_utente)
+and a.anno = c.ANNO_CONSUNTIVO
+and a.eu = c.TIPO_CAPITOLO
+and a.codice = c.capitolo
+and nvl(a.nb_pru,'000') in ('07','08','09','10','15'))
+order by 1,2,3;
+
+-- ******************************************
+
+-- ***************************************************************
+
+
+
+-- ******* Spese per Missioni (Allegato 4) ***********
+cursor spese_miss is 
+select Missione,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_RS>' RS,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_PC>' PC,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_CP>' CP,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_CS>' CS,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_PR>' PR,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_TP>' TP,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))    ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_R>' R,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))    ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_I>' I,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_Miss'||Missione||'_FPV>' FPV,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_Miss'||Missione||'_ECP>' ECP,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_EP>' EP,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_EC>' EC,
+'&lt;sr:SPE-MIS_Miss'||Missione||'_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))  ||'&lt;/sr:SPE-MIS_Miss'||Missione||'_TR>' TR
+from
+(SELECT
+  NB_LIVELLO1 Missione,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by NB_LIVELLO1)
+where Missione is not null
+UNION
+-- ********* TOTALE MISSIONI ***********
+select '99999991' Missione
+,'&lt;sr:SPE-MIS_TotaleMissioni_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_RS>' RS
+,'&lt;sr:SPE-MIS_TotaleMissioni_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_CP>' CP
+,'&lt;sr:SPE-MIS_TotaleMissioni_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_CS>' CS
+,'&lt;sr:SPE-MIS_TotaleMissioni_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_PR>' PR
+,'&lt;sr:SPE-MIS_TotaleMissioni_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_PC>' PC
+,'&lt;sr:SPE-MIS_TotaleMissioni_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_TP>' TP
+,'&lt;sr:SPE-MIS_TotaleMissioni_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_R>' R
+,'&lt;sr:SPE-MIS_TotaleMissioni_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_I>' I
+,'&lt;sr:SPE-MIS_TotaleMissioni_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_FPV>' FPV
+,'&lt;sr:SPE-MIS_TotaleMissioni_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_ECP>' ECP
+,'&lt;sr:SPE-MIS_TotaleMissioni_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_EP>' EP
+(SELECT
+,'&lt;sr:SPE-MIS_TotaleMissioni_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleMissioni_EC>' EC
+,'&lt;sr:SPE-MIS_TotaleMissioni_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE-MIS_TotaleMissioni_TR>' TR
+from
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente))
+-- ***** DISAVANZO di AMMINISTRAZIONE ******
+UNION
+select '99999992' Missione
+,null RS
+,'&lt;sr:SPE-MIS_DisavanzoAmministrazione_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_DisavanzoAmministrazione_CP>' CP
+,null CS
+,null PR
+,null PC
+,null TP
+,null R
+,null I
+,null FPV
+,null ECP
+,null EP
+,null EC
+,null TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  upper(DESC_CAPITOLO) = 'DISAVANZO DI AMMINISTRAZIONE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+-- ***** TOTALE GENERALE **********
+UNION
+select '99999999' Missione
+,'&lt;sr:SPE-MIS_TotaleGenerale_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_RS>' RS
+,'&lt;sr:SPE-MIS_TotaleGenerale_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_CP>' CP
+,'&lt;sr:SPE-MIS_TotaleGenerale_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_CS>' CS
+,'&lt;sr:SPE-MIS_TotaleGenerale_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_PR>' PR
+,'&lt;sr:SPE-MIS_TotaleGenerale_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_PC>' PC
+,'&lt;sr:SPE-MIS_TotaleGenerale_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_TP>' TP
+,'&lt;sr:SPE-MIS_TotaleGenerale_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_R>' R
+,'&lt;sr:SPE-MIS_TotaleGenerale_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_I>' I
+,'&lt;sr:SPE-MIS_TotaleGenerale_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_FPV>' FPV
+,'&lt;sr:SPE-MIS_TotaleGenerale_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_ECP>' ECP
+,'&lt;sr:SPE-MIS_TotaleGenerale_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_EP>' EP
+,'&lt;sr:SPE-MIS_TotaleGenerale_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE-MIS_TotaleGenerale_EC>' EC
+,'&lt;sr:SPE-MIS_TotaleGenerale_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE-MIS_TotaleGenerale_TR>' TR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente))
+order by 1;
+
+-- ******************************************
+
+-- ******* SPESE per Titoli (Allegato 5) ****************
+cursor spese_titoli is
+select Titolo,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PR,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_PR>' PR,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_RS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RS,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_RS>' RS,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_CP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CP,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_CP>' CP,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_CS decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(CS,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_CS>' CS,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(PC,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_PC>' PC,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_TP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TP,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_TP>' TP,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_R decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(R,0),'9999999990.00'))    ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_R>' R,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(I,0),'9999999990.00'))    ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_I>' I,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_FPV>' FPV,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_ECP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_ECP>' ECP,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EP,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_EP>' EP,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(EC,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_EC>' EC,
+'&lt;sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_TR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00'))  ||'&lt;/sr:SPE-TIT_U.'||Titolo||'.00.00.00.000_TR>' TR
+from
+(SELECT
+  NB_Titolo Titolo,
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+group by NB_Titolo)
+UNION
+-- ********* TOTALE MISSIONI ***********
+select 9991 Titolo
+,'&lt;sr:SPE-TIT_TotaleTitoli_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_RS>' RS
+,'&lt;sr:SPE-TIT_TotaleTitoli_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_CP>' CP
+,'&lt;sr:SPE-TIT_TotaleTitoli_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_CS>' CS
+,'&lt;sr:SPE-TIT_TotaleTitoli_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_PR>' PR
+,'&lt;sr:SPE-TIT_TotaleTitoli_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_PC>' PC
+,'&lt;sr:SPE-TIT_TotaleTitoli_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_TP>' TP
+,'&lt;sr:SPE-TIT_TotaleTitoli_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_R>' R
+,'&lt;sr:SPE-TIT_TotaleTitoli_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_EP>' EP
+,'&lt;sr:SPE-TIT_TotaleTitoli_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_I>' I
+,'&lt;sr:SPE-TIT_TotaleTitoli_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_FPV>' FPV
+,'&lt;sr:SPE-TIT_TotaleTitoli_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_ECP>' ECP
+,'&lt;sr:SPE-TIT_TotaleTitoli_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleTitoli_EC>' EC
+,'&lt;sr:SPE-TIT_TotaleTitoli_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE-TIT_TotaleTitoli_TR>' TR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  NB_LIVELLO1 != '0'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente))
+-- ***** DISAVANZO di AMMINISTRAZIONE ******
+UNION
+select 9992 Titolo
+,null RS
+,'&lt;sr:SPE-TIT_DisavanzoAmministrazione_CP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PREVISIONI_DEFINITIVE_COMPE ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_DisavanzoAmministrazione_CP>' CP
+,null CS
+,null PR
+,null PC
+,null TP
+,null R
+,null I
+,null FPV
+,null ECP
+,null EP
+,null EC
+,null TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  upper(DESC_CAPITOLO) = 'DISAVANZO DI AMMINISTRAZIONE'
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente)
+-- ***** TOTALE GENERALE **********
+UNION
+select 9999 Titolo
+,'&lt;sr:SPE-TIT_TotaleGenerale_RS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(RS ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_RS>' RS
+,'&lt;sr:SPE-TIT_TotaleGenerale_CP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CP ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_CP>' CP
+,'&lt;sr:SPE-TIT_TotaleGenerale_CS' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(CS ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_CS>' CS
+,'&lt;sr:SPE-TIT_TotaleGenerale_PR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PR ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_PR>' PR
+,'&lt;sr:SPE-TIT_TotaleGenerale_PC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(PC ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_PC>' PC
+,'&lt;sr:SPE-TIT_TotaleGenerale_TP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TP ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_TP>' TP
+,'&lt;sr:SPE-TIT_TotaleGenerale_R'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(R  ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_R>' R
+,'&lt;sr:SPE-TIT_TotaleGenerale_I'  ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(I  ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_I>' I
+,'&lt;sr:SPE-TIT_TotaleGenerale_FPV'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(FPV,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_FPV>' FPV
+,'&lt;sr:SPE-TIT_TotaleGenerale_ECP'||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(ECP,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_ECP>' ECP
+,'&lt;sr:SPE-TIT_TotaleGenerale_EP' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EP ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_EP>' EP
+,'&lt;sr:SPE-TIT_TotaleGenerale_EC' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(EC ,0),'9999999990.00'))||'&lt;/sr:SPE-TIT_TotaleGenerale_EC>' EC
+,'&lt;sr:SPE-TIT_TotaleGenerale_TR' ||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(TR,0),'9999999990.00')) ||'&lt;/sr:SPE-TIT_TotaleGenerale_TR>' TR
+from
+(SELECT
+  sum(RESIDUI_INIZIALI) RS,
+  sum(PREVISIONI_DEFINITIVE_COMPE) CP,
+  sum(PREVISIONI_DEFINITIVE_CASSA) CS,
+  sum(RISCOSSIONI_PAGAMENTI_RES) PR,
+  sum(RISCOSSIONI_PAGAMENTI_COMPE) PC,
+  sum(RISCOSSIONI_PAGAMENTI_TOTALE) TP,
+  sum(-VARIAZIONE_RESIDUI) R,
+  sum(ACCERTAMENTI_IMPEGNI_COMPE) I,
+  sum(FPV) FPV,
+  sum(ECONOMIE_COMPETENZA) ECP,
+  sum(RES_PASS_PREC) EP,
+  sum(RES_PASS_COMPE) EC,
+  sum(TOT_RES_PASS_RIP) TR
+FROM
+  FIN_T_CONSUNTIVO_EXCEL 
+WHERE
+ TIPO_CAPITOLO = 'U' 
+and  ANNO_CONSUNTIVO = p_anno
+and  Utente = upper(p_utente))
+order by 1;
+-- ****************************************
+
+-- ******* select QGR (Allegato 6)
+from fin_t_rendiconto_qgr
+cursor qgr_e is
+select
+riga,'&lt;sr:'||E_TAG_BDAP_ACC||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(e_accertamenti,0),'9999999990.00'))||'&lt;/sr:'||E_TAG_BDAP_ACC||'>' contenuto
+where anno = p_anno
+and utente = 'CONS'||p_anno
+and E_TAG_BDAP_ACC is not null
+UNION
+select
+riga,'&lt;sr:'||E_TAG_BDAP_RIS||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(e_riscossioni,0),'9999999990.00'))||'&lt;/sr:'||E_TAG_BDAP_RIS||'>' contenuto
+from fin_t_rendiconto_qgr
+where anno = p_anno
+and utente = 'CONS'||p_anno
+and E_TAG_BDAP_RIS is not null
+order by riga;
+
+cursor qgr_u is 
+select
+riga,'&lt;sr:'||U_TAG_BDAP_IMP||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(u_impegni,0),'9999999990.00'))||'&lt;/sr:'||U_TAG_BDAP_IMP||'>' contenuto
+from fin_t_rendiconto_qgr
+where anno = p_anno
+and utente = 'CONS'||p_anno
+and U_TAG_BDAP_IMP is not null
+UNION
+select
+riga,'&lt;sr:'||U_TAG_BDAP_PAG||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(u_pagamenti,0),'9999999990.00'))||'&lt;/sr:'||U_TAG_BDAP_PAG||'>' contenuto
+from fin_t_rendiconto_qgr
+where anno = p_anno
+and utente = 'CONS'||p_anno
+and U_TAG_BDAP_PAG is not null
+order by riga;
+
+
+-- *****************************
+
+-- ******* select Equilibri Bilancio (Allegato 7)
+cursor eqreg is 
+select
+num_ord_riga,'&lt;sr:'||car05||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(num01,0),'9999999990.00'))||'&lt;/sr:'||car05||'>' contenuto
+from fin_t_rendiconto_equilibri
+where utente = 'CONS'||p_anno
+and substr(car05,1,5) = 'EQREG'
+and car05 is not null
+order by num_ord_riga;
+
+-- *****************************
+
+-- ******* select STato PAtrimoniale
+cursor sp is
+select '&lt;sr:'||tag_bdap||' decimals="2" contextRef="i_'||anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto
+,'&lt;sr:'||tag_bdap||' decimals="2" contextRef="i_'||(anno-1)||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo1,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto1
+,'&lt;sr:'||tag_bdap||' decimals="2" contextRef="i_'||anno||'ape" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo1,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto2
+from (SELECT
+c.anno,
+b.tag_bdap,
+decode(b.tipo,'A',1,'P',2,3),
+b.ordinamento_stampa,
+sum(nvl(c.IMPORTO,0)) importo,
+sum(nvl(c.IMPORTO1,0)) importo1
+FROM
+nb_piacee_importi c 
+,nb_piacee b
+WHERE
+c.anno = p_anno
+and c.utente  = 99999
+and b.tipo = c.tipo_piacee
+and b.conto_vis = c.codice_piacee
+and b.tipo in ('A','P','CO')
+and b.TAG_BDAP is not null
+group by
+c.anno,
+decode(b.tipo,'A',1,'P',2,3),
+b.ordinamento_stampa,
+b.TAG_BDAP
+order by decode(b.tipo,'A',1,'P',2,3),
+b.ordinamento_stampa);
+-- **********************************
+
+-- ******* select Conto Economico
+cursor ce is 
+select '&lt;sr:'||tag_bdap||' decimals="2" contextRef="d_'||anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto
+,'&lt;sr:'||tag_bdap||' decimals="2" contextRef="d_'||(anno-1)||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo1,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto1
+from (SELECT
+c.anno,
+b.tag_bdap,
+b.ordinamento_stampa,
+sum(nvl(c.IMPORTO,0)) importo,
+sum(nvl(c.IMPORTO1,0)) importo1
+FROM
+nb_piacee_importi c 
+,nb_piacee b
+WHERE
+c.anno = p_anno
+and c.utente  = 99999
+and b.tipo = c.tipo_piacee
+and b.conto_vis = c.codice_piacee
+and b.tipo = 'E'
+and b.TAG_BDAP is not null
+group by
+c.anno,
+b.ordinamento_stampa,
+b.TAG_BDAP
+order by b.ordinamento_stampa);
+-- ************************************
+
+-- ******* select Risultato Ammiistrazione (Allegato 8)
+cursor risamm is 
+select
+riga,'&lt;sr:'||TAG_BDAP_RESIDUO||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(residui,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_RESIDUO||'>' contenuto
+from fin_t_rendiconto_risamm
+where utente = 'CONS'||p_anno
+and TAG_BDAP_RESIDUO is not null
+UNION
+select
+riga,'&lt;sr:'||TAG_BDAP_COMPETENZA||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(competenza,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_COMPETENZA||'>' contenuto
+from fin_t_rendiconto_risamm
+where utente = 'CONS'||p_anno
+and TAG_BDAP_COMPETENZA is not null
+UNION
+select
+riga,'&lt;sr:'||TAG_BDAP_TOTALE||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(totale,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_TOTALE||'>' contenuto
+from fin_t_rendiconto_risamm
+where utente = 'CONS'||p_anno
+and TAG_BDAP_TOTALE is not null
+order by riga,2 desc;
+
+-- *****************************
+
+
+-- ******** select FPV (Allegato 9)
+cursor fpv is
+select Missione,nvl(Programma,'0')
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVRiaccImpPluFinanz decimals="2" contextRef="d_'    ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_y,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVRiaccImpPluFinanz>' col_y
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVEsercizioPrec decimals="2" contextRef="d_'        ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_a,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVEsercizioPrec>' col_a
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizioPrec decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_b,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizioPrec>' col_b
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVRiaccImp decimals="2" contextRef="d_'             ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_x,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVRiaccImp>' col_x
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVQuotaRinv decimals="2" contextRef="d_'            ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_c,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVQuotaRinv>' col_c
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizio1 decimals="2" contextRef="d_'   ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_d,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizio1>' col_d
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizio2 decimals="2" contextRef="d_'   ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_e,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizio2>' col_e
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizioN decimals="2" contextRef="d_'   ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_f,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVSpeseImpEsercizioN>' col_f
+,'&lt;sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVEsercizio decimals="2" contextRef="d_'            ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_g,0),'9999999990.00'))||'&lt;/sr:FPV_'||decode(Programma,null,'Miss'||Missione,'Prog'||Missione||'.'||Programma)||'_FPVEsercizio>' col_g
+from
+(SELECT
+  Missione,
+  Programma,
+sum(nvl(col_a,0)) col_a,
+sum(nvl(col_b,0)) col_b,
+sum(nvl(col_x,0)) col_x,
+sum(nvl(col_y,0)) col_y,
+sum(nvl(col_c,0)) col_c,
+sum(nvl(col_d,0)) col_d,
+sum(nvl(col_e,0)) col_e,
+sum(nvl(col_f,0)) col_f,
+sum(nvl(col_g,0)) col_g
+FROM
+  FIN_T_RENDICONTO_FPV
+WHERE
+anno = p_anno
+and utente = upper(p_utente)
+group by rollup (Missione,
+  Programma))
+where Missione is not null
+,'&lt;sr:FPV_Totale_FPVEsercizioPrec decimals="2" contextRef="d_'        ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_a,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVEsercizioPrec>' col_a
+-- **** TOTALE GENERALE
+UNION
+select nvl(Missione,'99999999'),nvl(Programma,'0')
+,'&lt;sr:FPV_Totale_FPVSpeseImpEsercizioPrec decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_b,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVSpeseImpEsercizioPrec>' col_b
+,'&lt;sr:FPV_Totale_FPVRiaccImp decimals="2" contextRef="d_'             ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_x,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVRiaccImp>' col_x
+,'&lt;sr:FPV_Totale_FPVRiaccImpPluFinanz decimals="2" contextRef="d_'    ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_y,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVRiaccImpPluFinanz>' col_y
+,'&lt;sr:FPV_Totale_FPVQuotaRinv decimals="2" contextRef="d_'            ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_c,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVQuotaRinv>' col_c
+,'&lt;sr:FPV_Totale_FPVSpeseImpEsercizio1 decimals="2" contextRef="d_'   ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_d,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVSpeseImpEsercizio1>' col_d
+,'&lt;sr:FPV_Totale_FPVSpeseImpEsercizio2 decimals="2" contextRef="d_'   ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_e,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVSpeseImpEsercizio2>' col_e
+,'&lt;sr:FPV_Totale_FPVSpeseImpEsercizioN decimals="2" contextRef="d_'   ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_f,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVSpeseImpEsercizioN>' col_f
+,'&lt;sr:FPV_Totale_FPVEsercizio decimals="2" contextRef="d_'            ||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(col_g,0),'9999999990.00'))||'&lt;/sr:FPV_Totale_FPVEsercizio>' col_g
+from
+(SELECT
+  Missione,
+  Programma,
+sum(nvl(col_a,0)) col_a,
+sum(nvl(col_b,0)) col_b,
+sum(nvl(col_x,0)) col_x,
+sum(nvl(col_y,0)) col_y,
+sum(nvl(col_c,0)) col_c,
+sum(nvl(col_d,0)) col_d,
+sum(nvl(col_e,0)) col_e,
+sum(nvl(col_f,0)) col_f,
+sum(nvl(col_g,0)) col_g
+FROM
+  FIN_T_RENDICONTO_FPV
+WHERE
+anno = p_anno
+and utente = upper(p_utente)
+group by rollup (Missione,
+  Programma))
+where Missione is null
+order by 1,2;
+-- ******* fine FPV
+
+-- ****** select FCDDE (Allegato 11) **********
+/*select 
+riga,
+'&lt;sr:'||tag_bdap||'EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_a,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EC>' EC,
+'&lt;sr:'||tag_bdap||'EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_b,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EP>' EP,
+'&lt;sr:'||tag_bdap||'TRR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_c,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'TRR>' TRR,
+'&lt;sr:'||tag_bdap||'IMF decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_d,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'IMF>' IMF,
+'&lt;sr:'||tag_bdap||'FCDE decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_e,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'FCDE>' FCDE,
+'&lt;sr:'||tag_bdap||'PercAccFCDE decimals="4" contextRef="d_'||p_anno||'" unitRef="pure">'||LTRIM(TO_CHAR(NVL(importo_f,0)/100,'9999999990.0000'))||'&lt;/sr:'||tag_bdap||'PercAccFCDE>' PercFCDE
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and tipo not like 'Q%'
+UNION
+select 
+riga,
+'&lt;sr:'||tag_bdap||decode(tipo,'Q4','Crediti','TotCrediti')||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_g,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||decode(tipo,'Q4','Crediti','TotCrediti')||'>' EC,
+'&lt;sr:'||tag_bdap||'FondoSvalutCrediti decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_h,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'FondoSvalutCrediti>' EP,
+null TRR,
+null IMF,
+null FCDE,
+null PercFCDE
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and tipo like 'Q%'
+order by riga*/
+--modifica Gerry 14-09-2018
+cursor FCDDE is
+select 
+riga,
+'&lt;sr:'||tag_bdap||'EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_a,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EC>' EC,
+'&lt;sr:'||tag_bdap||'EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_b,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EP>' EP,
+'&lt;sr:'||tag_bdap||'TRR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_c,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'TRR>' TRR,
+'&lt;sr:'||tag_bdap||'IMF decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_d,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'IMF>' IMF,
+'&lt;sr:'||tag_bdap||'FCDE decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_e,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'FCDE>' FCDE,
+'&lt;sr:'||tag_bdap||'PercAccFCDE decimals="4" contextRef="d_'||p_anno||'" unitRef="pure">'||LTRIM(TO_CHAR(NVL(importo_f,0)/100,'9999999990.0000'))||'&lt;/sr:'||tag_bdap||'PercAccFCDE>' PercFCDE
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and tipo not like 'Q%'
+and nvl(codice,0) not in (1010100,1010200,1010300,4020000,4030000,2010500)
+UNION
+select 
+riga,
+'&lt;sr:'||tag_bdap||decode(tipo,'Q4','Crediti','TotCrediti')||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_g,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||decode(tipo,'Q4','Crediti','TotCrediti')||'>' EC,
+'&lt;sr:'||tag_bdap||'FondoSvalutCrediti decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_h,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'FondoSvalutCrediti>' EP,
+null TRR,
+null IMF,
+where anno = p_anno
+null FCDE,
+null PercFCDE
+from fin_t_rendiconto_fcdde
+and utente = p_utente
+and tipo like 'Q%'
+union
+select 
+riga,
+'&lt;sr:'||tag_bdap||'EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_a,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EC>' EC,
+'&lt;sr:'||tag_bdap||'EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_b,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EP>' EP,
+'&lt;sr:'||tag_bdap||'TRR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_c,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'TRR>' TRR,
+null IMF,
+null FCDE,
+null PercFCDE
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and ((tipo in ('P','D1') and codice in (1010100,1010200,1010300,2010500)) or (tipo in ('P','D1','D2') and codice in (4020000,4030000)))
+union
+select 
+riga,
+'&lt;sr:'||tag_bdap||'EC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_a,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EC>' EC,
+'&lt;sr:'||tag_bdap||'EP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_b,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'EP>' EP,
+'&lt;sr:'||tag_bdap||'TRR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_c,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'TRR>' TRR,
+'&lt;sr:'||tag_bdap||'IMF decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_d,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'IMF>' IMF,
+'&lt;sr:'||tag_bdap||'FCDE decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo_e,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'FCDE>' FCDE,
+'&lt;sr:'||tag_bdap||'PercAccFCDE decimals="4" contextRef="d_'||p_anno||'" unitRef="pure">'||LTRIM(TO_CHAR(NVL(importo_f,0)/100,'9999999990.0000'))||'&lt;/sr:'||tag_bdap||'PercAccFCDE>' PercFCDE
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and ((tipo ='D2' and codice in (1010100,1010200,1010300)) or (tipo  = 'D2' and codice in (2010500)) or (tipo  = 'D3' and codice in (4020000,4030000)))
+order by riga;
+
+-- ******* fine FCDDE
+
+-- ******* Select CATEGORIE ENTRATE (Allegato 12) ************
+cursor cat_ent is
+select liv1,liv2,liv3,
+case
+when liv3 is not null
+then '&lt;sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_A decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(A,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_A>'
+when liv2 is not null and liv3 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_A decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(A,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_A>'
+when liv1 is not null and liv2 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_A decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(A,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_A>'
+end as A,
+case
+when liv3 is not null
+then '&lt;sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_ANR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ANR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_ANR>'
+when liv2 is not null and liv3 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_ANR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ANR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_ANR>'
+when liv1 is not null and liv2 is null
+when liv3 is not null
+then '&lt;sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_ANR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ANR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_ANR>'
+end as ANR,
+case
+then '&lt;sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_RiscCC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCC,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_RiscCC>'
+when liv2 is not null and liv3 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_RiscCC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCC,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_RiscCC>'
+when liv1 is not null and liv2 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_RiscCC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCC,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_RiscCC>'
+end as RiscCC,
+case
+when liv3 is not null
+then '&lt;sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_RiscCR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv3,1,1)||'.'||substr(liv3,2,2)||'.'||substr(liv3,4,2)||'.'||substr(liv3,6,2)||'.000_RiscCR>'
+when liv2 is not null and liv3 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_RiscCR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv2,1,1)||'.'||substr(liv2,2,2)||'.'||substr(liv2,4,2)||'.00.000_RiscCR>'
+when liv1 is not null and liv2 is null
+then '&lt;sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_RiscCR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_E.'||substr(liv1,1,1)||'.'||substr(liv1,2,2)||'.00.00.000_RiscCR>'
+end as RiscCR
+from(
+select NB_LIVELLO1 liv1
+,nb_livello2 liv2
+,nb_livello3 liv3
+,nvl(sum(nvl(accertamenti_impegni_compe,0)),0) A
+,nvl(sum(nvl(decode(nvl(nb_entrata_ricorrente,'N'),'N',accertamenti_impegni_compe,0),0)),0) ANR
+,nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_COMPE,0)),0) RiscCC
+,nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_RES,0)),0) RiscCR
+from fin_t_consuntivo_excel
+where TIPO_CAPITOLO = 'E'
+and anno_consuntivo = p_anno
+and utente = p_utente
+and nb_livello1 &lt;> 0
+group by rollup (NB_LIVELLO1
+,nb_livello2,nb_livello3)
+having (nvl(sum(nvl(accertamenti_impegni_compe,0)),0)
++ nvl(sum(nvl(decode(nvl(nb_entrata_ricorrente,'N'),'N',accertamenti_impegni_compe,0),0)),0)
++ nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_COMPE,0)),0)
++ nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_RES,0)),0)) > 0
+)
+where liv1 is not null
+UNION
+select '999999999' liv1,'0' liv2,'0' liv3,
+'&lt;sr:ENT-CAT_TotaleTitoli_A decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(A,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_TotaleTitoli_A>' A,
+'&lt;sr:ENT-CAT_TotaleTitoli_ANR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(ANR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_TotaleTitoli_ANR>' ANR,
+'&lt;sr:ENT-CAT_TotaleTitoli_RiscCC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCC,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_TotaleTitoli_RiscCC>' RiscCC,
+'&lt;sr:ENT-CAT_TotaleTitoli_RiscCR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(RiscCR,0),'9999999990.00'))||'&lt;/sr:ENT-CAT_TotaleTitoli_RiscCR>' RiscCR
+from(
+select nvl(sum(nvl(accertamenti_impegni_compe,0)),0) A
+,nvl(sum(nvl(decode(nvl(nb_entrata_ricorrente,'N'),'N',accertamenti_impegni_compe,0),0)),0) ANR
+,nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_COMPE,0)),0) RiscCC
+,nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_RES,0)),0) RiscCR
+from fin_t_consuntivo_excel
+where TIPO_CAPITOLO = 'E'
+and anno_consuntivo = p_anno
+and utente = p_utente
+and nb_livello1 &lt;> 0
+having (nvl(sum(nvl(accertamenti_impegni_compe,0)),0)
++ nvl(sum(nvl(decode(nvl(nb_entrata_ricorrente,'N'),'N',accertamenti_impegni_compe,0),0)),0)
++ nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_COMPE,0)),0)
++ nvl(sum(nvl(RISCOSSIONI_PAGAMENTI_RES,0)),0)) > 0)
+order by 1,2,3;
+-- ******* Fine Entrate Categorie *************
+
+
+-- ******** select MAC Spese (Allegato 13) **********
+cursor mac_spese is
+select liv1,liv2,mac,
+case 
+when liv1 &lt;> '9999' and liv2 &lt;> '99' 
+then '&lt;sr:SPE-MAC_Prog'||liv1||'.'||liv2||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_Prog'||liv1||'.'||liv2||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_I>'
+when liv1 &lt;> '9999' and liv2 = '99'
+end as Imp,
+then '&lt;sr:SPE-MAC_Miss'||liv1||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_Miss'||liv1||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_I>'
+when liv1 = '9999' and liv2 = '99' --and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_I>'
+case 
+when liv1 &lt;> '9999' and liv2 &lt;> '99' and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_Prog'||liv1||'.'||liv2||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(pc,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_Prog'||liv1||'.'||liv2||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PC>'
+when liv1 &lt;> '9999' and liv2 = '99' and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_Miss'||liv1||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(pc,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_Miss'||liv1||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PC>'
+when liv1 = '9999' and liv2 = '99' and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PC decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(pc,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PC>'
+end as PC,
+case 
+when liv1 &lt;> '9999' and liv2 &lt;> '99' and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_Prog'||liv1||'.'||liv2||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(pr,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_Prog'||liv1||'.'||liv2||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PR>'
+when liv1 &lt;> '9999' and liv2 = '99' and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_Miss'||liv1||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(pr,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_Miss'||liv1||'-U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PR>'
+when liv1 = '9999' and liv2 = '99' and substr(mac,1,1) in (1,2,3)
+then '&lt;sr:SPE-MAC_U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(pr,0),'9999999990.00'))||'&lt;/sr:SPE-MAC_U.'||substr(mac,1,1)||'.'||nvl(substr(mac,2,2),'00')||'.00.00.000_PR>'
+end as PR
+from
+(select nb_livello1 liv1,nb_livello2 liv2,nb_macroaggregato mac
+,sum(nvl(accertamenti_impegni_compe,0)) imp
+,sum(nvl(riscossioni_pagamenti_compe,0)) pc
+,sum(nvl(riscossioni_pagamenti_res,0)) pr
+from fin_t_consuntivo_excel
+where anno_consuntivo = p_anno
+and utente = p_utente
+and tipo_capitolo = 'U'
+and nb_livello1 &lt;> '0'
+and nb_livello1||nb_livello2||substr(nb_macroaggregato,1,1) &lt;> '50014'
+group by nb_livello1,nb_livello2,nb_macroaggregato
+having sum(nvl(accertamenti_impegni_compe,0))+ sum(nvl(riscossioni_pagamenti_compe,0)) + sum(nvl(riscossioni_pagamenti_res,0)) > 0
+UNION
+select nb_livello1 liv1,nb_livello2 liv2,substr(nb_macroaggregato,1,1) mac
+,sum(nvl(accertamenti_impegni_compe,0)) imp
+,sum(nvl(riscossioni_pagamenti_compe,0)) pc
+,sum(nvl(riscossioni_pagamenti_res,0)) pr
+from fin_t_consuntivo_excel
+where anno_consuntivo = p_anno
+and utente = p_utente
+and tipo_capitolo = 'U'
+and nb_livello1 &lt;> '0'
+and nb_livello1||nb_livello2||substr(nb_macroaggregato,1,1) &lt;> '50014'
+group by nb_livello1,nb_livello2,substr(nb_macroaggregato,1,1)
+having sum(nvl(accertamenti_impegni_compe,0))+ sum(nvl(riscossioni_pagamenti_compe,0)) + sum(nvl(riscossioni_pagamenti_res,0)) > 0
+UNION
+select nb_livello1 liv1,'99' liv2, nb_macroaggregato mac
+,sum(nvl(accertamenti_impegni_compe,0)) imp
+,sum(nvl(riscossioni_pagamenti_compe,0)) pc
+,sum(nvl(riscossioni_pagamenti_res,0)) pr
+from fin_t_consuntivo_excel
+where anno_consuntivo = p_anno
+and utente = p_utente
+and tipo_capitolo = 'U'
+and nb_livello1 &lt;> '0'
+and nb_livello1||nb_livello2||substr(nb_macroaggregato,1,1) &lt;> '50014'
+group by nb_livello1,NB_MACROAGGREGATO
+having sum(nvl(accertamenti_impegni_compe,0))+ sum(nvl(riscossioni_pagamenti_compe,0)) + sum(nvl(riscossioni_pagamenti_res,0)) > 0
+UNION
+select nb_livello1 liv1,'99' liv2, substr(nb_macroaggregato,1,1) mac
+,sum(nvl(accertamenti_impegni_compe,0)) imp
+,sum(nvl(riscossioni_pagamenti_compe,0)) pc
+,sum(nvl(riscossioni_pagamenti_res,0)) pr
+from fin_t_consuntivo_excel
+where anno_consuntivo = p_anno
+and utente = p_utente
+and tipo_capitolo = 'U'
+and nb_livello1 &lt;> '0'
+and nb_livello1||nb_livello2||substr(nb_macroaggregato,1,1) &lt;> '50014'
+group by nb_livello1,substr(NB_MACROAGGREGATO,1,1)
+having sum(nvl(accertamenti_impegni_compe,0))+ sum(nvl(riscossioni_pagamenti_compe,0)) + sum(nvl(riscossioni_pagamenti_res,0)) > 0
+UNION
+select '9999' liv1,'99' liv2, nb_macroaggregato mac
+,sum(nvl(accertamenti_impegni_compe,0)) imp
+,sum(nvl(riscossioni_pagamenti_compe,0)) pc
+,sum(nvl(riscossioni_pagamenti_res,0)) pr
+from fin_t_consuntivo_excel
+where anno_consuntivo = p_anno
+and utente = p_utente
+and tipo_capitolo = 'U'
+and nb_livello1 &lt;> '0'
+and nb_livello1||nb_livello2||substr(nb_macroaggregato,1,1) &lt;> '50014'
+group by NB_MACROAGGREGATO
+,sum(nvl(accertamenti_impegni_compe,0)) imp
+having sum(nvl(accertamenti_impegni_compe,0))+ sum(nvl(riscossioni_pagamenti_compe,0)) + sum(nvl(riscossioni_pagamenti_res,0)) > 0
+UNION
+select '9999' liv1,'99' liv2, substr(nb_macroaggregato,1,1) mac
+,sum(nvl(riscossioni_pagamenti_compe,0)) pc
+,sum(nvl(riscossioni_pagamenti_res,0)) pr
+from fin_t_consuntivo_excel
+where anno_consuntivo = p_anno
+and utente = p_utente
+and tipo_capitolo = 'U'
+and nb_livello1 &lt;> '0'
+and nb_livello1||nb_livello2||substr(nb_macroaggregato,1,1) &lt;> '50014'
+group by substr(NB_MACROAGGREGATO,1,1)
+having sum(nvl(accertamenti_impegni_compe,0))+ sum(nvl(riscossioni_pagamenti_compe,0)) + sum(nvl(riscossioni_pagamenti_res,0)) > 0)
+order by 1,2,3;
+
+-- *********** Fine MAC spese *********
+
+-- ********** Select MAC Riepilogo *********
+cursor mac_riep is
+select titolo,mac,
+case 
+when titolo &lt;> '999' and mac &lt;> '9999'
+then '&lt;sr:SPE-RIEPMAC_U.'||substr(mac,1,1)||'.'||substr(mac,2,2)||'.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp,0),'9999999990.00'))||'&lt;/sr:SPE-RIEPMAC_U.'||substr(mac,1,1)||'.'||substr(mac,2,2)||'.00.00.000_I>'
+when titolo &lt;> '999' and mac = '9999'
+then '&lt;sr:SPE-RIEPMAC_U.'||titolo||'.00.00.00.000_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp,0),'9999999990.00'))||'&lt;/sr:SPE-RIEPMAC_U.'||titolo||'.00.00.00.000_I>'
+when titolo = '999' and mac = '9999'
+then '&lt;sr:SPE-RIEPMAC_TotaleImpegni_I decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp,0),'9999999990.00'))||'&lt;/sr:SPE-RIEPMAC_TotaleImpegni_I>'
+end as Imp,
+case 
+when titolo &lt;> '999' and mac &lt;> '9999'
+then '&lt;sr:SPE-RIEPMAC_U.'||substr(mac,1,1)||'.'||substr(mac,2,2)||'.00.00.000_INR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(impNR,0),'9999999990.00'))||'&lt;/sr:SPE-RIEPMAC_U.'||substr(mac,1,1)||'.'||substr(mac,2,2)||'.00.00.000_INR>'
+when titolo &lt;> '999' and mac = '9999'
+then '&lt;sr:SPE-RIEPMAC_U.'||titolo||'.00.00.00.000_INR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(impNR,0),'9999999990.00'))||'&lt;/sr:SPE-RIEPMAC_U.'||titolo||'.00.00.00.000_INR>'
+when titolo = '999' and mac = '9999'
+then '&lt;sr:SPE-RIEPMAC_TotaleImpegni_INR decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(impNR,0),'9999999990.00'))||'&lt;/sr:SPE-RIEPMAC_TotaleImpegni_INR>'
+end as ImpNR
+from(
+select nvl(substr(c.NB_MACROAGGREGATO,1,1),'999') titolo
+,nvl(c.NB_MACROAGGREGATO,'9999') mac,nvl(sum(nvl(c.ACCERTAMENTI_IMPEGNI_COMPE,0)),0) imp
+,nvl(sum(decode(nvl(a.NB_USCITA_RICORRENTE,'N'),'S',nvl(c.ACCERTAMENTI_IMPEGNI_COMPE,0))),0) impNR
+from fin_t_consuntivo_excel c
+,fin_t_articoli a
+where 
+c.ANNO_CONSUNTIVO = p_anno
+and c.TIPO_CAPITOLO = 'U'
+and c.UTENTE = p_utente
+and a.anno = c.ANNO_CONSUNTIVO
+and a.eu = c.TIPO_CAPITOLO
+and a.codice = c.CAPITOLO
+and c.nb_livello1||c.nb_livello2||substr(c.NB_MACROAGGREGATO,1,1) &lt;> '50014'
+group by rollup (substr(c.NB_MACROAGGREGATO,1,1),c.NB_MACROAGGREGATO)
+having (nvl(sum(nvl(c.ACCERTAMENTI_IMPEGNI_COMPE,0)),0)+ nvl(sum(decode(nvl(a.NB_USCITA_RICORRENTE,'N'),'S',nvl(c.ACCERTAMENTI_IMPEGNI_COMPE,0))),0)) > 0)
+order by 1,2;
+
+-- ********** Fine MAC Riepilogo ***********
+
+-- ********** Select ACCERTAMENTI Pluriennali ***********
+cursor accplur is
+select riga,'&lt;sr:'||TAG_BDAP_PREVCOMPE1||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(prevcompe1,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_PREVCOMPE1||'>' prevcompe1
+,'&lt;sr:'||TAG_BDAP_ACC1||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(acc1,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_ACC1||'>' acc1
+,'&lt;sr:'||TAG_BDAP_PREVCOMPE2||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(prevcompe2,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_PREVCOMPE2||'>' prevcompe2
+,'&lt;sr:'||TAG_BDAP_ACC2||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(acc2,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_ACC2||'>' acc2
+,'&lt;sr:'||TAG_BDAP_ACCN||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(accn,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_ACCN||'>' accn
+from fin_t_rendiconto_accplur
+where anno = p_anno
+and utente = p_utente
+and substr(nvl(codice,'999'),1,1) &lt;> '7'
+order by 1;
+-- ********** Fine ACC PLUR *****************************
+
+-- ********** Select IMPEGNI Pluriennali ***********
+cursor impplur is
+select riga,'&lt;sr:'||TAG_BDAP_PREVCOMPE1||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(prevcompe1,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_PREVCOMPE1||'>' prevcompe1
+,'&lt;sr:'||TAG_BDAP_IMP1||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp1,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_imp1||'>' imp1
+,'&lt;sr:'||TAG_BDAP_PREVCOMPE2||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(prevcompe2,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_PREVCOMPE2||'>' prevcompe2
+,'&lt;sr:'||TAG_BDAP_IMP2||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(imp2,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_IMP2||'>' imp2
+,'&lt;sr:'||TAG_BDAP_IMPN||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(impn,0),'9999999990.00'))||'&lt;/sr:'||TAG_BDAP_IMPN||'>' impn
+from fin_t_rendiconto_impplur
+where anno = p_anno
+and utente = p_utente
+order by 1;
+-- ********** Fine ACC PLUR *****************************
+
+
+-- ********** Select COSTI MISSIONI *********************
+cursor cost_miss is 
+select car02 miss
+,'&lt;sr:'||CAR07||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num07,0),'9999999990.00'))||'&lt;/sr:'||CAR07||'>' c4
+,'&lt;sr:'||CAR04||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num04,0),'9999999990.00'))||'&lt;/sr:'||CAR04||'>' c1 
+,'&lt;sr:'||CAR05||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num05,0),'9999999990.00'))||'&lt;/sr:'||CAR05||'>' c2 
+,'&lt;sr:'||CAR06||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num06,0),'9999999990.00'))||'&lt;/sr:'||CAR06||'>' c3
+,'&lt;sr:'||CAR08||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num08,0),'9999999990.00'))||'&lt;/sr:'||CAR08||'>' c5 
+,'&lt;sr:'||CAR09||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num09,0),'9999999990.00'))||'&lt;/sr:'||CAR09||'>' c6
+,'&lt;sr:'||CAR10||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num10,0),'9999999990.00'))||'&lt;/sr:'||CAR10||'>' c7
+,'&lt;sr:'||CAR11||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num11,0),'9999999990.00'))||'&lt;/sr:'||CAR11||'>' c8
+,'&lt;sr:'||CAR12||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num12,0),'9999999990.00'))||'&lt;/sr:'||CAR12||'>' c9
+,'&lt;sr:'||CAR13||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num13,0),'9999999990.00'))||'&lt;/sr:'||CAR13||'>' c10
+,'&lt;sr:'||CAR14||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num14,0),'9999999990.00'))||'&lt;/sr:'||CAR14||'>' c11
+,'&lt;sr:'||CAR15||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num15,0),'9999999990.00'))||'&lt;/sr:'||CAR15||'>' c12
+,'&lt;sr:'||CAR16||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num16,0),'9999999990.00'))||'&lt;/sr:'||CAR16||'>' c13
+,'&lt;sr:'||CAR17||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num17,0),'9999999990.00'))||'&lt;/sr:'||CAR17||'>' c14 
+,'&lt;sr:'||CAR18||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num18,0),'9999999990.00'))||'&lt;/sr:'||CAR18||'>' c15 
+,'&lt;sr:'||CAR19||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num19,0),'9999999990.00'))||'&lt;/sr:'||CAR19||'>' c16 
+,'&lt;sr:'||CAR20||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num20,0),'9999999990.00'))||'&lt;/sr:'||CAR20||'>' c17 
+,'&lt;sr:'||CAR21||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num21,0),'9999999990.00'))||'&lt;/sr:'||CAR21||'>' c18 
+,'&lt;sr:'||CAR22||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num22,0),'9999999990.00'))||'&lt;/sr:'||CAR22||'>' c19 
+,'&lt;sr:'||CAR23||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num23,0),'9999999990.00'))||'&lt;/sr:'||CAR23||'>' c20
+,'&lt;sr:'||CAR24||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num24,0),'9999999990.00'))||'&lt;/sr:'||CAR24||'>' c21
+,'&lt;sr:'||CAR25||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num25,0),'9999999990.00'))||'&lt;/sr:'||CAR25||'>' c22
+,'&lt;sr:'||CAR26||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num26,0),'9999999990.00'))||'&lt;/sr:'||CAR26||'>' c23
+,'&lt;sr:'||CAR27||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num27,0),'9999999990.00'))||'&lt;/sr:'||CAR27||'>' c24
+,'&lt;sr:'||CAR28||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num28,0),'9999999990.00'))||'&lt;/sr:'||CAR28||'>' c25
+,'&lt;sr:'||CAR29||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num29,0),'9999999990.00'))||'&lt;/sr:'||CAR29||'>' c26
+,'&lt;sr:'||CAR30||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num30,0),'9999999990.00'))||'&lt;/sr:'||CAR30||'>' c27
+,'&lt;sr:'||CAR31||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">' ||LTRIM(TO_CHAR(NVL(num31,0),'9999999990.00'))||'&lt;/sr:'||CAR31||'>' c28
+from tmp_tabulati2
+where utente = p_utente
+and nvl(num31,0)&lt;>0
+order by to_number(car02);
+
+
+-- ************FINE COSTI MISSIONI **********************
+
+-- *********** FINE CURSORI
+
+
+
+
+begin
+ begin
+ select nvl(codice_bdap,'X') into p_id_ente
+ from fin_t_dati_generali
+ where anno_finanziario = p_anno;
+ exception when no_data_found then p_id_ente := 'X';
+ end;
+ 
+ delete fin_t_bdap where anno = p_anno and utente = p_utente and substr(tipo_trasmissione,1,4) = 'REND';
+  commit;
+
+if p_id_ente &lt;> 'X'
+ then
+-- determino (se presente) risultato esercizio anno precedente
+    select nvl(sum(nvl(RISULTATO_ESERCIZIO,0)),0)
+    into risultato_es_prec
+    from fin_t_dati_generali
+    where anno_finanziario = p_anno-1;
+-- ************DATI REND_ENTRATE ******
+
+-- parte comune
+
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',010,'&lt;?xml version="1.0" encoding="UTF-8"?>');
+
+-- anche gli ENTI STRUMENTALI seguono gli schemi REGIONE
+ -- if p_id_ente='899342930540086001' --REGIONE
+ --  then 
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',020,'  &lt;xbrli:xbrl xmlns:sre="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/regioni/2019-01-07" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:sr="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/2019-01-07" xmlns:common="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/common/2019-01-07" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink">');
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',030,'   &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-sdb-rend-regioni_2016-10-18.xsd"/>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',030,'   &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-sdb-rend-regioni_2019-01-07.xsd"/>');
+
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',020,'  &lt;xbrli:xbrl xmlns:sre="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/regioni/2016-10-18" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:sr="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/2016-10-18" xmlns:common="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/common/2016-10-18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink">');
+ -- else 
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',020,'  &lt;xbrli:xbrl xmlns:sre="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/enti/2016-10-18" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:sr="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/2016-10-18" xmlns:common="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/common/2016-10-18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink">');
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',030,'   &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-sdb-rend-enti_2016-10-18.xsd"/>');
+ -- end if;
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',040,'   &lt;xbrli:context id="d_'||p_anno||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',050,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',060,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',070,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',080,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',090,'       &lt;xbrli:startDate>'||p_anno||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',100,'       &lt;xbrli:endDate>'||p_anno||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',110,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',120,'   &lt;/xbrli:context>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',130,'   &lt;xbrli:context id="i_'||p_anno||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',140,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',150,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',160,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',170,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',180,'       &lt;xbrli:instant>'||p_anno||'-12-31&lt;/xbrli:instant>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',190,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',200,'   &lt;/xbrli:context>');
+
+-- solo nel primo anno di entrata in esercizio della contabilità economica serve anche l'instant di Apertura dello Stato Patrimoniale
+if risultato_es_prec = 0
+then
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',210,'  &lt;xbrli:context id="i_'||p_anno||'ape">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',220,'    &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',230,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',240,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',250,'    &lt;xbrli:period>');
+end if;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',260,'      &lt;xbrli:instant>'||p_anno||'-01-01&lt;/xbrli:instant>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',270,'    &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',280,'  &lt;/xbrli:context>');
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',290,'  &lt;xbrli:unit id="eur">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',300,'    &lt;xbrli:measure>iso4217:EUR&lt;/xbrli:measure>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',310,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',320,'  &lt;xbrli:unit id="pure">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',330,'    &lt;xbrli:measure>xbrli:pure&lt;/xbrli:measure>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',340,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',345,'   &lt;xbrli:context id="d_'||(p_anno-1)||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',350,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',360,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',370,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',380,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',390,'       &lt;xbrli:startDate>'||(p_anno-1)||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',400,'       &lt;xbrli:endDate>'||(p_anno-1)||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',410,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',420,'   &lt;/xbrli:context>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',430,'   &lt;xbrli:context id="i_'||(p_anno-1)||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',470,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',440,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',450,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',460,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',480,'       &lt;xbrli:instant>'||(p_anno-1)||'-12-31&lt;/xbrli:instant>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',490,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',500,'   &lt;/xbrli:context>');
+-- SDB
+
+-- setto valore riga
+c_riga := 600;
+
+
+for c in entrate loop
+
+ if c.RS is null
+ then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.CP);
+  c_riga := c_riga + 1;
+ else
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.CP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.CS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.TR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.R);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.A);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.MCS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.MCP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.TRR);
+  c_riga := c_riga + 1;
+ end if;
+
+end loop;
+commit;
+-- ************************************
+
+-- ************DATI REND_ENTRATE TITOLI ******
+
+for c in entrate_titoli loop
+
+ if c.RS is null
+ then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.CP);
+  c_riga := c_riga + 1;
+ else
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.CP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.CS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.TR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.R);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.A);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.MCS);
+  c_riga := c_riga + 1;
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.MCP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EP);
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.TRR);
+  c_riga := c_riga + 1;
+ end if;
+
+end loop;
+commit;
+-- ************************************
+
+-- ************DATI SPESE (Allegato 3) ******
+
+for c in spese loop
+
+ if c.RS is null
+ then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+  c_riga := c_riga + 1;
+ else
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.RS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.R);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.I);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.FPV);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.ECP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TR);
+  c_riga := c_riga + 1;
+ end if;
+
+end loop;
+commit;
+-- ************************************
+
+-- ************DATI SPESE Politica Regionale Unitaria (Allegato 3_1) ******
+
+if p_id_ente = '899342930540086001'
+then
+
+    for c in spese_pru loop
+
+     if c.RS is null
+     then
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+      c_riga := c_riga + 1;
+     else
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.RS);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CS);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PR);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PC);
+      c_riga := c_riga + 1;
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TP);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.R);
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.I);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.FPV);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.ECP);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EP);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EC);
+      c_riga := c_riga + 1;
+      insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TR);
+      c_riga := c_riga + 1;
+     end if;
+
+    end loop;
+    commit;
+end if;
+-- ************************************
+-- ********* DATI SPESE MISSIONI ******
+
+for c in spese_miss loop
+
+ if c.RS is null
+ then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+  c_riga := c_riga + 1;
+ else
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.RS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.R);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.I);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.FPV);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.ECP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TR);
+  c_riga := c_riga + 1;
+ end if;
+
+end loop;
+commit;
+
+-- ************************************
+
+-- ********* DATI SPESE TITOLI ******
+
+for c in spese_titoli loop
+
+ if c.RS is null
+ then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+  c_riga := c_riga + 1;
+ else
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.RS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.CS);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.PC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TP);
+  c_riga := c_riga + 1;
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.R);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.I);
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.FPV);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.ECP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.TR);
+  c_riga := c_riga + 1;
+ end if;
+
+end loop;
+commit;
+
+-- ************************************
+
+-- ******* Dati Quadro Generale Riassuntivo (Allegato 6) ********* --
+--rend_qgr(p_anno,p_utente);
+
+for c in qgr_e loop
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+end loop;
+  commit;
+
+for c in qgr_u loop
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+end loop;
+  commit;
+-- ************ FINE QGR **************
+
+-- **** Equilibri di Bilancio (Allegato 7)
+--EQUILIBRI_RENDICONTO(p_anno,p_utente,145);
+
+for c in eqreg loop
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+end loop;
+  commit;
+
+
+-- ********** FINE EQREG **************
+
+-- ************ CE + SP ***************
+--Genera_Economica.piacee_importi(p_anno,99999);
+-- ************ DATI CE ***************
+
+for c in ce loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+  if nvl(risultato_es_prec,0) &lt;> 0
+    then 
+    insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto1);
+    c_riga := c_riga + 1;
+  end if;
+
+end loop;
+  commit;
+
+-- *********** FINE CE *************
+
+-- ************ DATI SP ***************
+
+for c in sp loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+  if nvl(risultato_es_prec,0) &lt;> 0
+    then 
+    insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto1);
+    c_riga := c_riga + 1;
+    else
+     insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto2);
+    c_riga := c_riga + 1;
+  end if;
+
+end loop;
+  commit;
+
+-- *********** FINE SP *************
+
+-- **** Risulatato di amministrazione (Allegato 8) ******
+--REND_RISAMM(p_anno,p_utente);
+
+for c in risamm loop
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','M',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+end loop;
+  commit;
+
+
+-- ********** FINE RISAMM **************
+
+-- ********* DATI FPV ******
+-- FPV_RENDICONTO(p_anno,p_utente,null,fpv_rend);
+
+for c in fpv loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_a);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_b);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_x);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_y);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_c);
+  c_riga := c_riga + 1;
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_d);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_e);
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_f);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.col_g);
+  c_riga := c_riga + 1;
+
+  c_riga := c_riga + 1;
+end loop;
+
+commit;
+
+-- ********** FINE FPV ****************
+
+-- ********** DATI FCDDE *************
+--rend_fcdde (p_anno, p_utente);
+
+
+for c in FCDDE loop
+if c.TRR is null
+ then
+ insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EP);
+  c_riga := c_riga + 1;
+ else
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.EP);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.TRR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.IMF);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.FCDE);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.PercFCDE);
+  c_riga := c_riga + 1;
+end if;
+
+end loop;
+commit;
+
+-- ********** FINE FCDDE *************
+
+-- ********* DATI CATEGORIE ENTRATE ******
+
+for c in cat_ent loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.A);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.ANR);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RiscCC);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.RiscCR);
+  c_riga := c_riga + 1;
+
+end loop;
+commit;
+
+-- ************ FINE CATEGORIE ENTRATE **************
+
+-- ********* DATI MAC SPESE *****************
+for c in mac_spese loop
+  if c.imp is not null
+  then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.imp);
+  c_riga := c_riga + 1;
+  end if;
+  if c.pc is not null 
+  then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.pc);
+  c_riga := c_riga + 1;
+  end if;
+  if c.pr is not null
+  then
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.pr);
+  c_riga := c_riga + 1;
+  end if;
+
+end loop;
+commit;
+
+-- ************ FINE MAC SPESE **************
+
+-- ********* DATI MAC RIEPILOGO *****************
+for c in mac_riep loop
+
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.imp);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.impNR);
+  c_riga := c_riga + 1;
+
+
+end loop;
+commit;
+
+-- ************ FINE MAC RIEPILOGO **************
+
+-- ********* DATI ACC PLURIENNALI ******
+
+for c in accplur loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.prevcompe1);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.acc1);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.prevcompe2);
+  c_riga := c_riga + 1;
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.acc2);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','E',c_riga,c.accn);
+
+end loop;
+commit;
+
+-- ************ FINE ACC PLUR **************
+
+-- ********* DATI IMP PLURIENNALI ******
+
+for c in impplur loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.prevcompe1);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.imp1);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.prevcompe2);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.imp2);
+  c_riga := c_riga + 1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.impn);
+  c_riga := c_riga + 1;
+
+end loop;
+commit;
+
+-- ************ FINE ACC PLUR **************
+
+-- ************ DATI COSTI MISSIONI ********
+--costi_missioni(p_anno,p_utente);
+
+for c in cost_miss loop
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c1);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c2);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c3);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c4);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c5);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c6);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c7);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c8);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c9);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c10);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c11);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c12);
+c_riga := c_riga + 1;
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c13);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c14);
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c15);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c16);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c17);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c18);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c19);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c20);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c21);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c22);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c23);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c24);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c25);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c26);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c27);
+c_riga := c_riga + 1;
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','U',c_riga,c.c28);
+c_riga := c_riga + 1;
+
+end loop;
+commit;
+
+
+-- ************ FINE COSTI MISSIONI ********
+
+-- ******* Chiusura FILE XBLR ******
+ insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDSDB','T',c_riga,'&lt;/xbrli:xbrl>');
+ commit;
+-- *********************************
+
+BDAP_DCA_REND(p_anno);
+BDAP_REND_INDICATORI(p_anno,p_utente);
+ end if;
+end;</pre>	</td></tr>
+</table></div>

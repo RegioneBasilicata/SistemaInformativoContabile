@@ -1,0 +1,1608 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>REND_FCDDE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="REND_FCDDE.html">Details</a></div></div>
+<div class="tab"><div><a href="REND_FCDDE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="REND_FCDDE_References.html">References</a></div></div>
+<div class="tab"><div><a href="REND_FCDDE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="REND_FCDDE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure rend_fcdde (p_anno in number, p_utente in varchar2) as
+
+CP_desc_col_a_1 varchar2(500) := 'di cui accertati per cassa sulla base del principio contabile 3.7';
+CP_col_a_1 number := 0;
+CP_col_a_2 number := 0;
+CP_col_b_1 number := 0;
+CP_col_b_2 number := 0;
+CP_col_c_1 number := 0;
+CP_col_c_2 number := 0;
+CP_col_d   number := 0;
+CP_col_e   number := 0;
+CP_col_f   number := 0;
+CP_col_d_1 number := 0;
+CP_col_d_2 number := 0;
+CP_col_e_1 number := 0;
+CP_col_e_2 number := 0;
+
+-- dati in caso di Consolidato con il consiglio
+CP_col_a_1_c number := 0;
+CP_col_b_1_c number := 0;
+CP_col_d_c   number := 0;
+CP_col_e_c   number := 0;
+CP_col_d_1_c   number := 0;
+CP_col_e_1_c   number := 0;
+
+
+CP_g number := 0;
+CP_h number := 0;
+CP_i number := 0;
+CP_l number := 0;
+CP_m number := 0;
+CP_n number := 0;
+CP_o number := 0;
+CP_p number := 0;
+
+c_riga number := 1;
+
+
+cursor tipologia is
+SELECT e.nb_livello2 tipologia,
+       e.desc_nb_livello2 desc_tipologia,
+       NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) col_a,
+       NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_b,
+       NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) + 
+           NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_c
+FROM fin_t_consuntivo_excel e
+WHERE 
+   e.tipo_capitolo = 'E' AND
+   SUBSTR(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+   e.anno_consuntivo = P_anno AND
+   e.utente = upper(P_UTENTE) 
+GROUP BY nb_livello2,desc_nb_livello2
+ORDER BY tipologia;
+
+begin
+
+ delete fin_t_rendiconto_fcdde where anno = p_anno and utente = p_utente;
+  commit;
+
+-- **** Inserimento TIPOLOGIE *****
+for t in tipologia loop
+
+
+ IF t.tipologia = '1010100'
+  THEN
+   BEGIN
+   SELECT 'TIPOL101COL_A_DICUIPERCASSA' descrizione_campo_report,
+        sum(NVL(residui_competenza,0))
+   INTO CP_desc_col_a_1,
+        CP_col_a_2
+   FROM fin_t_consuntivo_excel
+   WHERE anno_consuntivo = p_anno AND
+        utente = p_utente AND
+        tipo_capitolo = 'E' AND
+        capitolo = '01000' AND -- richiesta Sarli 24/07/2019
+        nb_livello2 = t.tipologia
+        group by 'TIPOL101COL_A_DICUIPERCASSA';     
+   EXCEPTION WHEN OTHERS THEN NULL;
+   END;
+
+  BEGIN
+  SELECT sum(NVL(rimanenze_residui,0))
+  INTO CP_col_b_2
+   FROM fin_t_consuntivo_excel
+   WHERE anno_consuntivo = p_anno AND
+        utente = p_utente AND
+        tipo_capitolo = 'E' AND
+        capitolo = '01000' AND -- richiesta Sarli 24/07/2019
+        nb_livello2 = t.tipologia;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_D';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_E';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  
+  if p_utente = 'CONSOLIDATO'
+   then 
+    BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_D';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_E';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  end if;
+
+  CP_col_a_1 := t.col_a - CP_col_a_2;
+  CP_col_b_1 := t.col_b - CP_col_b_2;
+  CP_col_c_1 := CP_col_a_1 + CP_col_b_1;
+  CP_col_c_2 := CP_col_a_2 + CP_col_b_2;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_D_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_E_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+if p_utente = 'CONSOLIDATO'
+   then 
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_D_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL101COL_E_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  end if;
+
+  CP_col_d_2 := (CP_col_d + CP_col_d_c) - (CP_col_d_1 + CP_col_d_1_c);
+  CP_col_e_2 := (CP_col_e + CP_col_e_c) - (CP_col_e_1 + CP_col_e_1_c);
+  
+  
+
+  IF CP_col_c_2 != 0
+  	THEN
+  	 CP_col_f := (CP_col_e_2  / CP_col_c_2)*100;
+  END IF;  
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_a
+           ,t.col_b
+           ,t.col_c
+           ,CP_col_d
+           ,CP_col_e
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+        c_riga := c_riga + 1;
+        
+          insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D1' -- inserisco i di cui
+           ,t.tipologia
+           ,'di cui accertati per cassa sulla base del principio contabile 3.7'
+           ,CP_col_a_1
+           ,CP_col_b_1
+           ,CP_col_c_1
+           ,CP_col_d_1
+           ,CP_col_e_1
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-AccCassa_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D2' -- inserisco i di cui
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia||' non accertati per cassa'
+           ,CP_col_a_2
+           ,CP_col_b_2
+           ,CP_col_c_2
+           ,CP_col_d_2
+           ,CP_col_e_2
+           ,CP_col_f
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-NonAccCassa_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         CP_col_d := 0;
+         CP_col_e := 0;
+         CP_col_c_1 := 0;
+         CP_col_f := 0;
+         CP_col_a_1 := 0;
+         CP_col_b_1 := 0;
+         CP_col_d_1 := 0;
+         CP_col_e_1 := 0;
+         CP_col_a_2 := 0;
+         CP_col_b_2 := 0;
+         CP_col_c_2 := 0;
+         CP_col_d_2 := 0;
+         CP_col_e_2 := 0;
+         CP_col_f := 0;
+         CP_col_a_1_c := 0;
+         CP_col_b_1_c := 0;
+         CP_col_d_c   := 0;
+         CP_col_e_c   := 0;
+         CP_col_d_1_c := 0;
+         CP_col_e_1_c := 0;
+
+
+ELSIF t.tipologia = '2010500'
+THEN
+ 
+   SELECT e.desc_nb_livello3,
+        NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) col_a,
+       NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_b
+    --   ,NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) + NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_c
+   INTO CP_desc_col_a_1,
+        CP_col_a_1,
+        CP_col_b_1
+   FROM fin_t_consuntivo_excel e
+   WHERE 
+    e.tipo_capitolo = 'E' AND
+    SUBSTR(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+    e.nb_livello2 = t.tipologia AND
+    e.nb_livello3 = '2010501' AND
+    e.anno_consuntivo = P_anno AND
+    e.utente = upper(P_UTENTE)
+    group by e.desc_nb_livello3;
+
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_D_UE';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_E_UE';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  
+  if p_utente = 'CONSOLIDATO'
+   then 
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_D_UE';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_E_UE';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  end if;
+  
+  CP_col_a_2 := t.col_a - CP_col_a_1;
+  CP_col_b_2 := t.col_b - CP_col_b_1;
+  CP_col_c_1 := CP_col_a_1 + CP_col_b_1;
+  CP_col_c_2 := CP_col_a_2 + CP_col_b_2;
+
+    
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_D_MONDO';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_E_MONDO';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+ if p_utente = 'CONSOLIDATO'
+   then 
+     BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = P_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_D_MONDO';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL105COL_E_MONDO';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  end if;
+
+  CP_col_d_2 := (CP_col_d + CP_col_d_c) - (CP_col_d_1 + CP_col_d_1_c);
+  CP_col_e_2 := (CP_col_e + CP_col_e_c) - (CP_col_e_1 + CP_col_e_1_c);
+
+  IF CP_col_c_2 != 0
+  	THEN
+  	 CP_col_f := (CP_col_e_2  / CP_col_c_2)*100;
+  END IF;  
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,t.col_a
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_b
+           ,t.col_c
+           ,CP_col_d
+           ,CP_col_e
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+        c_riga := c_riga + 1;
+        
+          insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D1' -- inserisco i di cui
+           ,t.tipologia
+           ,'Trasferimenti correnti dall''Unione Europea'
+           ,CP_col_a_1
+           ,CP_col_b_1
+           ,CP_col_c_1
+           ,CP_col_d_1
+           ,CP_col_e_1
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-UE_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D2' -- inserisco i di cui
+           ,t.tipologia
+           ,'Trasferimenti correnti dal Resto del Mondo'
+           ,CP_col_a_2
+           ,CP_col_b_2
+           ,CP_col_c_2
+           ,CP_col_d_2
+           ,CP_col_e_2
+           ,CP_col_f
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-Mondo_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         CP_col_d := 0;
+         CP_col_e := 0;
+         CP_col_f := 0;
+         CP_col_a_1 := 0;
+         CP_col_b_1 := 0;
+         CP_col_c_1 := 0;
+         CP_col_d_1 := 0;
+         CP_col_e_1 := 0;
+         CP_col_a_2 := 0;
+         CP_col_b_2 := 0;
+         CP_col_c_2 := 0;
+         CP_col_d_2 := 0;
+         CP_col_e_2 := 0;
+         CP_col_f := 0;
+         CP_col_a_1_c := 0;
+         CP_col_b_1_c := 0;
+         CP_col_d_c   := 0;
+         CP_col_e_c   := 0;
+         CP_col_d_1_c := 0;
+         CP_col_e_1_c := 0;
+
+ELSIF t.tipologia = '3010000'
+ THEN
+  BEGIN
+  SELECT descrizione_campo_report,
+         NVL(importo,0)
+  INTO CP_desc_col_a_1,
+       CP_col_a_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_A_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_b_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_B_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_D';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_E';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  
+  if p_utente = 'CONSOLIDATO'
+  then
+  BEGIN
+  SELECT NVL(importo,0)
+  INTO CP_col_a_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_A_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_b_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+  END;
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_B_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_D';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_E';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+ end if;
+ 
+  CP_col_a_2 := t.col_a - (nvl(CP_col_a_1,0) + nvl(CP_col_a_1_c,0));
+  CP_col_b_2 := t.col_b - (nvl(CP_col_b_1,0) + nvl(CP_col_b_1_c,0));
+  CP_col_c_1 := (nvl(CP_col_a_1,0) + nvl(CP_col_a_1_c,0)) + (nvl(CP_col_b_1,0) + nvl(CP_col_b_1_c,0));
+  CP_col_c_2 := CP_col_a_2 + CP_col_b_2;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_D_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_1
+  FROM fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_E_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  
+  if p_utente = 'CONSOLIDATO'
+  then
+ BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_d_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_D_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+
+  BEGIN
+  SELECT nvl(sum(NVL(importo,0)),0)
+  INTO CP_col_e_1_c
+  FROM sic_consiglio.fnd_reports_importi_man
+  WHERE valore_parametro_anno = p_anno AND
+        id_report = 156 AND
+        nome_campo_report = 'TIPOL301COL_E_DICUIPERCASSA';
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  end if;
+  
+
+  CP_col_d_2 := (nvl(CP_col_d,0) + nvl(CP_col_d_c,0)) - (nvl(CP_col_d_1,0) + nvl(CP_col_d_1_c,0));
+  CP_col_e_2 := (nvl(CP_col_e,0) + nvl(CP_col_e_c,0)) - (nvl(CP_col_e_1,0) + nvl(CP_col_e_1_c,0));
+
+  IF CP_col_c_2 != 0
+  	THEN
+  	 CP_col_f := round((CP_col_e / t.col_c)*100,2); -- non presente la riga "di cui per cassa"
+  END IF;  
+  -- f.coretti 20/06/2016 
+  insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_a
+           ,t.col_b
+           ,t.col_c
+           ,CP_col_d
+           ,CP_col_e
+           ,CP_col_f
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+        c_riga := c_riga + 1;
+        
+        CP_col_d := 0;
+         CP_col_e := 0;
+         CP_col_f := 0;
+         CP_col_a_1 := 0;
+         CP_col_b_1 := 0;
+         CP_col_c_1 := 0;
+         CP_col_d_1 := 0;
+         CP_col_e_1 := 0;
+         CP_col_a_2 := 0;
+         CP_col_b_2 := 0;
+         CP_col_c_2 := 0;
+         CP_col_d_2 := 0;
+         CP_col_e_2 := 0;
+         CP_col_f := 0;
+         
+ ELSIF t.tipologia = '4020000'
+ THEN
+ --- riga con il totale della tipologia
+   insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,t.col_c
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_a
+           ,t.col_b
+           ,CP_col_d
+           ,CP_col_e
+           ,decode(t.col_c,0,0,CP_col_e/t.col_c)
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+          
+         CP_col_a_1_c := 0;
+         CP_col_b_1_c := 0;
+         CP_col_d_c   := 0;
+         CP_col_e_c   := 0;
+         CP_col_d_1_c := 0;
+         CP_col_e_1_c := 0;
+ -- loop con i valori delle categorie
+ 
+ 
+  SELECT  NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) col_a,
+               NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_b,
+               NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) + 
+                   NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_c
+                   into CP_col_a_1,CP_col_b_1,CP_col_c_1
+                    FROM fin_t_consuntivo_excel e
+                    WHERE 
+                       e.tipo_capitolo = 'E' AND
+                       SUBSTR(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+                       e.nb_livello2 = t.tipologia AND
+                       e.nb_livello3 = '4020100' AND
+                       e.anno_consuntivo = P_anno AND
+                       e.utente = upper(P_UTENTE);
+
+
+
+        c_riga := c_riga + 1;
+        
+          insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D1' -- inserisco i di cui
+           ,t.tipologia
+           ,'Contributi agli investimenti da amministrazioni pubbliche'
+           ,CP_col_a_1
+           ,CP_col_b_1
+           ,CP_col_c_1
+           ,CP_col_d_1
+           ,CP_col_e_1
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-PA_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+         
+         
+         SELECT  NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) col_a,
+               NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_b,
+               NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) + 
+                   NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_c
+                   into CP_col_a_2,CP_col_b_2,CP_col_c_2
+                    FROM fin_t_consuntivo_excel e
+                    WHERE 
+                       e.tipo_capitolo = 'E' AND
+                       SUBSTR(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+                       e.nb_livello2 = t.tipologia AND
+                       e.nb_livello3 = '4020500' AND
+                       e.anno_consuntivo = P_anno AND
+                       e.utente = upper(P_UTENTE);
+        
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D2' -- inserisco i di cui
+           ,t.tipologia
+           ,'Contributi agli investimenti da UE'
+           ,CP_col_a_2
+           ,CP_col_b_2
+           ,CP_col_c_2
+           ,CP_col_d_2
+           ,CP_col_e_2
+           ,CP_col_f
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-UE_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+         
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D3' -- inserisco i di cui
+           ,(t.col_b -   CP_col_b_1 - CP_col_b_2)
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||': Contributi agli investimenti al netto dei contributi da PA e da UE'
+           ,(t.col_a   - CP_col_a_1 - CP_col_a_2)
+           ,(t.col_c -   CP_col_c_1 - CP_col_c_2)
+           ,(CP_col_d -  CP_col_d_1 - CP_col_d_2)
+           ,(CP_col_e -  CP_col_e_1 - CP_col_e_2)
+           ,decode((t.col_c -   CP_col_c_1 - CP_col_c_2),0,0,(CP_col_e -  CP_col_e_1 - CP_col_e_2)/(t.col_c -   CP_col_c_1 - CP_col_c_2))
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-NonPAUE_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         CP_col_d := 0;
+         CP_col_e := 0;
+         CP_col_f := 0;
+         CP_col_a_1 := 0;
+         CP_col_b_1 := 0;
+         CP_col_c_1 := 0;
+         CP_col_d_1 := 0;
+         CP_col_e_1 := 0;
+         CP_col_a_2 := 0;
+         CP_col_b_2 := 0;
+         CP_col_c_2 := 0;
+         CP_col_d_2 := 0;
+         CP_col_e_2 := 0;
+         CP_col_f := 0;
+ 
+ ELSIF t.tipologia = '4030000'
+ THEN
+  -- attualmente questi valori non sono presenti ma i D2 vanno inseriti
+  CP_col_a_2 := t.col_a - CP_col_a_1;
+  CP_col_b_2 := t.col_b - CP_col_b_1;
+  CP_col_c_1 := CP_col_a_1 + CP_col_b_1;
+  CP_col_c_2 := CP_col_a_2 + CP_col_b_2;
+  
+   insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_a
+           ,t.col_b
+           ,t.col_c
+           ,CP_col_d
+           ,CP_col_e
+           ,decode(t.col_c,0,0,CP_col_e/t.col_c)
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+        c_riga := c_riga + 1;
+        
+        SELECT  NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) col_a,
+               NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_b,
+               NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) + 
+                   NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_c
+                   into CP_col_a_1,CP_col_b_1,CP_col_c_1
+                    FROM fin_t_consuntivo_excel e
+                    WHERE 
+                       e.tipo_capitolo = 'E' AND
+                       SUBSTR(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+                       e.nb_livello2 = t.tipologia AND
+                       e.nb_livello3 = '4031000' AND
+                       e.anno_consuntivo = P_anno AND
+                       e.utente = upper(P_UTENTE);
+        
+          insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D1' -- inserisco i di cui
+           ,t.tipologia
+           ,'Contributi agli investimenti da amministrazioni pubbliche'
+           ,CP_col_a_1
+           ,CP_col_b_1
+           ,CP_col_c_1
+           ,CP_col_d_1
+           ,CP_col_e_1
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-PA_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+         
+         SELECT  NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) col_a,
+               NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_b,
+               NVL(SUM(NVL(e.accertamenti_impegni_compe,0)-NVL(e.riscossioni_pagamenti_compe,0)),0) + 
+                   NVL(SUM(NVL(e.rimanenze_residui,0)),0) col_c
+                   into CP_col_a_2,CP_col_b_2,CP_col_c_2
+                    FROM fin_t_consuntivo_excel e
+                    WHERE 
+                       e.tipo_capitolo = 'E' AND
+                       SUBSTR(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+                       e.nb_livello2 = t.tipologia AND
+        
+                       e.nb_livello3 = '4031400' AND
+                       e.anno_consuntivo = P_anno AND
+                       e.utente = upper(P_UTENTE);
+        
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D2' -- inserisco i di cui
+           ,t.tipologia
+           ,'Altri trasferimenti in conto capitale da UE'
+           ,CP_col_a_2
+           ,CP_col_b_2
+           ,CP_col_c_2
+           ,CP_col_d_2
+           ,CP_col_e_2
+           ,CP_col_f
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-UE_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+         
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D3' -- inserisco i di cui
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||': Altri trasferimenti in conto capitale al netto dei trasferimenti da PA e da UE'
+           ,(t.col_a   - CP_col_a_1 - CP_col_a_2)
+           ,(t.col_b -   CP_col_b_1 - CP_col_b_2)
+           ,(t.col_c -   CP_col_c_1 - CP_col_c_2)
+           ,(CP_col_d -  CP_col_d_1 - CP_col_d_2)
+           ,(CP_col_e -  CP_col_e_1 - CP_col_e_2)
+           ,decode((t.col_c -   CP_col_c_1 - CP_col_c_2),0,0,(CP_col_e -  CP_col_e_1 - CP_col_e_2)/(t.col_c -   CP_col_c_1 - CP_col_c_2))
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-NonPAUE_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         CP_col_d := 0;
+         CP_col_e := 0;
+         CP_col_f := 0;
+         CP_col_a_1 := 0;
+         CP_col_b_1 := 0;
+         CP_col_c_1 := 0;
+         CP_col_d_1 := 0;
+         CP_col_e_1 := 0;
+         CP_col_a_2 := 0;
+         CP_col_b_2 := 0;
+         CP_col_c_2 := 0;
+         CP_col_d_2 := 0;
+         CP_col_e_2 := 0;
+         CP_col_f := 0;
+         
+ ELSIF (t.tipologia = '1010200' OR t.tipologia = '1010300')
+  then
+ 
+  CP_col_a_2 := t.col_a - CP_col_a_1;
+  CP_col_b_2 := t.col_b - CP_col_b_1;
+  CP_col_c_1 := CP_col_a_1 + CP_col_b_1;
+  CP_col_c_2 := CP_col_a_2 + CP_col_b_2;
+  CP_col_d_2 := CP_col_d - CP_col_d_1;
+  CP_col_e_2 := CP_col_e - CP_col_e_1;
+
+ insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_a
+           ,t.col_b
+           ,t.col_c
+           ,CP_col_d
+           ,CP_col_e
+           ,decode(t.col_c,0,0,CP_col_e/t.col_c)
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+        c_riga := c_riga + 1;
+        
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,'D1' -- inserisco i di cui
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,t.tipologia
+           ,'di cui accertati per cassa sulla base del principio contabile 3.7'
+           ,CP_col_a_1
+           ,CP_col_b_1
+           ,CP_col_c_1
+           ,CP_col_d_1
+           ,CP_col_e_1
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-AccCassa_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'D2' -- inserisco i di cui
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia||' non accertati per cassa'
+           ,CP_col_a_2
+           ,CP_col_b_2
+           ,CP_col_c_2
+           ,CP_col_d_2
+           ,CP_col_e_2
+           ,CP_col_f
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000-NonAccCassa_'
+          );
+          commit;
+         c_riga := c_riga + 1;
+        
+         CP_col_d := 0;
+         CP_col_e := 0;
+         CP_col_f := 0;
+         CP_col_a_1 := 0;
+         CP_col_b_1 := 0;
+         CP_col_c_1 := 0;
+         CP_col_d_1 := 0;
+         CP_col_e_1 := 0;
+         CP_col_a_2 := 0;
+         CP_col_b_2 := 0;
+         CP_col_c_2 := 0;
+         CP_col_d_2 := 0;
+         CP_col_e_2 := 0;
+         CP_col_f := 0;
+  ELSE
+  insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,IMPORTO_F
+          ,TAG_BDAP
+          )
+          values
+          (sysdate
+           ,p_utente
+           ,c_riga
+           ,p_anno
+           ,'P' -- inserisco le tipologie
+           ,t.tipologia
+           ,'Tipologia '||substr(t.tipologia,3,3)||' - '||t.desc_tipologia
+           ,t.col_a
+           ,t.col_b
+           ,t.col_c
+           ,CP_col_d
+           ,CP_col_e
+           ,decode(t.col_c,0,0,CP_col_e/t.col_c)
+           ,'FCDDE_E.'||substr(t.tipologia,1,1)||'.'||substr(t.tipologia,2,2)||'.'||substr(t.tipologia,4,2)||'.00.000_'
+          );
+          commit;
+        c_riga := c_riga + 1;
+
+END IF;
+
+
+ end loop;
+ 
+-- inserisco i totali Titoli
+insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,CODICE
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+(select sysdate
+,p_utente
+,(c_riga + substr(codice,1,1))
+,p_anno
+,'T'
+,substr(codice,1,1)
+,'Titolo '||substr(codice,1,1)
+,sum(NVL(importo_a,0))--EC
+,sum(NVL(importo_b,0))--EP
+,sum(NVL(importo_c,0))--TRR
+,sum(NVL(importo_d,0))--IMF
+,sum(NVL(importo_e,0))--FCDE
+,'FCDDE_E.'||substr(codice,1,1)||'.00.00.00.000_'--TAG_BDAP
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+commit;
+and utente = p_utente
+and tipo = 'P'
+group by substr(codice,1,1));
+
+c_riga := c_riga  + 10;-- i titoli Entrate solitamente sono 7 per sicurezza sommiamo 10
+-- ***************
+
+-- inserisco Totale Generale e Totale FCDE c/capitale e c/corrente
+insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+(select sysdate
+,p_utente
+,c_riga
+,p_anno
+,'TG'
+,'TOTALE GENERALE'
+,sum(NVL(importo_a,0))--EC
+,sum(NVL(importo_b,0))--EP
+,sum(NVL(importo_c,0))--TRR
+,sum(NVL(importo_d,0))--IMF
+,sum(NVL(importo_e,0))--FCDE
+,'FCDDE_TotaleGeneraleFCDDE_'--TAG_BDAP
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and tipo = 'T'
+);
+commit;
+c_riga := c_riga + 1;
+
+insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+(select sysdate
+,p_utente
+,c_riga
+,p_anno
+,'TP'
+,'DI CUI FONDO CREDITI DI DUBBIA ESIGIBILITA'' IN C/CAPITALE'
+,sum(NVL(importo_a,0))--EC
+,sum(NVL(importo_b,0))--EP
+,sum(NVL(importo_c,0))--TRR
+,sum(NVL(importo_d,0))--IMF
+,sum(NVL(importo_e,0))--FCDE
+,'FCDDE_TotaleGeneraleFCDDE-cap_'--TAG_BDAP
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and tipo = 'T'
+and codice = 4
+);
+commit;
+c_riga := c_riga + 1;
+
+insert into fin_t_rendiconto_fcdde 
+          (DATA_GENERAZIONE
+          ,UTENTE
+          ,RIGA
+          ,ANNO
+          ,TIPO
+          ,DESCRIZIONE
+          ,IMPORTO_A
+          ,IMPORTO_B
+          ,IMPORTO_C
+          ,IMPORTO_D
+          ,IMPORTO_E
+          ,TAG_BDAP
+          )
+(select sysdate
+,p_utente
+,c_riga
+,p_anno
+,'TC'
+,'DI CUI FONDO CREDITI DI DUBBIA ESIGIBILITA'' DI PARTE CORRENTE'
+,sum(NVL(importo_a,0))--EC
+,sum(NVL(importo_b,0))--EP
+,sum(NVL(importo_c,0))--TRR
+,sum(NVL(importo_d,0))--IMF
+,sum(NVL(importo_e,0))--FCDE
+,'FCDDE_TotaleGeneraleFCDDE-corr_'--TAG_BDAP
+from fin_t_rendiconto_fcdde
+where anno = p_anno
+and utente = p_utente
+and tipo = 'T'
+and codice &lt;> 4
+);
+commit;
+c_riga := c_riga + 1;
+-- *******************
+
+-- SPECCHIETTO FINALE
+
+  SELECT NVL(SUM(NVL(e.residui_finali,0)),0) into  CP_g
+  FROM fin_t_consuntivo_excel e
+  WHERE 
+      e.tipo_capitolo = 'E' AND
+      e.anno_consuntivo = p_anno AND
+      substr(e.nb_livello1,1,1) in ('1','2','3','4','5') AND
+      e.utente = upper(P_UTENTE);
+
+  select nvl(sum(nvl(importo_e,0)),0) into CP_h 
+  from fin_t_rendiconto_fcdde
+  where anno = p_anno
+  and utente = p_utente
+  and nvl(tipo,'X') = 'P';
+
+  CP_o := CP_g + CP_i + CP_m;
+  CP_p := CP_h + CP_l + CP_n;
+
+  insert into fin_t_rendiconto_fcdde 
+  (DATA_GENERAZIONE
+  ,UTENTE
+  ,RIGA
+  ,ANNO
+  ,TIPO
+  ,CODICE
+  ,DESCRIZIONE
+  ,IMPORTO_G
+  ,IMPORTO_H
+  ,TAG_BDAP
+  )
+  values
+  (sysdate
+   ,p_utente
+   ,c_riga
+   ,p_anno
+   ,'Q1' -- inserisco i di cui
+   ,null
+   ,'RESIDUI ATTIVI NEL CONTO DEL BILANCIO'
+   ,CP_g
+   ,CP_h
+   ,'FCDDE_ResiduiAttiviContoBilancio_'
+  );
+  commit;
+ c_riga := c_riga + 1;
+
+ insert into fin_t_rendiconto_fcdde 
+  (DATA_GENERAZIONE
+  ,UTENTE
+  ,RIGA
+  ,ANNO
+  ,TIPO
+  ,CODICE
+  ,DESCRIZIONE
+  ,IMPORTO_G
+  ,IMPORTO_H
+  ,TAG_BDAP
+  )
+  values
+  (sysdate
+   ,p_utente
+   ,c_riga
+   ,p_anno
+   ,'Q2' -- inserisco i di cui
+   ,null
+   ,'CREDITI STRALCIATI DAL CONTO DEL BILANCIO'
+   ,CP_i
+   ,CP_l
+   ,'FCDDE_CreditiStralciatiContoBilancio_'
+  );
+  commit;
+ c_riga := c_riga + 1;
+
+  insert into fin_t_rendiconto_fcdde 
+  (DATA_GENERAZIONE
+  ,UTENTE
+  ,RIGA
+  ,ANNO
+  ,IMPORTO_G
+  ,TIPO
+  ,CODICE
+  ,DESCRIZIONE
+  ,IMPORTO_H
+  ,TAG_BDAP
+  )
+  values
+  (sysdate
+   ,p_utente
+   ,c_riga
+   ,p_anno
+   ,'Q3' -- inserisco i di cui
+   ,null
+   ,'ACCERTAMENTI IMPUTATI AGLI ESERCIZI SUCCESSIVI A QUELLO CUI IL RENDICONTO SI RIFERISCE (m)'
+   ,CP_m
+   ,CP_n
+   ,'FCDDE_AccertamentiEserciziSucc_'
+  );
+  commit;
+ c_riga := c_riga + 1;
+
+  insert into fin_t_rendiconto_fcdde 
+  (DATA_GENERAZIONE
+  ,UTENTE
+  ,RIGA
+  ,ANNO
+  ,TIPO
+  ,CODICE
+  ,DESCRIZIONE
+  ,IMPORTO_G
+  ,IMPORTO_H
+  ,TAG_BDAP
+  )
+  values
+  (sysdate
+   ,p_utente
+   ,c_riga
+   ,p_anno
+   ,'Q4' -- inserisco i di cui
+   ,null
+   ,'TOTALE'
+   ,CP_o
+   ,CP_p
+   ,'FCDDE_Totale'
+  );
+  commit;
+
+-- UPDATE per inserire % dei TOTALI
+
+update fin_t_rendiconto_fcdde set importo_f = (importo_e/importo_c) * 100
+where tipo in ('TG','TP','TC')
+and nvl(importo_c,0) > 0;
+commit;
+
+
+ end;</pre>	</td></tr>
+</table></div>

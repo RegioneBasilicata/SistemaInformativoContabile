@@ -1,0 +1,176 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_V_ALLEGATO10P</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_V_ALLEGATO10P.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_V_ALLEGATO10P_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_V_ALLEGATO10P_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_V_ALLEGATO10P_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_V_ALLEGATO10P_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_V_ALLEGATO10P</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>3144</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select  b.ANNO ANNO_FIN, 
+ b.EU,
+ b.capitolo_uscita articolo,
+ a.CODICE_NUM ORD_ARTICOLO,
+ a.DESCRIZIONE||decode(ff.descrizione,null,null,' - '||ff.descrizione)||decode(ns.descrizione,null,null,' - '||ns.descrizione) DESC_ARTICOLO,
+ a.CAPITOLO, 
+ ca.DESCRIZIONE DESC_CAPITOLO,
+ ca.CODICE_NUM ORD_CAPITOLO,
+ 'A. DERIVANTI DA LEGGI NAZIONALI E PROGRAMMI COMUNITARI' DESC_ALLEGATO4_1,
+ b.QUOTA_AVANZO AVANZI
+from  FINA_AVANZI_SIC01017 b,
+  FINA_ARTICOLI a,
+  FINA_CAPITOLI ca,
+  FINA_FONTE_FINANZIAMENTO ff,
+  FINA_NATURA_SPESA ns
+where
+ nvl(b.quota_avanzo,0) &lt;> 0 and 
+ b.tipo = 'A' and
+ b.eu     = 'U' and
+ b.anno        = a.anno and
+ b.eu     = a.eu and
+ b.capitolo_uscita  = a.codice and
+                nvl(a.flag_perenti,'N') &lt;> 'S' and 
+ nvl(a.abilitato,'S') = 'S' and
+ a.fonte_finanziamento = ff.codice(+) and
+ a.natura_spesa = ns.codice(+) and
+ ca.anno   = a.anno and
+ ca.eu  = a.eu and
+ ca.titolo    = a.titolo  and
+ ca.categoria = a.categoria and
+ ca.codice   = a.capitolo 
+union
+select   b.ANNO      ANNO_FIN_2, 
+  b.EU      EU_2,
+  b.CAPITOLO_USCITA    ARTICOLO_2,
+  a.CODICE_NUM     ORD_ARTICOLO_2,
+ a.DESCRIZIONE||decode(ff.descrizione,null,null,' - '||ff.descrizione)||decode(ns.descrizione,null,null,' - '||ns.descrizione) DESC_ARTICOLO_2,
+  a.CAPITOLO     CAPITOLO_2, 
+  ca.DESCRIZIONE     DESC_CAPITOLO_2,
+  ca.CODICE_NUM     ORD_CAPITOLO_2,
+  'B. DERIVANTI DA LEGGI O PROGRAMMI REGIONALI'  DESC_ALLEGATO4_2,
+  b.QUOTA_AVANZO    AVANZI2
+from   FINA_AVANZI_SIC01017 b,
+  FINA_ARTICOLI a,
+  FINA_CAPITOLI ca,
+  FINA_FONTE_FINANZIAMENTO ff,
+  FINA_NATURA_SPESA ns
+where nvl(b.quota_avanzo,0)  &lt;> 0 and 
+     b.tipo    = 'B' and
+ b.eu       = 'U' and
+ b.anno          = a.anno and
+ b.eu       = a.eu and
+ b.capitolo_uscita    = a.codice and
+                nvl(a.flag_perenti,'N')  &lt;> 'S' and
+ a.fonte_finanziamento  = ff.codice(+) and
+ a.natura_spesa   = ns.codice(+) and
+ nvl(a.abilitato,'S') = 'S' and
+ ca.anno     = a.anno and
+ ca.eu    = a.eu and
+ ca.titolo      = a.titolo  and
+ ca.categoria   = a.categoria and
+ ca.codice     = a.capitolo 
+union
+select   b.ANNO      ANNO_FIN_3, 
+  b.EU       EU_3,
+  b.CAPITOLO_USCITA     ARTICOLO_3,
+  a.CODICE_NUM      ORD_ARTICOLO_3,
+ a.DESCRIZIONE||decode(ff.descrizione,null,null,' - '||ff.descrizione)||decode(ns.descrizione,null,null,' - '||ns.descrizione) DESC_ARTICOLO_3,
+  a.CAPITOLO      CAPITOLO_3, 
+  ca.DESCRIZIONE     DESC_CAPITOLO_3,
+  ca.CODICE_NUM     ORD_CAPITOLO_3,
+  'C. DERIVANTI DA RESIDUI PASSIVI'  DESC_ALLEGATO4_3,
+  b.QUOTA_AVANZO     AVANZI3
+from   FINA_AVANZI_SIC01017 b,
+  FINA_ARTICOLI a,
+  FINA_CAPITOLI ca,
+  FINA_FONTE_FINANZIAMENTO ff,
+  FINA_NATURA_SPESA ns
+where 
+ nvl(b.quota_avanzo,0)  &lt;> 0 and 
+ b.eu       = 'U' and
+ b.anno          = a.anno and
+ b.eu       = a.eu and
+ b.capitolo_uscita    = a.codice and
+ ( b.tipo    = 'C'  or
+                  nvl(a.flag_perenti,'N')  = 'S' ) and
+ a.fonte_finanziamento  = ff.codice(+) and
+ a.natura_spesa   = ns.codice(+) and
+ nvl(a.abilitato,'S') = 'S' and
+ ca.anno     = a.anno and
+ ca.eu    = a.eu and
+ ca.titolo      = a.titolo  and
+ ca.categoria   = a.categoria and
+ ca.codice     = a.capitolo 
+order by 9,3</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

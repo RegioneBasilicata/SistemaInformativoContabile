@@ -1,0 +1,38 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CODICE_FISCALE_PKG</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CODICE_FISCALE_PKG.html">Details</a></div></div>
+<div class="tab"><div><a href="CODICE_FISCALE_PKG_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CODICE_FISCALE_PKG_References.html">References</a></div></div>
+<div class="tab"><div><a href="CODICE_FISCALE_PKG_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CODICE_FISCALE_PKG_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PACKAGE CODICE_FISCALE_pkg AS
+
+      FUNCTION cognome(v_str varchar2) RETURN varchar2;
+      FUNCTION nome(v_str varchar2) RETURN varchar2;
+      FUNCTION data_nascita(v_data varchar2, v_sesso varchar2) RETURN varchar2;
+      FUNCTION comune_di_nacita(v_comune varchar2, v_provincia varchar2 ) RETURN varchar2;
+      FUNCTION codice_controllo(v_str varchar2) RETURN varchar2;
+      FUNCTION calcola( v_nome varchar2,  
+                        v_cognome varchar2,  
+                        v_data_di_nascita varchar2,
+                        v_sesso varchar2,
+                        v_comune_di_nascita varchar2,
+                        v_provincia_di_nascita varchar2) RETURN varchar2;
+     FUNCTION trova_doppioni(str varchar2, car varchar2) RETURN BOOLEAN;
+                    
+  END CODICE_FISCALE_pkg;</pre>	</td></tr>
+</table></div>

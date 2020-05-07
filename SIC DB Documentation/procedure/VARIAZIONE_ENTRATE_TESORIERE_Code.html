@@ -1,0 +1,1107 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VARIAZIONE_ENTRATE_TESORIERE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_TESORIERE.html">Details</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_TESORIERE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_TESORIERE_References.html">References</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_ENTRATE_TESORIERE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="VARIAZIONE_ENTRATE_TESORIERE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure  variazione_entrate_tesoriere
+(p_anno in number
+,p_anno_stampa in number
+,p_da_data_movimento in date
+,p_a_data_movimento in date
+,p_residuo in varchar2
+,p_utente in varchar2
+,p_id in number
+,p_fpv in varchar2) AS
+
+
+cassa_prec number;
+cassa_pos number;
+cassa_neg number;
+cassa_def number;
+
+
+compe_prec number;
+compe_pos number;
+compe_neg number;
+compe_def number;
+
+cp_res_prec number;
+cp_res_pos number;
+cp_res_neg number;
+cp_res_def number;
+
+p_ord number;
+max_riga number;--numero massimo riga
+min_riga number;--numero minimo riga
+max_riga_fin number; --numero max riga per else
+conta_titoli number;
+
+avanzo_previsione number;
+variazione_avanzo_piu number;
+variazione_avanzo_meno number;
+avanzo_finale number;
+fpv_cor_iniziale number;
+fpv_cap_iniziale number;
+fpv_cor_variazione_piu number;
+fpv_cor_variazione_meno number;
+fpv_cap_variazione_piu number;
+fpv_cap_variazione_meno number;
+fpv_cor_finale number;
+fpv_cap_finale number;
+cassa_iniziale number;
+
+
+cursor capitoli is 
+select 
+ a.eu||a.codice capitolo_bil
+,decode(nvl(a.modificato_nuovo,'Z'),'M','(Modificato) ','N','(Nuovo) ',null)||a.descrizione desc_capitolo
+,nvl(l1.codice,'0') titolo
+,nvl(l2.codice,0) tipologia
+,nvl(l3.codice,0) categoria
+,l1.descrizione desc_titolo
+,l2.descrizione desc_tipologia
+,l3.descrizione desc_categoria
+,a.codice_precedente cap_precs1
+,a.codice_precedente2 cap_precs2
+,a.codice_precedente3 cap_precs3
+,a.codice_precedente4 cap_precs4
+,a.codice_precedente5 cap_precs5
+,nvl(a.modificato_nuovo,'Z') modificato_nuovo
+,a.nb_piano_conti_fina pcf
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+nb_livello3 l3
+where a.anno=p_anno_stampa 
+and a.abilitato = 'S'
+and a.eu = 'E' 
+and l3.id(+) = a.nb_id_padre 
+and l2.id(+) = l3.id_livello2
+and l1.id(+) = l2.id_livello1
+order by 3,4,5;
+
+cursor tot_tipologia is 
+select
+	utente
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR07
+    ,CAR08
+    ,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+	,nvl(sum(nvl(num01,0)),0) tot_tip_iniz
+	,nvl(sum(nvl(num02,0)),0) tot_var_tip_piu
+	,nvl(sum(nvl(num03,0)),0) tot_var_tip_meno
+	,nvl(sum(nvl(num04,0)),0) tot_tip_fin
+	from tmp_tabulati2
+	where car01='VARIAZIONE ENTRATE TESORIERE'
+	and nvl(car12,'N')&lt;>'N'
+   	group by
+    utente
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    order by car02, car04, CAR13;
+
+cursor tot_titoli is 
+select
+	utente
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR07
+    ,CAR08
+    ,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+	,nvl(sum(nvl(num01,0)),0) tot_tit_iniz
+	,nvl(sum(nvl(num02,0)),0) tot_var_tit_piu
+	,nvl(sum(nvl(num03,0)),0) tot_var_tit_meno
+	,nvl(sum(nvl(num04,0)),0) tot_tit_fin
+	from tmp_tabulati3
+	where car01='VARIAZIONE ENTRATE TESORIERE'
+	and nvl(car12,'N')='N'
+    and nvl(car09,'N')='VALORI'
+   	group by
+    utente
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    order by car02,CAR13;
+
+
+
+begin
+
+delete tmp_tabulati2 where car01='VARIAZIONE ENTRATE TESORIERE';
+ p_ord:=1;
+	for c in capitoli loop
+
+
+
+if p_anno-p_anno_stampa =0
+	 then
+	 variazione_competenza(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,compe_prec,compe_pos,compe_neg,compe_def);
+	 variazione_cassa(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,cassa_prec,cassa_pos,cassa_neg,cassa_def);
+     variazione_residuo(p_anno_stampa,c.capitolo_bil,p_utente,cp_res_prec,cp_res_pos,cp_res_neg,cp_res_def);
+	 end if;
+
+if p_anno_stampa-p_anno = 1
+	 then
+	 variazione_pluriennale1(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,compe_prec,compe_pos,compe_neg,compe_def);
+end if;	
+
+if p_anno_stampa-p_anno = 2
+	 then
+	 variazione_pluriennale2(p_anno_stampa,c.capitolo_bil,p_da_data_movimento,p_a_data_movimento,compe_prec,compe_pos,compe_neg,compe_def);
+end if;
+
+
+insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+    ,CAR13
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+	(p_utente
+	,p_ord
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,c.Titolo
+	,c.desc_titolo
+	,c.tipologia
+	,c.desc_tipologia
+	,null
+	,'previsione di competenza'
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+	,c.capitolo_bil
+    ,'2'
+	,compe_prec
+	,compe_pos 
+	,compe_neg
+	,compe_def);
+
+if p_anno-p_anno_stampa =0
+then	
+    if p_residuo='S'
+    then
+   	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+    ,CAR13
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+    (p_utente
+	,p_ord-1
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,c.Titolo
+	,c.desc_titolo
+	,c.tipologia
+	,c.desc_tipologia
+	,null
+	,'residui presunti'
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+	,c.capitolo_bil
+    ,'1'
+	,cp_res_prec
+	,cp_res_pos
+	,cp_res_neg
+	,cp_res_def);
+    else
+   	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+    ,CAR13
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+    (p_utente
+	,p_ord-1
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,c.Titolo
+	,c.desc_titolo
+	,c.tipologia
+	,c.desc_tipologia
+	,null
+	,'residui presunti'
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+	,c.capitolo_bil
+    ,'1'
+	,cp_res_prec
+	,0
+	,0
+	,cp_res_prec);
+    end if;
+
+p_ord:=p_ord+2;
+
+	insert into tmp_tabulati2 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+	,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR12
+    ,CAR13
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+	values
+	(p_utente
+	,p_ord
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,c.Titolo
+	,c.desc_titolo
+	,c.tipologia
+	,c.desc_tipologia
+	,null
+	,'previsione di cassa'
+    ,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+	,c.capitolo_bil
+    ,'3'
+	,cassa_prec
+	,cassa_pos 
+	,cassa_neg
+	,cassa_def);
+end if;
+
+p_ord:=p_ord+2;
+end loop;
+commit;
+
+
+delete tmp_tabulati3 where car01='VARIAZIONE ENTRATE TESORIERE';
+
+--Tipologia
+p_ord:=8;
+
+    for t in tot_tipologia loop
+
+
+	insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+	,CAR04
+	,CAR05
+    ,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR13
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (t.utente
+	,p_ord
+	,t.CAR01
+	,t.CAR02
+	,t.CAR03
+	,t.CAR04
+	,t.CAR05
+    ,'TIP'
+	,t.CAR07
+    ,null
+	,t.CAR09
+	,t.CAR10
+	,t.CAR11
+    ,t.CAR13
+    ,p_anno
+	,t.tot_tip_iniz
+    ,t.tot_var_tip_piu
+    ,t.tot_var_tip_meno
+    ,t.tot_tip_fin);
+
+     p_ord:=p_ord+20;
+
+end loop;
+commit;
+
+--Titoli
+min_riga:=0;
+max_riga:=0;
+max_riga_fin:=0;
+
+for t in tot_titoli loop
+
+conta_titoli:=0;
+
+    select min(num_ord_riga), max (num_ord_riga) into min_riga, max_riga
+    from tmp_tabulati3
+    where nvl(car02,'N')=t.car02
+    and nvl(car04,'N')&lt;>'N';
+
+    select count(car02) into conta_titoli
+    from tmp_tabulati3 
+    where nvl(car02,'N')=t.car02
+    and nvl(car04,'N')='N'
+    and nvl(car08,'N')='T'
+    and nvl(car09,'N')='N';
+
+    if conta_titoli=0
+    then
+    insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+    ,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR13
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (t.utente
+	,min_riga-1
+	,t.CAR01
+	,t.CAR02
+	,t.CAR03
+    ,'TI'
+	,null
+    ,'T'
+	,null
+	,t.CAR10
+	,t.CAR11
+    ,null
+    ,t.CAR15
+	,null
+    ,null
+    ,null
+    ,null);
+
+    insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+    ,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR13
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (t.utente
+	,max_riga+1
+	,t.CAR01
+	,t.CAR02
+	,t.CAR03
+    ,'TI'
+	,t.CAR07
+    ,'T'
+	,t.CAR09
+	,t.CAR10
+	,t.CAR11
+    ,t.CAR13
+    ,t.CAR15
+	,t.tot_tit_iniz
+    ,t.tot_var_tit_piu
+    ,t.tot_var_tit_meno
+    ,t.tot_tit_fin);
+
+    else
+
+    select  max (num_ord_riga) into  max_riga_fin
+    from tmp_tabulati3
+    where nvl(car02,'N')=t.car02
+    and nvl(car04,'N')='N'
+    and nvl(car09,'N')='VALORI';
+
+
+    insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+	,CAR03
+    ,CAR06
+	,CAR07
+    ,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+	,CAR13
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (t.utente
+	,max_riga_fin+1
+	,t.CAR01
+	,t.CAR02
+	,t.CAR03
+    ,'TI'
+	,t.CAR07
+    ,'T'
+	,t.CAR09
+	,t.CAR10
+	,t.CAR11
+    ,t.CAR13
+    ,t.CAR15
+	,t.tot_tit_iniz
+    ,t.tot_var_tit_piu
+    ,t.tot_var_tit_meno
+    ,t.tot_tit_fin);
+
+    end if;
+
+    end loop;
+commit;
+
+
+select 	
+nvl(dg.avanzo_amministrazione,0),nvl(dg.variazione_avanzo_piu,0),nvl(dg.variazione_avanzo_meno,0),nvl(dg.avanzo_amministrazione,0)  /*+ nvl(dg.variazione_avanzo_delibera,0)*/  + nvl(dg.variazione_avanzo_piu,0)  - nvl(dg.variazione_avanzo_meno,0)
+,nvl(dg.fpv_corrente,0),nvl(dg.fpv_capitale,0),decode( sign( nvl(dg.variazione_fpv_corrente,0) ), -1, 0,  nvl(dg.variazione_fpv_corrente,0) ) ,decode( sign( nvl(dg.variazione_fpv_corrente,0) ), -1, nvl(dg.variazione_fpv_corrente,0),0 )
+,decode( sign( nvl(dg.variazione_fpv_capitale,0) ), -1, 0,  nvl(dg.variazione_fpv_capitale,0) ),decode( sign( nvl(dg.variazione_fpv_capitale,0) ), -1, nvl(dg.variazione_fpv_capitale,0),0 )
+,(nvl(dg.fpv_corrente,0) + nvl(dg.variazione_fpv_corrente,0) ),(nvl(dg.fpv_capitale,0) + nvl(dg.variazione_fpv_capitale,0) )
+,dg.cassa
+--,nvl(dg.variazione_avanzo_delibera,0) variazione_avanzo_previsione
+ into avanzo_previsione ,variazione_avanzo_piu,variazione_avanzo_meno,avanzo_finale
+ ,fpv_cor_iniziale, fpv_cap_iniziale,fpv_cor_variazione_piu,fpv_cor_variazione_meno
+ ,fpv_cap_variazione_piu,fpv_cap_variazione_meno
+ ,fpv_cor_finale,fpv_cap_finale
+ ,cassa_iniziale
+from 	
+fina_dati_generali dg
+where
+dg.anno_finanziario = p_anno_stampa;
+
+
+min_riga:=0;
+
+select min(num_ord_riga) into min_riga
+from tmp_tabulati3
+where nvl(car01,'N')='VARIAZIONE ENTRATE TESORIERE';
+
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR06
+	,CAR08
+    ,CAR15
+	,CAR09
+	,CAR10
+	,CAR11
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (p_utente
+	,min_riga-1
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,'Utilizzo Avanzo d''amministrazione'
+    ,'F'
+	,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+    ,p_anno
+    ,avanzo_previsione
+    ,variazione_avanzo_piu
+    ,variazione_avanzo_meno
+    ,avanzo_finale);
+
+min_riga:=min_riga-2;
+
+if p_fpv='S' --Gestire la variazione fpv 04-09-2019
+
+then
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR06
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (p_utente
+	,min_riga
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,'Fondo pluriennale vincolato per spese in conto capitale'
+    ,'F'
+	,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+    ,p_anno
+    ,fpv_cap_iniziale
+    ,fpv_cap_variazione_piu
+    ,fpv_cap_variazione_meno
+    ,fpv_cap_finale);
+
+min_riga:=min_riga-3;
+
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR06
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (p_utente
+	,min_riga-1
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,'Fondo pluriennale vincolato per spese correnti'
+    ,'F'
+	,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+    ,p_anno
+    ,fpv_cor_iniziale
+    ,fpv_cor_variazione_piu
+    ,fpv_cor_variazione_meno
+    ,fpv_cor_finale);
+
+else
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR06
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (p_utente
+	,min_riga
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,'Fondo pluriennale vincolato per spese in conto capitale'
+    ,'F'
+	,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+    ,p_anno
+    ,fpv_cap_iniziale+fpv_cap_variazione_piu-fpv_cap_variazione_meno
+    ,0
+    ,0
+    ,fpv_cap_finale);
+
+min_riga:=min_riga-3;
+
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR06
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR15
+	,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+    values
+    (p_utente
+	,min_riga-1
+	,'VARIAZIONE ENTRATE TESORIERE'
+	,'Fondo pluriennale vincolato per spese correnti'
+    ,'F'
+	,'T'
+	,'VALORI'
+	,p_id
+	,p_anno_stampa
+    ,p_anno
+    ,fpv_cor_iniziale+fpv_cor_variazione_piu-fpv_cor_variazione_meno
+    ,0
+    ,0
+    ,fpv_cor_finale);
+
+end if;
+
+--delete tmp_tabulati2 where car01='VARIAZIONE ENTRATE TESORIERE';
+
+--Totale variazioni
+
+max_riga:=0;
+
+select max(num_ord_riga) into max_riga
+from tmp_tabulati3
+where nvl(car01,'N')='VARIAZIONE ENTRATE TESORIERE';
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR07
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    ,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+   (select
+	utente
+    ,max_riga+1
+	,CAR01
+    ,'TOTALE VARIAZIONI ENTRATE'
+    ,car07 Tipo_importo
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 Anno_stampa
+    ,car13 Ordinamento_tipo_imp
+    ,car15 Anno
+    ,sum(nvl(NUM01,0))
+    ,sum(nvl(NUM02,0))
+    ,sum(nvl(NUM03,0))
+    ,sum(nvl(NUM04,0))
+    from tmp_Tabulati3
+    where car01='VARIAZIONE ENTRATE TESORIERE'
+    and nvl(car04,'N')='N'
+    and nvl(car09,'N')='VALORI'
+    and nvl(car07,'N')='residui presunti'
+    ,'TOTALE VARIAZIONI ENTRATE'
+    group by utente
+    ,max_riga+1
+    ,car01
+    ,car07 
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 
+    ,car13
+    ,car15)
+	order by car13;
+
+max_riga:=max_riga+2;
+
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR07
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    ,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+   (select
+	utente
+    ,max_riga+1
+	,CAR01
+    ,'TOTALE VARIAZIONI ENTRATE'
+    ,car07 Tipo_importo
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 Anno_stampa
+    ,car13 Ordinamento_tipo_imp
+    ,car15 Anno
+    ,sum(nvl(NUM01,0))
+    ,sum(nvl(NUM02,0))
+    ,sum(nvl(NUM03,0))
+    ,sum(nvl(NUM04,0))
+    from tmp_Tabulati3
+    where car01='VARIAZIONE ENTRATE TESORIERE'
+    and nvl(car04,'N')='N'
+    and nvl(car09,'N')='VALORI'
+    and nvl(car07,'N')='previsione di competenza'
+    group by utente
+    ,max_riga+1
+    ,car01
+    ,'TOTALE VARIAZIONI ENTRATE'
+    ,car07 
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 
+    ,car13
+    ,car15)
+	order by car13;
+
+max_riga:=max_riga+1;
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR07
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    ,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+   (select
+	utente
+    ,max_riga+1
+	,CAR01
+    ,'TOTALE VARIAZIONI ENTRATE'
+    ,car07 Tipo_importo
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 Anno_stampa
+    ,car13 Ordinamento_tipo_imp
+    ,car15 Anno
+    ,sum(nvl(NUM01,0))
+    ,sum(nvl(NUM02,0))
+    ,sum(nvl(NUM03,0))
+    ,sum(nvl(NUM04,0))
+    from tmp_Tabulati3
+    where car01='VARIAZIONE ENTRATE TESORIERE'
+    and nvl(car04,'N')='N'
+    and nvl(car09,'N')='VALORI'
+    and nvl(car07,'N')='previsione di cassa'
+    group by utente
+    ,max_riga+1
+    ,car01
+    ,'TOTALE VARIAZIONI ENTRATE'
+    ,car07 
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 
+    ,car13
+    ,car15)
+	order by car13;
+commit;
+
+--TOTALE GENERALE
+
+max_riga:=0;
+
+select max(num_ord_riga) into max_riga
+from tmp_tabulati3
+where nvl(car01,'N')='VARIAZIONE ENTRATE TESORIERE';
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR07
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    ,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+   (select
+	utente
+    ,max_riga+1
+	,CAR01
+    ,'TOTALE GENERALE ENTRATE'
+    ,car07 Tipo_importo
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 Anno_stampa
+    ,car13 Ordinamento_tipo_imp
+    ,car15 Anno
+    ,sum(nvl(NUM01,0))
+    ,sum(nvl(NUM02,0))
+    ,sum(nvl(NUM03,0))
+    ,sum(nvl(NUM04,0))
+    from tmp_Tabulati3
+    where car01='VARIAZIONE ENTRATE TESORIERE'
+    and nvl(car04,'N')='N'
+    and nvl(car09,'N')='VALORI'
+    and nvl(car07,'N')='residui presunti'
+    and nvl(car02,'N')&lt;>'TOTALE VARIAZIONI ENTRATE'
+    group by utente
+    ,max_riga+1
+    ,car01
+    ,'TOTALE GENERALE ENTRATE'
+    ,car07 
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 
+    ,car13
+    ,car15)
+	order by car13;
+
+max_riga:=max_riga+2;
+
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR07
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    ,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+   (select
+	utente
+    ,max_riga+1
+	,CAR01
+    ,'TOTALE GENERALE ENTRATE'
+    ,'previsione di competenza' Tipo_importo
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 Anno_stampa
+    ,'2' Ordinamento_tipo_imp
+    ,car15 Anno
+    ,sum(nvl(NUM01,0))
+    ,sum(nvl(NUM02,0))
+    ,sum(nvl(NUM03,0))
+    and ((nvl(car04,'N')='N'
+    ,sum(nvl(NUM04,0))
+    from tmp_Tabulati3
+    where car01='VARIAZIONE ENTRATE TESORIERE'
+    and nvl(car09,'N')='VALORI'
+    and nvl(car07,'N')='previsione di competenza'
+    and nvl(car02,'N')='TOTALE VARIAZIONI ENTRATE') or nvl(car06,'N')='F')
+    group by utente
+    ,max_riga+1
+    ,car01
+    ,'TOTALE GENERALE ENTRATE'
+    ,'previsione di competenza' 
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 
+    ,'2'
+    ,car15);
+
+max_riga:=max_riga+1;
+
+insert into tmp_tabulati3 (
+	UTENTE
+	,NUM_ORD_RIGA
+	,CAR01
+	,CAR02
+    ,CAR07
+	,CAR08
+	,CAR09
+	,CAR10
+	,CAR11
+    ,CAR13
+    ,CAR15
+    ,NUM01
+	,NUM02
+	,NUM03
+	,NUM04)
+   (select
+	utente
+    ,max_riga+1
+	,CAR01
+    ,'TOTALE GENERALE ENTRATE'
+    ,car07 Tipo_importo
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 Anno_stampa
+    ,car13 Ordinamento_tipo_imp
+    ,car15 Anno
+    ,sum(nvl(NUM01,0))+cassa_iniziale
+    ,sum(nvl(NUM02,0))
+    ,sum(nvl(NUM03,0))
+    ,sum(nvl(NUM04,0))+cassa_iniziale
+    from tmp_Tabulati3
+    where car01='VARIAZIONE ENTRATE TESORIERE'
+    and nvl(car04,'N')='N'
+    and nvl(car09,'N')='VALORI'
+    and nvl(car07,'N')='previsione di cassa'
+    and nvl(car02,'N')&lt;>'TOTALE VARIAZIONI ENTRATE'
+    group by utente
+    ,max_riga+1
+    ,car01
+    ,'TOTALE GENERALE ENTRATE'
+    ,car07 
+    ,car08 
+    ,car09 
+    ,car10
+    ,car11 
+    ,car13
+    ,car15)
+	order by car13;
+commit;
+end;</pre>	</td></tr>
+</table></div>

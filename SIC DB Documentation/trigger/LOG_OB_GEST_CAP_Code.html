@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LOG_OB_GEST_CAP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LOG_OB_GEST_CAP.html">Details</a></div></div>
+<div class="tab"><div><a href="LOG_OB_GEST_CAP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LOG_OB_GEST_CAP_References.html">References</a></div></div>
+<div class="tab"><div><a href="LOG_OB_GEST_CAP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LOG_OB_GEST_CAP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2".LOG_OB_GEST_CAP
+AFTER DELETE OR UPDATE
+ON FIN_T_OBIETTIVI_GEST_CAPITOLI
+FOR EACH ROW
+
+
+
+declare
+tipo_aggiornamento varchar2(1);
+begin
+if updating
+   then tipo_aggiornamento := 'U';
+   else tipo_aggiornamento := 'D';
+end if;
+insert into fin_t_log_ob_gest_cap values
+(:OLD.FIN_T_ASP_ANNO,
+:OLD.FIN_T_ASP_CODICE,
+:OLD.FIN_T_DIRETTRICE_ANNO,
+:OLD.FIN_T_DIRETTRICE_CODICE,
+:OLD.FIN_T_RISULTATI_ANNO,
+:OLD.FIN_T_RISULTATI_CODICE,
+:OLD.FIN_T_OG_ANNO,
+:OLD.FIN_T_OG_CODICE_PARTE1,
+:OLD.FIN_T_OG_CODICE_PARTE2,
+:OLD.FIN_T_OG_CODICE_PARTE3,
+:OLD.CAPITOLO_ANNO,
+:OLD.CAPITOLO_EU,
+:OLD.CAPITOLO_CODICE,
+:OLD.DATA_ASSESTAMENTO,
+:OLD.PREV_COMPE,
+:OLD.PERC_COMPE,
+:OLD.PREV_RESIDUI,
+:OLD.PERC_RESIDUI,
+:OLD.COMPE,
+:OLD.RESIDUI,
+:OLD.CASSA,
+SYSDATE,
+tipo_aggiornamento,
+:OLD.aggiornato_da);
+end;
+</pre>	</td></tr>
+</table></div>

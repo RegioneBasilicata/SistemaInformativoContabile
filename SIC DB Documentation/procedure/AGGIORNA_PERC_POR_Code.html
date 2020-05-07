@@ -1,0 +1,117 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_PERC_POR</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_PERC_POR.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_PERC_POR_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_PERC_POR_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_PERC_POR_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_PERC_POR_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE aggiorna_perc_por (P_ANNO IN NUMBER) IS
+
+-- PRENDO i nuovi vapitoli POR
+cursor nuovi is
+select b.capitolo
+from fin_quota_ue b
+where
+b.anno = p_anno
+and nvl(b.quota_ue,0) > 0
+minus
+select capitolo
+from fin_t_por_patto
+where anno = p_anno;
+-- PRENDO SOLO I CAPITOLI LE CUI PERCENTUALI NON COINCIDONO CON QUELLE CALCOLATE
+cursor modificati is
+select p.capitolo
+,NVL(p.p_anno_cor,0) perc
+from fin_t_por_patto p
+,fin_quota_ue q
+where p.anno = p_anno
+and q.anno(+) = p.anno
+and q.capitolo(+) = p.capitolo
+and nvl(q.quota_ue,0) > 0 
+minus
+select p.capitolo 
+,round(nvl(q.quota_ue,0)/
+(previsione_definitiva(p.anno,p.capitolo) - 
+(nvl(a.quota_avanzo,0) - nvl(d.quota_avanzo,0)))
+,4)  perc
+from fin_t_por_patto p 
+,fin_t_bilancio b 
+,fin_quote_avanzi a 
+,fin_avanzi_definitivi d
+,fin_quota_ue q
+where p.anno = p_anno
+and b.anno = p.anno 
+and b.eu||b.articolo = p.capitolo 
+and a.anno(+) = p.anno 
+and a.capitolo(+) = p.capitolo 
+and d.anno(+) = p.anno
+and d.eu(+)||d.capitolo_uscita(+) = p.capitolo
+and d.tipo(+) = 'B'
+and q.anno(+) = p.anno
+and q.capitolo(+) = p.capitolo
+and nvl(q.quota_ue,0) > 0
+and (previsione_definitiva(p.anno,p.capitolo) - 
+(nvl(a.quota_avanzo,0) - nvl(d.quota_avanzo,0))) > 0;
+
+BEGIN
+
+FOR n in nuovi loop
+  insert into fin_t_por_patto(anno,capitolo) values (p_anno,n.capitolo);
+  commit;
+END LOOP;
+FOR m in modificati loop
+	update fin_t_por_patto t set t.p_anno_cor = 
+	(select round(nvl(q.quota_ue,0)/
+	(nvl(b.previsto_attuale,0)+nvl(b.variazione_competenza_piu,0)+nvl(b.assestamento_competenza_piu,0)
+	-nvl(b.variazione_competenza_meno,0)-nvl(b.assestamento_competenza_meno,0) - 
+	(nvl(a.quota_avanzo,0) - nvl(d.quota_avanzo,0)))
+	,4)  perc
+	from fin_t_por_patto p 
+	,fin_t_bilancio b 
+	,fin_quote_avanzi a 
+	,fin_avanzi_def_tipo d
+	,fin_quota_ue q
+	where p.anno = p_anno
+	and p.capitolo = m.capitolo
+	and b.anno = p.anno 
+	and b.eu||b.articolo = p.capitolo 
+ 	and a.anno(+) = p.anno 
+	and a.capitolo(+) = p.capitolo 
+	and d.anno(+) = p.anno
+	and d.eu(+)||d.capitolo_uscita(+) = p.capitolo
+	and d.tipo(+) = 'B'
+	and q.anno(+) = p.anno
+	and q.capitolo(+) = p.capitolo
+	and nvl(q.quota_ue,0) > 0)
+	where t.anno = p_anno
+	and t.capitolo = m.capitolo;
+	commit;
+end loop;
+
+ update fin_t_por_patto p set (p.quota_avanzo,p.quota_avanzo_ue,p.p_avanzo) = 
+ (select round(nvl(a.quota_avanzo,0)),
+    round(nvl(a.quota_avanzo_ue,0)),
+    nvl(a.percentuale,0)
+    from FIN_PERC_AVANZO_UE a
+    where a.anno = p.anno
+    and a.capitolo = p.capitolo)
+ where p.anno = p_anno;
+ --and p.capitolo &lt;> 'U36950'; -- ricordarsi di togliere questo controllo in fase di assestamento
+ commit;
+
+END;</pre>	</td></tr>
+</table></div>

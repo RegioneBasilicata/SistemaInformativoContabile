@@ -1,0 +1,255 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AP_VEICOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="AP_VEICOLI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="AP_VEICOLI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>TARGA</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MODELLO</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MARCA</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_POSTI</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_TELAIO</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO_CARBURANTE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>No</td>
+<td>'B' </td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_TELEPASS</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_ACI</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTE</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CARTA_CARBURANTE</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_UFFICIO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FIRMA_RESP</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DISMESSO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATO_DA</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATO_IL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MODIFICATO_DA</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MODIFICATO_IL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_INV</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_IMMATRICOLAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_LIBR_CIRC</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>Numero libretto circolazione</td>
+	</tr>
+	<tr>
+<td>NUM_FOGLIO_COMP</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>Numero foglio complementare</td>
+	</tr>
+	<tr>
+<td>POTENZA_FISC</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>Potenza fiscale</td>
+	</tr>
+	<tr>
+<td>CILINDRATA</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>KEY_CARTA_CARB</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>Codice segrato carta carburante</td>
+	</tr>
+	<tr>
+<td>CERT_ROTT</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>Certificato rottamazione</td>
+	</tr>
+	<tr>
+<td>PNEUMATICI</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>Misure pneumatici</td>
+	</tr>
+	<tr>
+<td>ESCLUDI_CALCOLO_CC</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>Veicolo escluso dal calcolo su cento di costo</td>
+	</tr>
+	<tr>
+<td>COSTO_KM</td>
+<td>NUMBER(5,3)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+</table></div>

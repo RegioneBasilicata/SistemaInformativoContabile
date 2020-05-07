@@ -1,0 +1,316 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CREA_SEDE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CREA_SEDE.html">Details</a></div></div>
+<div class="tab"><div><a href="CREA_SEDE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CREA_SEDE_References.html">References</a></div></div>
+<div class="tab"><div><a href="CREA_SEDE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CREA_SEDE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE crea_sede(
+    PI_ID_ANAGRAFICA IN NUMBER,
+    PI_INDIRIZZO IN VARCHAR2,                                                                                                                  
+    PI_COMUNE_SEDE IN VARCHAR2,                                                                                                                
+    PI_CAP_SEDE IN VARCHAR2,                                                                                                                   
+    PI_TELEFONO IN VARCHAR2,                                                                                                                   
+    PI_E_MAIL IN VARCHAR2,                                                                                                                     
+    PI_FAX IN VARCHAR2,                                                                                                                        
+    PI_BOLLO IN VARCHAR2,                                                                                                                      
+    PI_TIPO_PAGAMENTO IN VARCHAR2,                                                                                                             
+    PI_CONTO_CORRENTE IN VARCHAR2,                                                                                                             
+    PI_MODALITA_PRINCIPALE_SN IN VARCHAR2,                                                                                                     
+    PI_NOME_BANCA IN VARCHAR2,                                                                                                                 
+    PI_SEDE_AGENZIA IN VARCHAR2,                                                                                                               
+    PI_INDIRIZZO_AGENZIA IN VARCHAR2,                                                                                                                  
+    PI_CITTA IN VARCHAR2,                                                                                                                      
+    PI_CAP_AGENZIA IN VARCHAR2,                                                                                                                
+    PI_PROVINCIA_AGENZIA IN VARCHAR2,                                                                                                          
+    PI_ABI IN VARCHAR2,                                                                                                                        
+    PI_CAB IN VARCHAR2,                                                                                                                        
+    PI_CIN IN VARCHAR2,                                                                                                                        
+    PI_IBAN IN VARCHAR2,                                                                                                                       
+    PI_COD_FISC_UTENTE IN VARCHAR2,
+    PO_ID_ANAGRAFICA IN OUT NUMBER,                                                                                                               
+    PO_ID_SEDE IN OUT NUMBER,                                                                                                                     
+    PO_ID_TIPO_PAGAMENTO IN OUT NUMBER,                                                                                                           
+    PO_ID_CONTO_CORRENTE IN OUT NUMBER,                                                                                                           
+    PO_CODICE_RISPOSTA IN OUT NUMBER,                                                                                                             
+    PO_DESCRIZIONE_RISPOSTA IN OUT VARCHAR2)                                                                                                      
+IS                                                                                                                                             
+                                                                                                                                               
+	conta number := 0;                                                                                                                           
+	id_com_sede number;                                                                                                                          
+	appoggio number := 0;                                                                                                                        
+	ana_id number := 0;	                                                                                                                             
+	contatore	number := 0;                                                                                                                       
+	err varchar2(1);                                                                                                                             
+	num number;                                                                                                                                  
+  cc_si_no number := 0;                                                                                                                        
+  abi_si_no number := 0;                                                                                                                       
+  cab_si_no number := 0;                                                                                                                       
+  id_agenzia number := 0;
+  id_conto_corrente number := 0;
+  nome_utente varchar2(240) := 'XX' ;  
+  id_tipo_pagamento number := 0;
+  val_iban varchar2(1) := '0';
+  v_banca_id number;
+  provincia_sede varchar2(3);
+  cod_vers_bonifici varchar2(10);
+                                                                                                                                               
+BEGIN                                                                                                                                          
+PO_ID_ANAGRAFICA := PI_ID_ANAGRAFICA;                                                                                                                         
+PO_ID_SEDE := 0;                                                                                                                               
+PO_ID_TIPO_PAGAMENTO := 0;                                                                                                                     
+PO_ID_CONTO_CORRENTE := 0;                                                                                                                     
+PO_CODICE_RISPOSTA := 1;                                                                                                                       
+PO_DESCRIZIONE_RISPOSTA := 'Operazione terminata con successo!';                                                                               
+  -- ****************** VERIFICA UTENTE ************************                                                                               
+  begin                                                                                                                                        
+    select user_name into nome_utente                                                                                                              
+    from fnd_user                                                                                                                              
+    where upper(nvl(cod_fiscale,'')) = upper(PI_COD_FISC_UTENTE);                                                                                            
+    exception when others then nome_utente := 'XX';                                                                                                 
+  end;                                                                                                                                         
+  if nome_utente = 'XX'                                                                                                                            
+    then PO_CODICE_RISPOSTA := 0;                                                                                                              
+    PO_DESCRIZIONE_RISPOSTA := 'Utente non presente o non autorizzato ad operare nel SIC!';                                                    
+    return;                                                                                                                                      
+  end if;    
+  
+  -- ************ Verifico che esista l'ID_ANAGRAFICA ******************
+    select count(*) into ana_id
+    from fin_t_anagrafica
+    where id = PI_ID_ANAGRAFICA;
+    if ana_id = 0
+      then PO_CODICE_RISPOSTA := 0;                                                                                                              
+      PO_DESCRIZIONE_RISPOSTA := 'Anagrafica non presente! Impossibile creare la sede!';                                                    
+      return;                                                                                                                                      
+    end if; 
+  -- ************** FINE verifica ID_ANAGRAFICA ************************
+  
+   
+  -- ******** Controlli GENERALI *******************
+   --	Controllo il comune della sede		                                                                                                 
+					begin                                                                                                                                
+						select id into id_com_sede from fin_t_comuni where upper(replace(descrizione,' ')) = upper(replace(nvl(PI_COMUNE_SEDE,'X'),' '));           
+						exception when others then                                                                                                         
+              PO_CODICE_RISPOSTA := 0;                                                                                                         
+              PO_DESCRIZIONE_RISPOSTA := 'Il comune della sede non esiste nella tabella Comuni.';                                              
+							return;                                                                                                                            
+					end;                                                                                                                                 
+        -- FINE Controllo comune sede    
+        
+        -- *** controllo il Tipo Pagamento ***********
+         begin                                                                                                                                
+						select id into id_tipo_pagamento 
+            from fin_t_tipo_pagamenti 
+            --where upper(replace(descrizione,' ')) = upper(replace(PI_TIPO_PAGAMENTO,' '));           
+						 where upper(replace(descrizione,' ')) = 
+            upper(replace(decode(PI_TIPO_PAGAMENTO,'Accredito su c/c bancario','BONIFICO BANCARIO E POSTALE','Assegno circolare non trasferibile da inviare al beneficiario','ASSEGNO CIRCOLARE',PI_TIPO_PAGAMENTO),' '))
+            and (nvl(attivo,'N') = 'S' OR id = 32);
+            exception when no_data_found then                                                                                                        
+              PO_CODICE_RISPOSTA := 0;                                                                                                         
+              PO_DESCRIZIONE_RISPOSTA := 'Il tipo pagamento non è tra quelli consentiti.';                                              
+							return;                                                                                                                            
+        end;
+        PO_ID_TIPO_PAGAMENTO := ID_TIPO_PAGAMENTO;
+        -- *** FIne controllo Tipo Pagamento *********
+        
+         -- controllo se trattasi di Comune Lucano già presente, in caso positivo restituisci i dati standard nella tabella TB_COMUNI_LUCANO ed esco
+     begin
+     select id_sede,id_conto
+     into PO_ID_SEDE,PO_ID_CONTO_CORRENTE
+     from TB_COMUNI_LUCANI
+     where id_sic = PI_ID_ANAGRAFICA;
+     exception when no_data_found then PO_ID_SEDE := 0; PO_ID_CONTO_CORRENTE := 0;
+     end;
+     
+     if PO_ID_SEDE > 0
+      then return;
+     end if;
+        
+        
+                                                                                                                                             
+        -- Controlli per il conto corrente                                                                                                     
+        begin                                                                                                                                  
+          select count(*) into cc_si_no                                                                                                        
+          from fin_t_tipo_pagamenti                                                                                                            
+          where upper(descrizione) = upper(PI_TIPO_PAGAMENTO)                                                                                  
+          and nvl(cc_sn,'N') = 'S';                                                                                                            
+          exception when no_data_found then cc_si_no := 0;                                                                                     
+        end;                                                                                                                                  
+                                                                                                                                               
+        if cc_si_no > 0 and (PI_IBAN is null and id_tipo_pagamento not in (3,25))                                                                                         
+          then PO_CODICE_RISPOSTA := 0;                                                                                                        
+              PO_DESCRIZIONE_RISPOSTA := 'Per la modalità di pagamento scelta è necessario inserire almeno un conto corrente.';                
+							return;                                                                                                                            
+        end if;                                                                                                                                
+                                                                                                                                               
+           if cc_si_no > 0 and (PI_MODALITA_PRINCIPALE_SN is null or (PI_IBAN is null and id_tipo_pagamento not in (3,25)))                           
+              then PO_CODICE_RISPOSTA := 0;                                                                                                    
+              PO_DESCRIZIONE_RISPOSTA := 'Mancano informazioni necessarie (IBAN, modalità principale o numero conto) alla creazione del conto corrente.';                                 
+							return;                                                                                                                            
+             end if;  
+            
+        if translate(PI_CONTO_CORRENTE,'$0123456789','$') is not null
+         then PO_CODICE_RISPOSTA := 0;                                                                                                    
+         PO_DESCRIZIONE_RISPOSTA := 'Il numero del conto deve essere numerico.';                                 
+			  	return;                                                                                                                            
+         end if;
+  -- ******* FINE Controlli GENERALI **************
+     select (nvl(max(id_sede),0) + 1) into conta
+     from fin_t_ana_sedi
+     where id_ana = PI_ID_ANAGRAFICA;
+  
+ 
+  -- ************** carico la SEDE **************
+           INSERT
+              INTO
+                fin_t_ana_sedi
+                (
+                  ID_ANA,
+                  ID_SEDE,
+                  INDIRIZZO,
+                  ID_COMUNE_SEDE,
+                  CAP_SEDE,
+                  COGNOME_LR,
+                  NOME_LR,
+                  SESSO_LR,
+                  ID_COMUNE_NS_LR,
+                  DATA_NS_LR,
+                  CF_LR,
+                  INDIRIZZO_LR,
+                  ID_COMUNE_RES_LR,
+                  CAP_RES_LR,
+                  TELEFONO,
+                  E_MAIL,
+                  FAX,
+                  BOLLO,
+                  DATA_CREAZIONE,
+                  ID_SEDE_OA,
+                  ID_VENDOR_OA,
+                  NOME_SEDE,
+                  ID_TIPO_PAGAMENTO,
+                  INATTIVO_DAL,
+                  COMUNE_SEDE_OA,
+                  UTENTE_CREAZIONE,
+                  UTENTE_AGGIORNAMENTO,
+                  DATA_AGGIORNAMENTO
+                )
+                VALUES
+                (
+                  PI_ID_ANAGRAFICA,                           
+                  conta,                               
+                  upper(PI_INDIRIZZO),                    
+                  ID_COM_SEDE,                     
+                  PI_CAP_SEDE,                     
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  NULL,                            
+                  PI_TELEFONO,                     
+                  sysdate,                          
+                  PI_E_MAIL,                       
+                  PI_FAX,                          
+                  DECODE(PI_BOLLO,'Y','S','N'),    
+                  NULL,                            
+                  NULL,                            
+                  'SEDE N.'||conta,                      
+                  ID_TIPO_PAGAMENTO,               
+                  null,                            
+                  null,                            
+                  nome_utente,        
+                  null,--:global.utente_collegato, 
+                  null--sysdate                    
+                );
+              COMMIT;
+              PO_ID_SEDE := conta;                                                                                                                               
+              
+  -- ************ FINE carico SEDE ************           
+ 
+  -- *********** carico il CONTO CORRENTE ****
+            if ID_TIPO_PAGAMENTO = 3
+                then v_banca_id := 34003;
+                PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' c/c POSTALE';
+                elsif ID_TIPO_PAGAMENTO = 25
+                then 
+                begin
+                select upper(c.provincia) into provincia_sede
+                from fin_t_comuni c
+                where c.id = id_com_sede;
+                exception when no_data_found then provincia_sede :='';
+                end;
+                v_banca_id := 5015;
+                cod_vers_bonifici := 'VERSAMENTO';
+                PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' Mod. F24';
+                else v_banca_id := null;
+              end if;
+  
+          if PI_IBAN is not null                                                                                                       
+            then 
+             val_iban := valida_iban(UPPER(PI_IBAN),'N');
+              if val_iban &lt;> '0'
+                then --PO_CODICE_RISPOSTA := 0;                                                                                                                       
+                PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' Non è stato possibile validare l''IBAN!';
+                return;
+              end if;
+              PO_DESCRIZIONE_RISPOSTA := PO_DESCRIZIONE_RISPOSTA||' c/c BANCARIO';
+           end if;
+      if (PI_IBAN is not null or (ID_TIPO_PAGAMENTO in (3,25) and PI_CONTO_CORRENTE is not null))
+      then
+        select (nvl(max(id),0) + 1) into id_conto_corrente                                                                                   
+               from fin_t_ana_conti_bancari;   
+        insert into fin_t_ana_conti_bancari (
+        ID                     
+        ,ID_ANA                
+        ,ID_SEDE               
+        ,BANCA_ID								
+        ,CONTO_CORRENTE        
+        ,MODALITA_PRINCIPALE_SN
+        ,DATA_CREAZIONE        
+        ,CIN                   
+        ,IBAN                  
+        ,DATA_AGGIORNAMENTO    
+        ,UTENTE_CREAZIONE      
+        ,UTENTE_AGGIORNAMENTO
+        ,PROVINCIA_TESORERIA
+        ,CODICE_VERSAMENTO_BONIFICI) 
+        values (
+        id_conto_corrente         
+        ,PI_ID_ANAGRAFICA                    
+        ,conta                        
+        ,v_banca_id              
+        ,PI_CONTO_CORRENTE       
+        ,'S'--PI_MODALITA_PRINCIPALE_SN
+        ,sysdate                  
+        ,null                  
+        ,UPPER(PI_IBAN)                  
+        ,null                     
+        ,nome_utente                
+        ,null
+        ,nvl(provincia_sede,'')
+        ,nvl(cod_vers_bonifici,''));
+        commit;
+        PO_ID_CONTO_CORRENTE := id_conto_corrente;
+      end if;           
+            -- **** FINE CONTO CORRENTE *******
+  
+END;</pre>	</td></tr>
+</table></div>

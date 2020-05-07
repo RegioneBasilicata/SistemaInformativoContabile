@@ -1,0 +1,136 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_TIPO_PAGAMENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_TIPO_PAGAMENTI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_TIPO_PAGAMENTI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ID</td>
+<td>NUMBER(10,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BOLLETTINO_POSTALE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'N'                   </td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PAGAMENTO_TESORIERE</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LOOKUP_CODE_OA</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CC_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'N'
+</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_PAGAMENTO_TESORIERE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DELEGATO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>IBAN_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'N'</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CASSA_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>Usato nella stampa giornale di cassa degli economi per distinguere i pagamenti di cassa o banca</td>
+	</tr>
+	<tr>
+<td>CODICE_SDI</td>
+<td>VARCHAR2(4 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTIVO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>se = S il tipo pagamento può essere utilizzato</td>
+	</tr>
+	<tr>
+<td>RISC_PAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>se = R individua un tipo di riscossione, se = P individua un pagamento, se = E indivdua un tipo che va bene sia per  riscossione che pagamento</td>
+	</tr>
+</table></div>

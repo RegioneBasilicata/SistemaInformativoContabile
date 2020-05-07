@@ -1,0 +1,123 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TB_MOD_PAGAMRISC_ORDINF</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF.html">Colonne</a></div></div>
+<div class="tab" id="current"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="TB_MOD_PAGAMRISC_ORDINF_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Vincoli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>CONSTRAINT_NAME</th>
+	<th>CONSTRAINT_TYPE</th>
+	<th>SEARCH_CONDITION</th>
+	<th>R_OWNER</th>
+	<th>R_TABLE_NAME</th>
+	<th>R_CONSTRAINT_NAME</th>
+	<th>DELETE_RULE</th>
+	<th>STATUS</th>
+	<th>DEFERRABLE</th>
+	<th>VALIDATED</th>
+	<th>GENERATED</th>
+	<th>BAD</th>
+	<th>RELY</th>
+	<th>LAST_CHANGE</th>
+	<th>INDEX_OWNER</th>
+	<th>INDEX_NAME</th>
+	<th>INVALID</th>
+	<th>VIEW_RELATED</th>
+</tr>
+	<tr>
+<td>CK_TB_MODPAGAMRISC_FL</td>
+<td>Check</td>
+<td>NVL(fl_nascosto,'N') IN ('S','N')</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-03-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CK_TB_MODPAGAMRISC_TIPO</td>
+<td>Check</td>
+<td>tipo IN ('PAGAMENTO','RISCOSSIONE')</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-03-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PK_TB_MODPAGAMRISC_OI</td>
+<td>Primary_Key</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-03-20</td>
+<td>GAT2</td>
+<td>PK_TB_MODPAGAMRISC_OI</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C00233924</td>
+<td>Check</td>
+<td>"DESCRIZIONE_OI" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-03-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+</table></div>

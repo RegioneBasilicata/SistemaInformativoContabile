@@ -1,0 +1,182 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>RICODIFICA_UFFICI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="RICODIFICA_UFFICI.html">Details</a></div></div>
+<div class="tab"><div><a href="RICODIFICA_UFFICI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="RICODIFICA_UFFICI_References.html">References</a></div></div>
+<div class="tab"><div><a href="RICODIFICA_UFFICI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="RICODIFICA_UFFICI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure ricodifica_uffici (p_anno in number) is
+--  *********** ATTENZIONE *********************
+-- *********************************************
+-- prima di lanciare la procedura è necessario:
+-- 1. disabilitare su fin_t_struttureFK con fin_t_dipartimenti
+-- 2. disabilitare su fin_t_strutture_capitoli FK con fin_t_strutture 
+-- 3. verificare con SicCecco per problematiche legate alle schede di monitoraggio in relazione ai periodi precedenti
+controlla_strutt number := 0;
+
+cursor aggiorna is
+select NUOVO_CODICE
+,nuova_descrizione
+,VECCHIO_CODICE
+from tmp_ricodifica_uffici
+where anno = p_anno
+and nvl(aggiorna,'X') = 'S'
+and data_aggiornamento is null;
+
+begin
+ for a in aggiorna 
+ loop
+-- update da fare per cambio codici uffici
+-- tabella FND_USER
+update fnd_user set ufficio = a.nuovo_codice where ufficio = a.vecchio_codice;
+
+-- tabella AP_UTENTI
+update ap_utenti set ufficio = a.nuovo_codice where ufficio = a.vecchio_codice;
+
+-- tabella FIN_T_CDG_RICHIESTE
+--update fin_t_cdg_richieste set struttura_richiedente = a.nuovo_codice where struttura_richiedente =  a.vecchio_codice and to_char(data,'yyyy') = p_anno;
+--update fin_t_cdg_richieste set struttura_titolare_origine = a.nuovo_codice where struttura_titolare_origine =  a.vecchio_codice and to_char(data,'yyyy') = p_anno;
+
+-- tabella fin_t_obiettivi_gestionali
+update fin_t_obiettivi_gestionali set ufficio = a.nuovo_codice where ufficio = a.vecchio_codice and data_assestamento = to_date('01011900','ddmmyyyy') and anno >= p_anno;
+
+
+select count(*) into controlla_strutt
+from fin_t_strutture
+where 
+codice = a.nuovo_codice and anno >= p_anno and data_assestamento = to_date('01011900','ddmmyyyy');
+
+if controlla_strutt = 0 
+then
+-- tabella fin_strutture ***** ATTENZIONE **** disabilitare FK con fin_t_dipartimenti e PK
+  --update fin_t_strutture set codice = a.nuovo_codice, fin_t_dipartimenti_codice = substr(a.nuovo_codice,1,2), descrizione = a.nuova_descrizione  where codice = a.vecchio_codice and anno > p_anno and data_assestamento = to_date('01011900','ddmmyyyy');
+  insert into fin_t_strutture (ANNO
+  ,CODICE
+  ,FIN_T_DIPARTIMENTI_ANNO
+  ,FIN_T_DIPARTIMENTI_CODICE
+  ,DESCRIZIONE
+  ,ATTIVO
+  ,DATA_ASSESTAMENTO
+  ,MONITORAGGIO
+  ,DATA_ATTIVAZIONE)
+  values
+  (p_anno
+   ,a.nuovo_codice
+   ,p_anno
+   ,substr(a.nuovo_codice,1,2)
+   ,a.nuova_descrizione
+   ,'S'
+   ,to_date('01011900','ddmmyyyy')
+   ,'S'
+   ,trunc(sysdate,'dd'));
+end if;
+
+select count(*) into controlla_strutt
+from fin_t_strutture_capitoli
+where fin_t_strutture_codice =  a.nuovo_codice and data_assestamento = to_date('01011900','ddmmyyyy') and capitolo_anno >= p_anno;
+
+if controlla_strutt = 0 
+then
+-- -- tabella fin_strutture_Capitoli ***** ATTENZIONE **** disabilitare FK con fin_t_strutture e PK
+update fin_t_strutture_capitoli set fin_t_strutture_codice = a.nuovo_codice,fin_t_dipartimenti_codice = substr(a.nuovo_codice,1,2) where fin_t_strutture_codice =  a.vecchio_codice and data_assestamento = to_date('01011900','ddmmyyyy') and capitolo_anno >= p_anno;
+end if;
+
+
+-- tabella FIN_T_DOCUMENTI
+-- PREIMPEGNI
+update fin_t_documenti set segment3  = a.nuovo_codice where nvl(segment3,'XXX') = a.vecchio_codice and doc_type = 'PRE-IMP' and nvl(open_balance_proposed,0) > 0 and nvl(deletion_status_flag,'N') = 'N';
+--IMPEGNI
+update fin_t_documenti set segment3  = a.nuovo_codice where nvl(segment3,'XXX') = a.vecchio_codice and doc_type like 'IMP%' and nvl(open_balance_proposed,0) > 0 and nvl(deletion_status_flag,'N') = 'N';
+--Liquidazioni
+update fin_t_documenti set segment3  = a.nuovo_codice where nvl(segment3,'XXX') = a.vecchio_codice and doc_type = 'LIQ' and nvl(open_balance_proposed,0) > 0 and nvl(deletion_status_flag,'N') = 'N';
+--Accertamenti
+update fin_t_documenti set segment3  = a.nuovo_codice where nvl(segment3,'XXX') = a.vecchio_codice and doc_type = 'ACC' and nvl(open_balance_proposed,0) > 0 and nvl(deletion_status_flag,'N') = 'N';
+-- MANDATI
+update fin_t_documenti set segment3  = a.nuovo_codice where nvl(segment3,'XXX') = a.vecchio_codice and doc_type = 'MAND' and nvl(open_balance_proposed,0) > 0 and nvl(open_balance_proposed,0) > 0;
+-- REVERSALI
+update fin_t_documenti set segment3  = a.nuovo_codice where nvl(segment3,'XXX') = a.vecchio_codice and doc_type = 'REV' and nvl(open_balance_proposed,0) > 0 and nvl(open_balance_proposed,0) > 0;
+
+
+-- MAX
+-- Tabella contratti
+update bi_generale_gest set ufficio  = a.nuovo_codice where ufficio = a.vecchio_codice and ufficio &lt;> a.nuovo_codice;
+-- Tabella suddivisione importi contratti
+update bi_sud_def set ufficio  = a.nuovo_codice where ufficio = a.vecchio_codice and ufficio &lt;> a.nuovo_codice;
+-- Tabella movimenti (richieste inevase)
+update ec_righi_mov set ufficio  = a.nuovo_codice where (tipo_mov,data,numero) in (select tipo_mov,data,numero from ec_movimenti where ufficio = a.vecchio_codice and ufficio &lt;> a.nuovo_codice and tipo_mov='RIC' and flag is null);
+update ec_movimenti set ufficio  = a.nuovo_codice where ufficio = a.vecchio_codice and ufficio &lt;> a.nuovo_codice and tipo_mov='RIC' and flag is null;
+-- Tabella assegnazione beni mobili
+update tb_beni_ass set ass_ufficio= a.nuovo_codice where data_fine_ass is null and ass_ufficio= a.vecchio_codice and ass_ufficio &lt;> a.nuovo_codice;
+-- FINE MAX
+
+-- sicCECCO
+-- ************************* DA VAòUTARE AL MOMENTO **************************************
+/*
+select count(*) into controlla_strutt
+from fin_t_cdg_dirigenti
+where ufficio = a.nuovo_codice;
+
+if controlla_strutt = 0
+then
+update fin_t_cdg_dirigenti set ufficio = a.nuovo_codice where ufficio = a.vecchio_codice;
+end if;
+
+select count(*) into controlla_strutt
+from mon_abilitazioni_ute_uff
+where ufficio = a.nuovo_codice;
+
+if controlla_strutt = 0
+then
+update mon_abilitazioni_ute_uff set ufficio = a.nuovo_codice where ufficio = a.vecchio_codice;
+end if;
+
+-- per aggiornare MON_PERSONALE_STRUTTURE è necessaria una piccola procedura
+begin
+ for r in
+  (SELECT rowid,CODICE_UFFICIO, MATRICOLA,INT_EST,DATA_DAL,DATA_AL,CREATO_DA,CREATO_IL,AGGIORNATO_DA,AGGIORNATO_IL,COGNOME,NOME
+  FROM MON_PERSONALE_STRUTTURE 
+  where codice_ufficio = a.vecchio_codice
+  and codice_ufficio &lt;> a.nuovo_codice
+  and (data_al is null or trunc(data_al,'dd') > trunc(sysdate,'dd')))
+ loop
+    insert into MON_PERSONALE_STRUTTURE(CODICE_UFFICIO, MATRICOLA,INT_EST,DATA_DAL,DATA_AL,CREATO_DA,CREATO_IL,AGGIORNATO_DA,AGGIORNATO_IL,COGNOME,NOME)
+    values (a.nuovo_codice,r.MATRICOLA,r.INT_EST,trunc((sysdate+1),'dd'),r.DATA_AL,'TRACCIA',trunc(sysdate,'dd'),null,null,r.COGNOME,r.NOME);
+    
+    update  MON_PERSONALE_STRUTTURE set data_al = trunc(sysdate,'dd')
+    where rowid = r.rowid;
+  end loop;
+end;
+verificare anche la tabella MON_SCHEDE_PERS_PRESTATO
+
+*/
+-- fine MON_PERSONALE_STRUTTURE
+-- FINE SicCECCO
+-- ************************************************************************
+  WHERE ANNO              = p_anno
+-- per evitare di rifare l'update per strutture già aggiornate 
+  UPDATE TMP_RICODIFICA_UFFICI
+  SET aggiorna            = 'N',data_aggiornamento = sysdate
+  AND NUOVO_CODICE        = a.NUOVO_CODICE
+  AND nvl(VECCHIO_CODICE,'X')      = nvl(a.VECCHIO_CODICE,'X')
+  AND AGGIORNA            = 'S'
+  and data_aggiornamento is null;
+-- *******************
+commit;
+end loop;
+
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,1854 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLO_PATTO_ANTE_2013</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLO_PATTO_ANTE_2013.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLO_PATTO_ANTE_2013_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLO_PATTO_ANTE_2013_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLO_PATTO_ANTE_2013_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLO_PATTO_ANTE_2013_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE calcolo_patto_ante_2013 (p_anno in number,
+p_id_utente in number,
+p_data_al in date) IS
+/*declare
+
+p_anno number := 2010;
+p_id_utente number := 1000;
+p_data_al date;*/
+pag_enti_residui number :=0;
+no_pag_enti_residui number :=0;
+pag_enti_perenti number :=0;
+validita_voce varchar2(1) := 'N';
+v_segno number;
+
+itotale_titolo1 number := 0;
+ivalidita_voce varchar2(1);
+
+p1_imp_scor number := 0;--p1_impegni_correnti
+p1_imp_s1 number := 0;-- p1_impegni_corr_sanita
+p1_imp_s2 number := 0; --p1_impegni_corr_trasporti per il 2010 beni_trasferiti dal 2011 
+p1_imp_s3 number := 0;
+p1_imp_s4 number := 0;
+p1_imp_s5 number := 0;
+p1_imp_s6 number := 0;
+p1_imp_s7 number := 0;
+p1_imp_s8 number := 0;
+p1_imp_s9 number := 0;
+p1_imp_s10 number := 0;
+p1_imp_s11 number := 0;
+p1_imp_s12 number := 0;
+p1_imp_s13 number := 0;
+p1_imp_s14 number := 0;
+p1_imp_s15 number := 0;
+p1_imp_s16 number := 0;
+p1_imp_s17 number := 0;
+p1_imp_s18 number := 0;
+p1_imp_s19 number := 0;
+p1_imp_s20 number := 0;
+p1_imp_s21 number := 0;
+p1_imp_scorn number := 0;
+p1_imp_scap number := 0;
+p1_imp_scapn number := 0;
+p1_imp_rsf number := 0;
+p1_imp_opsf number := 0;
+p1_imp_qosf number := 0;
+p1_imp_orsf number := 0;
+p1_imp_ds number := 0;
+
+
+
+p1_mand_scor number := 0;--p1_impegni_correnti
+p1_mand_s1 number := 0;-- p1_impegni_corr_sanita
+p1_mand_s2 number := 0; --p1_impegni_corr_trasporti per il 2010 beni_trasferiti dal 2011 
+p1_mand_s3 number := 0;
+p1_mand_s4 number := 0;
+p1_mand_s5 number := 0;
+p1_mand_s6 number := 0;
+p1_mand_s7 number := 0;
+p1_mand_s8 number := 0;
+p1_mand_s9 number := 0;
+p1_mand_s10 number := 0;
+p1_mand_s11 number := 0;
+p1_mand_s12 number := 0;
+p1_mand_s13 number := 0;
+p1_mand_s14 number := 0;
+p1_mand_s15 number := 0;
+p1_mand_s16 number := 0;
+p1_mand_s17 number := 0;
+p1_mand_s18 number := 0;
+p1_mand_s19 number := 0;
+p1_mand_s20 number := 0;
+p1_mand_s21 number := 0;
+p1_mand_s22 number := 0;
+p1_mand_scorn number := 0;
+p1_mand_scap number := 0;
+p1_mand_scapn number := 0;
+p1_mand_rsf number := 0;
+p1_mand_opsf number := 0;
+p1_mand_qosf number := 0;
+p1_mand_orsf number := 0;
+p1_mand_ds number := 0;
+
+p1_tot_por_compe number := 0;
+p1_tot_por_res number := 0;
+p1_tot_por_imp number := 0;
+data_al  date := nvl(p_data_al,to_date('3112'||p_anno||' 00:00','ddmmyyyy HH24:MI'));
+type vettore_30 is varray(30) of number;
+corr_imp vettore_30 := vettore_30(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+corr_mand vettore_30 := vettore_30(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+
+cursor struttura_imp is
+select to_number(substr(codice_voce,2)) cur
+,nvl(importo,0) imp_corr
+from fin_t_struttura_patto
+where anno = p_anno
+and tipo_rilevazione = 'I'
+and substr(codice_voce,1,1) = 'S'
+and ascii(substr(codice_voce,2,1)) between 49 and 57
+order by to_number(substr(codice_voce,2));
+
+cursor struttura_mand is
+select to_number(substr(codice_voce,2)) cur
+,nvl(importo,0) imp_corr
+from fin_t_struttura_patto
+where anno = p_anno
+and tipo_rilevazione = 'M'
+and substr(codice_voce,1,1) = 'S'
+and ascii(substr(codice_voce,2,1)) between 49 and 57
+order by to_number(substr(codice_voce,2));
+
+BEGIN
+
+   -- Calcolo importi Capitoli POR
+	   calcolo_pag_por_residui(p_anno,data_al);
+   -- FINE Calcolo importi Capitoli POR 
+DELETE FIN_T_IMPORTI_PATTO WHERE anno = p_anno and utente = p_id_utente;
+commit;
+
+-- carico nel vattore corr_impegni gli importi correttivi
+  for imp in struttura_imp loop
+    corr_imp(imp.cur) := imp.imp_corr;
+  end loop;
+-- FINE corr_imp
+-- carico nel vattore corr_mandati gli importi correttivi
+  for mand in struttura_mand loop
+    corr_mand(mand.cur) := mand.imp_corr;
+  end loop;
+-- FINE corr_imp
+begin
+ select 
+ nvl(obiettivo_patto_stabilita,0),
+ nvl(obiettivo_patto_stabilita_imp,0),
+ --nvl(sforamento_patto_prec,0),
+ nvl(quota_enti_locali,0),
+ nvl(quota_enti_locali_imp,0)
+ into 
+ p1_mand_opsf,
+ p1_imp_opsf,
+-- p1_sforamento_anno_precedente,
+ p1_mand_qosf,
+ p1_imp_qosf
+ from fin_t_dati_generali
+ where anno_finanziario = p_anno;
+end;
+
+ 
+--IMPEGNI
+--  PARTE CORRENTE
+
+ begin
+  select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_scor
+  from fin_t_documenti b,
+  fin_t_articoli a
+  where b.segment8 = p_anno
+  and b.doc_type LIKE 'IMP%'
+  and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+  and b.date_created &lt;= nvl(p_data_al,b.date_created)
+  and a.anno = b.segment8
+  and a.eu||a.codice = b.segment2
+  and substr(a.codice_meccanografico,3,1) = '1';
+  exception when no_data_found then p1_imp_scor := 0;
+ end;
+ if p_anno = 2010
+ then p1_imp_scor := p1_imp_scor - 26;
+ end if;
+-- ** FINE SCor ****
+
+-- ** S1 ****
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S1';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  
+ if ivalidita_voce = 'S'
+    then
+     begin
+      select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_s1
+      from fin_t_documenti b,
+      fin_t_articoli a
+      where b.segment8 = p_anno
+      and b.doc_type LIKE 'IMP%'
+      and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+      and b.date_created &lt;= nvl(p_data_al,b.date_created)
+      and a.anno = b.segment8
+      and a.eu||a.codice = b.segment2
+      and a.eu = 'U'
+      and (substr(a.codice_meccanografico,3,3) = '157' or a.codice = 26381);
+      exception when no_data_found then p1_imp_s1 := 0;
+     end;
+     p1_imp_s1 := p1_imp_s1 + corr_imp(1);
+      else p1_imp_s1 := 0;
+ end if;
+-- ** FINE S1 *****
+                
+-- ** S2 ****    
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S2';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  if ivalidita_voce = 'S'
+    then  
+     if p_anno &lt; 2012
+     then
+    p1_imp_s2 := 0; 
+    else 
+ /*   begin
+      select nvl(round(sum(nvl(b.QUOTA_UE_IMP,0))/1000,0),0) into p1_imp_s2
+      from fin_t_por_patto b
+      ,fin_t_articoli a
+      where b.anno = p_anno
+      and b.anno = a.anno
+      and b.capitolo = a.eu||a.codice
+      and substr(a.codice_meccanografico,3,1) = '1' ;
+      exception when no_data_found then p1_imp_s2  := 0;
+     end;*/
+     p1_imp_s2 := 0; 
+     end if;
+    p1_imp_s2 := p1_imp_s2 + corr_imp(2);
+   else p1_imp_s2 := 0;
+  end if; 
+                        
+-- **** FINE S2 ****
+  
+-- ******* S3  ********
+            
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S3';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+ 
+ if ivalidita_voce = 'S'
+    then  
+   if p_anno &lt; 2011
+     then p1_imp_s3  := 0;
+  --   elsif p_anno >= 2011
+   --  then
+   else
+     begin
+      select nvl(round(sum(nvl(b.QUOTA_UE_IMP,0))/1000,0),0) into p1_imp_s3
+      from fin_t_por_patto b
+      ,fin_t_articoli a
+      where b.anno = p_anno
+      and b.anno = a.anno
+      and b.capitolo = a.eu||a.codice
+      and substr(a.codice_meccanografico,3,1) = '1' ;
+      exception when no_data_found then p1_imp_s3  := 0;
+     end;
+     end if;
+     p1_imp_s3 := p1_imp_s3 + corr_imp(3);
+      else p1_imp_s3  := 0;
+ end if;
+            
+-- ***** FINE S3 *****                 
+-- ******* S4  ********
+            
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S4';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+ 
+ if ivalidita_voce = 'S'
+    then  
+   if p_anno &lt; 2011
+     then
+     begin
+      select nvl(round(sum(nvl(b.QUOTA_UE_IMP,0))/1000,0),0) into p1_imp_s4
+      from fin_t_por_patto b
+      ,fin_t_articoli a
+      where b.anno = p_anno
+      and b.anno = a.anno
+      and b.capitolo = a.eu||a.codice
+      and substr(a.codice_meccanografico,3,1) = '1' ;
+      exception when no_data_found then p1_imp_s4  := 0;
+     end;
+     else 
+      begin    
+      select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_s4
+      from fin_t_documenti b
+      where b.segment8 = p_anno
+      and b.doc_type LIKE'IMP%'
+      and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+      and b.date_created &lt;= nvl(p_data_al,b.date_created)
+      and b.segment2 in ('U09327','U09328','U09329','U09330');
+      exception when no_data_found then p1_imp_s4 := 0;
+     end;
+     end if;
+     p1_imp_s4 := p1_imp_s4 + corr_imp(4);
+      else p1_imp_s4  := 0;
+ end if;
+            
+-- ***** FINE S4 *****    
+                
+-- ** S5  **
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S5';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+
+  if ivalidita_voce = 'S'
+    then    
+    if p_anno &lt; 2011
+     then p1_imp_s5 := 0;
+     else p1_imp_s5 := 0;    
+     end if;
+     p1_imp_s5 := p1_imp_s5 + corr_imp(5);
+      else p1_imp_s5 := 0;
+ end if;
+  
+-- *** FINE S5 ****
+             
+-- ******* S6 voce non Applicabile ********
+            
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S6';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  
+ if ivalidita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then 
+     begin    
+      select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_s6
+      from fin_t_documenti b
+      where b.segment8 = p_anno
+      and b.doc_type LIKE'IMP%'
+      and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+      and b.date_created &lt;= nvl(p_data_al,b.date_created)
+      and b.segment2 in ('U09327','U09328','U09329','U09330');
+      exception when no_data_found then p1_imp_s6 := 0;
+     end;
+     else p1_imp_s6 := 0;
+     end if;
+     p1_imp_s6 := p1_imp_s6 + corr_imp(6);
+      else p1_imp_s6 := 0;
+ end if;
+            
+-- ***** FINE S6 *****
+             
+-- ** S7 ****    
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S7';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end; 
+ 
+  if ivalidita_voce = 'S'
+    then 
+     if p_anno &lt; 2011
+     then 
+     begin 
+      select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_s7
+      from fin_t_documenti b,
+      fin_t_articoli a
+      where b.segment8 = p_anno
+      and b.doc_type LIKE 'IMP%'
+      and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+      and b.date_created &lt;= nvl(p_data_al,b.date_created)
+      and a.anno = b.segment8
+      and a.eu||a.codice = b.segment2
+      and substr(a.codice_meccanografico,3,3) = '237';
+      exception when no_data_found then p1_imp_s7 := 0;
+      end;
+      else p1_imp_s7 := 0;
+      end if;
+      p1_imp_s7 := p1_imp_s7 + corr_imp(7);
+      else p1_imp_s7 := 0;
+  end if;
+
+-- **** FINE S7 ****
+ -- ** S8 **
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S8';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  
+ if ivalidita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then p1_imp_s8 := 0;
+     else p1_imp_s8 := 0;
+     end if;
+     p1_imp_s8 := p1_imp_s8 + corr_imp(8);
+      else p1_imp_s8 := 0;
+ end if;
+-- *** FINE S8***               
+-- ** S9 **
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S9';
+ if ivalidita_voce = 'S'
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  
+    then 
+    if p_anno &lt; 2011
+     then p1_imp_s9 := 0;
+     else p1_imp_s9 := 0;      
+    end if;
+    p1_imp_s9 := p1_imp_s9 + corr_imp(9);
+      else p1_imp_s9 := 0;
+ end if;
+-- *** FINE S9***               
+            
+-- ******* S10  ********
+            
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S10';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  
+ if ivalidita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then
+     begin
+     select nvl(round(sum(nvl(b.QUOTA_UE_IMP,0))/1000,0),0) into p1_imp_s10
+     from fin_t_por_patto b
+     ,fin_t_articoli a
+     where b.anno = p_anno
+     and b.anno = a.anno
+     and b.capitolo = a.eu||a.codice
+     and substr(a.codice_meccanografico,3,1) = '2';
+     end;
+     else p1_imp_s10 := 0;
+     end if;
+     p1_imp_s10 := p1_imp_s10 + corr_imp(10);
+    else null;
+ end if;
+            
+-- ***** FINE S10 *****   
+-- ******* S11  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S11';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s11 := 0;
+     elsif p_anno &lt;= 2012
+     then
+     begin
+      select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_s11
+      from fin_t_documenti b,
+      fin_t_articoli a
+      where b.segment8 = p_anno
+      and b.doc_type LIKE 'IMP%'
+      and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+      and b.date_created &lt;= nvl(p_data_al,b.date_created)
+      and a.anno = b.segment8
+      and a.eu||a.codice = b.segment2
+      and substr(a.codice_meccanografico,3,3) = '237';
+      exception when no_data_found then p1_imp_s11 := 0;
+    end;
+    else 
+     begin
+     select nvl(round(sum(nvl(b.QUOTA_UE_IMP,0))/1000,0),0) into p1_imp_s11
+     from fin_t_por_patto b
+     ,fin_t_articoli a
+     where b.anno = p_anno
+     and b.anno = a.anno
+     and b.capitolo = a.eu||a.codice
+     and substr(a.codice_meccanografico,3,1) = '2';
+     end;
+   end if;
+     p1_imp_s11 := p1_imp_s11 + corr_imp(11);
+   else p1_imp_s11 := 0;
+  end if;
+            
+-- ***** FINE S11 *****    
+-- ******* S12  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S12';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s12 := 0;
+     else p1_imp_s12 := 0;
+   end if;
+     p1_imp_s12 := p1_imp_s12 + corr_imp(12);
+   else p1_imp_s12 := 0;
+  end if;
+            
+-- ***** FINE S12 *****  
+-- ******* S13  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S13';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s13 := 0;
+     else p1_imp_s13 := 0;
+   end if;
+     p1_imp_s13 := p1_imp_s13 + corr_imp(13);
+   else p1_imp_s13 := 0;
+  end if;
+            
+-- ***** FINE S13 *****
+-- ******* S14  ********
+            
+ begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S14';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;    
+  
+ if ivalidita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then p1_imp_s14 := 0;
+     else p1_imp_s14 := 0;
+    end if;
+     p1_imp_s14 := p1_imp_s14 + corr_imp(14);
+    else null;
+ end if;
+            
+-- ***** FINE S14 ***** 
+-- ******* S15  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S15';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s15 := 0;
+     else
+     begin
+     select nvl(round(sum(nvl(b.QUOTA_UE_IMP,0))/1000,0),0) into p1_imp_s15
+     from fin_t_por_patto b
+     ,fin_t_articoli a
+     where b.anno = p_anno
+     and b.anno = a.anno
+     and b.capitolo = a.eu||a.codice
+     and substr(a.codice_meccanografico,3,1) = '2';
+     end;
+  end if;
+   end if;
+     p1_imp_s15 := p1_imp_s15 + corr_imp(15);
+   else p1_imp_s15 := 0;
+            
+-- ***** FINE S15 *****
+-- ******* S16  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S16';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s16 := 0;
+     else p1_imp_s16 := 0;
+   end if;
+     p1_imp_s16 := p1_imp_s16 + corr_imp(16);
+   else p1_imp_s15 := 0;
+  end if;
+            
+-- ***** FINE S16 *****
+-- ******* S17  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S17';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s17 := 0;
+     else p1_imp_s17 := 0;
+   end if;
+     p1_imp_s17 := p1_imp_s17 + corr_imp(17);
+   else p1_imp_s17 := 0;
+  end if;
+-- ***** FINE S17 *****
+-- ******* S18  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S18';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s18 := 0;
+     else p1_imp_s18 := 0;
+   end if;
+     p1_imp_s18 := p1_imp_s18 + corr_imp(18);
+   else p1_imp_s18 := 0;
+  end if;
+-- ***** FINE S18 *****
+-- ******* S19  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S19';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s19 := 0;
+     else p1_imp_s19 := 0;
+   end if;
+     p1_imp_s19 := p1_imp_s19 + corr_imp(19);
+   else p1_imp_s19 := 0;
+  end if;
+-- ***** FINE S19 *****
+-- ******* S20  ********
+   begin
+  select nvl(attivo,'N') into ivalidita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'I'
+  and nvl(codice_voce,'XX') = 'S20';
+  exception when no_data_found then ivalidita_voce := 'N';
+ end;        
+  if ivalidita_voce = 'S'
+   THEN 
+   if p_anno &lt; 2011
+     then p1_imp_s20 := 0;
+     else p1_imp_s20 := 0;
+   end if;
+     p1_imp_s20 := p1_imp_s20 + corr_imp(20);
+   else p1_imp_s20 := 0;
+  end if;
+-- ***** FINE S20 *****
+
+-- ** SCap ***                
+-- calcolo sulla fin_t_documenti
+select nvl(round(sum(nvl(b.DOCUMENT_AMOUNT,0))/1000,0),0) into p1_imp_scap
+from fin_t_documenti b,
+fin_t_articoli a
+where b.segment8 = p_anno
+and b.doc_type LIKE 'IMP%'
+and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+and b.date_created &lt;= nvl(p_data_al,b.date_created)
+and a.anno = b.segment8
+and a.eu||a.codice = b.segment2
+and substr(a.codice_meccanografico,3,1) = '2';
+-- ** FINE SCap **
+
+if p_anno &lt; 2011
+  then 
+  p1_imp_scorn := nvl(p1_imp_scor,0) - nvl(p1_imp_s1,0) - nvl(p1_imp_s2,0) - nvl(p1_imp_s3,0) - nvl(p1_imp_s4,0) - nvl(p1_imp_s5,0) - nvl(p1_imp_s6,0) ;
+  p1_imp_scapn := nvl(p1_imp_scap,0) - nvl(p1_imp_s7,0) - nvl(p1_imp_s8,0) - nvl(p1_imp_s9,0) - nvl(p1_imp_s10,0); 
+  elsif  p_anno = 2011
+  then p1_imp_scorn := nvl(p1_imp_scor,0) - nvl(p1_imp_s1,0) - nvl(p1_imp_s2,0) - nvl(p1_imp_s3,0) - nvl(p1_imp_s4,0) - nvl(p1_imp_s5,0) - nvl(p1_imp_s6,0) - nvl(p1_imp_s7,0) - nvl(p1_imp_s8,0) - nvl(p1_imp_s9,0) - nvl(p1_imp_s10,0);
+  p1_imp_scapn := nvl(p1_imp_scap,0)  - nvl(p1_imp_s11,0) - nvl(p1_imp_s12,0) - nvl(p1_imp_s13,0) - nvl(p1_imp_s14,0) - nvl(p1_imp_s15,0) - nvl(p1_imp_s16,0) - nvl(p1_imp_s17,0) - nvl(p1_imp_s18,0) - nvl(p1_imp_s19,0) - nvl(p1_imp_s20,0); 
+  elsif p_anno > 2011
+  then
+  p1_imp_scorn := nvl(p1_imp_scor,0) - nvl(p1_imp_s1,0) - nvl(p1_imp_s2,0) - nvl(p1_imp_s3,0) - nvl(p1_imp_s4,0) - nvl(p1_imp_s5,0) - nvl(p1_imp_s6,0) - nvl(p1_imp_s7,0) - nvl(p1_imp_s8,0) - nvl(p1_imp_s9,0) - nvl(p1_imp_s10,0);
+  p1_imp_scapn := nvl(p1_imp_scap,0) - nvl(p1_imp_s11,0) - nvl(p1_imp_s12,0) - nvl(p1_imp_s13,0) - nvl(p1_imp_s14,0) - nvl(p1_imp_s15,0) - nvl(p1_imp_s16,0) - nvl(p1_imp_s17,0) - nvl(p1_imp_s18,0) - nvl(p1_imp_s19,0) - nvl(p1_imp_s20,0); 
+end if;
+p1_imp_rsf := p1_imp_scorn + p1_imp_scapn;
+p1_imp_orsf := p1_imp_opsf - p1_imp_qosf;
+p1_imp_ds := p1_imp_rsf - p1_imp_orsf;
+
+-- FINE IMPEGNI
+
+-- ##### INIZIO SPESE ######
+
+--PARTE CORRENTE
+-- calcolo sulla fin_t_documenti
+begin
+ select 
+  nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_scor
+ from 
+  fin_t_documenti b,
+  fin_t_articoli a
+ where b.segment8 = p_anno
+   and b.doc_type = 'MAND'
+   and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+   and b.date_created &lt;= nvl(data_al,b.date_created)
+   and a.anno = b.segment8
+   and a.eu||a.codice = b.segment2
+ if p_anno = 2010
+   and substr(a.codice_meccanografico,3,1) = '1';
+ end;  
+ 
+ then p1_mand_scor := p1_mand_scor - 26;
+ end if;
+ -- ******* CALCOLO PAGAMENTI RESIDUI ENTI LOCALI *****************
+begin
+     insert into T_MANDATI_ENTI_LOCALI 
+     select 
+       d.segment8 anno 
+      ,d.doc_id
+      ,d.doc_sequence_value numero_mandato
+      ,d.segment2 capitolo_mandato
+      ,d.description oggetto_mandato
+      ,d.date_created data_mandato
+      ,d.document_amount importo_mandato
+      ,b.denominazione beneficiario
+      ,nvl(t.amount,0) importo_beneficiario
+      ,'S'
+      ,nvl(t.amount,0) importo_da_escludere
+      from fin_t_articoli a
+      ,fin_t_documenti d
+      ,fin_t_documenti i
+      ,fin_t_documenti_terze_parti t
+      ,fin_t_anagrafica b 
+      ,fin_t_ana_sedi s
+      ,fin_t_comuni c
+      where 
+      a.anno = p_anno
+      and a.eu = 'U'
+      and nvl(a.flag_perenti,'N') = 'N'
+      and substr(a.codice_meccanografico,3,1) = '1'
+      and d.segment8 = a.anno
+      and d.segment2 = a.eu||a.codice
+      and d.doc_type = 'MAND'
+      and nvl(d.open_balance_proposed,0)>0
+--     and d.date_created &lt;= nvl(p_data_al,d.date_created)
+      and i.doc_id = d.doc_id_capo_filiera
+      and i.doc_type like 'IMP%'
+      and i.segment8 &lt; a.anno
+      and t.doc_id = d.doc_id
+      and b.id = t.id_ana
+      and b.tipo_anagrafica = 'G'
+      and (upper(b.denominazione) like 'COMUNE%' 
+           or upper(b.denominazione) like 'AMMINISTRAZIONE PROVINCIALE%' 
+           or upper(b.denominazione) like 'COMUNITA'' MONTANA%' )
+      and s.id_ana = t.id_ana
+      and s.id_sede = t.id_sede
+      and s.id_comune_sede = c.id
+      and upper(c.regione) = 'BASILICATA'
+      and d.doc_id not in (select doc_id from T_MANDATI_ENTI_LOCALI where anno = p_anno and upper(beneficiario) = b.denominazione);
+     commit;
+     end;
+        
+     begin
+     insert into T_MANDATI_ENTI_LOCALI 
+     select 
+       d.segment8 anno 
+      ,d.doc_id
+      ,d.doc_sequence_value numero_mandato
+      ,d.segment2 capitolo_mandato
+      ,d.description oggetto_mandato
+      ,d.date_created data_mandato
+      ,d.document_amount importo_mandato
+      ,b.denominazione beneficiario
+      ,nvl(t.amount,0) importo_beneficiario
+      ,'S'
+      ,nvl(t.amount,0) importo_da_escludere
+     from fin_t_documenti d
+      ,fin_t_documenti_terze_parti t
+      ,fin_t_anagrafica b 
+      ,fin_t_ana_sedi s
+      ,fin_t_comuni c
+     where 
+      d.segment8 = p_anno
+      and d.segment2 in ('U37230','U37231')
+      and d.doc_type = 'MAND'
+      and nvl(d.open_balance_proposed,0)>0
+      and t.doc_id = d.doc_id
+      and b.id = t.id_ana
+      and b.tipo_anagrafica = 'G'
+      and (upper(b.denominazione) like 'COMUNE%' 
+           or upper(b.denominazione) like 'AMMINISTRAZIONE PROVINCIALE%' 
+           or upper(b.denominazione) like 'COMUNITA'' MONTANA%' )
+      and s.id_ana = t.id_ana
+      and s.id_sede = t.id_sede
+      and s.id_comune_sede = c.id
+      and upper(c.regione) = 'BASILICATA'
+      and d.doc_id not in (select doc_id from T_MANDATI_ENTI_LOCALI where anno = p_anno and upper(beneficiario) = b.denominazione);
+     commit;
+     end;
+            
+-- FINE
+
+-- calcolo RESIDUI
+     begin
+     select sum(nvl(t.amount,0)) into pag_enti_residui 
+     from fin_t_articoli a
+     ,fin_t_documenti d
+     ,fin_t_documenti i
+     ,fin_t_documenti_terze_parti t
+     ,fin_t_anagrafica b 
+     ,fin_t_ana_sedi s
+     ,fin_t_comuni c
+     where a.anno = p_anno
+     and a.eu = 'U'
+     and nvl(a.flag_perenti,'N') = 'N'
+     and substr(a.codice_meccanografico,3,1) = '1'
+     and d.segment8 = a.anno
+     and d.segment2 = a.eu||a.codice
+     and d.doc_type = 'MAND'
+     and nvl(d.open_balance_proposed,0)>0
+     and d.date_created &lt;= nvl(data_al,d.date_created)
+     and i.doc_id = d.doc_id_capo_filiera
+     and i.doc_type like 'IMP%'
+     and i.segment8 &lt; a.anno
+     and t.doc_id = d.doc_id
+     and b.id = t.id_ana
+     and b.tipo_anagrafica = 'G'
+     and (upper(b.denominazione) like 'COMUNE%' 
+           or upper(b.denominazione) like 'AMMINISTRAZIONE PROVINCIALE%' 
+           or upper(b.denominazione) like 'COMUNITA'' MONTANA%' )
+     and nvl(b.ente_locale,'N') = 'S'
+     and nvl(b.popolazione,'N') = 'S'
+     and s.id_ana = t.id_ana
+     and s.id_sede = t.id_sede
+     and s.id_comune_sede = c.id
+     and upper(c.regione) = 'BASILICATA';
+     exception when no_data_found then pag_enti_residui := 0;
+     end;
+-- FINE calcolo RESIDUI
+
+-- calcolo pagamenti da non detrarre
+    begin
+     select sum(nvl(t.importo_da_escludere,0)) into no_pag_enti_residui 
+     from t_mandati_enti_locali t
+          ,fin_t_anagrafica b
+     where t.anno = p_anno
+     and t.data_mandato &lt;= nvl(data_al,t.data_mandato)
+     and nvl(t.esclusione,'N') = 'S'
+     and upper(b.denominazione) = upper(t.beneficiario)
+     and nvl(b.ente_locale,'N') = 'S'
+     and nvl(b.popolazione,'N') = 'S';
+     exception when no_data_found then no_pag_enti_residui := 0;
+    end;
+-- FINE calcolo pagamenti da non detrarre
+
+-- calcolo PERENTI
+         ,fin_t_documenti_terze_parti t
+    begin
+     select sum(nvl(t.amount,0)) into pag_enti_perenti 
+     from fin_t_documenti d
+         ,fin_t_anagrafica b 
+         ,fin_t_ana_sedi s
+         ,fin_t_comuni c
+     where d.segment8 = p_anno
+     and d.segment2 in ('U37230','U37231')
+     and d.doc_type = 'MAND'
+     and nvl(d.open_balance_proposed,0)>0
+     and d.date_created &lt;= nvl(data_al,d.date_created)
+     and t.doc_id = d.doc_id
+     and b.id = t.id_ana
+     and b.tipo_anagrafica = 'G'
+     and (upper(b.denominazione) like 'COMUNE%' 
+          or upper(b.denominazione) like 'AMMINISTRAZIONE PROVINCIALE%' 
+          or upper(b.denominazione) like 'COMUNITA'' MONTANA%' )
+    and nvl(b.ente_locale,'N') = 'S'
+    and nvl(b.popolazione,'N') = 'S'
+    and s.id_ana = t.id_ana
+    and s.id_sede = t.id_sede
+    and s.id_comune_sede = c.id
+    and upper(c.regione) = 'BASILICATA';
+    exception when no_data_found then pag_enti_perenti  := 0;
+   end;
+-- FINE calcolo PERENTI
+   
+-- ******
+
+
+                
+-- ** S1 **
+ begin
+  select nvl(attivo,'N')
+  into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S1';
+  exception when no_data_found then validita_voce := 'N';
+  end;
+
+-- calcolo sulla fin_t_documenti SPESE SANITA'
+if validita_voce = 'S'
+    then
+     begin
+      select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s1
+      from fin_t_documenti b,
+           fin_t_articoli a
+      where b.segment8 = p_anno
+       and b.doc_type = 'MAND'
+       and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+       and b.date_created &lt;= nvl(data_al,b.date_created)
+       and a.anno = b.segment8
+       and a.eu||a.codice = b.segment2
+       and a.eu = 'U'
+       and (substr(a.codice_meccanografico,3,3) = '157' or a.codice = 26381);
+     exception when no_data_found then p1_mand_s1 := 0;
+    end;
+    p1_mand_s1 := p1_mand_s1 + corr_mand(1);
+   else p1_mand_s1 := 0;
+end if;
+-- ***  FINE S1 ******
+                
+-- ** S2 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S2';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+      if p_anno &lt; 2011
+        then
+          begin
+            select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s2
+            from fin_t_documenti b
+            where b.segment8 = p_anno
+              and b.doc_type = 'MAND'
+              and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+              and b.date_created &lt;= nvl(p_data_al,b.date_created)
+              and b.segment2 in ('U14022','U14013','U14014','U14017','U14018','U14010');
+            exception when no_data_found then p1_mand_s2 := 0;
+           end;
+        else p1_mand_s2 := 0;
+        /*if p_anno = 2012
+        then 
+        begin
+         select nvl(round(sum(nvl(b.QUOTA_UE_RESIDUO,0) + nvl(QUOTA_UE_COMPE,0))/1000,0),0) into p1_mand_s2
+         from fin_t_por_patto b
+         ,fin_t_articoli a 
+         where b.anno = p_anno
+         and b.anno = a.anno
+         and b.capitolo = a.eu||a.codice
+         and substr(a.codice_meccanografico,3,1) = '1';
+         exception when no_data_found then p1_mand_s2 := 0;
+         end;
+        end if;*/
+    p1_mand_s2 := p1_mand_s2 + corr_mand(2);
+     end if;
+    else p1_mand_s2 := 0;
+  end if;
+-- ******* FINE S2 *******
+-- ** S3 **
+  begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S3';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+ if validita_voce = 'S'
+    then 
+       if p_anno &lt; 2011
+        then p1_mand_s3 := 0;
+        else
+        begin
+         select nvl(round(sum(nvl(b.QUOTA_UE_RESIDUO,0) + nvl(QUOTA_UE_COMPE,0))/1000,0),0) into p1_mand_s3
+         from fin_t_por_patto b
+         ,fin_t_articoli a 
+         where b.anno = p_anno
+         and b.anno = a.anno
+         and b.capitolo = a.eu||a.codice
+         and substr(a.codice_meccanografico,3,1) = '1';
+         exception when no_data_found then p1_mand_s3 := 0;
+         end;
+        end if;
+     p1_mand_s3 := p1_mand_s3 + corr_mand(3);
+     else p1_mand_s3 := 0;
+  end if;
+-- FINE S3
+-- ** S4 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S4';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+ if validita_voce = 'S'
+    then 
+     if p_anno &lt; 2011
+        then
+         begin
+         select nvl(round(sum(nvl(b.QUOTA_UE_RESIDUO,0) + nvl(QUOTA_UE_COMPE,0))/1000,0),0) into p1_mand_s4
+         from fin_t_por_patto b
+         ,fin_t_articoli a 
+         where b.anno = p_anno
+         and b.anno = a.anno
+         end;
+         and b.capitolo = a.eu||a.codice
+         and substr(a.codice_meccanografico,3,1) = '1';
+         exception when no_data_found then p1_mand_s4 := 0;
+      else 
+       p1_mand_s4 := round((nvl(pag_enti_residui,0) + nvl(pag_enti_perenti,0) - nvl(no_pag_enti_residui,0))/1000);
+      end if;
+      p1_mand_s4 := p1_mand_s4 + corr_mand(4);
+    else p1_mand_s4 := 0;
+ end if;
+
+-- ******* FINE S4 *****
+-- **S5 **
+begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S5';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+-- calcolo sulla fin_t_documenti
+ if validita_voce = 'S'
+    then 
+   if p_anno &lt; 2011
+     then p1_mand_s5 := 0;
+     else  begin
+     select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s5
+     from fin_t_documenti b
+     where b.segment8 = p_anno
+     and b.doc_type = 'MAND'
+     and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+     and b.date_created &lt;= nvl(data_al,b.date_created)
+     and b.segment2 in ('U09327','U09328','U09329','U09330');
+     exception when no_data_found then p1_mand_s5 := 0;
+    end;
+   end if;
+   p1_mand_s5 := p1_mand_s5 + corr_mand(5);
+   else 
+   p1_mand_s5  := 0;
+
+ end if;
+-- inserisco eventuali nuovi pagamenti su residui nella T_MANDATI_ENTI_LOCALI
+     
+-- *** FINE S5 **** 
+
+-- **S6  **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S6';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+                
+ if validita_voce = 'S'
+    then 
+     if p_anno &lt; 2011
+     then p1_mand_s6 := round((nvl(pag_enti_residui,0) + nvl(pag_enti_perenti,0) - nvl(no_pag_enti_residui,0))/1000);
+     else p1_mand_s6 := 0;   
+    end if;
+    p1_mand_s6 := p1_mand_s6 + corr_mand(6);
+    else p1_mand_s6 := 0;
+ end if;     
+
+-- *** FINE S6 ****    
+            
+-- **S7**
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S7';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then 
+      begin
+     select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s7
+     from fin_t_documenti b
+     where b.segment8 = p_anno
+     and b.doc_type = 'MAND'
+     and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+     and b.date_created &lt;= nvl(data_al,b.date_created)
+     and b.segment2 in ('U09327','U09328','U09329','U09330');
+     exception when no_data_found then p1_mand_s7 := 0;
+     end;
+     else p1_mand_s7 := 0;
+     end if;
+     p1_mand_s7 := p1_mand_s7 + corr_mand(7);
+    else null;
+ end if;
+            
+-- *** FINE S7 ****    
+            
+-- **S8 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S8';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then 
+      begin
+     select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s8
+     from fin_t_documenti b,
+     fin_t_articoli a
+     where b.segment8 = p_anno
+     and b.doc_type = 'MAND'
+     and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+     and b.date_created &lt;= nvl(data_al,b.date_created)
+     and a.anno = b.segment8
+     and a.eu||a.codice = b.segment2
+     and substr(a.codice_meccanografico,3,3) = '237';
+     exception when no_data_found then p1_mand_s8 := 0;
+    end;
+    else p1_mand_s8 := 0;
+    end if;
+    p1_mand_s8 := p1_mand_s8 + corr_mand(8);
+    else p1_mand_s8 := 0;
+ end if;
+-- *** FINE S8 **** 
+
+ -- **S9 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S9';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+  /*  if p_anno &lt; 2012
+     then p1_mand_s9 := 0;
+     else 
+       begin
+       select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s9
+       from fin_t_documenti b,
+       fin_t_articoli a
+       where b.segment8 = p_anno
+       and b.doc_type = 'MAND'
+       and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+       and b.date_created &lt;= nvl(data_al,b.date_created)
+       and a.anno = b.segment8
+       and a.eu||a.codice = b.segment2
+       and substr(a.codice_meccanografico,3,3) = '237';
+       exception when no_data_found then p1_mand_s9 := 0;
+       end;
+     end if;*/
+     p1_mand_s9 := 0;
+     p1_mand_s9 := p1_mand_s9 + corr_mand(9);
+     
+ -- **S10 **
+    else p1_mand_s9 := 0;
+ end if;
+-- *** FINE S9 ****
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S10';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then p1_mand_s10 := 0;
+     else p1_mand_s10 := 0;
+     end if;
+     p1_mand_s10 := p1_mand_s10 + corr_mand(10);
+     
+    else p1_mand_s10 := 0;
+ end if;
+-- *** FINE S10 ****
+ -- **S11 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S11';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then begin
+      select round(nvl(sum(nvl(b.QUOTA_UE_RESIDUO,0) + nvl(QUOTA_UE_COMPE,0)),0)/1000) into p1_mand_s11
+      from fin_t_por_patto b
+          ,fin_t_articoli a 
+      where b.anno = p_anno
+      and b.anno = a.anno
+      and b.capitolo = a.eu||a.codice
+      and substr(a.codice_meccanografico,3,1) = '2';
+      exception when no_data_found then p1_mand_s11 := 0;
+    end;
+     else p1_mand_s11 := 0;
+     end if;
+     p1_mand_s11 := p1_mand_s11 + corr_mand(11);
+     
+    else p1_mand_s11 := 0;
+ end if;
+-- *** FINE S11 ****
+
+-- **S12 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S12';
+  exception when no_data_found then validita_voce := 'N';
+ end;
+  if validita_voce = 'S'
+    then 
+    if p_anno &lt; 2011
+     then p1_mand_s12 := 0;
+     else
+        begin
+       select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_s12
+       from fin_t_documenti b,
+       fin_t_articoli a
+       where b.segment8 = p_anno
+       and b.doc_type = 'MAND'
+       and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+       and b.date_created &lt;= nvl(data_al,b.date_created)
+       and a.anno = b.segment8
+       and a.eu||a.codice = b.segment2
+       and substr(a.codice_meccanografico,3,3) = '237';
+       exception when no_data_found then p1_mand_s12 := 0;
+      end;
+    end if;
+    p1_mand_s12 := p1_mand_s12 + corr_mand(12);
+    else p1_mand_s12 := 0;
+ end if;
+-- *** FINE S12 ****  
+
+-- ** S13 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S13';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+ then
+  if p_anno &lt; 2012
+    then p1_mand_s13 := 0;
+    else 
+/* begin
+    select round(nvl(sum(nvl(b.QUOTA_UE_RESIDUO,0) + nvl(QUOTA_UE_COMPE,0)),0)/1000) into p1_mand_s13
+      from fin_t_por_patto b
+          ,fin_t_articoli a 
+      where b.anno = p_anno
+      and b.anno = a.anno
+      and b.capitolo = a.eu||a.codice
+      and substr(a.codice_meccanografico,3,1) = '2';
+      exception when no_data_found then p1_mand_s13 := 0;
+    end;
+      end if;*/
+      p1_mand_s13 := 0;
+    p1_mand_s13 := p1_mand_s13 + corr_mand(13);
+     end if;
+    else p1_mand_s13 := 0;
+ end if;
+      
+-- *****FINE S13 **********           
+
+-- ** S14 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S14';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then p1_mand_s14 := 0;
+    p1_mand_s14 := p1_mand_s14 + corr_mand(14);
+    else p1_mand_s14 := 0;
+ end if;
+      
+-- *****FINE S14 **********
+
+-- ** S15 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S15';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then  if p_anno &lt; 2011
+     then p1_mand_s15 := 0;
+     else
+      p1_mand_s15 := 0;     
+    end if;
+    p1_mand_s15 := p1_mand_s15 + corr_mand(15);
+    else p1_mand_s15 := 0;
+ end if;
+      
+-- *****FINE S15 **********
+
+-- ** s16 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S16';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then  
+    if p_anno &lt;= 2012
+    then
+    begin
+      where b.anno = p_anno
+    select round(nvl(sum(nvl(b.QUOTA_UE_RESIDUO,0) + nvl(QUOTA_UE_COMPE,0)),0)/1000) into p1_mand_s16
+      from fin_t_por_patto b
+          ,fin_t_articoli a 
+      and b.anno = a.anno
+      and b.capitolo = a.eu||a.codice
+      and substr(a.codice_meccanografico,3,1) = '2';
+      exception when no_data_found then p1_mand_s16 := 0;
+    end;
+    end if;
+    p1_mand_s16 := p1_mand_s16 + corr_mand(16);
+    else p1_mand_s16 := 0;
+ end if;
+      
+-- *****FINE s16 **********
+
+-- ** s17 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S17';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then p1_mand_s17 := 0;
+    p1_mand_s17 := p1_mand_s17 + corr_mand(17);
+    else p1_mand_s17 := 0;
+end if;
+      
+-- *****FINE s17 **********
+
+-- ** s18 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S18';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then p1_mand_s18 := 0;
+    p1_mand_s18 := p1_mand_s18 + corr_mand(18);
+    else p1_mand_s18 := 0;
+end if;
+      
+-- *****FINE s18 **********
+
+-- ** s19 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S19';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then p1_mand_s19 := 0;
+    p1_mand_s19 := p1_mand_s19 + corr_mand(19);
+    else p1_mand_s19 := 0;
+end if;
+      
+-- *****FINE s19 **********
+
+-- ** s20 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S20';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then p1_mand_s20 := 0;
+    p1_mand_s20 := p1_mand_s20 + corr_mand(20);
+    else p1_mand_s20 := 0;
+end if;
+      
+-- *****FINE s20 **********
+
+-- ** s21 **
+ begin
+  select nvl(attivo,'N') into validita_voce
+  from fin_t_struttura_patto
+  where anno = p_anno
+  and nvl(tipo_rilevazione,'X') = 'M'
+  and nvl(codice_voce,'XX') = 'S21';
+  exception when no_data_found then validita_voce := 'N';
+ end;    
+  
+ if validita_voce = 'S'
+    then p1_mand_s21 := 0;
+    p1_mand_s21 := p1_mand_s21 + corr_mand(21);
+    else p1_mand_s21 := 0;
+end if;
+      
+-- *****FINE s21 **********
+
+
+-- Scap
+                
+ begin    
+  select nvl(round(sum(nvl(b.open_balance_proposed,0))/1000,0),0) into p1_mand_scap
+  from fin_t_documenti b,
+  fin_t_articoli a
+  where b.segment8 = p_anno
+  and b.doc_type = 'MAND'
+  and nvl(b.deletion_status_flag,'X') &lt;> 'Y'
+  and b.date_created &lt;= nvl(data_al,b.date_created)
+  and a.anno = b.segment8
+  and a.eu||a.codice = b.segment2
+  and substr(a.codice_meccanografico,3,1) = '2';
+end;
+ -- FINE Scap
+
+if p_anno &lt; 2011
+  then
+      p1_mand_scorn := p1_mand_scor - p1_mand_s1 - p1_mand_s2 - p1_mand_s3 - p1_mand_s4 - p1_mand_s5 - p1_mand_s6 - p1_mand_s7;
+      p1_mand_scapn := p1_mand_scap - p1_mand_s8 - p1_mand_s9 - p1_mand_s10 - p1_mand_s11;
+  elsif p_anno = 2011
+  then p1_mand_scorn := p1_mand_scor - p1_mand_s1 - p1_mand_s2 - p1_mand_s3 - p1_mand_s4 - p1_mand_s5 - p1_mand_s6 - p1_mand_s7 - p1_mand_s8 - p1_mand_s9 - p1_mand_s10 - p1_mand_s11 ;
+      p1_mand_scapn := p1_mand_scap - p1_mand_s12 - p1_mand_s13 - p1_mand_s14 - p1_mand_s15 - p1_mand_s16 - p1_mand_s17 - p1_mand_s18 - p1_mand_s19 - p1_mand_s20 - p1_mand_s21;
+  elsif p_anno > 2011
+  then p1_mand_scorn := p1_mand_scor - p1_mand_s1 - p1_mand_s2 - p1_mand_s3 - p1_mand_s4 - p1_mand_s5 - p1_mand_s6 - p1_mand_s7 - p1_mand_s8 - p1_mand_s9 - p1_mand_s10 - p1_mand_s11;
+       p1_mand_scapn := p1_mand_scap - p1_mand_s12 - p1_mand_s13 - p1_mand_s14 - p1_mand_s15 - p1_mand_s16 - p1_mand_s17 - p1_mand_s18 - p1_mand_s19 - p1_mand_s20 - p1_mand_s21;
+ END if;
+ 
+ p1_mand_rsf := p1_mand_scorn + p1_mand_scapn;
+ p1_mand_orsf := p1_mand_opsf - p1_mand_qosf;
+ p1_mand_ds := p1_mand_rsf - p1_mand_orsf;
+ 
+-- FINE SPESE
+ -- *** Insert delle voci riguardanti gli IMPEGNI sulla FIN_T_IMPORTI_PATTO ***
+    -- SCor
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCor','I',nvl(p1_imp_scor,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    -- S1
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S1','I',nvl(p1_imp_s1,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S2
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    --S3
+    values (p_anno,'S2','I',nvl(p1_imp_s2,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S3','I',nvl(p1_imp_s3,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S4
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S4','I',nvl(p1_imp_s4,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S5
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S5','I',nvl(p1_imp_s5,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S6
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S6','I',nvl(p1_imp_s6,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S7
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S7','I',nvl(p1_imp_s7,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S8
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S8','I',nvl(p1_imp_s8,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S9
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S9','I',nvl(p1_imp_s9,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S10
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S10','I',nvl(p1_imp_s10,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S11
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S11','I',nvl(p1_imp_s11,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S12
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S12','I',nvl(p1_imp_s12,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S13
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S13','I',nvl(p1_imp_s13,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S14
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S14','I',nvl(p1_imp_s14,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S15
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S15','I',nvl(p1_imp_s15,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S16
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S16','I',nvl(p1_imp_s16,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S17
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S17','I',nvl(p1_imp_s17,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S18
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S18','I',nvl(p1_imp_s18,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S19
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S19','I',nvl(p1_imp_s19,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+      --S20
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S20','I',nvl(p1_imp_s20,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --SCorN
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCorN','I',nvl(p1_imp_scorn,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --SCap
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCap','I',nvl(p1_imp_scap,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --SCapN
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCapN','I',nvl(p1_imp_scapn,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --R SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'R SF '||substr(p_anno,3,2),'I',nvl(p1_imp_rsf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --OP SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'OP SF '||substr(p_anno,3,2),'I',nvl(p1_imp_opsf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --QO SF
+    --
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'QO SF '||substr(p_anno,3,2),'I',nvl(p1_imp_qosf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+     --OR SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'OR SF '||substr(p_anno,3,2),'I',nvl(p1_imp_orsf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --D S
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'D S '||substr(p_anno,3,2),'I',nvl(p1_imp_ds,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+-- ***** FINE insert IMPEGNI
+   
+-- insert MANDATI in FIN_T_IMPORTI_PATTO
+-- SCor
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCor','M',nvl(p1_mand_scor,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    -- S1
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S1','M',nvl(p1_mand_s1,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S2
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S2','M',nvl(p1_mand_s2,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S3
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S3','M',nvl(p1_mand_s3,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S4
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S4','M',nvl(p1_mand_s4,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S5
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S5','M',nvl(p1_mand_s5,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S6
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S6','M',nvl(p1_mand_s6,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S7
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S7','M',nvl(p1_mand_s7,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S8
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S8','M',nvl(p1_mand_s8,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S9
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S9','M',nvl(p1_mand_s9,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S10
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S10','M',nvl(p1_mand_s10,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S11
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S11','M',nvl(p1_mand_s11,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S12
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S12','M',nvl(p1_mand_s12,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S13
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S13','M',nvl(p1_mand_s13,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S14
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S14','M',nvl(p1_mand_s14,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S15
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S15','M',nvl(p1_mand_s15,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S16
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S16','M',nvl(p1_mand_s16,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --S17
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S17','M',nvl(p1_mand_s17,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+    --S18
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S18','M',nvl(p1_mand_s18,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+      --S19
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S19','M',nvl(p1_mand_s19,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+      --S20
+    --
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S20','M',nvl(p1_mand_s20,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+      --S21
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'S21','M',nvl(p1_mand_s21,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --SCorN
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCorN','M',nvl(p1_mand_scorn,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --SCap
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCap','M',nvl(p1_mand_scap,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --SCapN
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'SCapN','M',nvl(p1_mand_scapn,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --R SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'R SF '||substr(p_anno,3,2),'M',nvl(p1_mand_rsf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --OP SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'OP SF '||substr(p_anno,3,2),'M',nvl(p1_mand_opsf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --QO SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'QO SF '||substr(p_anno,3,2),'M',nvl(p1_mand_qosf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --OR SF
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'OR SF '||substr(p_anno,3,2),'M',nvl(p1_mand_orsf,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+     --D S
+    insert into fin_t_importi_patto(ANNO,CODICE_VOCE,TIPO_RILEVAZIONE,IMPORTO,UTENTE,DATA_ELABORAZIONE,DATA_AL)
+    values (p_anno,'D S '||substr(p_anno,3,2),'M',nvl(p1_mand_ds,0),p_id_utente,trunc(sysdate,'dd'),data_al);
+    commit;
+    --
+-- ***** FINE insert MANDATI
+END;</pre>	</td></tr>
+</table></div>

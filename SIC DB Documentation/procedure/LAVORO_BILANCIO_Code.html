@@ -1,0 +1,251 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LAVORO_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LAVORO_BILANCIO.html">Details</a></div></div>
+<div class="tab"><div><a href="LAVORO_BILANCIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LAVORO_BILANCIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="LAVORO_BILANCIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LAVORO_BILANCIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure lavoro_bilancio(p_anno number) is
+
+fpv_riacc number := 0; --totale importo netto doc (B_COM,V-COM,A_COM) con segment9 = 'FPV_REG'
+fpv number := 0; --totale importo netto doc (B_COM,V-COM,A_COM) con segment9 = 'FPV'
+capitoli_vinc varchar2(2000); --tutti i capitoli di Entrata vincolati al capitolo di uscita dell loop
+compe_def_anno1 number := 0; --stanziamento di comnpetenza p_anno + 1
+impegni_anno1 number := 0; --totale impegni plur alla data del '0101'||p_anno + 1
+p_STANZIAMENTO_DEF_ANNO_PREC number := 0;
+p_DISPONIB_COMPE_ANNO_PREC number := 0;
+p_capitolo varchar2(6);
+
+  cursor bilancio is
+  SELECT distinct
+      b.anno,
+      b.eu,
+      b.titolo,
+      b.categoria fo,
+      b.capitolo upb,
+      decode(dp.dipartimenti,null,a.dipartimento,dp.dipartimenti) dipartimenti,
+      nvl(nb1.codice,'Da Def.') Missione
+      ,nb1.descrizione Desc_Missione
+      ,nvl(nb2.codice,'Da Def.') Programma
+      ,nb2.descrizione Desc_Programma
+      ,a.NB_TITOLO
+      ,ntu.descrizione nb_desc_titolo
+      ,a.nb_macroaggregato macroaggregato
+      ,a.nb_codice_transazione codice_transazione
+      ,a.nb_piano_conti_fina pcf
+      ,pcf.descrizione desc_pcf
+      ,a.sanita_sn,
+      a.eu||a.codice capitolo,
+      a.descrizione desc_capitolo,
+      NVL(b.previsto_attuale,0)+ NVL(b.variazione_competenza_piu,0) + NVL(
+      b.assestamento_competenza_piu,0)- NVL(b.variazione_competenza_meno,0) -
+      NVL(b.assestamento_competenza_meno,0) stanziamento_def_compe,
+      NVL(b.variazione_competenza_piu,0)- NVL(b.variazione_competenza_meno,0) variazione_competenza,
+      NVL(b.previsto_attuale,0)+ NVL(b.variazione_competenza_piu,0) + NVL(
+      b.assestamento_competenza_piu,0)- NVL(b.variazione_competenza_meno,0) -
+      NVL(b.assestamento_competenza_meno,0) - NVL(
+      b.pre_impegni,0) - NVL(b.impegni_accertamenti_compe,0) DISPONIB_COMP_ANNO,
+      NVL(b.ENTRATE,0) ENTRATE,
+      NVL(b.MUTUI,0) MUTUI,
+      NVL(b.ALIENAZIONE_BENI_IMMOBILI,0) ALIENAZIONE_BENI_IMMOBILI,
+      NVL(b.STATO,0) STATO,
+      NVL(b.UNIONE_EUROPEA,0) UE,
+      NVL(b.avanzi,0) AVANZI,
+      NVL(b.AIUTI,0) AIUTI,
+      NVL(b.regione,0) REGIONE,
+      NVL(b.altri_soggetti,0) ALTRI_SOGGETTI,
+      NVL(na.quota_avanzo,0) quota_avanzo_libero,
+      NVL(reg.quota_avanzo,0) quota_avanzo_regionale,
+      NVL(b.previsto_attuale,0) competenza
+    FROM
+      fin_t_bilancio b,
+      fin_t_articoli a,
+      fin_t_capitoli_dipartimenti dp,
+      fin_v_avanzi_regionali reg,
+      fin_v_avanzi_liberi na,  
+      --  wv_vincoli v,
+      fin_v_tipo_variazioni tv,
+      nb_livello1 nb1,
+      nb_livello2 nb2,
+      nb_titoli_uscite ntu,
+      nb_pcf_04 pcf
+    WHERE a.anno = p_anno
+    AND a.eu = 'U'
+    AND a.anno                   = b.anno
+    AND a.eu                   = b.eu
+    AND a.codice               = b.articolo
+    AND a.capitolo             = b.capitolo
+    AND a.categoria            = b.categoria
+    AND a.titolo               = b.titolo
+    AND na.anno(+)             = b.anno
+    AND na.eu(+)               = b.eu
+    AND na.capitolo_uscita(+)  = b.articolo
+    AND reg.anno(+)            = b.anno
+    AND reg.eu(+)              = b.eu
+    AND reg.capitolo_uscita(+) = b.articolo
+    AND tv.anno(+)            = b.anno
+    AND tv.capitolo_uscita(+) = b.eu||b.articolo
+    AND a.anno > 2002
+    and nb1.id(+) = nb2.id_livello1
+    and a.nb_id_padre = nb2.id(+)
+    and nb1.anno(+) = nb2.anno
+    and nb2.anno(+) = a.anno
+    and ntu.anno(+) = a.anno
+    and ntu.id(+) = a.nb_titolo 
+    and pcf.anno(+) = a.anno
+    and pcf.eu(+) = a.eu
+    and pcf.codice_finale(+) = a.nb_piano_conti_fina
+    and dp.anno(+) = a.anno
+    and dp.capitolo(+) = a.eu||a.codice 
+  ORDER BY 1,2,3,4,5,6;
+  
+  cursor vincoli is
+  select distinct capitolo_entrata
+  from fin_t_capitoli_vincolati
+  where anno = p_anno
+  and capitolo_uscita = p_capitolo;
+
+begin
+ delete tmp_lavoro_bilancio where anno = p_anno and eu = 'U';
+ commit;
+ 
+  for b in bilancio loop 
+  fpv_riacc := 0;
+  fpv := 0;
+  capitoli_vinc := '';
+  compe_def_anno1 := 0;
+  impegni_anno1 := 0;  
+  p_STANZIAMENTO_DEF_ANNO_PREC := 0;
+  p_DISPONIB_COMPE_ANNO_PREC := 0;
+  
+-- setto il capitolo in corso nella variabile p_capitolo
+  p_capitolo := b.capitolo;
+-- calcolo stanziamento definitivo  e disponibilità anno prec
+begin
+ SELECT NVL(a.previsto_attuale,0)+ NVL(a.variazione_competenza_piu,0) + NVL(a.assestamento_competenza_piu,0)
+ - NVL(a.variazione_competenza_meno,0) - NVL(a.assestamento_competenza_meno,0) stanziamento_def_compe,
+      NVL(a.previsto_attuale,0)+ NVL(a.variazione_competenza_piu,0) + NVL(
+      a.assestamento_competenza_piu,0)- NVL(a.variazione_competenza_meno,0) -
+      NVL(a.assestamento_competenza_meno,0) - NVL(a.pre_impegni,0) - NVL(a.impegni_accertamenti_compe,0) DISPONIB_COMP_ANNO
+    into p_STANZIAMENTO_DEF_ANNO_PREC, p_DISPONIB_COMPE_ANNO_PREC
+     FROM fin_t_bilancio a
+    WHERE a.anno = (b.anno-1)
+    AND a.eu||a.articolo = p_capitolo;
+    exception when no_data_found then p_STANZIAMENTO_DEF_ANNO_PREC := 0; p_DISPONIB_COMPE_ANNO_PREC := 0;
+END;
+-- fine stanziamento def anno prec
+-- calcolo FPV_RIACC
+   select  
+     nvl(sum(to_number(decode(substr(d.doc_type,7,3),'POS',nvl(d.document_amount,0)
+    ,-nvl(d.document_amount,0)))),0) into fpv_riacc
+    from
+    fin_t_documenti d
+    where 
+      d.segment8 = p_anno
+    and d.segment2 = b.capitolo
+   -- and doc_type in ('V_COM_POS','V_COM_NEG','A_COM_POS','A_COM_NEG','B_COM_POS','B_COM_NEG')
+    and nvl(d.deletion_status_flag,'N') = 'N'
+    and nvl(d.segment9,'XXX') = 'FPV_REG';
+    
+-- calcolo FPV    
+    select  
+    nvl(sum(to_number(decode(substr(d.doc_type,7,3),'POS',nvl(d.document_amount,0)
+    ,-nvl(d.document_amount,0)))),0) into fpv
+    from
+    fin_t_documenti d
+    where 
+      d.segment8 = p_anno
+    and d.segment2 = b.capitolo
+   -- and doc_type in ('V_COM_POS','V_COM_NEG','A_COM_POS','A_COM_NEG','B_COM_POS','B_COM_NEG')
+    and nvl(d.deletion_status_flag,'N') = 'N'
+    and nvl(d.segment9,'XXX') = 'FPV';
+    
+-- loop sui capitoli di entrata vincolati
+    for v in vincoli loop
+      capitoli_vinc := capitoli_vinc||v.capitolo_entrata||'-';
+    end loop;
+  capitoli_vinc := trim(trailing '-' from capitoli_vinc);
+-- end loop su capitoli vincolati
+    
+-- calcolo la competenza definitiva per l'anno p_anno + 1
+ begin
+  select 
+  NVL(b.previsto_attuale,0)+ NVL(b.variazione_competenza_piu,0) + NVL(
+      b.assestamento_competenza_piu,0)- NVL(b.variazione_competenza_meno,0) -
+      NVL(b.assestamento_competenza_meno,0) into compe_def_anno1
+  from fin_t_bilancio b
+  where b.anno = p_anno + 1
+  and b.eu||b.articolo = p_capitolo;
+  exception when no_data_found then compe_def_anno1 := 0;
+ end;
+ -- calcolo il totale degli impegni per l'anno p_anno + 1
+  select nvl(sum(nvl(d.document_amount,0)),0)
+  into impegni_anno1
+  from fin_t_documenti d
+  where 
+     d.segment8 = p_anno + 1
+   and d.segment2 = b.capitolo
+   and d.doc_type like 'IMP%'
+   and nvl(d.deletion_status_flag,'N') = 'N'
+   and trunc(d.date_created,'dd') = to_date('0101'||(p_anno+1),'ddmmyyyy');
+   
+  insert into tmp_lavoro_bilancio
+  (ANNO, EU, TITOLO, FO_CATEGORIA, UPB
+  ,DIPARTIMENTI,LIVELLO_GER1, DESC_LIVELLO1, LIVELLO_GER2, DESC_LIVELLO2,
+  NB_TITOLO, DESC_NB_TITOLO, MACROAGGREGATO, PCF, DESCRIZIONE_PCF, SANITA_SN, CODICE_TRANSAZIONE, 
+  CAPITOLO, DESCRIZIONE, STANZIAMENTO_DEFINITIVO_ANNO, DISPONIB_COMP_ANNO, ENTRATE_REGIONALI, 
+  MUTUI, STATO, UE, REGIONE_VINC, ALTRI_SOGGETTI, AVANZO_VINCOLATO, QUOTA_AVANZO_REG, 
+  FPV_RIACC, FPV, VARIAZIONE_COMP, COMPE_DEF_ANNO_SUCC, CAPITOLI_VINC, IMPEGNI_ANNO_SUCC,STANZIAMENTO_DEF_ANNO_PREC,DISPONIB_COMPE_ANNO_PREC
+  ,VAR_ENTRATE_REG
+  ,VAR_FPV
+  ,VAR_STATO
+  ,VAR_UE
+  ,VAR_REGIONE_VINC
+  ,VAR_ALTRI_SOGGETTI
+  ,VAR_AVANZO_VINC
+  ,ASS_ENTRATE_REG
+  ,ASS_FPV
+  ,ASS_STATO
+  ,ASS_UE
+  ,ASS_REGIONE_VINC
+  ,ASS_ALTRI_SOGGETTI
+  ,ASS_AVANZO_VINC)
+  values
+  (p_anno,b.eu,b.titolo,b.fo,b.upb
+  ,b.dipartimenti,b.missione,b.desc_missione,b.programma,b.desc_programma,
+  b.nb_titolo,b.nb_desc_titolo,b.macroaggregato,b.pcf,b.desc_pcf,b.sanita_sn,b.codice_transazione,
+  b.capitolo,b.desc_capitolo,b.stanziamento_def_compe,b.DISPONIB_COMP_ANNO,nvl(b.entrate,0),
+  nvl(b.mutui,0),nvl(b.stato,0),nvl(b.ue,0),nvl(b.regione,0),nvl(b.altri_soggetti,0),nvl(b.avanzi,0),nvl(b.quota_avanzo_regionale,0),
+  nvl(fpv_riacc,0),nvl(fpv,0),nvl(b.variazione_competenza,0),nvl(compe_def_anno1,0),capitoli_vinc,nvl(impegni_anno1,0),p_STANZIAMENTO_DEF_ANNO_PREC, p_DISPONIB_COMPE_ANNO_PREC
+  ,variazione_segment9(p_anno,b.capitolo,'REGIONE')
+  ,variazione_segment9(p_anno,b.capitolo,'FPV')
+  ,variazione_segment9(p_anno,b.capitolo,'STATO')
+  ,variazione_segment9(p_anno,b.capitolo,'UE')
+  ,variazione_segment9(p_anno,b.capitolo,'REG VIN')
+  ,variazione_segment9(p_anno,b.capitolo,'ALTRI')
+  ,variazione_segment9(p_anno,b.capitolo,'AVANZO')
+  ,assestamento_segment9(p_anno,b.capitolo,'REGIONE')
+  ,assestamento_segment9(p_anno,b.capitolo,'FPV')
+  ,assestamento_segment9(p_anno,b.capitolo,'STATO')
+  ,assestamento_segment9(p_anno,b.capitolo,'UE')
+  ,assestamento_segment9(p_anno,b.capitolo,'REG VIN')
+  ,assestamento_segment9(p_anno,b.capitolo,'ALTRI') 
+  ,assestamento_segment9(p_anno,b.capitolo,'AVANZO'));
+  commit;
+  end loop;
+end;</pre>	</td></tr>
+</table></div>

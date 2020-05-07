@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CAPITOLI_DIPARTIMENTI_ENTRATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CAPITOLI_DIPARTIMENTI_ENTRATE.html">Details</a></div></div>
+<div class="tab"><div><a href="CAPITOLI_DIPARTIMENTI_ENTRATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CAPITOLI_DIPARTIMENTI_ENTRATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="CAPITOLI_DIPARTIMENTI_ENTRATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CAPITOLI_DIPARTIMENTI_ENTRATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure capitoli_dipartimenti_entrate (v_anno in number) is 
+p_anno number := v_anno;
+p_cap_entrata varchar2(10);
+p_cap_uscita varchar2(10);
+dipart varchar2(2000):= '';
+strutt varchar2(2000):= '';
+n_cond number := 0;
+conta_cap number := 0;
+
+cursor capitoli_entrata is
+select distinct eu||codice cap_entrata
+from fin_t_articoli
+where anno = p_anno
+and eu = 'E'
+and codice not like '0000%'
+and nvl(abilitato,'N') = 'S';
+
+cursor capitoli_uscita is
+select capitolo_uscita cap_uscita
+from fin_vincoli_definitivi
+where anno = p_anno
+and eu||capitolo_entrata = p_cap_entrata
+union
+select capitolo_uscita cap_uscita
+from fin_t_capitoli_vincolati
+where anno = p_anno
+and capitolo_entrata = p_cap_entrata;
+
+cursor dip is
+select distinct fin_t_dipartimenti_codice dip
+from fin_t_strutture_capitoli 
+where capitolo_eu||capitolo_codice = p_cap_uscita
+and capitolo_anno = p_anno
+and data_assestamento = to_date('01011900','ddmmyyyy');
+
+cursor uff is
+select fin_t_strutture_codice uff
+from fin_t_strutture_capitoli 
+where capitolo_eu||capitolo_codice = p_cap_uscita
+and capitolo_anno = p_anno
+and data_assestamento = to_date('01011900','ddmmyyyy');
+
+begin
+--delete fin_t_capitoli_dipartimenti where anno = p_anno and substr(capitolo,1,1) = 'E';
+--commit;
+for ce in capitoli_entrata loop
+p_cap_entrata := ce.cap_entrata;
+dipart := '';
+strutt := '';
+n_cond := 0;
+conta_cap := 0;
+    for cu in capitoli_uscita loop
+    p_cap_uscita := cu.cap_uscita;
+      for d in dip loop
+      if instr(nvl(dipart,'XXX'),d.dip)= 0
+      then
+      dipart := substr(dipart||d.dip||'-',1,2000);
+      end if;
+      end loop;
+      
+      for u in uff loop
+      if instr(nvl(strutt,'XXX'),u.uff) = 0
+      then 
+      strutt := substr(strutt||u.uff||'-',1,2000);
+      n_cond := n_cond + 1;
+      end if;
+      end loop;
+      
+    end loop;
+    dipart := trim(trailing '-' from dipart);
+    strutt := trim(trailing '-' from strutt);
+    begin
+    select count(*) into conta_cap
+    from fin_t_capitoli_dipartimenti
+    where anno = p_anno
+    and nvl(capitolo,'X') = p_cap_entrata;
+    end;
+ if conta_cap = 0
+  then
+  begin
+  insert into fin_t_capitoli_dipartimenti(ANNO,CAPITOLO,DIPARTIMENTI,UFFICI,NUMERO_CONDIVISIONI,DIPARTIMENTO_PRINCIPALE) 
+  values (p_anno,p_cap_entrata,dipart,strutt,n_cond,substr(nvl(dipart,''),1,2));
+  commit;
+  exception when dup_val_on_index then null;
+  end;
+   else 
+  update fin_t_capitoli_dipartimenti set dipartimenti = dipart,uffici = strutt,numero_condivisioni = n_cond,DIPARTIMENTO_PRINCIPALE=substr(nvl(dipart,''),1,2)
+  where anno = p_anno and capitolo = p_cap_entrata and DIPARTIMENTO_PRINCIPALE is null;
+  commit;
+  end if;
+   end loop;
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP_INSUS</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP_INSUS.html">Details</a></div></div>
+<div class="tab"><div><a href="SP_INSUS_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP_INSUS_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP_INSUS_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP_INSUS_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure SP_INSUS(p_anno in number, p_data in date) authid definer as
+
+esercizio number := p_anno;
+
+id_causale number := 0;
+descr_causale varchar2(2000);
+
+id_pn_testa number := 0;
+indice number :=0; --indice
+conto_dare number;
+conto_avere number;
+p_data_mov date := nvl(p_data,to_date('3112'||esercizio,'ddmmyyyy'));
+
+cursor ins is
+select distinct d.date_created data_doc,
+d.segment2 capitolo
+,d.doc_id doc_id
+,d.description||' - Insussistenza n.'||d.doc_sequence_value||' - Capitolo '||d.segment2 descrizione
+,nvl(d.document_amount,0) importo_acc
+,a.conto_sanita2 --conto DARE
+,a.conto_sanita -- conto AVERE
+,nvl(d.LAST_UPDATED_BY,d.created_by) utente
+from fin_t_documenti d
+, fin_t_articoli a
+where d.segment8 = esercizio
+and d.doc_type = 'INSUS'
+and nvl(d.deletion_status_flag,'N') = 'N'
+and trunc(d.date_created,'dd') &lt;= trunc(p_data_mov,'dd')
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2 
+and nvl(a.sanita_sn,'X') = 'S'
+order by 1,3;
+
+BEGIN
+
+for i in ins loop
+--delete sa_prima_nota_testa where doc_id = i.doc_id;
+--commit;
+id_pn_testa := 0;
+-- trovo la causale contabile relativa al capitolo
+  begin
+    select nvl(id,0),nvl(denominazione,'X')
+      into id_causale,descr_causale
+    from sa_causali_contabili
+    where capitolo = 'E00000'
+    and doc_type = 'INSUS';
+    exception when no_data_found then id_causale:= 0; descr_causale := '';
+  end;
+  -- PRIMA NOTA TESTA
+  -- stacca id per sa_prima_nota_testa
+      select nvl(max(num_reg),0) + 1 into id_pn_testa
+      from sa_prima_nota_testa
+      where data = i.data_doc;
+    --FINE   
+    -- inserisco la testata in sa_prima_nota_testa
+    insert into sa_prima_nota_testa(DATA,NUM_REG,DOC_ID,DESCRIZIONE_MOV,SA_CC_ID,utente)
+    values
+    (i.data_doc,
+     id_pn_testa,
+     i.doc_id,
+     i.descrizione,
+     id_causale,
+     i.utente
+    );
+    commit;
+  -- FINE PNT
+  
+  -- Ricavo i conti Dare e Avere delle causali guidate
+  conto_dare := i.conto_sanita2; -- Fondo
+  conto_avere := i.conto_sanita; -- Crediti
+ 
+    -- FINE causali guidate
+    -- stacco identificativo univoco e progressivo per il rigo della sa_prima_nota_corpo
+    SELECT sq_sapc.NEXTVAL into indice 
+    FROM dual;
+    -- ****
+    insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+    values
+    (i.data_doc,
+    id_pn_testa,
+    conto_dare,
+    indice,
+    'D',
+    nvl(i.importo_acc,0)
+    );
+    commit;
+   -- stacco identificativo univoco e progressivo per il rigo della sa_prima_nota_corpo
+    SELECT sq_sapc.NEXTVAL into indice 
+    FROM dual;
+    -- ****
+   insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+    values
+    ( i.data_doc,
+     id_pn_testa,
+     conto_avere,
+     indice,
+     'A',
+     nvl(i.importo_acc,0)
+    );
+    commit;
+    
+  
+  -- FINE causali guidate
+  
+  end loop;
+ 
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP_APERTURA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP_APERTURA.html">Details</a></div></div>
+<div class="tab"><div><a href="SP_APERTURA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP_APERTURA_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP_APERTURA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP_APERTURA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure SP_apertura(p_anno in number) authid definer as
+id_pn_testa number := 0;
+p_conto number := 9999999999;
+p_data_chiusura date;
+p_data_prec date;
+esercizio number := p_anno;
+verifica_causale number := 0;
+progr number := 0;
+saldo number := 0;
+
+cursor conti is
+select conto codice
+from sa_bilcee_conti
+order by 1;
+
+Begin
+  -- verifico che l'anno contabile non sia chiuso
+   begin
+   select nvl(data_chiusura,to_date('01011900','ddmmyyyy')) into p_data_chiusura
+   from sa_dati_generali
+   where anno = p_anno;
+   exception when no_data_found then p_data_chiusura := to_date('01011900','ddmmyyyy');
+   end;
+   begin
+   select nvl(data_chiusura,to_date('01011900','ddmmyyyy')) into p_data_prec
+   from sa_dati_generali
+   where anno = p_anno - 1
+   and data_chiusura is not null;
+   exception when no_data_found then p_data_prec := to_date('01011900','ddmmyyyy');
+   end;
+   if p_data_chiusura &lt;> to_date('01011900','ddmmyyyy') OR p_data_prec = to_date('01011900','ddmmyyyy')
+   then return;
+   end if;
+   -- FINE verifica anno contabile
+   
+   -- Verifico che l'Apertura Automatica non sia stata già effettuata
+    select count(num_reg) into verifica_causale
+    from sa_prima_nota_testa
+    where to_char(data,'yyyy') = esercizio
+    and sa_cc_id = 999;
+   -- FINE verifica Apertura Automatica
+   
+   -- proseguo solo se l'Apertura Automatica non è stata già fatta verifica_causale = 0
+  if verifica_causale = 0
+   then 
+   -- stacca id per sa_prima_nota_testa
+              select nvl(max(num_reg),0) + 1 into id_pn_testa
+              from sa_prima_nota_testa
+              where data = to_date('0101'||esercizio,'ddmmyyyy');
+             --FINE   
+     -- inserisco la testata in sa_prima_nota_testa
+              insert into sa_prima_nota_testa(DATA,NUM_REG,DESCRIZIONE_MOV,SA_CC_ID)
+              values
+              (to_date('0101'||esercizio,'ddmmyyyy'),
+               id_pn_testa,
+               'Apertura conti automatica',
+               999
+              );
+              commit;
+      -- fine prima nota testa 
+       progr := 0;
+     for con in conti loop
+       progr := progr + 1;
+       begin
+         SELECT
+         (sum(to_number(decode( p.D_A,'D',nvl(p.IMPORTO,0),0)))-
+          sum(to_number(decode( p.D_A,'A',nvl(p.IMPORTO,0),0)))) into saldo    
+        FROM
+          SA_PRIMA_NOTA_CORPO p
+          ,sa_prima_nota_testa t
+        where to_char(p.t_data,'yyyy')= p_anno-1
+        and p.id_conto = con.codice
+        and t.num_reg = p.t_num_reg
+        and t.data = p.t_data;
+        exception when no_data_found then saldo := 0;
+       end;
+           if saldo > 0
+            then
+            -- inserisco il dettaglio in sa_prima_nota_corpo
+              insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+              values
+              (to_date('0101'||esercizio,'ddmmyyyy'),
+               id_pn_testa,
+               con.codice,
+               progr,
+               'D',
+               nvl(saldo,0)
+              );
+              commit;
+           elsif saldo &lt; 0
+            then   
+           -- inserisco il dettaglio in sa_prima_nota_corpo
+              insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+              values
+              (to_date('0101'||esercizio,'ddmmyyyy'),
+               id_pn_testa,
+               con.codice,
+               progr,
+               'A',
+              -nvl(saldo,0)
+              );
+              commit;
+           else null;
+         end if; 
+    end loop;  
+  end if;            
+end;</pre>	</td></tr>
+</table></div>

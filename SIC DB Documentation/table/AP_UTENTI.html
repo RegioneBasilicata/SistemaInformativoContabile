@@ -1,0 +1,271 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AP_UTENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="AP_UTENTI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="AP_UTENTI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>COGNOME</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOME</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_FISCALE</td>
+<td>VARCHAR2(16 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_GAT2</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONTRATTO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LIVELLO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UFFICIO</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_ASS</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MATRICOLA</td>
+<td>NUMBER(10,0)</td>
+<td>No</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RUOLO</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>GUIDA_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>No</td>
+<td>'N'                   </td>
+<td>11</td>
+<td>Si/No</td>
+	</tr>
+	<tr>
+<td>AUTISTA_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>No</td>
+<td>'N'                   </td>
+<td>12</td>
+<td>Si/No</td>
+	</tr>
+	<tr>
+<td>ATTIVO_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>No</td>
+<td>'S'                   </td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TEL_UFFICIO</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>E_MAIL</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_DESCR_FOGLIO</td>
+<td>NUMBER(1,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE_AGGIORNAMENTO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_AGGIORNAMENTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AUT_AUTOPARCO</td>
+<td>NUMBER(3,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_PATENTE</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_SCADENZA_PATENTE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIRIGENTE_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'N'</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>POSIZIONE_ORG_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'N'</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_RILASCIO_PATENTE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LUOGO_RILASCIO_PATENTE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ENTE_RILASCIO_PATENTE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MESSAGGIO_FOGLIO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DG_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PRESIDIO</td>
+<td>NUMBER(5,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO_POS_ORG</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+</table></div>

@@ -1,0 +1,89 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CTRL_FORM_CF</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CTRL_FORM_CF.html">Details</a></div></div>
+<div class="tab"><div><a href="CTRL_FORM_CF_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CTRL_FORM_CF_References.html">References</a></div></div>
+<div class="tab"><div><a href="CTRL_FORM_CF_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CTRL_FORM_CF_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE CTRL_FORM_CF (w_cf IN VARCHAR2, w_errore IN OUT VARCHAR2) IS
+ w_codfis   VARCHAR2(16);
+ lettere    VARCHAR2(26) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+ let_num    VARCHAR2(36) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+ pari_cf    VARCHAR2(72) := '000102030405060708091011121314151617181920212223242500010203040506070809';
+ dispari_cf VARCHAR2(72) := '010005070913151719210204182011030608121416102225242301000507091315171921';
+ tot_let    NUMBER(3);
+ num_contr  NUMBER(2);
+ cix 	NUMBER(2);
+ ciy 	NUMBER(2);
+ w_cdc	VARCHAR2(1);
+BEGIN
+if length(w_cf)=16 then 
+ w_cdc := SUBSTR(w_cf,16,1);
+ w_codfis := SUBSTR(w_cf,1,15);
+ -- genero e verifico il codice di controllo
+ BEGIN
+  tot_let := 0;
+  cix := 2;
+  ciy := 0;
+  BEGIN
+   LOOP
+    ciy := ciy + 1;
+    IF SUBSTR(let_num,ciy,1) = SUBSTR(w_codfis,cix,1) THEN
+     tot_let := tot_let + TO_NUMBER(SUBSTR(pari_cf,((ciy * 2 ) - 1),2));
+     BEGIN
+      cix := cix + 2;
+      IF cix &lt; 15 THEN
+       ciy := 0;
+      ELSE
+       EXIT;
+      END IF;
+     END;
+    END IF;
+   END LOOP;
+  END;
+  BEGIN
+   cix := 1;
+   ciy := 0;
+   BEGIN
+    LOOP
+     ciy := ciy + 1;
+     IF SUBSTR(let_num,ciy,1) = SUBSTR(w_codfis,cix,1) THEN
+      tot_let := tot_let + TO_NUMBER(SUBSTR(dispari_cf,((ciy * 2) - 1),2));
+      BEGIN
+       cix := cix + 2;
+       IF cix &lt; 16 THEN
+        ciy := 0;
+       ELSE
+        EXIT;
+       END IF;
+      END;
+     END IF;
+    END LOOP;
+   END;
+   num_contr := MOD(tot_let,26);
+   IF SUBSTR(lettere, num_contr + 1,1) = w_cdc THEN
+    w_errore := 'N';
+   ELSE
+    w_errore := 'S';
+   END IF;
+  END;
+ END;
+else
+ w_errore:='S'; 
+end if; 
+END CTRL_FORM_CF;</pre>	</td></tr>
+</table></div>

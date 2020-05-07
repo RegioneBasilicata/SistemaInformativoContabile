@@ -1,0 +1,58 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLA_LIQUIDATO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLA_LIQUIDATO.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLA_LIQUIDATO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLA_LIQUIDATO_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLA_LIQUIDATO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLA_LIQUIDATO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure calcola_liquidato(p_anno in number) is
+Liquidato_doc number(15,2) := 0;
+cursor bilancio_u is
+select 
+anno,
+eu||articolo capitolo,
+nvl(liquidato,0) liquidato
+from fin_t_bilancio
+where anno = p_anno
+and eu = 'U';
+
+begin
+ for b in bilancio_u loop
+ -- verifico la situazione del Liquidato
+ begin
+  select sum(nvl(jugd1.document_amount,0)) importo into Liquidato_doc
+  FROM
+  fina_documenti jugd1
+  ,fina_documenti jugd2
+  WHERE
+  upper(jugd1.doc_type) = 'LIQ' and
+  upper(nvl(jugd1.proposal_status_flag,'Z'))||upper(nvl(jugd1.auditing_status_flag,'Z')) ='PI' and
+  upper(nvl(jugd1.deletion_status_flag,'N')) &lt;> 'Y' and
+  to_number(to_char(jugd1.date_created,'yyyy')) =b.anno and
+  jugd1.segment2 = b.capitolo and
+  jugd2.doc_id = jugd1.previous_doc_id and
+  jugd2.segment8 = b.anno;
+  exception when no_data_found then Liquidato_doc := 0;
+ end;
+  if nvl(Liquidato_doc,0) &lt;> nvl(b.liquidato,0)
+  then  update fin_t_bilancio set liquidato = nvl(Liquidato_doc,0) where anno = b.anno and eu||articolo = b.capitolo;
+   commit;
+   end if;
+ end loop;
+end;
+</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,447 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_DOCUMENTI_TERZE_PARTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Flashback.html">Flashback</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_TERZE_PARTI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dipendenze"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>OWNER</th>
+	<th>NAME</th>
+	<th>TYPE</th>
+	<th>REFERENCED_OWNER</th>
+	<th>REFERENCED_NAME</th>
+	<th>REFERENCED_TYPE</th>
+</tr>
+	<tr>
+<td>RAGIONERIA</td>
+<td>VM_GEO_INCASSI</td>
+<td>MATERIALIZED VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>RAGIONERIA</td>
+<td>VM_GEO_PAGAMENTI</td>
+<td>MATERIALIZED VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_V_ANA_NO_DOC.html">GAT2</a></td>
+<td><a href="../view/FIN_V_ANA_NO_DOC.html">FIN_V_ANA_NO_DOC</a></td>
+<td><a href="../view/FIN_V_ANA_NO_DOC.html">VIEW</a></td>
+<td><a href="../view/FIN_V_ANA_NO_DOC.html">GAT2</a></td>
+<td><a href="../view/FIN_V_ANA_NO_DOC.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_V_ANA_NO_DOC.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/ANA_D.html">GAT2</a></td>
+<td><a href="../view/ANA_D.html">ANA_D</a></td>
+<td><a href="../view/ANA_D.html">VIEW</a></td>
+<td><a href="../view/ANA_D.html">GAT2</a></td>
+<td><a href="../view/ANA_D.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/ANA_D.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_MANDATI_SIC_2009.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI_SIC_2009.html">FIN_MANDATI_SIC_2009</a></td>
+<td><a href="../view/FIN_MANDATI_SIC_2009.html">VIEW</a></td>
+<td><a href="../view/FIN_MANDATI_SIC_2009.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI_SIC_2009.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_MANDATI_SIC_2009.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>GENERO_DOCUMENTI_SCRIPT</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>GENERO_DOCUMENTI</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>GENERO_DOCUMENTI2</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../synonym/FINA_DOCUMENTI_TERZE_PARTI.html">GAT2</a></td>
+<td><a href="../synonym/FINA_DOCUMENTI_TERZE_PARTI.html">FINA_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../synonym/FINA_DOCUMENTI_TERZE_PARTI.html">SYNONYM</a></td>
+<td><a href="../synonym/FINA_DOCUMENTI_TERZE_PARTI.html">GAT2</a></td>
+<td><a href="../synonym/FINA_DOCUMENTI_TERZE_PARTI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../synonym/FINA_DOCUMENTI_TERZE_PARTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_V_DOC_TERZE_PARTI.html">GAT2</a></td>
+<td><a href="../view/FIN_V_DOC_TERZE_PARTI.html">FIN_V_DOC_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_V_DOC_TERZE_PARTI.html">VIEW</a></td>
+<td><a href="../view/FIN_V_DOC_TERZE_PARTI.html">GAT2</a></td>
+<td><a href="../view/FIN_V_DOC_TERZE_PARTI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_V_DOC_TERZE_PARTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/FED_FISCALE_U_SETTORI.html">GAT2</a></td>
+<td><a href="../procedure/FED_FISCALE_U_SETTORI.html">FED_FISCALE_U_SETTORI</a></td>
+<td><a href="../procedure/FED_FISCALE_U_SETTORI.html">PROCEDURE</a></td>
+<td><a href="../procedure/FED_FISCALE_U_SETTORI.html">GAT2</a></td>
+<td><a href="../procedure/FED_FISCALE_U_SETTORI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/FED_FISCALE_U_SETTORI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/QUIETANZE.html">GAT2</a></td>
+<td><a href="../procedure/QUIETANZE.html">QUIETANZE</a></td>
+<td><a href="../procedure/QUIETANZE.html">PROCEDURE</a></td>
+<td><a href="../procedure/QUIETANZE.html">GAT2</a></td>
+<td><a href="../procedure/QUIETANZE.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/QUIETANZE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_PAG_ENTI_LOCALI.html">GAT2</a></td>
+<td><a href="../view/VW_PAG_ENTI_LOCALI.html">VW_PAG_ENTI_LOCALI</a></td>
+<td><a href="../view/VW_PAG_ENTI_LOCALI.html">VIEW</a></td>
+<td><a href="../view/VW_PAG_ENTI_LOCALI.html">GAT2</a></td>
+<td><a href="../view/VW_PAG_ENTI_LOCALI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/VW_PAG_ENTI_LOCALI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/PAGATO_TP.html">GAT2</a></td>
+<td><a href="../function/PAGATO_TP.html">PAGATO_TP</a></td>
+<td><a href="../function/PAGATO_TP.html">FUNCTION</a></td>
+<td><a href="../function/PAGATO_TP.html">GAT2</a></td>
+<td><a href="../function/PAGATO_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/PAGATO_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/IMPEGNATO_TP.html">GAT2</a></td>
+<td><a href="../function/IMPEGNATO_TP.html">IMPEGNATO_TP</a></td>
+<td><a href="../function/IMPEGNATO_TP.html">FUNCTION</a></td>
+<td><a href="../function/IMPEGNATO_TP.html">GAT2</a></td>
+<td><a href="../function/IMPEGNATO_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/IMPEGNATO_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/ALLINEA_LIQUIDAZIONI.html">GAT2</a></td>
+<td><a href="../procedure/ALLINEA_LIQUIDAZIONI.html">ALLINEA_LIQUIDAZIONI</a></td>
+<td><a href="../procedure/ALLINEA_LIQUIDAZIONI.html">PROCEDURE</a></td>
+<td><a href="../procedure/ALLINEA_LIQUIDAZIONI.html">GAT2</a></td>
+<td><a href="../procedure/ALLINEA_LIQUIDAZIONI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/ALLINEA_LIQUIDAZIONI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_REVERSALI1.html">GAT2</a></td>
+<td><a href="../view/FIN_REVERSALI1.html">FIN_REVERSALI1</a></td>
+<td><a href="../view/FIN_REVERSALI1.html">VIEW</a></td>
+<td><a href="../view/FIN_REVERSALI1.html">GAT2</a></td>
+<td><a href="../view/FIN_REVERSALI1.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_REVERSALI1.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP_DATA.html">OPEN_BALANCE_LIQ_TP_DATA</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP_DATA.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP_DATA.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP_DATA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/RITENUTE_REVERSALI.html">GAT2</a></td>
+<td><a href="../function/RITENUTE_REVERSALI.html">RITENUTE_REVERSALI</a></td>
+<td><a href="../function/RITENUTE_REVERSALI.html">FUNCTION</a></td>
+<td><a href="../function/RITENUTE_REVERSALI.html">GAT2</a></td>
+<td><a href="../function/RITENUTE_REVERSALI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/RITENUTE_REVERSALI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/BDAP_DCA_REND.html">GAT2</a></td>
+<td><a href="../procedure/BDAP_DCA_REND.html">BDAP_DCA_REND</a></td>
+<td><a href="../procedure/BDAP_DCA_REND.html">PROCEDURE</a></td>
+<td><a href="../procedure/BDAP_DCA_REND.html">GAT2</a></td>
+<td><a href="../procedure/BDAP_DCA_REND.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/BDAP_DCA_REND.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>TEST_ORD_PAGAMENTO_INCASSO</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../function/REVERSALI_TP.html">GAT2</a></td>
+<td><a href="../function/REVERSALI_TP.html">REVERSALI_TP</a></td>
+<td><a href="../function/REVERSALI_TP.html">FUNCTION</a></td>
+<td><a href="../function/REVERSALI_TP.html">GAT2</a></td>
+<td><a href="../function/REVERSALI_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/REVERSALI_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>ORDINATIVO_PAGAMENTO_INCASSO</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_MAND_REV_SOSPESI.html">GAT2</a></td>
+<td><a href="../view/VW_MAND_REV_SOSPESI.html">VW_MAND_REV_SOSPESI</a></td>
+<td><a href="../view/VW_MAND_REV_SOSPESI.html">VIEW</a></td>
+<td><a href="../view/VW_MAND_REV_SOSPESI.html">GAT2</a></td>
+<td><a href="../view/VW_MAND_REV_SOSPESI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/VW_MAND_REV_SOSPESI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_IMPWEB_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_IMPWEB_TP.html">OPEN_BALANCE_IMPWEB_TP</a></td>
+<td><a href="../function/OPEN_BALANCE_IMPWEB_TP.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_IMPWEB_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_IMPWEB_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_IMPWEB_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_IMP_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP.html">OPEN_BALANCE_IMP_TP</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_MANDATI_WEB.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI_WEB.html">FIN_MANDATI_WEB</a></td>
+<td><a href="../view/FIN_MANDATI_WEB.html">VIEW</a></td>
+<td><a href="../view/FIN_MANDATI_WEB.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI_WEB.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_MANDATI_WEB.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/NB_PRIMA_NOTA_TP.html">GAT2</a></td>
+<td><a href="../procedure/NB_PRIMA_NOTA_TP.html">NB_PRIMA_NOTA_TP</a></td>
+<td><a href="../procedure/NB_PRIMA_NOTA_TP.html">PROCEDURE</a></td>
+<td><a href="../procedure/NB_PRIMA_NOTA_TP.html">GAT2</a></td>
+<td><a href="../procedure/NB_PRIMA_NOTA_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/NB_PRIMA_NOTA_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/ALLINEA_OPEN_BALANCE_TP.html">GAT2</a></td>
+<td><a href="../procedure/ALLINEA_OPEN_BALANCE_TP.html">ALLINEA_OPEN_BALANCE_TP</a></td>
+<td><a href="../procedure/ALLINEA_OPEN_BALANCE_TP.html">PROCEDURE</a></td>
+<td><a href="../procedure/ALLINEA_OPEN_BALANCE_TP.html">GAT2</a></td>
+<td><a href="../procedure/ALLINEA_OPEN_BALANCE_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/ALLINEA_OPEN_BALANCE_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/FED_FISCALE_E.html">GAT2</a></td>
+<td><a href="../procedure/FED_FISCALE_E.html">FED_FISCALE_E</a></td>
+<td><a href="../procedure/FED_FISCALE_E.html">PROCEDURE</a></td>
+<td><a href="../procedure/FED_FISCALE_E.html">GAT2</a></td>
+<td><a href="../procedure/FED_FISCALE_E.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/FED_FISCALE_E.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_V_RITENUTE_DOC.html">GAT2</a></td>
+<td><a href="../view/FIN_V_RITENUTE_DOC.html">FIN_V_RITENUTE_DOC</a></td>
+<td><a href="../view/FIN_V_RITENUTE_DOC.html">VIEW</a></td>
+<td><a href="../view/FIN_V_RITENUTE_DOC.html">GAT2</a></td>
+<td><a href="../view/FIN_V_RITENUTE_DOC.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_V_RITENUTE_DOC.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP.html">OPEN_BALANCE_LIQ_TP</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_LIQ_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_ACC_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP.html">OPEN_BALANCE_ACC_TP</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../materialized view/VM_SIOPE_RGS.html">GAT2</a></td>
+<td><a href="../materialized view/VM_SIOPE_RGS.html">VM_SIOPE_RGS</a></td>
+<td><a href="../materialized view/VM_SIOPE_RGS.html">MATERIALIZED VIEW</a></td>
+<td><a href="../materialized view/VM_SIOPE_RGS.html">GAT2</a></td>
+<td><a href="../materialized view/VM_SIOPE_RGS.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../materialized view/VM_SIOPE_RGS.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/RESIDUO_IMP_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/RESIDUO_IMP_TP_DATA.html">RESIDUO_IMP_TP_DATA</a></td>
+<td><a href="../function/RESIDUO_IMP_TP_DATA.html">FUNCTION</a></td>
+<td><a href="../function/RESIDUO_IMP_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/RESIDUO_IMP_TP_DATA.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/RESIDUO_IMP_TP_DATA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_IMP_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP_DATA.html">OPEN_BALANCE_IMP_TP_DATA</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP_DATA.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP_DATA.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_IMP_TP_DATA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../function/OPEN_BALANCE_ACC_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP_DATA.html">OPEN_BALANCE_ACC_TP_DATA</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP_DATA.html">FUNCTION</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP_DATA.html">GAT2</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP_DATA.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../function/OPEN_BALANCE_ACC_TP_DATA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_MANDATI.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI.html">FIN_MANDATI</a></td>
+<td><a href="../view/FIN_MANDATI.html">VIEW</a></td>
+<td><a href="../view/FIN_MANDATI.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_MANDATI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>IGRUE_02_CREA_LAV</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>ORDINATIVO</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../trigger/TERZE_PARTI_PIGNORATE.html">GAT2</a></td>
+<td><a href="../trigger/TERZE_PARTI_PIGNORATE.html">TERZE_PARTI_PIGNORATE</a></td>
+<td><a href="../trigger/TERZE_PARTI_PIGNORATE.html">TRIGGER</a></td>
+<td><a href="../trigger/TERZE_PARTI_PIGNORATE.html">GAT2</a></td>
+<td><a href="../trigger/TERZE_PARTI_PIGNORATE.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../trigger/TERZE_PARTI_PIGNORATE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP</td>
+<td>TEST_PROC2</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GAT2</td>
+<td>GENERO_DOCUMENTI_NO_CODA</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../procedure/CALCOLO_PATTO_ANTE_2013.html">GAT2</a></td>
+<td><a href="../procedure/CALCOLO_PATTO_ANTE_2013.html">CALCOLO_PATTO_ANTE_2013</a></td>
+<td><a href="../procedure/CALCOLO_PATTO_ANTE_2013.html">PROCEDURE</a></td>
+<td><a href="../procedure/CALCOLO_PATTO_ANTE_2013.html">GAT2</a></td>
+<td><a href="../procedure/CALCOLO_PATTO_ANTE_2013.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/CALCOLO_PATTO_ANTE_2013.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_MANDATI1.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI1.html">FIN_MANDATI1</a></td>
+<td><a href="../view/FIN_MANDATI1.html">VIEW</a></td>
+<td><a href="../view/FIN_MANDATI1.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI1.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_MANDATI1.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_REVERSALI.html">GAT2</a></td>
+<td><a href="../view/FIN_REVERSALI.html">FIN_REVERSALI</a></td>
+<td><a href="../view/FIN_REVERSALI.html">VIEW</a></td>
+<td><a href="../view/FIN_REVERSALI.html">GAT2</a></td>
+<td><a href="../view/FIN_REVERSALI.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_REVERSALI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP</td>
+<td>IMPORT_DATI_SIC</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_MANDATI_SIC.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI_SIC.html">FIN_MANDATI_SIC</a></td>
+<td><a href="../view/FIN_MANDATI_SIC.html">VIEW</a></td>
+<td><a href="../view/FIN_MANDATI_SIC.html">GAT2</a></td>
+<td><a href="../view/FIN_MANDATI_SIC.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_MANDATI_SIC.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/SP_LIQ.html">GAT2</a></td>
+<td><a href="../procedure/SP_LIQ.html">SP_LIQ</a></td>
+<td><a href="../procedure/SP_LIQ.html">PROCEDURE</a></td>
+<td><a href="../procedure/SP_LIQ.html">GAT2</a></td>
+<td><a href="../procedure/SP_LIQ.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/SP_LIQ.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/SP_MAND.html">GAT2</a></td>
+<td><a href="../procedure/SP_MAND.html">SP_MAND</a></td>
+<td><a href="../procedure/SP_MAND.html">PROCEDURE</a></td>
+<td><a href="../procedure/SP_MAND.html">GAT2</a></td>
+<td><a href="../procedure/SP_MAND.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../procedure/SP_MAND.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>GENERA_FN08_PERCETTORI</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_DOCUMENTI_TERZE_PARTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_DOCUMENTI_SIMIP.html">GAT2</a></td>
+<td><a href="../view/FIN_DOCUMENTI_SIMIP.html">FIN_DOCUMENTI_SIMIP</a></td>
+<td><a href="../view/FIN_DOCUMENTI_SIMIP.html">VIEW</a></td>
+<td><a href="../view/FIN_DOCUMENTI_SIMIP.html">GAT2</a></td>
+<td><a href="../view/FIN_DOCUMENTI_SIMIP.html">FIN_T_DOCUMENTI_TERZE_PARTI</a></td>
+<td><a href="../view/FIN_DOCUMENTI_SIMIP.html">TABLE</a></td>
+	</tr>
+</table></div>

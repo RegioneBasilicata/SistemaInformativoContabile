@@ -1,0 +1,275 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LIQUIDAZIONI_PATTO_STABILITA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LIQUIDAZIONI_PATTO_STABILITA.html">Details</a></div></div>
+<div class="tab"><div><a href="LIQUIDAZIONI_PATTO_STABILITA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LIQUIDAZIONI_PATTO_STABILITA_References.html">References</a></div></div>
+<div class="tab"><div><a href="LIQUIDAZIONI_PATTO_STABILITA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LIQUIDAZIONI_PATTO_STABILITA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE liquidazioni_patto_stabilita (p_anno in number,p_id_utente in number)IS
+--declare
+--p_anno number := 2011;
+perc_patto number := 1;
+
+
+-- ** cursore per prendere le liquidazioni sui capitoli POR **
+cursor liq_por is
+ select 
+   l.segment2 capitolo
+  ,l.doc_sequence_value liquidazione
+  ,l.description oggetto
+  ,l.attribute13 tipo_atto
+  ,l.attribute14 numero_atto
+  ,l.segment3 ufficio
+  ,l.data_atto_autorizzativo data_atto
+  ,nvl(l.open_balance_proposed,0) residuo
+  ,i.segment8 anno_imp
+  ,1 - p.p_anno_cor incid
+ -- ,1 - p.p_anno_cor p_anno1
+ -- ,1 - p.p_anno_cor p_anno2
+ -- ,1 - p.p_anno_cor p_anno3
+ -- ,1 - p.p_anno_cor p_anno4
+ -- ,1 - p.p_anno_cor p_anno5
+ -- ,1 - p.p_anno_cor p_anno6
+ -- ,1 - p.p_anno_cor p_anno7
+ from fin_t_documenti l
+     ,fin_t_documenti i
+     ,fin_t_por_patto p
+ where l.doc_type = 'LIQ'
+ and l.segment8 = p_anno
+ and nvl(l.open_balance_proposed,0) > 0
+ and i.doc_id = l.previous_doc_id
+ and p.anno = l.segment8
+ and p.capitolo = l.segment2;
+-- ** FINE cursore per prendere le liquidazioni sui capitoli POR **
+
+BEGIN
+
+delete fin_t_liquidazioni_patto where id_utente = p_id_utente;
+commit;
+-- *** carico in fin_t_liquidazioni_patto le LIQ che NON incidono sul patto
+           insert into fin_t_liquidazioni_patto 
+           (ID_UTENTE,
+            ANNO,
+            CAPITOLO,
+            LIQUIDAZIONE,
+            OGGETTO_LIQUIDAZIONE,
+            RESIDUO,
+            IMPORTO_PATTO,
+            INCIDENZA,
+            RESIDUO_IN_PAGAMENTO,
+            TIPO_ATTO,
+            NUMERO_ATTO,
+            DATA_ATTO,
+            UFFICIO)
+          select 
+          p_id_utente
+          ,l.segment8 anno
+          ,l.segment2 capitolo
+          ,l.doc_sequence_value liquidazione
+          ,l.description
+          ,nvl(l.open_balance_proposed,0) residuo
+          ,0 importo_patto
+          ,0 incidenza
+          ,0 residuo_in_pagamento
+          ,l.attribute13
+          ,l.attribute14
+          ,l.data_atto_autorizzativo
+          ,l.segment3
+          from 
+          fin_t_documenti l
+          ,fin_t_articoli a
+          where l.doc_type = 'LIQ'
+          and l.segment8 = p_anno
+          and nvl(l.open_balance_proposed,0) > 0
+          and a.anno = l.segment8
+          and a.eu||a.codice = l.segment2
+          and a.eu = 'U'
+          and nvl(a.sanita_sn,'N') = 'S'--and (substr(a.codice_meccanografico,3,3) = '157' or a.codice = 26381)
+          UNION
+          select 
+          p_id_utente
+          ,l.segment8 anno
+          ,l.segment2 capitolo
+          ,l.doc_sequence_value liquidazione
+          ,l.description
+          ,nvl(l.open_balance_proposed,0) residuo
+          ,0 importo_patto
+          ,0 incidenza
+          ,0 residuo_in_pagamento
+          ,l.attribute13
+          ,l.attribute14
+          ,l.data_atto_autorizzativo
+          ,l.segment3
+          from fin_t_documenti l
+          ,fin_t_articoli a
+          where l.doc_type = 'LIQ'
+          and l.segment8 = p_anno
+          and nvl(l.open_balance_proposed,0) > 0
+          and a.anno = l.segment8
+          and a.eu||a.codice = l.segment2
+          and a.eu = 'U'
+          and a.VOCE_PSI_PAG2 = 'S19';--and l.segment2 in ('U09327','U09328','U09329','U09330');
+  commit;
+-- ** inserisco in fin_t_liquidazioni_patto le LIQ che incidono totalmente sul patto --
+        insert into fin_t_liquidazioni_patto 
+           (ID_UTENTE,
+            ANNO,
+            CAPITOLO,
+            LIQUIDAZIONE,
+            OGGETTO_LIQUIDAZIONE,
+            RESIDUO,
+            IMPORTO_PATTO,
+            INCIDENZA,
+            RESIDUO_IN_PAGAMENTO,
+            TIPO_ATTO,
+            NUMERO_ATTO,
+            DATA_ATTO,
+            UFFICIO)
+          select 
+           p_id_utente
+          ,l.segment8 anno
+          ,l.segment2 capitolo
+          ,l.doc_sequence_value liquidazione
+          ,l.description
+          ,nvl(l.open_balance_proposed,0) residuo
+          ,nvl(l.open_balance_proposed,0) importo_patto
+          ,1 incidenza
+          ,0 residuo_in_pagamento
+          ,l.attribute13
+          ,l.attribute14
+          ,l.data_atto_autorizzativo
+          ,l.segment3
+        from fin_t_documenti l
+        where l.doc_type = 'LIQ'
+        and l.segment8 = p_anno
+        and nvl(l.open_balance_proposed,0) > 0
+        minus
+        (select 
+           p_id_utente
+          ,l.segment8 anno
+          ,l.segment2 capitolo
+          ,l.doc_sequence_value liquidazione
+          ,l.description
+          ,nvl(l.open_balance_proposed,0) residuo
+          ,nvl(l.open_balance_proposed,0) importo_patto
+          ,1 incidenza
+          ,0 residuo_in_pagamento
+          ,l.attribute13
+          ,l.attribute14
+          ,l.data_atto_autorizzativo
+          ,l.segment3
+        from fin_t_documenti l
+        ,fin_t_articoli a
+        where l.doc_type = 'LIQ'
+        and l.segment8 = p_anno
+        and nvl(l.open_balance_proposed,0) > 0
+        and a.anno = l.segment8
+        and a.eu||a.codice = l.segment2
+        and a.eu = 'U'
+        and nvl(a.sanita_sn,'N') = 'S')--and (substr(a.codice_meccanografico,3,3) = '157' or a.codice = 26381))
+        minus
+        (select 
+           p_id_utente
+          ,l.segment8 anno
+          ,l.segment2 capitolo
+          ,l.doc_sequence_value liquidazione
+          ,l.description
+          ,nvl(l.open_balance_proposed,0) residuo
+          ,nvl(l.open_balance_proposed,0) importo_patto
+          ,1 incidenza
+          ,0 residuo_in_pagamento
+          ,l.attribute13
+          ,l.attribute14
+          ,l.data_atto_autorizzativo
+          ,l.segment3
+        from fin_t_documenti l
+        ,fin_t_articoli a
+        where l.doc_type = 'LIQ'
+        and l.segment8 = p_anno
+        and nvl(l.open_balance_proposed,0) > 0
+        and a.anno = l.segment8
+          and a.eu||a.codice = l.segment2
+          and a.eu = 'U'
+          and a.VOCE_PSI_PAG2 = 'S19')--and l.segment2 in ('U09327','U09328','U09329','U09330'))
+        minus
+        (select 
+           p_id_utente
+          ,l.segment8 anno
+          ,l.segment2 capitolo
+          ,l.doc_sequence_value liquidazione
+          ,l.description
+          ,nvl(l.open_balance_proposed,0) residuo
+          ,nvl(l.open_balance_proposed,0) importo_patto
+          ,1 incidenza
+          ,0 residuo_in_pagamento
+          ,l.attribute13
+          ,l.attribute14
+          ,l.data_atto_autorizzativo
+          ,l.segment3
+        from fin_t_documenti l
+        ,fin_t_por_patto p
+        where l.doc_type = 'LIQ'
+        and l.segment8 = p_anno
+        and nvl(l.open_balance_proposed,0) > 0
+        and p.anno = l.segment8
+        and p.capitolo = l.segment2);
+    commit;
+ for liq in liq_por loop
+  /*if (liq.anno_imp &lt;= p_anno - 7) then perc_patto := liq.p_anno1;
+         elsif (liq.anno_imp = p_anno - 6) then perc_patto := liq.p_anno2;
+             elsif (liq.anno_imp = p_anno - 5) then perc_patto := liq.p_anno3;
+                     elsif (liq.anno_imp = p_anno - 4) then perc_patto := liq.p_anno4;
+                         elsif (liq.anno_imp = p_anno - 3) then perc_patto := liq.p_anno5;
+                             elsif (liq.anno_imp = p_anno - 2) then perc_patto := liq.p_anno6;
+                                 elsif (liq.anno_imp = p_anno - 1) then perc_patto := liq.p_anno7;
+                                 end if;*/
+                              
+   perc_patto := liq.incid;                            
+   insert into fin_t_liquidazioni_patto 
+           (ID_UTENTE,
+            ANNO,
+            CAPITOLO,
+            LIQUIDAZIONE,
+            OGGETTO_LIQUIDAZIONE,
+            RESIDUO,
+            IMPORTO_PATTO,
+            INCIDENZA,
+            RESIDUO_IN_PAGAMENTO,
+            TIPO_ATTO,
+            NUMERO_ATTO,
+            DATA_ATTO,
+            UFFICIO)
+          values
+          (p_id_utente
+          ,p_anno
+          ,liq.capitolo
+          ,liq.liquidazione
+          ,liq.oggetto
+          ,nvl(liq.residuo,0)
+          ,round(nvl(perc_patto,1) * nvl(liq.residuo,0),2)
+          ,nvl(perc_patto,1)
+          ,0
+          ,liq.tipo_atto
+          ,liq.numero_atto
+          ,liq.data_atto
+          ,liq.ufficio
+          );
+    commit;
+ end loop;
+     
+END;</pre>	</td></tr>
+</table></div>

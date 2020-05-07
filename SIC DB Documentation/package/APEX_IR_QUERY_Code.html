@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>APEX_IR_QUERY</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="APEX_IR_QUERY.html">Details</a></div></div>
+<div class="tab"><div><a href="APEX_IR_QUERY_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="APEX_IR_QUERY_References.html">References</a></div></div>
+<div class="tab"><div><a href="APEX_IR_QUERY_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="APEX_IR_QUERY_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PACKAGE "APEX_IR_QUERY" IS
+
+  -- Author  : STEWART_L_STRYKER
+  -- Created : 2/13/2009 4:00:45 PM
+  -- Purpose : Method of collecting user query from Interactive Report
+
+  -- GRANT EXECUTE ON apex_ir_query to &lt;apex_schema>;
+
+  /* ----------- PUBLIC FUNCTION AND PROCEDURE DECLARATIONS ----------- */
+
+    /* Setup:
+
+       Add your own version of the following Javascript function to the application page
+       that contains the button to run your custom report.
+       In this example, I'm popping up a new page (#7) to display a PDF report.  The important
+       thing is to pass the apexir_report_id value to a page item via a parameter.
+
+        &lt;script language="JavaScript" type="text/javascript">
+        function SaveAndRunReport() {
+             popUp2('f?p=null:7:null:new_request:NO::'+
+                    'P7_IR_REPORT_ID:'+$v('apexir_report_id'), 1024, 768);
+        }
+&lt;/script>
+
+        I calculate this WHERE clause, then add it to a fixed query string that our interactive
+        reports run against.
+
+        It supports Filters, Searches and Saved reports.
+        It DOES NOT support saving the Sort order.
+
+    */
+    -- Generate IR query string
+    FUNCTION ir_query_where(app_id_in IN NUMBER,
+                            page_id_in IN NUMBER,
+                            session_id_in IN NUMBER,
+                            base_report_id_in IN VARCHAR2) RETURN VARCHAR2;
+
+END apex_ir_query;</pre>	</td></tr>
+</table></div>

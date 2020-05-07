@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TEMP_INVIO_SFORAM_COMPE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TEMP_INVIO_SFORAM_COMPE.html">Details</a></div></div>
+<div class="tab"><div><a href="TEMP_INVIO_SFORAM_COMPE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TEMP_INVIO_SFORAM_COMPE_References.html">References</a></div></div>
+<div class="tab"><div><a href="TEMP_INVIO_SFORAM_COMPE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TEMP_INVIO_SFORAM_COMPE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE      temp_invio_sforam_compe IS
+ v_id_workspace NUMBER;
+ v_oggetto VARCHAR2(1000);
+ v_corpo VARCHAR2(32000);
+ v_mittente VARCHAR2(100);
+ v_destinatario VARCHAR2(100);
+ v_num_sforamenti NUMBER;
+ CURSOR c_sforamenti IS
+ SELECT d.segment8 anno,
+          d.segment2 cap,
+          LTRIM(TO_CHAR(SUM(decode(doc_type,'PRE-IMP',d.open_balance_proposed,d.document_amount)),'999G999G999G999D99')) importo_documenti,
+          LTRIM(TO_CHAR(
+  		  (PREVISIONE_DEFINITIVA(d.segment8,d.segment2))
+           ,'999G999G999G999D99')) stanziamento_tot,
+          LTRIM(TO_CHAR(
+		   SUM(decode(doc_type,'PRE-IMP',d.open_balance_proposed,d.document_amount)) - 
+		       (PREVISIONE_DEFINITIVA(d.segment8,d.segment2))
+           ,'999G999G999G999D99')) importo_sforam
+   FROM fin_t_bilancio b,
+        fin_t_documenti d
+   WHERE b.eu||b.articolo = d.segment2 AND
+         d.doc_type in ('PRE-IMP','IMP','IMP-PER','IMP-DEF') AND
+         d.segment8 = b.anno AND
+         b.anno > to_char(sysdate,'yyyy')-1 AND
+         NVL(d.deletion_status_flag,'X') &lt;> 'Y'
+   GROUP BY d.segment8,
+            d.segment2,
+           -- d.doc_type,
+            --  (NVL(b.impegni_accertamenti_compe,0)),
+            (PREVISIONE_DEFINITIVA(d.segment8,d.segment2))
+   HAVING SUM(decode(doc_type,'PRE-IMP',d.open_balance_proposed,d.document_amount)) > (PREVISIONE_DEFINITIVA(d.segment8,d.segment2));
+BEGIN
+IF UPPER(TO_CHAR(SYSDATE,'dy')) NOT IN ('DOM','SUN')
+ THEN
+  SELECT workspace_id
+  INTO v_id_workspace
+  FROM APEX_WORKSPACES;
+  
+  v_mittente := 'sic@assistenza.regione.basilicata.it';
+  v_oggetto := 'Sforamenti competenza';
+
+  FOR d IN (SELECT 'luigi.pierro@regione.basilicata.it' ind_mail
+            FROM DUAL
+            UNION 
+            SELECT 'antero.viola@regione.basilicata.it' ind_mail
+            FROM DUAL
+		    UNION 
+            SELECT 'francesco.ferrante@supporto.regione.basilicata.it' ind_mail
+            FROM DUAL) LOOP
+	 BEGIN
+	  v_destinatario := d.ind_mail;
+	  v_corpo := 'ANNO/CAPITOLO/IMPORTO DOCUMENTI/STANZIAMENTO TOTALE/IMPORTO_SFORAMENTO'||UNISTR('\000a');
+	  v_num_sforamenti := 0;
+	  FOR r IN c_sforamenti LOOP
+	   v_num_sforamenti := v_num_sforamenti + 1;
+	   v_corpo := v_corpo||r.anno||'/'||r.cap||'/'||r.importo_documenti||'/'||r.stanziamento_tot||'/'||r.importo_sforam||UNISTR('\000a');
+      END LOOP;
+	  IF v_num_sforamenti > 0
+	    THEN
+          APEX_UTIL.SET_SECURITY_GROUP_ID(P_SECURITY_GROUP_ID => v_id_workspace);
+          APEX_MAIL.SEND(P_TO => v_destinatario,
+                         P_FROM => v_mittente,
+                         P_BODY => v_corpo,
+                         P_SUBJ => v_oggetto);
+          COMMIT; 
+          APEX_MAIL.PUSH_QUEUE;
+	  END IF;
+     EXCEPTION WHEN OTHERS
+	    THEN NULL;
+	 END;	  
+  END LOOP;
+END IF;
+END temp_invio_sforam_compe;</pre>	</td></tr>
+</table></div>

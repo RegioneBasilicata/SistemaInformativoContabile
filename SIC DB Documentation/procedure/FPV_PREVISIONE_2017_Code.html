@@ -1,0 +1,807 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FPV_PREVISIONE_2017</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FPV_PREVISIONE_2017.html">Details</a></div></div>
+<div class="tab"><div><a href="FPV_PREVISIONE_2017_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FPV_PREVISIONE_2017_References.html">References</a></div></div>
+<div class="tab"><div><a href="FPV_PREVISIONE_2017_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FPV_PREVISIONE_2017_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      FPV_PREVISIONE_2017(p_anno in number,p_anno_inizio_esercizio in number,p_data_stampa in date,p_utente in varchar2) as
+capitolo       varchar2(6);
+missione       varchar2(10);
+desc_missione  varchar2(2000);
+programma      varchar2(10);
+desc_programma varchar2(2000);
+
+vdata_approvazione_previsione date; -- ci serve per bloccare alcune elaborazioni
+
+delta_anno number(2) :=0;
+
+-- **** CAMPO DI CORREZIONE - ATTENZIONE AGGIUNGE  L'IMPORTO INDICATO FORZATAMENTE SU ALCUNI CAMPI A SCELTA. IN QUESTO MOMENTO E' INDICATO 
+correzione number(15,2) := 0;
+-- **** ATTENZIONE AGGIUNGE  0 CENTESIMI 
+-- USATO IN B1_COLONNA
+
+
+colonna_a number(15,2);
+colonna_b number(15,2);
+colonna_c number(15,2);
+colonna_d number(15,2);
+colonna_e number(15,2);
+colonna_f number(15,2);
+colonna_g number(15,2);
+colonna_h number(15,2);
+
+vfpv number(15,2);
+importo_impegni_fpv number(15,2);
+
+
+b_impegni0101 number(15,2);
+b_impegni_riaccertati number(15,2);
+
+c_impegni0101piu1 number(15,2);
+c_impegni0101piu2 number(15,2);
+
+d_fpv_bilancio1_1 number(15,2);
+d_fpv_bilancio1_2 number(15,2);
+
+e_fpv_bilancio2_1 number(15,2);
+e_fpv_bilancio2_2 number(15,2);
+
+f_fpv_bilancio2_1 number(15,2);
+f_fpv_bilancio2_2 number(15,2);
+
+
+cursor a2_colonna is
+select  
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) colonna_a2
+ ,d.segment2 capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_documenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where substr(d.segment2,1,1) = 'U'
+and   d.segment8 = p_anno 
+and   d.doc_type in ('B_COM_POS','B_COM_NEG','B_PL1_POS','B_PL1_NEG','B_PL2_POS','B_PL2_NEG','V_COM_POS','V_COM_NEG','A_COM_POS','A_COM_NEG','V_PL1_POS','V_PL1_NEG','A_PL1_POS','A_PL1_NEG','V_PL2_POS','V_PL2_NEG','A_PL2_POS','A_PL2_NEG') 
+and   d.segment9 in ('FPV','FPV_REG')
+and   a.anno = d.segment8
+and   a.eu||a.codice =d.segment2 
+--and   nvl(a.nb_fpv,'N') &lt;>'S' Modifica richiesta da pierro 6.3.2014
+and   nb2.id(+) = a.nb_id_padre 
+and   nb1.id(+) = nb2.id_livello1
+group by 
+  d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+
+cursor b1_colonna is 
+select 
+ sum(nvl(d.document_amount,0)) colonna_b1
+ ,d.segment2                capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_documenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' 
+and   upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'
+and   d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+and   nvl(d.segment8,0) = p_anno
+and   substr(d.segment2,1,1) = 'U'
+and   nvl(substr(attribute38,1,4),p_anno) &lt; p_anno_inizio_esercizio -- modifica del 23.05.2017 per evitare di considerare gli impegni presi nell'anno della prvisione come pluriennali per 2018 e 2019 *******
+--and   attribute21 is not null   -- controllo valido nel 2016 ma non nel 2017
+and   d.date_created = to_date('0101'||p_anno,'ddmmyyyy') -- controllo valido nel 2017 ma non valeva ne 2016
+and   a.anno = d.segment8
+and   a.eu||a.codice =d.segment2 
+and   nb2.id(+) = a.nb_id_padre 
+and   nb1.id(+) = nb2.id_livello1
+group by 
+ d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+-- Inizio gestione colonna B come calcolo del valore della colonna D per anno - 1
+cursor bd1_colonna is
+select 
+ SUM(nvl(d.document_amount,0)) colonna_bd1
+ ,d.segment2                capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_documenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' 
+and upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'
+and d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+and nvl(d.segment8,0) = ((p_anno - 1) + 1)
+and substr(d.segment2,1,1) = 'U'
+and to_char(d.date_created,'ddmmyyyy') ='0101'||(p_anno_inizio_esercizio - 1) + 1
+and substr(d.attribute38,1,4) = (p_anno - 1) - 1
+and to_char(doc_sequence_value) not in (select risposta_riaccertamento from fin_t_riaccertamenti where anno_riaccertamento=(p_anno -1)+1 and anno_bilancio_riaccertamento = (p_anno -1) - 1)
+--avendo escluso gli fpv_reg devo escludere tutti gli impegni riaccertati Pierro 22.07.2015
+and a.eu||a.codice =d.segment2 
+and a.anno= (p_anno - 1)
+and nb2.id(+) = a.nb_id_padre 
+and nb1.id(+) = nb2.id_livello1
+group by 
+  d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+cursor bd2_colonna is
+select  
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) colonna_bd2
+ ,d.segment2 capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_documenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where substr(d.segment2,1,1) = 'U'
+and   d.segment8 = (p_anno - 1) + 1 
+and   d.doc_type in ('B_COM_POS','B_COM_NEG','B_PL1_POS','B_PL1_NEG','B_PL2_POS','B_PL2_NEG','V_COM_POS','V_COM_NEG','A_COM_POS','A_COM_NEG','V_PL1_POS','V_PL1_NEG','A_PL1_POS','A_PL1_NEG','V_PL2_POS','V_PL2_NEG','A_PL2_POS','A_PL2_NEG') 
+and   d.segment9 in ('FPV') -- escluso FPV_REG Pierro 22.07.2015
+and   a.anno = d.segment8
+and   a.eu||a.codice =d.segment2 
+and   nvl(a.nb_fpv,'N') &lt;>'S' 
+and   nb2.id(+) = a.nb_id_padre 
+and   nb1.id(+) = nb2.id_livello1
+group by 
+  d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+-- fine gestione colonna B come calcolo del valore della colonna D per anno - 1
+
+
+-- la colonna c è di calcolo. a - b
+
+
+cursor d1_colonna is
+select 
+ SUM(nvl(d.document_amount,0)) colonna_d1
+ ,d.segment2                capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_documenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' 
+and upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'
+and d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+and nvl(d.segment8,0) = p_anno + 1
+and substr(d.segment2,1,1) = 'U'
+and to_char(d.date_created,'ddmmyyyy') ='0101'||p_anno + 1
+and substr(d.attribute38,1,4) = p_anno - 1
+and to_char(doc_sequence_value) not in (select risposta_riaccertamento from fin_t_riaccertamenti where anno_riaccertamento=p_anno+1 and anno_bilancio_riaccertamento = p_anno - 1)
+--avendo escluso gli fpv_reg devo escludere tutti gli impegni riaccertati Pierro 22.07.2015
+and a.eu||a.codice =d.segment2 
+and a.anno= p_anno
+and nb2.id(+) = a.nb_id_padre 
+and nb1.id(+) = nb2.id_livello1
+group by 
+  d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+cursor d2_colonna is
+select  
+  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) colonna_d2
+ ,d.segment2 capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_documenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where substr(d.segment2,1,1) = 'U'
+and   d.segment8 = p_anno + 1 
+and   d.doc_type in ('B_COM_POS','B_COM_NEG','B_PL1_POS','B_PL1_NEG','B_PL2_POS','B_PL2_NEG','V_COM_POS','V_COM_NEG','A_COM_POS','A_COM_NEG','V_PL1_POS','V_PL1_NEG','A_PL1_POS','A_PL1_NEG','V_PL2_POS','V_PL2_NEG','A_PL2_POS','A_PL2_NEG') 
+and   d.segment9 in ('FPV') -- escluso FPV_REG Pierro 22.07.2015
+and   a.anno = d.segment8
+and   a.eu||a.codice =d.segment2 
+and   nvl(a.nb_fpv,'N') &lt;>'S' 
+and   nb2.id(+) = a.nb_id_padre 
+and   nb1.id(+) = nb2.id_livello1
+group by 
+  d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+
+--Luigi Pierro 22.07.2014 
+-- Calcolo i riaccertamenti presi per anno_riaccertamento  + 2 e con anno_finanziario=anno -1 
+-- e devo sottrarli dalla colonna D in quanto già presenti 
+-- nella colonna C
+cursor e1_colonna is
+select 
+ SUM(nvl(d.importo_riaccertamento,0)) colonna_e1
+ ,d.capitolo_riaccertamento      capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+  fin_t_riaccertamenti d
+ ,fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where --d.anno_finanziario = p_anno - 1 
+--and 
+nvl(d.anno_riaccertamento,0) = p_anno + 2
+and nvl(d.anno_bilancio_riaccertamento,0) = p_anno
+and nvl(d.importo_riaccertamento,0) &lt;> 0
+and a.eu||a.codice =d.capitolo_riaccertamento 
+and a.anno= p_anno
+and nb2.id(+) = a.nb_id_padre 
+and nb1.id(+) = nb2.id_livello1
+group by 
+  d.capitolo_riaccertamento
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+
+cursor e2_colonna is
+select  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) colonna_e2
+  ,d.segment2 capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from fin_t_documenti  d
+    ,fin_t_articoli a
+    ,nb_livello1 nb1
+    ,nb_livello2 nb2
+where d.segment8 = p_anno + 2
+and   substr(d.segment2,1,1)='U' 
+and   d.doc_type in ('B_PL2_POS','B_PL2_NEG','V_PL2_POS','V_PL2_NEG','A_PL2_POS','A_PL2_NEG') 
+and   d.segment9 in ('FPV') -- eliminato FPV_REG pierro 22.07.2015
+and   nvl(deletion_status_flag,'N') &lt;> 'Y'
+and   a.anno = d.segment8
+and   a.eu||a.codice = d.segment2
+and   nvl(a.nb_fpv,'N') &lt;>'S'
+and   nb2.id(+) = a.nb_id_padre 
+and   nb1.id(+) = nb2.id_livello1
+group by   
+  d.segment2
+ ,nvl(nb1.codice,'Da Def.')
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+--documenti di variazione
+cursor f2_colonna is
+select  sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) colonna_f2
+  ,d.segment2 capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from fin_t_documenti  d
+    ,fin_t_articoli a
+    ,nb_livello1 nb1
+    ,nb_livello2 nb2
+where d.segment8 = p_anno + 2
+and   substr(d.segment2,1,1)='U' 
+and   d.doc_type in ('B_PL2_POS','B_PL2_NEG','V_PL2_POS','V_PL2_NEG','A_PL2_POS','A_PL2_NEG') 
+and   d.segment9 in ('FPV','FPV_REG') 
+and   nvl(deletion_status_flag,'N') &lt;> 'Y'
+and   a.anno = d.segment8
+and   a.eu||a.codice = d.segment2
+and   nvl(a.nb_fpv,'N')='S'
+and   nb2.id(+) = a.nb_id_padre 
+ ,nvl(nb1.codice,'Da Def.')
+and   nb1.id(+) = nb2.id_livello1
+group by   
+  d.segment2
+ ,nb1.descrizione
+ ,nvl(nb2.codice,'Da Def.')
+ ,nb2.descrizione;
+
+
+begin
+
+
+ begin
+  select data_approvazione_previsione 
+  into vdata_approvazione_previsione
+  from fin_t_dati_generali 
+  where anno_finanziario=p_anno;
+  exception when no_data_found then vdata_approvazione_previsione := trunc(sysdate,'dd');
+ end;
+
+
+
+ delta_anno := p_anno - p_anno_inizio_esercizio;
+ delete tmp_tabulati where utente=p_utente and car20 = 'FPV'||p_utente;
+
+ for ca2 in a2_colonna loop
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num01
+   )
+   values
+  (p_utente
+  ,1
+  ,ca2.missione
+  ,ca2.desc_missione
+  ,ca2.programma
+  ,ca2.desc_programma
+  ,ca2.capitolo
+  ,'A'
+  ,'FPV'||p_utente
+  ,ca2.colonna_a2 
+  );
+  commit;
+ end loop;
+
+
+ for cb1 in b1_colonna loop
+
+ --controllo che il capitolo sia finanziato con FPV.
+  begin
+  --fondo_pluriennale
+   select
+   sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+   into vfpv
+   from fin_t_documenti d
+   where d.segment9 in ('FPV','FPV_REG')
+   and d.segment2 = cb1.capitolo
+   and d.segment8 = p_anno
+   and d.doc_type in 
+   ('B_COM_POS'
+   ,'V_COM_POS'
+   ,'A_COM_POS'
+   ,'B_PL1_POS'
+   ,'V_PL1_POS'
+   ,'A_PL1_POS'
+   ,'B_PL2_POS'
+   ,'V_PL2_POS'
+   ,'A_PL2_POS'
+   ,'B_COM_NEG'
+   ,'V_COM_NEG'
+   ,'A_COM_NEG'
+   ,'B_PL1_NEG'
+   ,'V_PL1_NEG'
+   ,'A_PL1_NEG'
+   ,'B_PL2_NEG'
+   ,'V_PL2_NEG'
+   ,'A_PL2_NEG');
+  end;
+
+-- se il capitolo non è finanziato con FPV non prendo in considerazione l'importo degli impegni
+-- se il capitolo è finanziato con FPV ma l'importo degli impegni è maggiore, considero il valore dell'FPV
+-- altrimenti riporto il valore degli impegni.
+
+   if nvl(vfpv,0) &lt;=0
+    then importo_impegni_fpv := 0;
+    elsif nvl(cb1.colonna_b1,0) >= nvl(vfpv,0)
+          then importo_impegni_fpv := nvl(vfpv,0);
+          else importo_impegni_fpv := nvl(cb1.colonna_b1,0);
+   end if;
+
+-- **** ATTENZIONE AGGIUNGE  la correzione
+   if p_anno=2016 and importo_impegni_fpv &lt;> 0
+      then importo_impegni_fpv := importo_impegni_fpv + correzione;
+            correzione := 0;
+   end if;
+-- **** ATTENZIONE AGGIUNGE  la correzione
+
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num02
+   )
+   values
+  (p_utente
+  ,2
+  ,cb1.missione
+  ,cb1.desc_missione
+  ,cb1.programma
+  ,cb1.desc_programma
+  ,cb1.capitolo
+  ,'B1'
+  ,'FPV'||p_utente
+  ,importo_impegni_fpv
+--  ,cb1.colonna_b1
+  );
+  commit;
+ end loop;
+
+
+--inizio modifica del 19.04.2017 per calcolo colonna B anno + 1 e anno + 2 dell'esercizio finanziario
+ if delta_anno &lt;> 0 
+  then
+  for bd1 in bd1_colonna loop
+
+ --controllo che il capitolo sia finanziato con FPV.
+  begin
+  --fondo_pluriennale
+   select
+   sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+   into vfpv
+   from fin_t_documenti d
+   where d.segment9 in ('FPV','FPV_REG')
+   and d.segment2 = bd1.capitolo
+   and d.segment8 = (p_anno-1) + 1
+   and d.doc_type in 
+   ('B_COM_POS'
+   ,'V_COM_POS'
+   ,'A_COM_POS'
+   ,'B_PL1_POS'
+   ,'V_PL1_POS'
+   ,'A_PL1_POS'
+   ,'B_PL2_POS'
+   ,'V_PL2_POS'
+   ,'A_PL2_POS'
+   ,'B_COM_NEG'
+   ,'V_COM_NEG'
+   ,'A_COM_NEG'
+   ,'B_PL1_NEG'
+   ,'V_PL1_NEG'
+   ,'A_PL1_NEG'
+   ,'B_PL2_NEG'
+   ,'V_PL2_NEG'
+   ,'A_PL2_NEG');
+  end;
+
+-- se il capitolo non è finanziato con FPV non prendo in considerazione l'importo degli impegni
+-- se il capitolo è finanziato con FPV ma l'importo degli impegni è maggiore, considero il valore dell'FPV
+-- altrimenti riporto il valore degli impegni.
+
+   if nvl(vfpv,0) &lt;=0
+    then importo_impegni_fpv := 0;
+    elsif nvl(bd1.colonna_bd1,0) >= nvl(vfpv,0)
+          then importo_impegni_fpv := nvl(vfpv,0);
+          else importo_impegni_fpv := nvl(bd1.colonna_bd1,0);
+   end if;
+
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num02
+   )
+   values
+  (p_utente
+  ,2
+  ,bd1.missione
+  ,bd1.desc_missione
+  ,bd1.programma
+  ,bd1.desc_programma
+  ,bd1.capitolo
+  ,'BD1'
+  ,'FPV'||p_utente
+  commit;
+  ,importo_impegni_fpv
+--  ,d1.colonna_d1
+  );
+ end loop;
+
+
+for bd2 in bd2_colonna loop
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num02
+   )
+   values
+  (p_utente
+  ,2
+  ,bd2.missione
+  ,bd2.desc_missione
+  ,bd2.programma
+  ,bd2.desc_programma
+  ,bd2.capitolo
+  ,'BD2'
+  ,'FPV'||p_utente
+  ,bd2.colonna_bd2 
+  );
+  commit;
+ end loop;
+ end if;
+
+-- fine modifica del 19.4.2017 per calcolo colonna B anno + 1 e anno + 2 dell'esercizio finanziario
+
+-- Per il primo anno dell'esercizio va tutto bene.
+-- per il secondo anno dell'esercizio il valore della colonna D è in realtà il valore derivante dalla colonna C e non va calcolata come per il primo anno dell'esercizio 
+
+ if delta_anno &lt;> 1
+  then
+  for d1 in d1_colonna loop
+
+ --controllo che il capitolo sia finanziato con FPV.
+  begin
+  --fondo_pluriennale
+   select
+   sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount))
+   into vfpv
+   from fin_t_documenti d
+   where d.segment9 in ('FPV','FPV_REG')
+   and d.segment2 = d1.capitolo
+   and d.segment8 = p_anno + 1
+   and d.doc_type in 
+   ('B_COM_POS'
+   ,'V_COM_POS'
+   ,'A_COM_POS'
+   ,'B_PL1_POS'
+   ,'V_PL1_POS'
+   ,'A_PL1_POS'
+   ,'B_PL2_POS'
+   ,'V_PL2_POS'
+   ,'A_PL2_POS'
+   ,'B_COM_NEG'
+   ,'V_COM_NEG'
+   ,'A_COM_NEG'
+   ,'B_PL1_NEG'
+   ,'V_PL1_NEG'
+   ,'A_PL1_NEG'
+   ,'B_PL2_NEG'
+   ,'V_PL2_NEG'
+   ,'A_PL2_NEG');
+  end;
+
+-- se il capitolo non è finanziato con FPV non prendo in considerazione l'importo degli impegni
+-- se il capitolo è finanziato con FPV ma l'importo degli impegni è maggiore, considero il valore dell'FPV
+-- altrimenti riporto il valore degli impegni.
+
+   if nvl(vfpv,0) &lt;=0
+    then importo_impegni_fpv := 0;
+    elsif nvl(d1.colonna_d1,0) >= nvl(vfpv,0)
+          then importo_impegni_fpv := nvl(vfpv,0);
+          else importo_impegni_fpv := nvl(d1.colonna_d1,0);
+   end if;
+
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num04
+   )
+   values
+  (p_utente
+  ,4
+  ,d1.missione
+  ,d1.desc_missione
+  ,d1.programma
+  ,d1.desc_programma
+  ,d1.capitolo
+  ,'D1'
+  ,'FPV'||p_utente
+  ,importo_impegni_fpv
+--  ,d1.colonna_d1
+  );
+  commit;
+ end loop;
+
+
+for cd2 in d2_colonna loop
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num04
+   )
+   values
+  (p_utente
+  ,4
+  ,cd2.missione
+  ,cd2.desc_missione
+  ,cd2.programma
+  ,cd2.desc_programma
+  ,cd2.capitolo
+  ,'D2'
+  ,'FPV'||p_utente
+  ,cd2.colonna_d2 
+  );
+  commit;
+ end loop;
+end if;
+
+
+ for e2 in e2_colonna loop
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num05
+   )
+   values
+  (p_utente
+  ,5
+  ,e2.missione
+  ,e2.desc_missione
+  ,e2.programma
+  ,e2.desc_programma
+  ,e2.capitolo
+  ,'E2'
+  ,'FPV'||p_utente
+  ,e2.colonna_e2
+  );
+  commit;
+ end loop;
+
+
+ for f2 in f2_colonna loop
+   insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car05
+   ,car19
+   ,car20
+   ,num06
+   )
+   values
+  (p_utente
+  ,6
+  ,f2.missione
+  ,f2.desc_missione
+  ,f2.programma
+  ,f2.desc_programma
+  ,f2.capitolo
+  ,'F2'
+  ,'FPV'||p_utente
+  ,f2.colonna_f2
+  );
+  commit;
+ end loop;
+
+begin 
+ insert into tmp_tabulati
+   (utente
+   ,num_ord_riga
+   ,car01
+   ,car02
+   ,car03
+   ,car04
+   ,car19
+   ,car20
+   ,num01
+   ,num02
+   ,num03
+   ,num04
+   ,num05
+   ,num06
+   ,num07
+   ,num08
+   ,num09
+   ) 
+   select 
+   p_utente
+   ,99
+   ,car01 missione
+   ,car02 desc_missione
+   ,car03 programma
+   ,car04 desc_programma
+   ,'FPVFINALE'
+   ,'FPV'||p_utente
+   ,sum(nvl(num01,0)) c_num01 --a
+   ,sum(nvl(num01,0) - nvl(num02,0)) c_num03  --(C)
+
+   ,sum(nvl(num02,0))  c_num02 -- se non coincide con c_num08 lo faccio uscire in grassetto. (B)  
+
+
+  ,sum(DECODE(car19,'D1',nvl(num04,0)* -1, nvl(num04,0))) c_num04  -- (D)
+
+   ,sum(DECODE(car19,'E1',nvl(num05,0)* -1, nvl(num05,0))) c_num05  -- (E)
+
+--   ,sum(nvl(num05,0)) c_num05 --(E) sostituita con la riga di sopra
+
+   ,sum(nvl(num06,0)) c_num06
+
+   ,sum(nvl(num07,0)) c_num07 -- non valorizzata da nessuno, Imputazione non ancora definita
+
+
+   ,sum((nvl(num01,0) - nvl(num02,0)) + DECODE(car19,'D2',nvl(num04,0),nvl(num04,0)* -1) + DECODE(car19,'E1',nvl(num05,0)* -1, nvl(num05,0)) + nvl(num06,0) + nvl(num07,0)) c_num08
+
+   ,sum(nvl(num03,0)) c_num09 -- secondo calcolo della colonna c. Se non coincide con il valore del campo c_num03, bisogna segnalarlo (faccio uscire in grassetto la colonna c)
+ from tmp_tabulati 
+ where car20='FPV'||p_utente 
+ and car19 &lt;> 'FPVFINALE'
+ group by car01,car02,car03,car04;
+ commit;
+end;  
+
+end; </pre>	</td></tr>
+</table></div>
