@@ -1,0 +1,188 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>GENERA_CF</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="GENERA_CF.html">Details</a></div></div>
+<div class="tab"><div><a href="GENERA_CF_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="GENERA_CF_References.html">References</a></div></div>
+<div class="tab"><div><a href="GENERA_CF_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="GENERA_CF_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION GENERA_CF 
+(
+  P_COGNOME IN VARCHAR2  
+, P_NOME IN VARCHAR2  
+, P_ALTRI_NOMI IN VARCHAR2  
+, P_SESSO IN VARCHAR2 
+, P_DATA_NS IN DATE  
+, P_ID_COMUNE_NS IN NUMBER  
+) RETURN VARCHAR2 AS 
+
+cod_fis VARCHAR2(16);
+wc_cognome 	VARCHAR2(100) := NULL;
+wc_nome 	VARCHAR2(100) := NULL;
+wv_cognome 	VARCHAR2(100) := NULL;
+wv_nome 	VARCHAR2(100) := NULL;
+w_car 		VARCHAR2(1)   := NULL;
+id_belfiore  	VARCHAR2(4)   := NULL;
+lettere         varchar2(26) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+let_num         varchar2(36) := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+pari_cf         varchar2(72) := '000102030405060708091011121314151617181920212223242500010203040506070809';
+dispari_cf      varchar2(72) := '010005070913151719210204182011030608121416102225242301000507091315171921';
+tot_let         number(3);
+num_calc        number(3);
+num_contr       number(2);
+cix 		number(2);
+ciy 		number(2);
+BEGIN
+  cod_fis := NULL;
+
+-- separo consonanti e vocali per il cognome
+  FOR i IN 1 .. NVL(LENGTH(p_cognome), 0) LOOP
+    w_car := upper(SUBSTR(p_cognome,i,1));
+    IF ASCII(w_car) BETWEEN 65 AND 90 
+       THEN
+       IF w_car NOT IN ('A','E','I','O','U') 
+          THEN
+          wc_cognome := wc_cognome || w_car;
+       ELSE
+          wv_cognome := wv_cognome || w_car;
+       END IF;
+    END IF;
+  END LOOP;
+-- genero le lettere per il cognome
+  IF NVL(LENGTH(wc_cognome), 0) >= 3 THEN
+     cod_fis := SUBSTR(wc_cognome,1,3);
+  ELSIF NVL(LENGTH(wc_cognome), 0) = 2 THEN
+     cod_fis := wc_cognome || SUBSTR(wv_cognome,1,1);
+  ELSIF NVL(LENGTH(wc_cognome), 0) = 1 AND NVL(LENGTH(wv_cognome), 0) >= 2 THEN
+     cod_fis := wc_cognome ||SUBSTR(wv_cognome,1,2);
+  ELSIF NVL(LENGTH(wc_cognome), 0) = 1 AND NVL(LENGTH(wv_cognome), 0) = 1 THEN
+     cod_fis := wc_cognome || wv_cognome || 'X';
+  ELSIF NVL(NVL(LENGTH(wc_cognome), 0),0) = 0 AND NVL(LENGTH(wv_cognome), 0) > 1 THEN
+     cod_fis := SUBSTR(wv_cognome,1,2) ||'X';
+  END IF;
+
+-- separo vocali e consonanti per il nome
+  FOR i IN 1 .. NVL(LENGTH(p_nome||' '||p_ALTRI_NOMI), 0) LOOP
+    w_car := upper(SUBSTR(p_nome||' '||p_ALTRI_NOMI,i,1));
+    IF ASCII(w_car) BETWEEN 65 AND 90 
+       THEN
+       IF w_car NOT IN ('A','E','I','O','U') 
+          THEN
+          wc_nome := wc_nome || w_car;
+       ELSE
+          wv_nome := wv_nome || w_car;
+       END IF;
+    END IF;
+  END LOOP;
+
+-- genero le lettere per il nome
+  IF NVL(LENGTH(wc_nome), 0) >= 4 THEN
+     cod_fis := cod_fis || SUBSTR(wc_nome,1,1) || SUBSTR(wc_nome,3,2);
+  ELSIF NVL(LENGTH(wc_nome), 0) = 3 THEN
+     cod_fis := cod_fis || wc_nome;
+  ELSIF NVL(LENGTH(wc_nome), 0) = 2 THEN
+     cod_fis := cod_fis || wc_nome || SUBSTR(wv_nome,1,1);
+  ELSIF NVL(LENGTH(wc_nome), 0) = 1 AND NVL(LENGTH(wv_nome), 0) >= 2 THEN
+     cod_fis := cod_fis || wc_nome || SUBSTR(wv_nome,1,2);
+  ELSIF NVL(LENGTH(wc_nome), 0) = 1 AND NVL(LENGTH(wv_nome), 0) = 1 THEN
+     cod_fis := cod_fis || wc_nome || wv_nome || 'X';
+  ELSIF NVL(NVL(LENGTH(wc_nome), 0),0) = 0 AND NVL(LENGTH(wv_nome), 0) > 1 THEN
+     cod_fis := cod_fis || SUBSTR(wv_nome,1,2) || 'X';
+  END IF;
+
+--trasformo la data
+  cod_fis := cod_fis || TO_CHAR(p_data_ns,'YY');
+  SELECT DECODE(TO_CHAR(p_data_ns,'MM'),
+                '01','A',
+                '02','B',
+                '03','C',
+                '04','D',
+                '05','E',
+                '06','H',
+                '07','L',
+                '08','M',
+                '09','P',
+                '10','R',
+                '11','S',
+                '12','T',NULL) 
+  INTO w_car FROM DUAL;
+  cod_fis := cod_fis || w_car;
+  IF upper(p_sesso) = 'M' THEN
+     cod_fis := cod_fis || TO_CHAR(p_data_ns,'DD');
+  ELSE
+     cod_fis := cod_fis || TO_CHAR(TO_NUMBER(TO_CHAR(p_data_ns,'DD')) + 40);
+  END IF;
+
+-- leggo il codice belfiore per il comune di nascita. 
+  BEGIN
+  SELECT codice_bel_fiore
+  INTO   id_belfiore
+  FROM fin_t_comuni
+  WHERE id = p_ID_COMUNE_NS;
+  EXCEPTION WHEN NO_DATA_FOUND THEN id_belfiore := 'XXXX';
+  END;
+  cod_fis := cod_fis || id_belfiore; 
+
+-- genero il codice di controllo
+begin
+  tot_let := 0;
+  cix := 2;
+  ciy := 0;
+
+begin
+loop 
+  ciy := ciy + 1;
+  if substr(let_num,ciy,1) = substr(cod_fis,cix,1)
+     then tot_let := tot_let + to_number(substr(pari_cf,((ciy * 2 ) - 1),2));
+          begin
+          cix := cix + 2;
+          if cix &lt; 15
+             then ciy := 0;
+             else exit;
+          end if;
+          end;
+  end if;  
+
+end loop;
+end;
+
+begin
+cix := 1;
+ciy := 0;
+
+begin
+loop
+  ciy := ciy + 1;
+  if substr(let_num,ciy,1) = substr(cod_fis,cix,1)
+     then tot_let := tot_let + to_number(substr(dispari_cf,((ciy * 2) - 1),2));
+          begin
+          cix := cix + 2;
+          if cix &lt; 16
+             then ciy := 0;
+             else exit; 
+          end if;
+          end;
+  end if;    
+end loop;
+end;
+
+num_contr := mod(tot_let,26); 
+cod_fis := cod_fis ||substr(lettere, num_contr + 1,1);
+RETURN COD_FIS;
+end;
+end;
+END GENERA_CF;</pre>	</td></tr>
+</table></div>
