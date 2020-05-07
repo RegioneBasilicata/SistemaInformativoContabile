@@ -1,0 +1,72 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>DATA_DA_COD_FISC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="DATA_DA_COD_FISC.html">Details</a></div></div>
+<div class="tab"><div><a href="DATA_DA_COD_FISC_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="DATA_DA_COD_FISC_References.html">References</a></div></div>
+<div class="tab"><div><a href="DATA_DA_COD_FISC_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="DATA_DA_COD_FISC_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function data_da_cod_fisc (p_codice_fiscale in varchar2) return date
+is
+
+data_ns date;	
+
+giorno varchar2(10);
+mese varchar2(10);
+anno varchar2(4);
+
+
+
+begin
+
+
+	select SUBSTR(p_codice_fiscale,7,2),
+	CASE
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'A' THEN '01'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'E' THEN '05'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'P' THEN '09'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'B' THEN '02'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'H' THEN '06'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'R' THEN '10'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'C' THEN '03'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'L' THEN '07'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'S' THEN '11'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'D' THEN '04'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'M' THEN '08'
+	WHEN SUBSTR(p_codice_fiscale,9,1) = 'T' THEN '12'
+  ELSE '13'
+	END ,
+	SUBSTR(p_codice_fiscale,10,2)
+	into anno,mese,giorno
+	from dual;
+
+ if to_number(anno) > to_number(to_char(sysdate,'yy'))
+  then anno := '19'||anno;
+  else anno := '20'||anno;
+ end if;  
+
+ if to_number(giorno) > 40
+  then giorno := to_number(giorno) - 40; 
+ end if;
+ 
+ if mese &lt;> '13'
+  then data_ns := to_date(giorno||mese||anno,'ddmmyyyy');
+  return(data_ns);
+  else return(null);
+ end if;
+
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FONDO_CASSA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FONDO_CASSA.html">Details</a></div></div>
+<div class="tab"><div><a href="FONDO_CASSA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FONDO_CASSA_References.html">References</a></div></div>
+<div class="tab"><div><a href="FONDO_CASSA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FONDO_CASSA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function fondo_cassa(p_anno number) return Number is
+tot_mandati number := 0;
+tot_reversali number := 0;
+fondo_cassa_iniziale number:= 0;
+fondo_cassa_anno_prec number := 0;
+tot_mandati_ap number := 0;
+tot_reversali_ap number := 0;
+cp_tot_mandati number := 0;
+cp_tot_reversali number := 0;
+cp_disp_cassa number := 0;
+cp_fondo_cassa number := 0;
+BEGIN
+	
+  --:patto_stabilita.fondo_cassa := round((:fina_dati_generali.cassa + :fina_dati_generali.variazione_cassa_piu - :fina_dati_generali.variazione_cassa_meno)/1000,0);
+begin 
+	select (nvl(cassa,0) + nvl(variazione_cassa_piu,0) - nvl(variazione_cassa_meno,0)) 
+	into fondo_cassa_anno_prec
+	from fin_t_dati_generali
+	where anno_finanziario = p_anno - 1;
+	exception when no_data_found then fondo_cassa_anno_prec := 0;
+end;
+begin
+	select sum(nvl(mandati_reversali_compe,0)+nvl(mandati_reversali_res,0))
+	into tot_reversali_ap
+  from fin_t_bilancio
+  where anno = p_anno - 1
+  and eu='E';
+  exception when no_data_found then tot_reversali_ap := 0;
+end;
+begin
+	select sum(nvl(mandati_reversali_compe,0)+nvl(mandati_reversali_res,0))
+	into tot_mandati_ap
+  from fin_t_bilancio
+  where anno = p_anno - 1
+  and eu='U';
+  exception when no_data_found then tot_mandati_ap := 0;
+end;
+
+begin
+	select nvl(sum(nvl(open_balance_proposed,0)),0) into tot_mandati
+	from fin_t_documenti
+	where doc_type = 'MAND'
+	and nvl(deletion_status_flag,'X')&lt;>'Y'
+	and segment8 = p_anno;
+	--and date_created &lt;= nvl(:p_data_al,date_created);
+exception when no_data_found then tot_mandati := 0;
+end;
+begin
+		select nvl(sum(nvl(open_balance_proposed,0)),0) into tot_reversali
+	from fin_t_documenti
+	where doc_type = 'REV'
+	and nvl(deletion_status_flag,'X')&lt;>'Y'
+	and segment8 = p_anno;
+	--and date_created &lt;= nvl(:p_data_al,date_created);
+exception when no_data_found then tot_reversali := 0;
+end;
+fondo_cassa_iniziale := (fondo_cassa_anno_prec + tot_reversali_ap - tot_mandati_ap);
+cp_tot_mandati := nvl(tot_mandati,0);
+cp_tot_reversali := nvl(tot_reversali,0);
+cp_fondo_cassa := fondo_cassa_iniziale;
+cp_disp_cassa := fondo_cassa_iniziale - cp_tot_mandati + cp_tot_reversali;
+return(cp_disp_cassa);
+END;</pre>	</td></tr>
+</table></div>

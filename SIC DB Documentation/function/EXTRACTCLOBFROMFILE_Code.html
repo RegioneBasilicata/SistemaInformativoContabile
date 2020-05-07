@@ -1,0 +1,45 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>EXTRACTCLOBFROMFILE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="EXTRACTCLOBFROMFILE.html">Details</a></div></div>
+<div class="tab"><div><a href="EXTRACTCLOBFROMFILE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="EXTRACTCLOBFROMFILE_References.html">References</a></div></div>
+<div class="tab"><div><a href="EXTRACTCLOBFROMFILE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="EXTRACTCLOBFROMFILE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function extractClobFromFile (
+		p_nomefile in varchar2
+    ,p_directory in varchar2
+	) return clob IS
+  
+	/**
+	Dato il nome del file e la directory di database, ritorna il file in formato clob
+	*/
+
+  wclob CLOB;
+  wbfile  BFILE;
+  
+  BEGIN
+
+  DBMS_LOB.createtemporary (wclob, false);
+  wbfile := BFILENAME(p_directory, p_nomefile);
+  DBMS_LOB.OPEN(wbfile);
+  DBMS_LOB.loadfromfile(wclob, wbfile, DBMS_LOB.getlength(wbfile));
+  DBMS_LOB.fileclose(wbfile);
+
+  return wclob;
+  
+  END;</pre>	</td></tr>
+</table></div>
