@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GCSP" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d4168b5e-bb58-46f1-ba87-4b33e923c42e">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Grassetto" fontSize="10" isBold="false"/>
+	<parameter name="ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["/Users/alobefaro/JaspersoftWorkspace/SIC/"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select  
+b.DESCRIZIONE ente
+,b.LOGO
+,b.partita_iva
+,a.descrizione
+,a.intestazione01
+,a.intestazione02
+,a.intestazione_destra
+,b.anno_finanziario anno
+,a.piede_sinistra
+from tmp_param_reports_2 a
+,fin_t_dati_generali b
+where a.id = to_number($P{ID})
+and b.anno_finanziario = a.p01_anno]]>
+	</queryString>
+	<field name="ENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ENTE"/>
+	</field>
+	<field name="LOGO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LOGO"/>
+	</field>
+	<field name="ANNO_FINANZIARIO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO_FINANZIARIO"/>
+	</field>
+	<field name="PARTITA_IVA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PARTITA_IVA"/>
+	</field>
+	<field name="DESCRIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCRIZIONE"/>
+	</field>
+	<field name="INTESTAZIONE01" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE01"/>
+	</field>
+	<field name="INTESTAZIONE02" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE02"/>
+	</field>
+	<field name="INTESTAZIONE_DESTRA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE_DESTRA"/>
+	</field>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="PIEDE_SINISTRA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PIEDE_SINISTRA"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="70">
+			<textField>
+				<reportElement x="70" y="16" width="484" height="20" uuid="f19e48c8-6c6e-46c8-ba77-b4acde9e6c65"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ENTE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="70" y="36" width="484" height="15" uuid="f8eddd59-de1c-4cb5-83a1-bbc0b68fbfbd"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIZIONE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="70" y="52" width="484" height="15" uuid="58518ff5-54ce-4814-95a1-da203b65bea2"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Esercizio Finanziario "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="280" y="0" width="274" height="16" uuid="8478f227-ad8b-4426-a07f-767c5dc6b29e"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INTESTAZIONE_DESTRA}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="5" y="9" width="60" height="61" uuid="ef75929b-2f99-41e2-a9a7-4228d1e8158b"/>
+				<imageExpression><![CDATA[$P{SUBREPORT_DIR}+$F{LOGO}]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="54" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="54" uuid="7db8dd88-ef81-4746-b886-501eafe65623"/>
+				<subreportParameter name="ANNO">
+					<subreportParameterExpression><![CDATA[$F{ANNO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"GCSP1.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="63">
+			<subreport>
+				<reportElement x="0" y="6" width="555" height="50" uuid="9dd7c231-a89b-403b-88eb-754d95ffae68"/>
+				<subreportParameter name="ANNO">
+					<subreportParameterExpression><![CDATA[$F{ANNO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"GCSP2.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="10">
+			<textField>
+				<reportElement x="180" y="0" width="100" height="10" uuid="a8cfd50b-80fe-4559-bb15-2d87497c04c2"/>
+				<textElement textAlignment="Right">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="280" y="0" width="100" height="10" uuid="b44d523c-6445-4e47-93a6-69016917576c"/>
+				<textElement textAlignment="Left">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" di " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

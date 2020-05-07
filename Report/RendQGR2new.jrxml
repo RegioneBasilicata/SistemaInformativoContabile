@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendQGR1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="Grassetto">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{STILE},"T")]]></conditionExpression>
+			<style isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT DESC_RIGO_USCITA, 
+U_IMPEGNI,
+ DECODE(SUBSTR(DESC_RIGO_USCITA,1,2),'GE','T','d)','T','f)','T') stile
+FROM FIN_T_RENDICONTO_QGR
+WHERE UTENTE =   $P{UTENTE}   AND
+ANNO =  $P{ANNO}    AND
+TIPO in ('BIL','ACC')
+ORDER BY RIGA]]>
+	</queryString>
+	<field name="DESC_RIGO_USCITA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_RIGO_USCITA"/>
+	</field>
+	<field name="U_IMPEGNI" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="U_IMPEGNI"/>
+	</field>
+	<field name="STILE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="STILE"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Grassetto" x="400" y="0" width="220" height="20" uuid="8acb0288-9de8-45ad-ba60-924005945e3e"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESC_RIGO_USCITA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Grassetto" x="620" y="0" width="91" height="20" uuid="db46e510-2a6a-40e6-b5bf-14bbf4d6cab3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{U_IMPEGNI}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

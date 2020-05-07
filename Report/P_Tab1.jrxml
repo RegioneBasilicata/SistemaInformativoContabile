@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="P_Tab1" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" isFloatColumnFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="CAPITOLI" class="java.lang.String"/>
+	<parameter name="TIPO_BILANCIO" class="java.lang.String"/>
+	<parameter name="TABELLA" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select 
+ l1.codice missione
+,l2.codice programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,a.eu||a.codice articolo
+,a.nb_id_padre
+,decode( $P{TIPO_BILANCIO} ,'A',previsione_definitiva( $P{ANNO} ,a.eu||a.codice),previsione_iniziale( $P{ANNO},a.eu||a.codice)) previsto_attuale
+,decode($P{TIPO_BILANCIO},'A',pluriennale1_definitivo( $P{ANNO}+1,a.eu||a.codice),pluriennale1_iniziale( $P{ANNO}+1,a.eu||a.codice)) previsto_successivo_1
+,decode($P{TIPO_BILANCIO},'A',pluriennale2_definitivo( $P{ANNO}+2,a.eu||a.codice),pluriennale2_iniziale( $P{ANNO}+2,a.eu||a.codice)) previsto_successivo_2
+,a.descrizione desc_articolo
+, $P{ANNO}+1 ANNO1
+, $P{ANNO}+2 ANNO2
+from 
+ fin_t_articoli a
+,nb_livello1 l1
+,nb_livello2 l2
+where a.anno =  $P{ANNO}
+and a.eu = 'U' 
+and upper(a.tabella) = upper( $P{TABELLA} ) 
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and (
+ decode( $P{TIPO_BILANCIO} ,'A',previsione_definitiva( $P{ANNO} ,a.eu||a.codice),previsione_iniziale( $P{ANNO},a.eu||a.codice)) <>0
+or decode($P{TIPO_BILANCIO},'A',pluriennale1_definitivo( $P{ANNO}+1,a.eu||a.codice),pluriennale1_iniziale( $P{ANNO}+1,a.eu||a.codice)) <>0
+or decode($P{TIPO_BILANCIO},'A',pluriennale2_definitivo( $P{ANNO}+2,a.eu||a.codice),pluriennale2_iniziale( $P{ANNO}+2,a.eu||a.codice)) <>0
+)
+order by 1,2,5,6]]>
+	</queryString>
+	<field name="MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+	</field>
+	<field name="PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROGRAMMA"/>
+	</field>
+	<field name="DESC_MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_MISSIONE"/>
+	</field>
+	<field name="DESC_PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_PROGRAMMA"/>
+	</field>
+	<field name="ARTICOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ARTICOLO"/>
+	</field>
+	<field name="NB_ID_PADRE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NB_ID_PADRE"/>
+	</field>
+	<field name="PREVISTO_ATTUALE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVISTO_ATTUALE"/>
+	</field>
+	<field name="PREVISTO_SUCCESSIVO_1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVISTO_SUCCESSIVO_1"/>
+	</field>
+	<field name="PREVISTO_SUCCESSIVO_2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVISTO_SUCCESSIVO_2"/>
+	</field>
+	<field name="DESC_ARTICOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_ARTICOLO"/>
+	</field>
+	<field name="ANNO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO1"/>
+	</field>
+	<field name="ANNO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO2"/>
+	</field>
+	<variable name="PROG_PREVISTO_ATTUALE" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></variableExpression>
+	</variable>
+	<variable name="PROG_PREVISTO_SUCCESSIVO_1" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_1}]]></variableExpression>
+	</variable>
+	<variable name="PROG_PREVISTO_SUCCESSIVO_2" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_2}]]></variableExpression>
+	</variable>
+	<variable name="MIS_PREVISTO_ATTUALE" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></variableExpression>
+	</variable>
+	<variable name="MIS_PREVISTO_SUCCESSIVO_1" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_1}]]></variableExpression>
+	</variable>
+	<variable name="MIS_PREVISTO_SUCCESSIVO_2" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_2}]]></variableExpression>
+	</variable>
+	<variable name="TOT_PREVISTO_ATTUALE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></variableExpression>
+	</variable>
+	<variable name="TOT_PREVISTO_SUCCESSIVO_1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_1}]]></variableExpression>
+	</variable>
+	<variable name="TOT_PREVISTO_SUCCESSIVO_2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_2}]]></variableExpression>
+	</variable>
+	<group name="Missione">
+		<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement x="60" y="0" width="485" height="20" uuid="26a21441-1c8a-4915-95b6-c5a011b503f9"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="0" width="60" height="20" uuid="2147576b-2070-4078-aa9e-809d0ed2aa0d"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement x="0" y="0" width="245" height="20" uuid="02a24dbd-37ba-4aa2-bc80-1dccf6beb23e"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Totale Missione "+$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement x="245" y="0" width="100" height="20" uuid="66cb3841-66c1-4973-b501-c9b17cd0b1d7"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_PREVISTO_ATTUALE}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement x="345" y="0" width="100" height="20" uuid="a69602b4-b500-4744-8497-4d532bf59f1c"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_PREVISTO_SUCCESSIVO_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement x="445" y="0" width="100" height="20" uuid="382e2703-0a2d-4391-ad18-7daab9d39dd5"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_PREVISTO_SUCCESSIVO_2}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Programma">
+		<groupExpression><![CDATA[$F{PROGRAMMA}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement x="0" y="0" width="60" height="20" uuid="ca4eb06a-35c6-4b69-9211-bcb459cf92b6"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PROGRAMMA}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="60" y="0" width="184" height="20" uuid="0e734eb8-884e-45dd-8035-974d3313bb8e"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_PROGRAMMA}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+					<reportElement x="245" y="0" width="100" height="20" uuid="468c6a8e-0c07-411d-a693-a6f2d0f4e35c"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{PROG_PREVISTO_ATTUALE}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+					<reportElement x="345" y="0" width="100" height="20" uuid="43eb0d8a-3f7c-4d32-b40c-5fccf9158fa4"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{PROG_PREVISTO_SUCCESSIVO_1}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+					<reportElement x="445" y="0" width="100" height="20" uuid="dce41b89-4fe3-4a2e-905b-e426d9f62ae3"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{PROG_PREVISTO_SUCCESSIVO_2}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="30">
+			<staticText>
+				<reportElement x="0" y="0" width="245" height="30" uuid="3af413dd-8009-4059-9f0d-5f4807a0385a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Missione Programma]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="445" y="0" width="100" height="30" uuid="ebabf681-6921-4f3b-aed5-b0ea72b8e1ca"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsione "+$F{ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="245" y="0" width="100" height="30" uuid="099068f7-b35f-4a37-8d60-1fecd649217e"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsione "+$P{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="345" y="0" width="100" height="30" uuid="b06dc0b3-40dc-44e8-b0ab-00670b1a8590"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsione "+$F{ANNO1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20">
+			<printWhenExpression><![CDATA[EQUALS($P{CAPITOLI},"S" )]]></printWhenExpression>
+			<textField>
+				<reportElement x="0" y="0" width="60" height="20" uuid="dbe080a6-bf36-43e8-bc8f-fb4154105c24">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7649e8f6-6f82-4947-bad6-65425a84fcc0"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ARTICOLO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="0" width="185" height="20" uuid="9215eca3-b31f-4252-9888-5ff21566aa4a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="26123dcd-44ea-49db-82cc-290eebb2fdea"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESC_ARTICOLO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="245" y="0" width="100" height="20" uuid="b185add4-0992-4f5e-81ab-c4ab7163ec7a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="00b16550-c5a7-467a-b2cc-6101b20947f4"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="345" y="0" width="100" height="20" uuid="70705df1-26f2-44d3-be91-3fc668ddd90a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6e9c489b-6dbc-485e-b980-ffc1909e25a8"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="445" y="0" width="100" height="20" uuid="2a7daa23-9df5-4add-86de-530801754dec">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="576a2aad-a155-41e0-bb5b-955049becb66"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVISTO_SUCCESSIVO_2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="42">
+			<staticText>
+				<reportElement x="0" y="10" width="245" height="25" uuid="5ce077cb-aa86-4559-9ca0-f025a000870e"/>
+				<box>
+					<topPen lineWidth="2.0"/>
+					<bottomPen lineWidth="2.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[TOTALE GENERALE]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="245" y="10" width="100" height="25" uuid="c826f677-7786-4879-b3b4-34b4574d9d1e"/>
+				<box>
+					<topPen lineWidth="2.0"/>
+					<bottomPen lineWidth="2.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOT_PREVISTO_ATTUALE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="345" y="10" width="100" height="25" uuid="b588ea1f-4c98-4ae8-99fa-ee8af75d817d"/>
+				<box>
+					<topPen lineWidth="2.0"/>
+					<bottomPen lineWidth="2.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOT_PREVISTO_SUCCESSIVO_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="445" y="10" width="100" height="25" uuid="e3140aac-040d-492f-9323-7cd1110f1bd3"/>
+				<box>
+					<topPen lineWidth="2.0"/>
+					<bottomPen lineWidth="2.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOT_PREVISTO_SUCCESSIVO_2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

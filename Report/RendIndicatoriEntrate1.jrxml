@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendIndicatorientrate1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SIC_CONSIGLIO"/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<box>
+			<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{DEFINIZIONE},null)||EQUALS(RIGHT($F{TITOLO},4),"0000" )]]></conditionExpression>
+			<style mode="Transparent" backcolor="#FCF7F7" fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+ord
+,codice_indicatore1 Titolo
+,desc_cod1 Denominazione
+,definizione
+,prevcompe_su_tot1 --"Prev.in.comp./tot.prev.in.comp."
+,prevcompe_su_tot2 --"Prev.def.comp./tot.prev.def.comp."
+,prevcompe_su_tot3 --"Accertamenti/Totale Accertamenti"
+,macc_su_mtot
+,prevcassa_su_tot1
+,mrisc_su_macc
+,inc_mis_prog1
+,inc_fpv1
+from fin_t_indicatori_bilancio
+where anno =$P{ANNO}
+and utente='CONS'||anno
+and tipo_bilancio = 'R'
+and tipo_indicatore = 'E' 
+order by ord]]>
+	</queryString>
+	<field name="ORD" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ORD"/>
+	</field>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DENOMINAZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DENOMINAZIONE"/>
+	</field>
+	<field name="DEFINIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFINIZIONE"/>
+	</field>
+	<field name="PREVCOMPE_SU_TOT1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE_SU_TOT1"/>
+	</field>
+	<field name="PREVCOMPE_SU_TOT2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE_SU_TOT2"/>
+	</field>
+	<field name="PREVCOMPE_SU_TOT3" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE_SU_TOT3"/>
+	</field>
+	<field name="MACC_SU_MTOT" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="MACC_SU_MTOT"/>
+	</field>
+	<field name="PREVCASSA_SU_TOT1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCASSA_SU_TOT1"/>
+	</field>
+	<field name="MRISC_SU_MACC" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="MRISC_SU_MACC"/>
+	</field>
+	<field name="INC_MIS_PROG1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG1"/>
+	</field>
+	<field name="INC_FPV1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="INC_FPV1"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="70" splitType="Stretch">
+			<staticText>
+				<reportElement x="70" y="0" width="270" height="70" uuid="7656a225-fe3e-43e9-ac98-552da9e06ea5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Denominazione]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="0" width="174" height="15" uuid="4c00f34d-c5db-48a1-902d-400e3cd3a4fa"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Composizione delle entrate (valori percentuali)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="514" y="0" width="294" height="15" uuid="4ca719b0-4805-48b5-98dc-a41d84d5f04d"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Percentuale di riscossione
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="0" width="60" height="70" uuid="12c4ac52-f975-4a4c-8d7b-4c2c6e7e6360"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Titolo Tipologia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="15" width="58" height="55" uuid="b2679efa-b8ad-4b29-8ca4-6c5e8bff531f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[Previsioni iniziali competenza/  totale previsioni iniziali competenza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="398" y="15" width="58" height="55" uuid="7c5b7d1d-8c84-49cb-9ecb-9d8e852d4b0f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[Previsioni definitive competenza/  totale previsioni definitive competenza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="456" y="15" width="58" height="55" uuid="4ce229f9-8ca6-4941-b932-5a04a1654f88"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[Accertamenti/ Totale Accertamenti]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="514" y="15" width="58" height="55" uuid="60ab18b8-b1f0-459e-bdc1-8a2198a40747"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[% di riscossione prevista nel bilancio di previsione iniziale: Previsioni iniziali cassa/ (previsioni iniziali competenza + residui)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="572" y="15" width="58" height="55" uuid="c55044d1-c6bd-4214-b9d4-229ff79fea04"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[% di riscossione prevista nelle previsioni definitive: Previsioni definitive  cassa/ (previsioni definitive competenza + residui)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="630" y="15" width="58" height="55" uuid="033f3749-e87f-4bf2-86dd-888ba301fae5"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[% di riscossione complessiva: (Riscossioni c/comp+ Riscossioni c/residui)/ (Accertamenti + residui definitivi iniziali)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="688" y="15" width="58" height="55" uuid="094f92a4-5bf8-462d-a59f-9b7861f9e3da"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[% di riscossione dei crediti esigibili nell'eserczio: Riscossioni c/comp/ Accertamenti  di competenza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="746" y="15" width="62" height="55" uuid="d0b6cf46-83f8-4f9f-81c0-d772ff7313fb"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[% di riscossione dei crediti esigibili negli esercizi precedenti: Riscossioni c/residui/  residui definitivi iniziali
+]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="26" splitType="Prevent">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="10" y="0" width="60" height="25" uuid="1f6eee3a-00ac-4f23-92bf-102922028087">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45cf638c-eaa8-431b-b08b-0177d42a1cd3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TITOLO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" isPrintRepeatedValues="false" x="70" y="0" width="270" height="25" uuid="df64fc6f-f559-4fc2-8a7a-8dc4633fb12c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DENOMINAZIONE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="398" y="0" width="58" height="25" uuid="7da54ce9-4ef6-4435-a5af-e10950d2507f">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE_SU_TOT2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="456" y="0" width="58" height="25" uuid="a72fa5b1-8376-4739-bed5-cbfd3302467a">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE_SU_TOT3}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="514" y="0" width="58" height="25" uuid="3c17c65c-14d2-41e5-b296-84a54b0f29f1">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{MACC_SU_MTOT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="572" y="0" width="58" height="25" uuid="4064ddfb-c371-4387-bdca-edfdcbafa663">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PREVCASSA_SU_TOT1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="630" y="0" width="58" height="25" uuid="a8375e55-7322-4633-bb72-c37df4a5f0b0">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{MRISC_SU_MACC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="340" y="0" width="58" height="25" uuid="59f72ab7-6402-48c0-a33f-06165ebe5ea2">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="688" y="0" width="58" height="25" uuid="bc0eb47f-4cd0-41c6-bfbc-4acf56d95ac6">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INC_MIS_PROG1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" x="746" y="0" width="62" height="25" uuid="0aef840c-f2f6-47ca-9679-7ba016215e8b">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INC_FPV1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="340" y="0" width="468" height="25" uuid="a2bcf7c2-d43a-41f8-a161-16ad03e9a061">
+					<printWhenExpression><![CDATA[$F{PREVCOMPE_SU_TOT1}==null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

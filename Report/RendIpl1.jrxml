@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendIpl1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Grassetto Totali">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(UPPER(LEFT($F{DESCMACROAGG1},6) ),"TOTALE")]]></conditionExpression>
+			<style fontName="Arial" fontSize="9" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<subDataset name="Dataset1" uuid="d8ac0072-cb4f-4c6b-b799-1b13f91b3f48">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Gat2"/>
+		<parameter name="Titolo" class="java.lang.String"/>
+		<parameter name="UTENTE" class="java.lang.String"/>
+		<parameter name="ANNO" class="java.math.BigDecimal"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT DISTINCT i.riga
+               ,decode(i.codice,'','',u.id) titolo
+               ,decode(i.codice,'','',u.descrizione) desc_titolo
+               ,i.codice codmacroagg1
+               ,i.descrizione descmacroagg1
+			   ,i.anno
+			    ,i.prevcompe1
+               ,i.imp1
+               ,i.prevcompe2
+               ,i.imp2
+               ,i.impn
+               ,i.utente
+FROM nb_titoli_uscite u
+,fin_t_rendiconto_impplur i
+,tmp_param_reports_2 r
+WHERE     u.id <> 0 AND
+                  (substr(i.codice,1,1)  = u.id /*  OR i.codice IS null*/) AND
+                  i.utente =  $P{UTENTE} AND
+                  i.anno =  $P{ANNO} AND              
+				  u.descrizione  =  $P{Titolo}
+ORDER BY 1,2]]>
+		</queryString>
+		<field name="RIGA" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="RIGA"/>
+		</field>
+		<field name="TITOLO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+		</field>
+		<field name="DESC_TITOLO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+		</field>
+		<field name="CODMACROAGG1" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CODMACROAGG1"/>
+		</field>
+		<field name="DESCMACROAGG1" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESCMACROAGG1"/>
+		</field>
+		<field name="ANNO" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+		</field>
+		<field name="PREVCOMPE1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE1"/>
+		</field>
+		<field name="IMP1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="IMP1"/>
+		</field>
+		<field name="PREVCOMPE2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE2"/>
+		</field>
+		<field name="IMP2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="IMP2"/>
+		</field>
+		<field name="IMPN" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="IMPN"/>
+		</field>
+		<field name="UTENTE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+		</field>
+		<group name="DESC_TITOLO">
+			<groupExpression><![CDATA[$F{DESC_TITOLO}]]></groupExpression>
+		</group>
+	</subDataset>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT DISTINCT decode(i.codice,'','',u.id) titolo
+               ,decode(i.codice,'','T',u.descrizione) desc_titolo
+                ,i.anno
+			   ,i.anno+1
+               ,i.utente
+ FROM nb_titoli_uscite u
+,fin_t_rendiconto_impplur i
+WHERE     u.id <> 0 AND
+                  (substr(i.codice,1,1)  = u.id /*OR i.codice IS null*/) AND
+                  i.utente =  $P{UTENTE}  AND
+                  i.anno =  $P{ANNO} 
+ORDER BY 1]]>
+	</queryString>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="I.ANNO+1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="I.ANNO+1"/>
+	</field>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="300" height="60" uuid="f11aafe7-c396-483a-af87-a41faf16c386"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TITOLI E MACROAGGREGATI DI SPESA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="0" width="100" height="20" uuid="d2097e9e-cf88-4262-8493-d5cb399b15a9"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Anni successivi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="20" width="100" height="40" uuid="6a29dbe7-b57f-487e-918c-7a3ef24fbdad"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Previsioni di
+competenza del bilancio
+pluriennale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="20" width="100" height="40" uuid="dcc8783f-fea9-4ffe-b7e3-6d8a417e3a71"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Previsioni di
+competenza del bilancio
+pluriennale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="20" width="100" height="40" uuid="43788562-8ae1-4b17-9dd9-12c62578d932"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="20" width="100" height="40" uuid="6e1eae38-d892-45a0-a93a-247914dc109a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="600" y="20" width="100" height="40" uuid="2f7fc8a7-b38a-43fd-9adf-b2bdeaf6fd4c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="300" y="0" width="200" height="20" uuid="479a95b0-8d21-4258-8bcd-d0ca817b9cd4"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="0" width="200" height="20" uuid="af81872e-9b90-4f66-b10b-75eb6808d6ff"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{I.ANNO+1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30">
+			<componentElement>
+				<reportElement x="0" y="15" width="800" height="15" uuid="c1c1a683-42b9-4fee-bd55-1a5b0e44dfde">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset1" uuid="7c26e135-1607-4a8f-8ceb-245943edd5cf">
+						<datasetParameter name="UTENTE">
+							<datasetParameterExpression><![CDATA[$F{UTENTE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="ANNO">
+							<datasetParameterExpression><![CDATA[$F{ANNO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="Titolo">
+							<datasetParameterExpression><![CDATA[$F{DESC_TITOLO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="50" uuid="b800b809-38af-4617-8c09-6c96d01bd0e5">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna1"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField isBlankWhenNull="true">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="50" height="15" uuid="b4eb0281-eeef-44d4-afa5-ec01c0eab24a"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[EQUALS(UPPER(LEFT($F{DESCMACROAGG1},6) ),"TOTALE")?null:$F{CODMACROAGG1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="250" uuid="041c971c-4fa2-4885-b5a5-9654c155b53d">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna2"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Grassetto Totali" x="0" y="0" width="250" height="15" uuid="8ac151ff-2d69-4590-980e-bfdeea66eca0"/>
+								<textElement verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DESCMACROAGG1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="ea5c42f2-dc99-4086-9142-2fd5bfa258d1">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna3"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" uuid="377c104d-4011-43ee-a4df-c3dd06d3bd71"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{PREVCOMPE1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="f7097c0e-6f50-4dc5-8981-6814954e14ed">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna4"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" uuid="ade41c16-5e84-41c3-a43f-3dc896cc97d1"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{IMP1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="93e140b2-653b-4e8c-bc6a-6e71b9713c7c">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna5"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" uuid="75a8f8cc-a54a-466c-8757-aa46bd05e991"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{PREVCOMPE2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="5f597b3b-b54d-4742-8354-095ab6ec8787">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna6"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" uuid="b4c14da3-1037-48c0-a3b3-91c590db1722"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{IMP2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="bba06852-941d-4633-81ac-5626bf9f7924">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna7"/>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" uuid="fc88b3b7-875f-4804-97e2-666a80c51fd3"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{IMPN}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+			<textField isBlankWhenNull="true">
+				<reportElement x="50" y="0" width="750" height="15" isRemoveLineWhenBlank="true" uuid="1f457051-8ae2-492b-83b8-18bc73eef8a4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="36bc9160-9782-4bf9-b6b7-ac9e1c147b6e"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TITOLO "+ $F{TITOLO}+" "+$F{DESC_TITOLO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="15" uuid="a4c8f7e8-a1de-4ac2-83bd-2e5c26e4347e">
+					<printWhenExpression><![CDATA[LEN($F{TITOLO} )>0]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

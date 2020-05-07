@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="UsciteRendicontoT2" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{CAR01},"T")]]></conditionExpression>
+			<style fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ID" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT 
+ num_ord_riga
+,car02
+,car03
+,car89
+,car90
+,car08 car04co
+,car09 car05co
+,car10 car06co
+,car11 car07co
+FROM tmp_tabulati3
+WHERE car87= $P{ID}
+and num_ord_riga=0
+order by 1]]>
+	</queryString>
+	<field name="NUM_ORD_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_ORD_RIGA"/>
+	</field>
+	<field name="CAR02" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR02"/>
+	</field>
+	<field name="CAR03" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR03"/>
+	</field>
+	<field name="CAR89" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR89"/>
+	</field>
+	<field name="CAR90" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR90"/>
+	</field>
+	<field name="CAR04CO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR04CO"/>
+	</field>
+	<field name="CAR05CO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR05CO"/>
+	</field>
+	<field name="CAR06CO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR06CO"/>
+	</field>
+	<field name="CAR07CO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR07CO"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="80">
+			<textField>
+				<reportElement x="0" y="0" width="178" height="80" uuid="8f6e634c-1116-42c1-8d42-1ed731077f41"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR03}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="178" y="10" width="156" height="20" uuid="4a53abbb-2435-4c74-b91a-d1b3a7167712"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR04CO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="334" y="10" width="156" height="20" uuid="feaf6ca1-7869-4a24-a708-1d2c8251da7c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR05CO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="490" y="10" width="156" height="20" uuid="c4d009d2-ebb9-4b27-8b8c-1b25561dd247"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR06CO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="646" y="10" width="156" height="20" uuid="c7a5e8a9-b7e0-45e9-996e-4cc9a27a80c7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR07CO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="178" y="30" width="104" height="20" uuid="da9b850c-b1e9-43af-a7e3-614f9dfc4a3b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPETENZA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="178" y="50" width="52" height="30" uuid="8306555a-00a5-49ec-9099-8a01ed3f8d0f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="282" y="30" width="52" height="20" uuid="5e6ebf23-c58c-4d3b-8f38-9610ab581b6f"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CASSA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="230" y="50" width="52" height="30" uuid="2b387a23-60a6-4ba7-afeb-d79986bee515"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="282" y="50" width="52" height="30" uuid="21be5b0e-30d9-4537-8197-7ccb7802030b"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="334" y="30" width="104" height="20" uuid="39d678c6-8f4a-44a0-84fb-4adfd86925f5"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPETENZA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="438" y="30" width="52" height="20" uuid="36a56cd4-1675-4bb4-be16-c435edbba0ee"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CASSA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="386" y="50" width="52" height="30" uuid="cbb3b592-7e8c-4258-8fd4-ca2604fdc6a7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="438" y="50" width="52" height="30" uuid="054fb9fb-db70-4412-b596-87bc3cdc45ba"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="490" y="30" width="104" height="20" uuid="fbc233f2-abf0-4e7b-a666-e7b353b11705"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPETENZA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="594" y="30" width="52" height="20" uuid="cfc3233e-86c8-493e-8aa6-f1195b0b72bc"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CASSA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="542" y="50" width="52" height="30" uuid="3318b826-deb8-49ae-aca2-92a492211447"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="594" y="50" width="52" height="30" uuid="2f5af109-dece-40b9-ab3e-ad9e1f0fb7cb"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="646" y="30" width="104" height="20" uuid="022a0cdf-4b41-4a1f-b1c8-097fb57e6cff"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPETENZA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="750" y="30" width="52" height="20" uuid="23a5c680-80fb-4e11-b75e-bf61afcaa8c6"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CASSA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="698" y="50" width="52" height="30" uuid="567fbc37-12cd-4625-a42d-d08fbc73ca7a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="750" y="50" width="52" height="30" uuid="adca565f-eb10-4cfb-9405-5d242eb690d9"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="178" y="0" width="156" height="10" uuid="0b3b8ee4-369d-4fe5-b57c-44facf71d571"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[5]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="334" y="0" width="156" height="10" uuid="9e0201ee-de47-46f4-b98f-8b2aeb9722db"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[6]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="490" y="0" width="156" height="10" uuid="60b51c56-c95c-4bf1-9592-9592b2498285"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[7]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="646" y="0" width="156" height="10" uuid="fcb8e80c-f481-40ec-afcd-230057638f6b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[8]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="334" y="50" width="52" height="30" uuid="ffaef5a6-081b-452c-a7d5-e92a25f01aee"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="490" y="50" width="52" height="30" uuid="e38365b3-265b-4ab0-b81d-0264b12d0597"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="646" y="50" width="52" height="30" uuid="4554c186-46bf-4a29-bcb2-ea2a74bc1028"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impegni]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+</jasperReport>

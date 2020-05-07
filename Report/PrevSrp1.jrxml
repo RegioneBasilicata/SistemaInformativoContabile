@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevSrp1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="true"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="TIPO_BILANCIO" class="java.lang.String"/>
+	<parameter name="CODICE_ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+ a.eu eu_bil
+,a.codice capitolo_bil
+,nvl(a.nb_titolo,0) titolo
+,nvl(a.nb_macroaggregato,0) macroaggregato
+,l1.codice Missione
+,l2.codice Programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,case 
+ when  ($P{CODICE_ANNO} =0) then decode( $P{TIPO_BILANCIO} ,'A',nvl(previsione_definitiva($P{ANNO} ,a.eu||a.codice),0),nvl(previsione_iniziale($P{ANNO},a.eu||a.codice),0))
+ when ($P{CODICE_ANNO}=1)then decode($P{TIPO_BILANCIO},'A',nvl(pluriennale1_definitivo($P{ANNO},a.eu||a.codice),0),nvl(pluriennale1_iniziale($P{ANNO},a.eu||a.codice),0))
+ when  ($P{CODICE_ANNO}=2) then decode($P{TIPO_BILANCIO},'A',nvl(pluriennale2_definitivo($P{ANNO},a.eu||a.codice),0),nvl(pluriennale2_iniziale($P{ANNO},a.eu||a.codice),0))
+ else 0
+ end previsione
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+fin_t_bilancio b
+where a.anno= $P{ANNO} 
+and a.abilitato = 'S'
+and a.eu = 'U' 
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and nvl(a.nb_macroaggregato,0) in (401,402,403,404)
+and b.anno = a.anno
+and b.eu = a.eu
+and b.articolo = a.codice
+order by 5,6,4]]>
+	</queryString>
+	<field name="EU_BIL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="EU_BIL"/>
+	</field>
+	<field name="CAPITOLO_BIL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAPITOLO_BIL"/>
+	</field>
+	<field name="TITOLO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="MACROAGGREGATO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MACROAGGREGATO"/>
+	</field>
+	<field name="MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+	</field>
+	<field name="PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROGRAMMA"/>
+	</field>
+	<field name="DESC_MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_MISSIONE"/>
+	</field>
+	<field name="DESC_PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_PROGRAMMA"/>
+	</field>
+	<field name="PREVISIONE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVISIONE"/>
+	</field>
+	<variable name="Prog401" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"401" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Mis401" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"401" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Tot401" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"401" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Prog402" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"402" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Mis402" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"402" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Tot402" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"402" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Prog403" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"403" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Mis403" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"403" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Tot403" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"403" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Prog404" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"404" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Mis404" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"404" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Tot404" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS($F{MACROAGGREGATO},"404" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Prog400" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS(LEFT( $F{MACROAGGREGATO},1),"4" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Mis400" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS(LEFT( $F{MACROAGGREGATO},1),"4" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<variable name="Tot400" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[EQUALS(LEFT( $F{MACROAGGREGATO},1),"4" )?$F{PREVISIONE}:0]]></variableExpression>
+	</variable>
+	<group name="Missione" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField>
+					<reportElement x="0" y="0" width="30" height="15" uuid="20f2944c-f5d0-45ec-94d9-c9869d588010"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="30" y="0" width="770" height="15" uuid="2a37c2dc-f359-4c33-86a4-e6918bf45b53"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_MISSIONE}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="30" height="20" uuid="fbbf81f2-9fdb-4591-9ec2-f1d8f91ba6d9"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="30" y="0" width="270" height="20" uuid="d5737b76-584c-401a-8a32-e1c54b91a8bc"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="300" y="0" width="100" height="20" uuid="585435da-d77a-4363-92ba-e6e5d1641df8"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Mis401}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="400" y="0" width="100" height="20" uuid="545ed04e-3464-4225-9a6b-eeddacf071d6"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Mis402}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="500" y="0" width="100" height="20" uuid="2286621f-b581-46da-bb91-7aa89c050203"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Mis403}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="600" y="0" width="100" height="20" uuid="43c1da06-cbd1-4c1c-a96e-5ecf35e17987"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Mis404}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="700" y="0" width="100" height="20" uuid="5094d018-9ff4-41c1-8668-18d73a461bff"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Mis400}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Programma">
+		<groupExpression><![CDATA[$F{PROGRAMMA}]]></groupExpression>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="30" height="20" uuid="84e4e4a3-593a-46c2-a6c8-8870ec60a74a"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PROGRAMMA}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="30" y="0" width="270" height="20" uuid="9f153b28-8d64-49e7-b5ab-dfa53aa99139"/>
+					<textElement verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_PROGRAMMA}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="300" y="0" width="100" height="20" uuid="66bd2efa-a3c6-48bb-ab53-2ac056c01c6b"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Prog401}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="400" y="0" width="100" height="20" uuid="530650cc-ff65-4a55-bfe9-e502f2423ebb"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Prog402}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="500" y="0" width="100" height="20" uuid="b067522d-7ac4-4925-b0ee-c9296038054f"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Prog403}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="600" y="0" width="100" height="20" uuid="1625efc0-da39-44b7-a947-2abc31329eae"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Prog404}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="700" y="0" width="100" height="20" uuid="09ab07e7-a33a-4c3e-88f8-d3c68c35d519"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="7"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Prog400}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="82">
+			<staticText>
+				<reportElement x="0" y="0" width="300" height="82" uuid="a2413464-9b6f-4efb-b138-424c8809b320"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Missione e Programma/MacroAggregati]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="52" width="100" height="30" uuid="32f6718e-2c42-45b8-8840-6f94a68ea143"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[401]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="0" width="100" height="52" uuid="7d03fda6-47ca-4f23-b8fc-6f07543c0798"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rimborso di Titoli Obbligazionari]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="52" width="100" height="30" uuid="f8a9a7d4-31c2-4c3d-82f8-96ff337f759d"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[400]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="0" width="100" height="52" uuid="1d3adb83-9af9-486c-8e52-7ed694f05318"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTALE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="600" y="52" width="100" height="30" uuid="62594bfc-0270-4e1e-90e1-2869eefd3cee"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[404]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="600" y="0" width="100" height="52" uuid="b2df7c0e-6e1f-4564-868c-b193fbb89f52"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rimborso di altre forme di indebitamento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="52" width="100" height="30" uuid="863d7b71-612b-4b1a-b927-02272cf6828a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[403]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="0" width="100" height="52" uuid="d50a5e57-b829-44d8-8181-92776659d4f1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rimborso mutui e altri Finanziamenti a medio lungo termine]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="52" width="100" height="30" uuid="7ba0ef34-f2de-4ecc-98f4-88dc6c277e07"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[402]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="0" width="100" height="52" uuid="6d233f5d-5dc7-4123-be0a-53e38aa2525a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rimborso Prestiti a Breve Termine]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="33">
+			<staticText>
+				<reportElement x="0" y="6" width="300" height="20" uuid="7293e3d6-6eb0-49c5-9c93-fa21acfa838f"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTALE GENERALE]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="300" y="6" width="100" height="20" uuid="27276a52-65ea-4498-94ba-60ab52d1cfef"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Tot401}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="400" y="6" width="100" height="20" uuid="03b94a84-65e8-4b4d-96e3-94a8cf2ddc95"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Tot402}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="500" y="6" width="100" height="20" uuid="8f7299ab-584e-4c46-a3aa-ad3fc9224c6c"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Tot403}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="600" y="6" width="100" height="20" uuid="eb975850-89e6-4831-9649-eb0850372626"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Tot404}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="700" y="6" width="100" height="20" uuid="0ae338cb-6f6e-4aa2-96e9-d58c3e945c9e"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Tot400}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

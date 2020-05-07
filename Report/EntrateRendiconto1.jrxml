@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EntrateRendiconto1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{CAR01},"T")]]></conditionExpression>
+			<style fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select 
+  UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03
+ ,CAR04
+ ,NUM01
+ ,NUM02
+ ,NUM03
+ ,NUM04
+ ,NUM05
+ from tmp_tabulati
+ where utente='CONS'||$P{ANNO} 
+ and car04='ENTRATE_RENDICONTO'
+ order by num_ord_riga]]>
+	</queryString>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<field name="NUM_ORD_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_ORD_RIGA"/>
+	</field>
+	<field name="CAR01" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR01"/>
+	</field>
+	<field name="CAR02" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR02"/>
+	</field>
+	<field name="CAR03" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR03"/>
+	</field>
+	<field name="CAR04" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR04"/>
+	</field>
+	<field name="NUM01" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM01"/>
+	</field>
+	<field name="NUM02" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM02"/>
+	</field>
+	<field name="NUM03" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM03"/>
+	</field>
+	<field name="NUM04" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM04"/>
+	</field>
+	<field name="NUM05" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM05"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="46" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="0" width="60" height="46" uuid="39ecbeae-041b-41c1-88e3-267a6676643b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45cf638c-eaa8-431b-b08b-0177d42a1cd3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Titolo  Tipologia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="0" width="310" height="46" uuid="7656a225-fe3e-43e9-ac98-552da9e06ea5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrizione]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="487" y="20" width="107" height="26" uuid="385ee7f9-9d77-4bd3-8ff2-10ace25ac70b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8daf125c-7cdf-4ae7-bcdc-9c70173fdb6a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[di cui Gestione Sanitaria]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="701" y="20" width="107" height="26" uuid="434cc7f0-688a-4481-a337-4d0f6a1e9a0d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3debfa49-7039-49fb-9d5c-b31cc61f704b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[di cui Gestione Sanitaria]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="380" y="0" width="214" height="20" uuid="e80b21ec-9b06-41c7-94f2-678be88a92ca">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66a2309a-bd70-4f8d-8ad4-9d956e93600b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Competenza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="594" y="0" width="214" height="20" uuid="66e28147-4c24-4456-a876-98e68a1ac533">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6903b19b-17e3-4674-b1ed-35b627f12058"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cassa]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<printWhenExpression><![CDATA[!$F{CAR02}.equals("00000")]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="10" y="0" width="60" height="25" uuid="1f6eee3a-00ac-4f23-92bf-102922028087">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45cf638c-eaa8-431b-b08b-0177d42a1cd3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CAR02}.equals("E0000")||$F{CAR02}.equals("T")?"":$F{CAR02}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="70" y="0" width="310" height="25" uuid="df64fc6f-f559-4fc2-8a7a-8dc4633fb12c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CAR03}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="380" y="0" width="107" height="25" uuid="8fe4b61a-f1ea-45dc-91cc-107ef90f888a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66a2309a-bd70-4f8d-8ad4-9d956e93600b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NUM02}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="487" y="0" width="107" height="25" uuid="dee01d22-43a7-462b-a63a-73fe22ef7d5b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8daf125c-7cdf-4ae7-bcdc-9c70173fdb6a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NUM03}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="594" y="0" width="107" height="25" uuid="7d906c58-c6dc-463b-a906-b97254d6c6c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6903b19b-17e3-4674-b1ed-35b627f12058"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NUM04}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="701" y="0" width="107" height="25" uuid="698881a8-ae29-4e41-b914-4e1910259a65">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3debfa49-7039-49fb-9d5c-b31cc61f704b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NUM05}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

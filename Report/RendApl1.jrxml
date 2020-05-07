@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendApl1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Grassetto Totali">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(UPPER(LEFT($F{DESCTIPOLOGIA},6) ),"TOTALE")||EQUALS(LEFT($F{DESCTIPOLOGIA},6),"Totale")]]></conditionExpression>
+			<style fontName="Arial" fontSize="9" isBold="true">
+				<box>
+					<pen lineWidth="2.0"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+	</style>
+	<subDataset name="Dataset1" uuid="a70565df-4fc0-4d8b-aae3-e51643b93132">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+		<parameter name="Titolo" class="java.lang.String"/>
+		<parameter name="UTENTE" class="java.lang.String"/>
+		<parameter name="ANNO" class="java.math.BigDecimal"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT DISTINCT a.riga
+               ,decode(a.codice,'','',substr(e.codice,1,1)) titolo
+               ,decode(a.codice,'','',e.descrizione) desc_titolo
+               ,a.codice codtipologia
+               ,a.descrizione desctipologia
+			   ,a.anno
+			   ,a.prevcompe1
+               ,a.acc1
+               ,a.accn
+               ,a.prevcompe2
+               ,a.acc2
+FROM nb_livello1 e
+,fin_t_rendiconto_accplur a
+WHERE e.eu = 'E' AND
+e.anno=a.anno AND
+substr(a.codice,1,1)  = substr(e.codice,1,1)  AND
+a.utente =  $P{UTENTE}  AND
+a.anno =  $P{ANNO}  AND              
+e.descrizione  =  $P{Titolo}
+ORDER BY 1,2]]>
+		</queryString>
+		<field name="RIGA" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="RIGA"/>
+		</field>
+		<field name="TITOLO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+		</field>
+		<field name="DESC_TITOLO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+		</field>
+		<field name="CODTIPOLOGIA" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CODTIPOLOGIA"/>
+		</field>
+		<field name="DESCTIPOLOGIA" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESCTIPOLOGIA"/>
+		</field>
+		<field name="ANNO" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+		</field>
+		<field name="PREVCOMPE1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE1"/>
+		</field>
+		<field name="ACC1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ACC1"/>
+		</field>
+		<field name="ACCN" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ACCN"/>
+		</field>
+		<field name="PREVCOMPE2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE2"/>
+		</field>
+		<field name="ACC2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ACC2"/>
+		</field>
+		<group name="Titolo">
+			<groupExpression><![CDATA[$F{TITOLO}]]></groupExpression>
+		</group>
+	</subDataset>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT DISTINCT decode(a.codice,'','',substr(e.codice,1,1)) titolo
+               ,decode(a.codice,'','',e.descrizione) desc_titolo
+               ,a.anno
+			   ,a.anno+1
+			   ,a.utente
+FROM nb_livello1 e
+,fin_t_rendiconto_accplur a
+WHERE e.eu = 'E' AND
+e.anno=a.anno AND
+substr(a.codice,1,1)  = substr(e.codice,1,1)  AND
+ a.utente= $P{UTENTE}  AND
+a.anno=    $P{ANNO} 
+ORDER BY 1]]>
+	</queryString>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="A.ANNO+1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="A.ANNO+1"/>
+	</field>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="300" height="60" uuid="f11aafe7-c396-483a-af87-a41faf16c386"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TITOLI E TIPOLOGIA DI ENTRATA ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="0" width="100" height="20" uuid="d2097e9e-cf88-4262-8493-d5cb399b15a9"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Anni successivi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="20" width="100" height="40" uuid="6a29dbe7-b57f-487e-918c-7a3ef24fbdad"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Previsioni di competenza del bilancio pluriennale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="20" width="100" height="40" uuid="dcc8783f-fea9-4ffe-b7e3-6d8a417e3a71"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Previsioni di competenza del bilancio pluriennale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="20" width="100" height="40" uuid="43788562-8ae1-4b17-9dd9-12c62578d932"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Accertamenti]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="20" width="100" height="40" uuid="6e1eae38-d892-45a0-a93a-247914dc109a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Accertamenti]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="600" y="20" width="100" height="40" uuid="2f7fc8a7-b38a-43fd-9adf-b2bdeaf6fd4c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Accertamenti]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="300" y="0" width="200" height="20" uuid="479a95b0-8d21-4258-8bcd-d0ca817b9cd4"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="0" width="200" height="20" uuid="af81872e-9b90-4f66-b10b-75eb6808d6ff"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{A.ANNO+1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Prevent">
+			<componentElement>
+				<reportElement x="0" y="15" width="800" height="15" uuid="4fd758d1-3473-4c0d-a011-82e37b326fe0">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset1" uuid="4736f262-91b8-4078-b733-09ceb61006d6">
+						<datasetParameter name="ANNO">
+							<datasetParameterExpression><![CDATA[$F{ANNO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="UTENTE">
+							<datasetParameterExpression><![CDATA[$F{UTENTE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="Titolo">
+							<datasetParameterExpression><![CDATA[$F{DESC_TITOLO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="50" uuid="39cc146d-4484-40e4-8fbf-090649a5c841">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField isBlankWhenNull="true">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="50" height="15" uuid="bf085ef8-55bc-4b50-bcdd-5f2b67a74a06"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[EQUALS(UPPER(LEFT($F{DESCTIPOLOGIA},6) ),"TOTALE")?null:$F{CODTIPOLOGIA}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="250" uuid="d9ad7f5f-59ea-4aa0-9bff-9a6f3f2ed6db">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Grassetto Totali" x="0" y="0" width="250" height="15" uuid="ad08771b-6b6c-44a8-a374-017eb6a94f3d"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DESCTIPOLOGIA}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="c8d7dd1c-2eee-4413-bfc7-fa68892ff654">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true" uuid="57f8f79a-a4ce-4816-ae92-5b5b1de9bd47"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{PREVCOMPE1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="67558b80-7741-4ae7-baa0-df32b96f6572">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true" uuid="248244e1-75e9-4609-8876-b755155ae021"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ACC1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="589e8b87-fd19-4d7b-8b04-0ca067b1846a">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true" uuid="c0914977-983a-455e-adeb-314438e396bb"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{PREVCOMPE2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="b602f082-ce71-456a-bce0-b02b8dcc3a6d">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true" uuid="f366e9fa-3923-4973-96df-344938dec077"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ACC2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="0a47d874-2cb4-4d56-a291-2d222cfb9557">
+						<jr:detailCell style="Grassetto Totali" height="15">
+							<box>
+								<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Grassetto Totali" x="0" y="0" width="100" height="15" isRemoveLineWhenBlank="true" uuid="22e0bc14-5ebd-4a08-8431-694b5e25dac1"/>
+								<box>
+									<pen lineWidth="0.5"/>
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph rightIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ACCN}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+			<textField>
+				<reportElement x="50" y="0" width="750" height="15" uuid="94a293ef-3992-488c-920f-21961d37ac7f"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TITOLO "+ $F{TITOLO}+" "+$F{DESC_TITOLO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="15" uuid="13d701f5-adac-4e6f-9bb1-bfcd736516a8"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

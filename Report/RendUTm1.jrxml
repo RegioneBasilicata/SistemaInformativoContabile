@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendUTm1" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="429c78d4-d845-4c9b-8cf7-e8abaaac5c7d">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT nb_titolo titolo,
+       desc_nb_titolo desc_nb_titolo,
+       nb_macroaggregato macroaggr,
+       UPPER(descr_macro_agg)  descr_macro_agg,
+       NVL(SUM(NVL(accertamenti_impegni_compe,0)),0) totmacro
+FROM fin_t_consuntivo_excel
+WHERE anno_consuntivo =  $P{ANNO} AND
+      utente = UPPER($P{UTENTE}) AND
+      nb_titolo IS NOT NULL AND
+      tipo_capitolo = 'U'
+GROUP BY nb_titolo,desc_nb_titolo,nb_macroaggregato,descr_macro_agg
+ORDER BY nb_titolo, nb_macroaggregato]]>
+	</queryString>
+	<field name="TITOLO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_NB_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_NB_TITOLO"/>
+	</field>
+	<field name="MACROAGGR" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MACROAGGR"/>
+	</field>
+	<field name="DESCR_MACRO_AGG" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCR_MACRO_AGG"/>
+	</field>
+	<field name="TOTMACRO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TOTMACRO"/>
+	</field>
+	<variable name="TOTMACRO_TIT" class="java.math.BigDecimal" resetType="Group" resetGroup="Titolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTMACRO}]]></variableExpression>
+	</variable>
+	<variable name="TOTMACRO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTMACRO}]]></variableExpression>
+	</variable>
+	<group name="Titolo">
+		<groupExpression><![CDATA[$F{TITOLO}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<frame>
+					<reportElement x="0" y="0" width="540" height="15" uuid="3dc5476c-3f20-4655-bced-b98bf8d2d2fb"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textField>
+						<reportElement x="100" y="0" width="340" height="15" uuid="05843295-6f56-4671-aaa9-172e647643fb"/>
+						<box>
+							<leftPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font size="8" isBold="true"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA["Titolo "+$F{TITOLO}+" - "+$F{DESC_NB_TITOLO}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="15">
+				<frame>
+					<reportElement x="0" y="0" width="540" height="15" uuid="f6690c2e-67f0-4056-b7a2-eeb1090ceb33"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textField>
+						<reportElement x="100" y="0" width="340" height="15" uuid="d267f7cb-4198-4283-9340-20b5fd55d31c"/>
+						<box>
+							<leftPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font size="8" isBold="true"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA["Totale TITOLO "+$F{TITOLO}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement x="440" y="0" width="100" height="15" uuid="238215e3-2722-4518-ab72-be23813b8a79"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8" isBold="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TOTMACRO_TIT}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="440" height="30" uuid="8b6fe50d-00d6-4a08-9bbf-909c8a2a2569"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[TITOLI E MACROAGGREGATI DI SPESA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="440" y="0" width="100" height="30" uuid="b21050cd-f239-4e13-a557-35b41809b38a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTALE]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="15" uuid="9765382a-c2b4-46fb-ad1d-095817c8dc39"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MACROAGGR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="340" height="15" uuid="6f0819fa-15bc-4897-9ff0-093730c30cea"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCR_MACRO_AGG}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="440" y="0" width="100" height="15" uuid="4893bc99-bbde-40f7-bf6a-0e69b22e038a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTMACRO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="15">
+			<staticText>
+				<reportElement x="0" y="0" width="440" height="15" uuid="02567502-4468-4b92-9291-2f2b06be5062"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[TOTALE IMPEGNI]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="440" y="0" width="100" height="15" uuid="c5647506-9d6f-46f3-990c-af8dcda33dba"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTMACRO1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

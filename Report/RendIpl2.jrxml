@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendIpl2" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT DISTINCT i.riga
+               ,decode(i.codice,'','',u.id) titolo
+               ,decode(i.codice,'','',u.descrizione) desc_titolo
+               ,i.codice codmacroagg1
+               ,i.descrizione descmacroagg1
+			   ,i.anno
+			   ,i.prevcompe1
+               ,i.imp1
+               ,i.prevcompe2
+               ,i.imp2
+               ,i.impn
+               ,i.utente
+FROM nb_titoli_uscite u
+,fin_t_rendiconto_impplur i
+WHERE    u.id <> 0 AND
+                  i.codice IS null AND
+                  i.utente = $P{UTENTE} AND
+                  i.anno = $P{ANNO} 
+ORDER BY 1,2]]>
+	</queryString>
+	<field name="RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="RIGA"/>
+	</field>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+	</field>
+	<field name="CODMACROAGG1" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CODMACROAGG1"/>
+	</field>
+	<field name="DESCMACROAGG1" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCMACROAGG1"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="PREVCOMPE1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE1"/>
+	</field>
+	<field name="IMP1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="IMP1"/>
+	</field>
+	<field name="PREVCOMPE2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE2"/>
+	</field>
+	<field name="IMP2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="IMP2"/>
+	</field>
+	<field name="IMPN" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="IMPN"/>
+	</field>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="20">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="300" height="20" isRemoveLineWhenBlank="true" uuid="1f457051-8ae2-492b-83b8-18bc73eef8a4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="36bc9160-9782-4bf9-b6b7-ac9e1c147b6e"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true" isItalic="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCMACROAGG1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="300" y="0" width="100" height="20" uuid="2815ab5f-57bd-4c7f-bf6f-f108a6fff6ce">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dae6c4c1-336c-48b9-b7db-cd546ef2995d"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="400" y="0" width="100" height="20" uuid="3342e073-3880-4241-b62d-01e8cb791b17">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="963c63d9-95fa-4a6c-a391-e10809383086"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IMP1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="500" y="0" width="100" height="20" uuid="6d7c8253-7277-424a-9ed3-031b91748e61">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="014a2d43-f7e3-4678-a454-bd98ac41f589"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="600" y="0" width="100" height="20" uuid="bcc25ee8-3511-4773-b3ba-8d2387f7452c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4907d1e4-5f35-4eb0-9406-33502d3a43b7"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IMP2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="700" y="0" width="100" height="20" uuid="1948b6fd-8e6b-42aa-a02b-da096863b391">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4f04aebb-0522-4d0e-8654-0fdf465420be"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IMPN}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendIndicatoriSinteticiGiunta1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="true"/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<box>
+			<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{DEFINIZIONE},null)]]></conditionExpression>
+			<style mode="Transparent" backcolor="#FCF7F7" fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+ord
+,codice_indicatore1 codice
+,desc_cod1 tipologia
+,definizione Definizione
+,tot_missioni1 "Tutte le missioni"
+,missione13_1 "Missione 13"
+,netto_missioni1 "Tutte le spese al netto 13"
+from fin_t_indicatori_bilancio
+where anno =$P{ANNO} 
+and utente='CONS'||anno
+and tipo_bilancio = 'R'
+and tipo_indicatore = 'S'
+order by 1]]>
+	</queryString>
+	<field name="ORD" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ORD"/>
+	</field>
+	<field name="CODICE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CODICE"/>
+	</field>
+	<field name="TIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPOLOGIA"/>
+	</field>
+	<field name="DEFINIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFINIZIONE"/>
+	</field>
+	<field name="Tutte le missioni" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="Tutte le missioni"/>
+	</field>
+	<field name="Missione 13" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="Missione 13"/>
+	</field>
+	<field name="Tutte le spese al netto 13" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="Tutte le spese al netto 13"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="54" splitType="Prevent">
+			<staticText>
+				<reportElement x="10" y="0" width="260" height="54" uuid="7656a225-fe3e-43e9-ac98-552da9e06ea5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPOLOGIA INDICATORE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="0" width="268" height="54" uuid="e80b21ec-9b06-41c7-94f2-678be88a92ca">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66a2309a-bd70-4f8d-8ad4-9d956e93600b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEFINIZIONE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="538" y="0" width="270" height="20" uuid="66e28147-4c24-4456-a876-98e68a1ac533">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6903b19b-17e3-4674-b1ed-35b627f12058"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[VALORE INDICATORE
+2017 (percentuale)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="538" y="20" width="90" height="34" uuid="5e892bfe-fc8e-4b94-94fd-a68264c07ebb"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TOTALE MISSIONI"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="628" y="20" width="90" height="34" uuid="a045f9a3-f913-4654-a6de-130a5da5e9c7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SOLO PER  MISSIONE 13 - TUTELA DELLA SALUTE"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="718" y="20" width="90" height="34" uuid="e49d4187-fbd8-423f-b4f0-89beb773aee1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TUTTE LE SPESE AL NETTO MISSIONE 13"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Prevent">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="10" y="0" width="60" height="25" uuid="1f6eee3a-00ac-4f23-92bf-102922028087">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45cf638c-eaa8-431b-b08b-0177d42a1cd3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CODICE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="70" y="0" width="200" height="25" uuid="df64fc6f-f559-4fc2-8a7a-8dc4633fb12c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TIPOLOGIA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="270" y="0" width="268" height="25" uuid="8fe4b61a-f1ea-45dc-91cc-107ef90f888a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66a2309a-bd70-4f8d-8ad4-9d956e93600b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DEFINIZIONE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement stretchType="RelativeToTallestObject" x="538" y="0" width="90" height="25" uuid="04c278e9-573b-4403-b212-66a43b802c48">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="172d9491-8d94-4ad2-a75d-2213a6da14d2"/>
+					<printWhenExpression><![CDATA[$F{DEFINIZIONE}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tutte le missioni}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="628" y="0" width="90" height="25" uuid="918497c1-7f39-4c7e-8b01-be571772ae9d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="19e8fae1-7e1b-4304-92f6-fc3c39f46742"/>
+					<printWhenExpression><![CDATA[$F{DEFINIZIONE}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Missione 13}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="718" y="0" width="90" height="25" uuid="eb10f424-2562-4b4f-a319-641f7cc1f5cd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="19e8fae1-7e1b-4304-92f6-fc3c39f46742"/>
+					<printWhenExpression><![CDATA[$F{DEFINIZIONE}!=null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tutte le spese al netto 13}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement stretchType="RelativeToTallestObject" x="538" y="0" width="270" height="25" uuid="a2482fb5-4d83-45ac-9f22-769aa4ddc5f1">
+					<printWhenExpression><![CDATA[$F{DEFINIZIONE}==null?true:false]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="UscitePrevisionali" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d4168b5e-bb58-46f1-ba87-4b33e923c42e">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="588"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="398"/>
+	<style name="Grassetto" fontSize="10" isBold="false"/>
+	<parameter name="ID" class="java.lang.String"/>
+	<parameter name="PLUR" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["/Users/alobefaro/JaspersoftWorkspace/SiC/"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select  
+b.DESCRIZIONE 
+,b.LOGO
+,b.anno_finanziario
+,a.intestazione01
+,a.intestazione02
+from tmp_param_reports_2 a
+,fin_t_dati_generali b
+where a.id =  to_number($P{ID})
+and b.anno_finanziario = a.p01_anno]]>
+	</queryString>
+	<field name="DESCRIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCRIZIONE"/>
+	</field>
+	<field name="LOGO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LOGO"/>
+	</field>
+	<field name="ANNO_FINANZIARIO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO_FINANZIARIO"/>
+	</field>
+	<field name="INTESTAZIONE01" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE01"/>
+	</field>
+	<field name="INTESTAZIONE02" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE02"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="60">
+			<textField>
+				<reportElement x="70" y="0" width="731" height="20" uuid="f19e48c8-6c6e-46c8-ba77-b4acde9e6c65"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIZIONE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="20" width="731" height="20" uuid="f8eddd59-de1c-4cb5-83a1-bbc0b68fbfbd"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{INTESTAZIONE01}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="40" width="731" height="20" uuid="58518ff5-54ce-4814-95a1-da203b65bea2"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{INTESTAZIONE02}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="0" y="0" width="60" height="60" uuid="5c4ce635-f455-4774-8b29-f0d21f2f5cce"/>
+				<imageExpression><![CDATA[$P{SUBREPORT_DIR}+$F{LOGO}]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="66" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+			<subreport>
+				<reportElement x="0" y="0" width="802" height="66" uuid="f748c2d7-8735-47b5-8a0e-0a471e42ff22"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"UscitePrevisionaliD1.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="66">
+			<subreport>
+				<reportElement x="0" y="10" width="801" height="49" uuid="49120e48-9da6-4580-8ab9-3d3846c61f3b"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"UscitePrevisionaliD2.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="6" width="100" height="1" uuid="f32ee377-cb66-468e-a198-472ba10bf20c"/>
+			</break>
+		</band>
+		<band height="66">
+			<subreport>
+				<reportElement x="0" y="10" width="801" height="49" uuid="0d8e906e-c7f6-411b-9bff-9d3f2fa4b331"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"UscitePrevisionaliD3.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="5" width="100" height="1" uuid="e1cb509d-cb21-4c11-a2cf-3bad94413307"/>
+			</break>
+		</band>
+		<band height="66">
+			<subreport>
+				<reportElement x="0" y="10" width="801" height="49" uuid="95b5d3b0-2e91-4e82-9d94-fc48ec188d8e"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"UscitePrevisionaliD4.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="5" width="100" height="1" uuid="c56a8db3-84d8-4f8a-92a4-6f8b57752bca"/>
+			</break>
+		</band>
+		<band height="66">
+			<subreport>
+				<reportElement x="0" y="10" width="801" height="49" uuid="1dc0b97b-82fb-46b1-a976-21b446e4be73"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"UscitePrevisionaliD5.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="7" width="100" height="1" uuid="5a693463-de40-410e-858e-07a043014610"/>
+			</break>
+		</band>
+		<band height="66">
+			<break>
+				<reportElement x="0" y="6" width="100" height="1" uuid="c678103a-4f22-402c-a7cf-a4b02b82687f"/>
+			</break>
+			<subreport>
+				<reportElement x="0" y="10" width="801" height="49" uuid="678edaf2-6b01-45fe-b30a-9d54539c099b"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR}+"UscitePrevisionaliD6.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
