@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>RITENUTE_REVERSALI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="RITENUTE_REVERSALI.html">Details</a></div></div>
+<div class="tab"><div><a href="RITENUTE_REVERSALI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="RITENUTE_REVERSALI_References.html">References</a></div></div>
+<div class="tab"><div><a href="RITENUTE_REVERSALI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="RITENUTE_REVERSALI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION RITENUTE_REVERSALI(wdoc_id in number) RETURN NUMBER AS 
+
+importo_rev_coll number := 0;
+importo_rev_coll_iva number := 0;
+esito number := 0;
+
+
+cursor tp_mand is
+select t.id_ana id_ana, -- **** FFERRANTE 10/06/2019 aggiunta per gestire i mandati ai delegati con ritenute (prima era t.id_ana)
+t.id_sede id_sede,-- **** FFERRANTE 10/06/2019 aggiunta per gestire i mandati ai delegati con ritenute (prima era t.id_sede)
+t.id_delegato id_del,
+t.id_sede_delegato id_sede_del,
+nvl(t.attribute4,0)+nvl(t.attribute9,0)+nvl(t.attribute10,0)+nvl(t.attribute5,0)+nvl(t.attribute6,0)+nvl(t.attribute12,0)+nvl(t.attribute16,0) ritenute,
+nvl(t.attribute12,0) iva
+from fin_t_documenti_terze_parti t
+,fin_t_anagrafica a
+,fin_t_ana_sedi s
+where t.doc_id = wdoc_id
+and a.id = t.id_ana
+and s.id_ana = t.id_ana
+and s.id_sede = t.id_sede;
+
+BEGIN
+
+	for m in tp_mand loop
+     if m.iva = 0
+     then
+
+		select nvl(sum(t.amount),0)
+		into importo_rev_coll
+		from fin_t_rev_coll r
+		,fin_t_documenti d
+		,fin_t_documenti_terze_parti t
+		where r.rev_mand_cod = (select doc_sequence_value from fin_t_documenti where doc_type = 'MAND' and doc_id = wdoc_id)
+		and d.doc_type = 'REV'
+		and d.doc_sequence_value = r.rev_codice
+		and t.doc_id = d.doc_id
+		and t.id_ana = nvl(m.id_del,m.id_ana)
+		and t.id_sede = nvl(m.id_sede_del,m.id_sede);
+
+		if m.ritenute &lt;> importo_rev_coll
+			then esito := esito + 1;
+        else esito := esito + 0;
+		end if;		
+
+	else
+
+       select nvl(sum(t.amount),0)
+		into importo_rev_coll
+		from fin_t_rev_coll r
+		,fin_t_documenti d
+		,fin_t_documenti_terze_parti t
+		where r.rev_mand_cod = (select doc_sequence_value from fin_t_documenti where doc_type = 'MAND' and doc_id = wdoc_id)
+		and d.doc_type = 'REV'
+		and d.doc_sequence_value = r.rev_codice
+		and t.doc_id = d.doc_id
+		and t.id_ana = nvl(m.id_del,0)
+		and t.id_sede = nvl(m.id_sede_del,0);
+
+		select nvl(sum(t.amount),0)
+		into importo_rev_coll_iva
+		from fin_t_rev_coll r
+		,fin_t_documenti d
+		,fin_t_documenti_terze_parti t
+		where r.rev_mand_cod = (select doc_sequence_value from fin_t_documenti where doc_type = 'MAND' and doc_id = wdoc_id)
+		and d.doc_type = 'REV'
+		and d.doc_sequence_value = r.rev_codice
+		and t.doc_id = d.doc_id
+		and t.id_ana = m.id_ana
+		and t.id_sede = m.id_sede;
+
+		if m.ritenute &lt;> importo_rev_coll + importo_rev_coll_iva
+			then esito := esito + 1;
+        else esito := esito + 0;
+		end if;		
+    end if;
+
+	end loop;
+ return(esito);
+END RITENUTE_REVERSALI;</pre>	</td></tr>
+</table></div>

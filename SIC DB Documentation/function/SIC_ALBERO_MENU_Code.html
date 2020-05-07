@@ -1,0 +1,40 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SIC_ALBERO_MENU</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SIC_ALBERO_MENU.html">Details</a></div></div>
+<div class="tab"><div><a href="SIC_ALBERO_MENU_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SIC_ALBERO_MENU_References.html">References</a></div></div>
+<div class="tab"><div><a href="SIC_ALBERO_MENU_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SIC_ALBERO_MENU_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function      SIC_ALBERO_MENU (wcodice number) return varchar2 is
+
+wcodice_padre number;
+
+begin
+
+begin
+select codice_padre
+into wcodice_padre
+from fin_t_menu_web
+where codice = wcodice;
+end;
+
+if wcodice_padre is null then return '...';
+else return '...'||SIC_ALBERO_MENU(wcodice_padre);
+end if;
+
+end;</pre>	</td></tr>
+</table></div>
