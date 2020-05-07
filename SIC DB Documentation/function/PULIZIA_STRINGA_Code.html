@@ -1,0 +1,41 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PULIZIA_STRINGA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PULIZIA_STRINGA.html">Details</a></div></div>
+<div class="tab"><div><a href="PULIZIA_STRINGA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PULIZIA_STRINGA_References.html">References</a></div></div>
+<div class="tab"><div><a href="PULIZIA_STRINGA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PULIZIA_STRINGA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function pulizia_stringa(vvv varchar2) return varchar2 is
+   a_vvv varchar2(4000);
+  begin
+ -- potrebbe essere usata anche select CONVERT('vvv, 'US7ASCII', 'UTF8') FROM DUAL; 
+    a_vvv:=vvv;
+    a_vvv := replace(a_vvv,'°','');
+    a_vvv := replace(a_vvv,'^','');
+    a_vvv := replace(a_vvv,'à','a');
+    a_vvv := replace(a_vvv,'è','e');
+    a_vvv := replace(a_vvv,'é','e');
+    a_vvv := replace(a_vvv,'ù','u');
+    a_vvv := replace(a_vvv,'ò','');
+    a_vvv := replace(a_vvv,';',',');
+    a_vvv := replace(a_vvv,'"','');
+   -- a_vvv := replace(a_vvv,chr(13),'');   
+    a_vvv := REPLACE(REPLACE(a_vvv, CHR(13), ' '), CHR(10), ' ');
+    
+    return (a_vvv);
+  end;</pre>	</td></tr>
+</table></div>

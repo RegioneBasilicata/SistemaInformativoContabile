@@ -1,0 +1,41 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PROGR_PASSEGGERO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PROGR_PASSEGGERO.html">Details</a></div></div>
+<div class="tab"><div><a href="PROGR_PASSEGGERO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PROGR_PASSEGGERO_References.html">References</a></div></div>
+<div class="tab"><div><a href="PROGR_PASSEGGERO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PROGR_PASSEGGERO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function progr_passeggero (viaggio in number,num_pass in number)
+return number as 
+a_ind number;
+a_progr number; 
+begin
+a_progr:=0;
+a_ind:=1;
+for p in (select progr
+           from ap_pass_viaggio
+           where codice_viaggio=viaggio
+           order by progr) loop
+if a_ind=num_pass then
+--   a_progr:=p.progr;
+   return p.progr;
+else a_ind:=a_ind+1;
+end if;
+end loop;
+return 0;
+end;</pre>	</td></tr>
+</table></div>
