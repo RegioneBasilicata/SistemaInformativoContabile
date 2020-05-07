@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>DOCUMENTI_PLURIENNALI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="DOCUMENTI_PLURIENNALI.html">Details</a></div></div>
+<div class="tab"><div><a href="DOCUMENTI_PLURIENNALI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="DOCUMENTI_PLURIENNALI_References.html">References</a></div></div>
+<div class="tab"><div><a href="DOCUMENTI_PLURIENNALI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="DOCUMENTI_PLURIENNALI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function documenti_pluriennali(p_anno in NUMBER, p_capitolo in varchar2,p_tipo varchar2) return number IS
+/*
+Lino 19.01.2018
+
+restituisce la somma per tipo documento (ammesso nel pluriennale) di quelli emessi come pluriennale;
+I parametri sono:
+Anno     : L'anno per il quale avere il valore
+Capitolo : Capitolo per il quale si desidera conoscere il pluriennale
+Tipo     : Può valere PRE-IMP o IMP-DEF
+
+Se il documento è un pre-imp, devo riportare il reale residuo calcolandolo sottraendogli il valore degli
+impegni definitivi se quest'ultimi sono stati generati al primo gennaio dell'anno in considerazione.
+
+*/
+
+importo number(15,2) := 0; 
+appoggio_residuo number(15,2);
+appoggio_importo number(15,2);
+appoggio_doc_id number;
+
+cursor preimpegni is
+ select 
+ doc_id,
+ document_amount
+ from fin_t_documenti d
+ where d.segment8 = p_anno
+ and d.segment2 = p_capitolo
+ and d.doc_type = 'PRE-IMP'
+ and to_char(date_created,'ddmmyyyy')='0101'||to_char(p_anno)
+ and nvl(deletion_status_flag,'N')&lt;>'Y';
+
+BEGIN
+if p_tipo &lt;>'PRE-IMP'
+   then
+   select sum(nvl(document_amount,0))
+   into appoggio_importo 
+   from fin_t_documenti d
+   where d.segment8 = p_anno
+   and d.segment2 = p_capitolo
+   and d.doc_type = p_tipo
+   and to_char(date_created,'ddmmyyyy')='0101'||to_char(p_anno)
+   and nvl(deletion_status_flag,'N')&lt;>'Y';
+   else 
+   appoggio_importo:=0;
+   for a in preimpegni loop
+    select sum(document_amount)
+    into appoggio_residuo
+    from fin_t_documenti
+    where doc_type='IMP-DEF'
+    and previous_doc_id = a.doc_id
+    and to_char(date_created,'ddmmyyyy')='0101'||to_char(p_anno)
+    and nvl(deletion_status_flag,'N')&lt;>'Y';
+    appoggio_importo := appoggio_importo + (a.document_amount - nvl(appoggio_residuo,0));
+   end loop;
+end if;   
+ return nvl(appoggio_importo,0);
+END;</pre>	</td></tr>
+</table></div>

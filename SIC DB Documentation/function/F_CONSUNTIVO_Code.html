@@ -1,0 +1,314 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>F_CONSUNTIVO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="F_CONSUNTIVO.html">Details</a></div></div>
+<div class="tab"><div><a href="F_CONSUNTIVO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="F_CONSUNTIVO_References.html">References</a></div></div>
+<div class="tab"><div><a href="F_CONSUNTIVO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="F_CONSUNTIVO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION      F_CONSUNTIVO
+(p_anno in number,p_capitolo in varchar2,p_data in date) 
+return colonne_consuntivo 
+as
+
+-- varibili utilizzate per inserire il risultato delle stored procedure
+
+-- procedura U_MOVIMENTI_COMPETENZA (UMC)
+UMC_w_imp_acc_competenza number := 0;
+UMC_w_man_rev_competenza number := 0;
+
+-- procedura U_CONSUNTIVO_PERENTI (UCP) 
+UCP_w_residuo_consuntivo number := 0;
+UCP_w_man_rev_residui number := 0;
+UCP_w_variazioni_residui number := 0;
+UCP_w_per_anno1 number := 0;
+UCP_w_per_anno2 number := 0;
+UCP_w_per_anno3 number := 0;
+
+-- procedura U_CONSUNTIVO_PERENTI_SUCC (UCPS) 
+UCPS_w_man_rev_residui number := 0;
+UCPS_w_pag_per_anno1 number := 0;
+UCPS_w_pag_per_anno2 number := 0;
+UCPS_w_pag_per_anno3 number := 0;
+
+-- procedura U_CONSUNTIVO_RESIDUI (UCR)
+UCR_w_residuo_consuntivo number := 0;
+UCR_w_man_rev_residui number := 0;
+UCR_w_variazioni_residui number := 0;
+UCR_w_pag_anno1 number := 0;
+UCR_w_pag_anno2 number := 0;
+UCR_w_pag_anno3 number := 0;
+
+-- procedura E_MOVIMENTI_COMPETENZA (EMC)
+EMC_w_imp_acc_competenza number := 0;
+EMC_w_man_rev_competenza number := 0;
+
+-- procedura E_MOVIMENTI_MAGGIORI_INCASSI (EMMI) 
+EMMI_w_man_rev_residui number := 0;
+EMMI_w_variazioni_residui number := 0;
+
+-- procedura E_MOVIMENTI_RESIDUI (EMR)
+EMR_w_residuo_consuntivo number := 0;
+EMR_w_man_rev_residui number := 0;
+EMR_w_variazioni_residui number := 0;
+
+
+-- FINE varibili utilizzate per inserire il risultato delle stored procedure
+
+
+correttivo number := 0;
+
+colonna_corr varchar2(10);
+
+c1_corr number (15,2) := 0;
+c2_corr number (15,2) := 0;
+c3_corr number (15,2) := 0;
+c4_corr number (15,2) := 0;
+c5_corr number (15,2) := 0;
+c6_corr number (15,2) := 0;
+c7_corr number (15,2) := 0;
+c8_corr number (15,2) := 0;
+c9_corr number (15,2) := 0;
+c10_corr number (15,2) := 0;
+c11_corr number (15,2) := 0;
+c12_corr number (15,2) := 0;
+c13_corr number (15,2) := 0;
+
+c1 number (15,2) := 0;
+c2 number (15,2) := 0;
+c3 number (15,2) := 0;
+c4 number (15,2) := 0;
+c5 number (15,2) := 0;
+c6 number (15,2) := 0;
+c7 number (15,2) := 0;
+c8 number (15,2) := 0;
+c9 number (15,2) := 0;
+c10 number (15,2) := 0;
+c11 number (15,2) := 0;
+c12 number (15,2) := 0;
+c13 number (15,2) := 0;
+c14 number (15,2) := 0;
+c15 number (15,2) := 0;
+c16 number (15,2) := 0;
+c17 number (15,2) := 0;
+c18 number (15,2) := 0;
+c19 number (15,2) := 0;
+
+a_compe number := 0;
+a_cassa number := 0;
+v_compe number := 0;
+v_cassa number := 0;
+
+blocco_compe number := 0;
+blocco_cassa number := 0;
+
+
+wprevisione_competenza number (15,2);
+wprevisione_cassa number (15,2);
+
+wanno number(4);
+wcapitolo varchar2(6);
+wdata date;
+
+begin
+
+wanno := p_anno;
+wcapitolo := upper(p_capitolo);
+wdata := p_data;
+
+begin 
+ select 
+  nvl(a.previsto_attuale,0), 
+  nvl(a.cassa,0)
+  into
+  wprevisione_competenza,
+  wprevisione_cassa
+  from  fin_t_bilancio a
+  where a.anno = wanno 
+  and   a.eu||a.articolo = wcapitolo;
+  exception when no_data_found then 
+  wprevisione_competenza := 0; 
+  wprevisione_cassa := 0; 
+end;
+
+if substr(wcapitolo,1,1) = 'U'
+ then 
+ U_CONSUNTIVO_RESIDUI(wanno,wcapitolo,UCR_w_residuo_consuntivo,UCR_w_man_rev_residui,UCR_w_variazioni_residui,UCR_w_pag_anno1,UCR_w_pag_anno2,UCR_w_pag_anno3,wdata);
+ U_CONSUNTIVO_PERENTI_SUCC(wanno,wcapitolo,UCPS_w_man_rev_residui,UCPS_w_pag_per_anno1,UCPS_w_pag_per_anno2,UCPS_w_pag_per_anno3,wdata);
+ U_CONSUNTIVO_PERENTI(wanno,wcapitolo,UCP_w_residuo_consuntivo,UCP_w_man_rev_residui,UCP_w_variazioni_residui,UCP_w_per_anno1,UCP_w_per_anno2,UCP_w_per_anno3,wdata);
+ U_MOVIMENTI_COMPETENZA(wanno,wcapitolo,UMC_w_imp_acc_competenza,UMC_w_man_rev_competenza,wdata);
+ else
+ E_MOVIMENTI_RESIDUI (wanno,wcapitolo,EMR_w_residuo_consuntivo,EMR_w_man_rev_residui,EMR_w_variazioni_residui,wdata);
+ E_MOVIMENTI_MAGGIORI_INCASSI (wanno,wcapitolo,EMMI_w_man_rev_residui,EMMI_w_variazioni_residui,wdata);
+ E_MOVIMENTI_COMPETENZA (wanno,wcapitolo,EMC_w_imp_acc_competenza,EMC_w_man_rev_competenza,wdata);
+end if;
+
+
+ -- calcolo l'assestamento e variazione di cassa e competenza alla data di riferimento
+ begin
+  select SUM(decode(d.doc_type,'V_CAS_POS',nvl(d.document_amount,0),'V_CAS_NEG',-nvl(d.document_amount,0),0)) VCAS
+        ,SUM(decode(d.doc_type,'A_CAS_POS',nvl(d.document_amount,0),'A_CAS_NEG',-nvl(d.document_amount,0),0)) ACAS
+        ,SUM(decode(d.doc_type,'V_COM_POS',nvl(d.document_amount,0),'V_COM_NEG',-nvl(d.document_amount,0),0)) VCOM
+        ,SUM(decode(d.doc_type,'A_COM_POS',nvl(d.document_amount,0),'A_COM_NEG',-nvl(d.document_amount,0),0)) ACOM
+  into  v_cassa,
+        a_cassa,
+        v_compe,
+        a_compe
+  from   fin_t_documenti d
+  where
+  upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' and
+  upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'    and
+  d.doc_type in ('A_CAS_POS','A_CAS_NEG','V_CAS_POS','V_CAS_NEG','A_COM_POS','A_COM_NEG','V_COM_POS','V_COM_NEG') and
+  d.segment8 = wanno   and
+  d.segment2 = wcapitolo   and
+  d.date_created &lt;= nvl(wdata,d.date_created);
+  exception when others 
+   then v_cassa:= 0;
+        a_cassa:= 0;
+        v_compe:= 0;
+        a_compe:= 0;
+ end;
+-- fine calcolo assestamento e variazione cassa e competenza
+
+-- calcolo blocchi e sblocchi di cassa e competenza alla data di riferimento
+begin
+  select SUM(decode(d.doc_type,'SBLOCCO_CASSA',nvl(d.document_amount,0),'BLOCCO_CASSA',-nvl(d.document_amount,0),0)) CASSA
+        ,SUM(decode(d.doc_type,'SBLOCCO_COMPE',nvl(d.document_amount,0),'BLOCCO_COMPE',-nvl(d.document_amount,0),0)) COMPE
+  into blocco_cassa,
+       blocco_compe
+  from   fin_t_documenti d
+  where
+  upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' and
+  upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'    and
+  d.doc_type in ('BLOCCO_CASSA','SBLOCCO_CASSA','BLOCCO_COMPE','SBLOCCO_COMPE') and
+  d.segment8 = wanno   and
+  d.segment2 = wcapitolo   and
+  d.date_created &lt;= nvl(wdata,d.date_created);
+  exception when others 
+   then blocco_cassa:= 0;
+        blocco_compe:= 0;
+ end;
+ 
+-- gestione correzioni fatte su consuntivo e tabellizate.
+
+ begin
+  select importo_operazione*(decode(segno_operazione,'piu',1,'meno',-1,0)) 
+  ,colonna_consuntivo
+  into correttivo
+  ,colonna_corr
+  from t_appoggio_consuntivo
+  where anno = wanno
+  and cap = wcapitolo;
+  exception when no_data_found then correttivo := 0; colonna_corr := '';
+ end;
+
+ if colonna_corr = 'c1' 
+  then c1_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c2' 
+  then c2_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c3' 
+  then c3_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c4' 
+  then c4_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c5' 
+  then c5_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c6' 
+  then c6_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c7' 
+  then c7_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c8' 
+  then c8_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c9' 
+  then c9_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c10' 
+  then c10_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c11' 
+  then c11_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c12' 
+  then c12_corr := nvl(correttivo,0);
+  elsif colonna_corr = 'c13' 
+  then c13_corr := nvl(correttivo,0);
+ end if; 
+
+if substr(wcapitolo,1,1) = 'U'
+ then 
+ c1 := nvl(UCR_w_residuo_consuntivo,0) + nvl(UCPS_w_man_rev_residui,0) + nvl(UCP_w_residuo_consuntivo,0) + nvl(c1_corr,0);
+ c2 := nvl(wprevisione_competenza,0) + nvl(v_compe,0) + nvl(a_compe,0) + nvl(c2_corr,0);
+ c3 := nvl(wprevisione_cassa,0) + nvl(v_cassa,0) + nvl(a_cassa,0) + nvl(c3_corr,0);
+ c4 := nvl(UCPS_w_man_rev_residui,0) + nvl(UCP_w_man_rev_residui,0) + nvl(UCR_w_man_rev_residui,0) + nvl(c4_corr,0);
+ c5 := nvl(UMC_w_man_rev_competenza,0) + nvl(c5_corr,0);
+ c6 := c4 + c5 + nvl(c6_corr,0);
+ c7 := nvl(UMC_w_imp_acc_competenza,0) + nvl(c7_corr,0);
+ c8 := c2 - c7 + nvl(c8_corr,0);
+ c9 := c3 - c6 + nvl(c9_corr,0);
+ c10 := nvl(UCP_w_variazioni_residui,0) + nvl(UCR_w_variazioni_residui,0) + nvl(c10_corr,0);
+ c11 := c1 - c4 - c10 + nvl(c11_corr,0);
+ c12 := c7 - c5 + nvl(c12_corr,0);
+ c13 := c11 + c12 + nvl(c13_corr,0); 
+ c14 := nvl(a_compe,0);
+ c15 := nvl(a_cassa,0);
+ c16 := nvl(v_compe,0);
+ c17 := nvl(v_cassa,0);
+ c18 := nvl(blocco_compe,0);
+ c19 := nvl(blocco_cassa,0);
+ else 
+ c1 := nvl(EMR_w_residuo_consuntivo,0);
+ c2 := nvl(wprevisione_competenza,0) + nvl(v_compe,0);
+ c3 := nvl(wprevisione_cassa,0) + nvl(v_cassa,0);
+ c4 := nvl(EMR_w_man_rev_residui,0) + nvl(EMMI_w_man_rev_residui,0);
+ c5 := nvl(EMC_w_man_rev_competenza,0);
+ c6 := c4 + c5;
+ c7 := nvl(EMC_w_imp_acc_competenza,0);
+ c8 := c2 - c7;
+ c9 := c3 - c6;
+ c10 := nvl(EMR_w_variazioni_residui,0) + nvl(EMMI_w_man_rev_residui,0);
+ c11 := c1 - c4 + c10;
+ c12 := c7 - c5;
+ c13 := c11 + c12;
+ c14 := nvl(a_compe,0);
+ c15 := nvl(a_cassa,0);
+ c16 := nvl(v_compe,0);
+ c17 := nvl(v_cassa,0);
+ c18 := nvl(blocco_compe,0);
+ c19 := nvl(blocco_cassa,0);
+ 
+end if;
+
+return colonne_consuntivo(c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19);
+
+--c1  ;--RESIDUI_INIZIALI,
+--c2  ;--PREVISIONI_DEFINITIVE_COMPE,
+--c3  ;--PREVISIONI_DEFINITIVE_CASSA,
+--c4  ;--RISCOSSIONI_PAGAMENTI_RES,
+--c5  ;--RISCOSSIONI_PAGAMENTI_COMPE,
+--c6  ;--RISCOSSIONI_PAGAMENTI_TOTALE,
+--c7  ;--ACCERTAMENTI_IMPEGNI_COMPE,
+--c8  ;--DIFFERENZA_PREVCOMPE_IMPEGNI,
+--c9  ;--DIFFERENZA_CASSA_MAND_REV,
+--c10 ;--VARIAZIONE_RESIDUI,
+--c11 ;--RIMANENZE_RESIDUI,
+--c12 ;--RESIDUI_COMPETENZA,
+--c13 ;--RESIDUI_FINALI,
+--c14 ;--ASSESTAMENTO_COMPETENZA
+--c15 ;--ASSESTAMENTO_CASSA
+--c16 ;--VARIAZIONI_COMPETENZA
+--c17 ;--VARIAZIONI_CASSA
+--c18 ;--BLOCCHI_COMPETENZA (devono essere negativi o zero, se positivi c'e' un problema)
+--c19 ;--BLOCCHI_CASSA (devono essere negativi o zero, se positivi c'e' un problema)
+
+
+end f_consuntivo;</pre>	</td></tr>
+</table></div>

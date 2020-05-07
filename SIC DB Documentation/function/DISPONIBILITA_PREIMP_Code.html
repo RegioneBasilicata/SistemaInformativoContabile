@@ -1,0 +1,70 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>DISPONIBILITA_PREIMP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="DISPONIBILITA_PREIMP.html">Details</a></div></div>
+<div class="tab"><div><a href="DISPONIBILITA_PREIMP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="DISPONIBILITA_PREIMP_References.html">References</a></div></div>
+<div class="tab"><div><a href="DISPONIBILITA_PREIMP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="DISPONIBILITA_PREIMP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function disponibilita_preimp (p_anno number,p_numero varchar2,p_ufficio varchar2, p_data date) return number as
+
+titolare varchar2(10);
+condiviso varchar2(10);
+open_balance number := 0;
+disponibilita number := 0;
+
+begin
+
+ begin
+   select nvl(d.segment3,'XXX'),nvl(d.open_balance_proposed,0) into titolare, open_balance
+   from fin_t_documenti d
+   where 
+   d.segment8 = p_anno and
+   d.doc_type = 'PRE-IMP' and
+   d.doc_sequence_value = p_numero;
+   exception when no_data_found then titolare := 'XXX';open_balance := 0;
+ end;
+
+ if titolare = p_ufficio
+  then return(open_balance);
+ end if;
+
+ if titolare &lt;> p_ufficio --or titolare &lt;> 'XXX'
+  then 
+ SELECT nvl(sum(nvl(r.importo_cdg,0)),0) into condiviso 
+FROM fin_t_cdg_richieste r
+WHERE r.struttura_richiedente = p_ufficio
+    AND TRUNC(p_data,'dd') BETWEEN TRUNC(r.data_creazione,'dd') AND TRUNC(r.data_fine_cdg,'dd')
+    AND NVL(r.fl_decisione_cdg,'N') = 'A'
+    and r.ID_PREIMPEGNO = p_numero;
+   select nvl(sum(nvl(i.document_amount,0)),0) into disponibilita
+   from fin_t_documenti i
+    ,fin_t_documenti p
+    where p.doc_type = 'PRE-IMP'
+    and p.doc_sequence_value = p_numero
+    and i.previous_doc_id = p.doc_id
+    and i.doc_type like 'IMP%'
+    and i.segment3 = p_ufficio
+    and nvl(i.deletion_status_flag,'N') = 'N'
+    and i.segment8 = to_char(p_data,'yyyy');
+   if open_balance > (condiviso-disponibilita)
+    then return(condiviso-disponibilita);
+    else return(open_balance);
+   end if;
+  end if;
+
+end;</pre>	</td></tr>
+</table></div>
