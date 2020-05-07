@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LEGGIHTML</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LEGGIHTML.html">Details</a></div></div>
+<div class="tab"><div><a href="LEGGIHTML_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LEGGIHTML_References.html">References</a></div></div>
+<div class="tab"><div><a href="LEGGIHTML_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LEGGIHTML_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION leggihtml  RETURN CLOB
+IS
+   url    varchar2(2000);
+   pcs    UTL_HTTP.html_pieces;
+   retv   CLOB;
+BEGIN
+   url:= 'http://traccia:integra@alfresco.regione.basilicata.it:8080/alfresco/cmisbrowser/69cd2d25-0f7d-4b93-835b-bf749c2f4849/root/User%20Homes/publisys/Regione/FatturaPA/2015/03/03/4176549/FT-00107-PA-150225-1-1550100002.zip';
+   --url:= 'http://www.google.it';
+   pcs := UTL_HTTP.request_pieces (url, 50);
+   FOR i IN 1 .. pcs.COUNT
+   LOOP
+      retv := retv || pcs (i);
+   END LOOP;
+   RETURN retv;
+END;</pre>	</td></tr>
+</table></div>

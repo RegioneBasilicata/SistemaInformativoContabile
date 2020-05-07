@@ -1,0 +1,47 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>IMPORTO_BLOCCO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="IMPORTO_BLOCCO.html">Details</a></div></div>
+<div class="tab"><div><a href="IMPORTO_BLOCCO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="IMPORTO_BLOCCO_References.html">References</a></div></div>
+<div class="tab"><div><a href="IMPORTO_BLOCCO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="IMPORTO_BLOCCO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function importo_blocco (p_anno in number, p_capitolo in varchar2, p_cassa varchar2) return number is
+
+	imp_blocco number := 0;
+
+	begin
+	 if nvl(p_cassa,'N') = 'N'
+	 then
+	 select nvl(sum(decode(doc_type,'BLOCCO_COMPE',nvl(document_amount,0),-nvl(document_amount,0))),0) into imp_blocco
+	 from fin_t_documenti
+	 where doc_type like '%BLOCCO_COMPE'
+	 and segment8 = p_anno
+	 and segment2 = p_capitolo
+	 and nvl(deletion_status_flag,'N') = 'N';
+	 else
+	 select nvl(sum(decode(doc_type,'BLOCCO_CASSA',nvl(document_amount,0),-nvl(document_amount,0))),0) into imp_blocco
+	 from fin_t_documenti
+	 where doc_type like '%BLOCCO_CASSA'
+	 and segment8 = p_anno
+	 and segment2 = p_capitolo
+	 and nvl(deletion_status_flag,'N') = 'N';
+	 end if;
+
+	 return(imp_blocco);
+
+	end;</pre>	</td></tr>
+</table></div>

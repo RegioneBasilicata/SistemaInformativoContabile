@@ -1,0 +1,40 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>MON_APEX_ERROR_HANDLING</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="MON_APEX_ERROR_HANDLING.html">Details</a></div></div>
+<div class="tab"><div><a href="MON_APEX_ERROR_HANDLING_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="MON_APEX_ERROR_HANDLING_References.html">References</a></div></div>
+<div class="tab"><div><a href="MON_APEX_ERROR_HANDLING_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="MON_APEX_ERROR_HANDLING_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION mon_apex_error_handling(p_error IN APEX_ERROR.T_ERROR) RETURN APEX_ERROR.T_ERROR_RESULT IS
+  l_result APEX_ERROR.T_ERROR_RESULT;
+  l_reference_id NUMBER;
+  l_constraint_name VARCHAR2(255);
+BEGIN
+  l_result := APEX_ERROR.INIT_ERROR_RESULT (p_error => p_error);
+  l_constraint_name := APEX_ERROR.EXTRACT_CONSTRAINT_NAME (p_error => p_error);
+  IF UPPER(l_constraint_name) = 'MON_ABIL_UTEUFF_PK'
+    THEN
+	  l_result.message := 'In questa tabella non devono trovarsi due righe con stessi valori di operatore e ufficio. Il salvataggio NON è andato a buon fine';
+  ELSIF UPPER(l_constraint_name) = 'MON_SCH_PERSPREST_PK'
+	THEN
+	  l_result.message := 'Nella tabella sono presenti almeno due righe che hanno gli stessi valori di Risorsa e Ufficio di destinazione. Eliminare i duplicati per poter salvare';
+  END IF;  
+  
+  RETURN l_result;
+
+END mon_apex_error_handling;</pre>	</td></tr>
+</table></div>

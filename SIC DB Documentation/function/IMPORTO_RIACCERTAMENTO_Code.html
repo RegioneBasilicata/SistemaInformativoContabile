@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>IMPORTO_RIACCERTAMENTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="IMPORTO_RIACCERTAMENTO.html">Details</a></div></div>
+<div class="tab"><div><a href="IMPORTO_RIACCERTAMENTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="IMPORTO_RIACCERTAMENTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="IMPORTO_RIACCERTAMENTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="IMPORTO_RIACCERTAMENTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function      importo_riaccertamento(p_doc_id in varchar2) return number IS
+ 
+vanno_riaccertamento number(4);
+blocco_riaccertamento varchar2(1);
+importo_riaccertato_uff number(15,2);
+importo_riaccertato_bil number(15,2);
+importo_riaccertamento number(15,2);
+importo_riaccertato_def number(15,2);
+doc_id_impegno number;
+
+
+BEGIN
+ 
+ doc_id_impegno := p_doc_id;
+
+ begin 
+  select 
+   anno_riaccertamento
+  ,riaccertamento_blocco_doc
+  into 
+   vanno_riaccertamento
+  ,blocco_riaccertamento
+  from 
+   fin_t_dati_generali2;
+ end;
+
+ 
+-- Controllo per gli impegni sottoposti a riaccertamenti.
+
+/* if nvl(blocco_riaccertamento,'N') = 'R'
+    then
+    begin
+     select 
+     sum(importo_riaccertamento) 
+     into
+     importo_riaccertato_def
+     from fin_t_riaccertamenti 
+     where anno_bilancio_riaccertamento=anno_riaccertamento
+     and doc_id = doc_id_impegno;
+     exception when no_data_found 
+       then importo_riaccertato_def:=0;
+    end;
+  end if;
+*/
+
+ if nvl(blocco_riaccertamento,'N') &lt;> 'N' 
+    then  
+    begin
+    select 
+     nvl(importo_riaccertamento1,0)+nvl(importo_riaccertamento2,0) +nvl(importo_riaccertamento3,0) +nvl(importo_da_eliminare,0) 
+    ,nvl(importo_riaccertamento1_bil,0)+nvl(importo_riaccertamento2_bil,0) +nvl(importo_riaccertamento3_bil,0) +nvl(importo_da_eliminare_bil,0) 
+    into 
+     importo_riaccertato_uff
+    ,importo_riaccertato_bil  
+    from fin_t_riaccertamenti_uffici
+    where anno_bilancio_riaccertamento=vanno_riaccertamento
+    and doc_id = doc_id_impegno
+    and nvl(stato,0) &lt;> 4; -- riaccertamento rigettato dall'ufficio bilancio 
+     exception when no_data_found 
+       then importo_riaccertato_uff := 0;
+            importo_riaccertato_bil := 0;
+    end;
+    begin
+     select 
+     sum(importo_riaccertamento) 
+     into
+     importo_riaccertato_def
+     from fin_t_riaccertamenti 
+     where anno_bilancio_riaccertamento=vanno_riaccertamento
+     and doc_id = doc_id_impegno;
+     exception when no_data_found 
+       then importo_riaccertato_def:=0;
+    end;
+    
+-- Se l'ufficio bilancio inizia il lavoro, è il caso di lasciare il blocco su U per dar tempo al Bilancio di operare.
+-- quando il bilancio termina il lavoro, mette su B il flag per fissare la sua visione del riaccertamento.
+-- L'if che segue, ove il blocco è sulle richieste Ufficio ma il Bilancio ha già fatto una sua scelta, vale la sua e non quella dell'ufficio.
+
+    if blocco_riaccertamento = 'R'
+       then importo_riaccertamento := importo_riaccertato_def;
+       elsif blocco_riaccertamento = 'U'
+       and nvl(importo_riaccertato_bil,0)=0
+       then importo_riaccertamento := importo_riaccertato_uff;
+       else importo_riaccertamento := importo_riaccertato_bil;
+    end if;
+        
+ end if;
+
+ return nvl(importo_riaccertamento,0);
+END;</pre>	</td></tr>
+</table></div>
