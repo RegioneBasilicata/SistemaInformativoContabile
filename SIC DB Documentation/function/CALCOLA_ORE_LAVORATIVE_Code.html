@@ -1,0 +1,67 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLA_ORE_LAVORATIVE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLA_ORE_LAVORATIVE.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLA_ORE_LAVORATIVE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLA_ORE_LAVORATIVE_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLA_ORE_LAVORATIVE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLA_ORE_LAVORATIVE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION calcola_ore_lavorative (p_data_inizio date, p_data_fine date) RETURN NUMBER IS
+return_value number(5,2) := 0;
+conta_festivi number := 0;
+minuti_data_inizio number := 0;
+minuti_data_fine number := 0;
+conta_minuti_totale number := 0;
+data_loop date := p_data_inizio;
+
+cursor fasce is
+select inizio,fine
+from tb_fasce_lavorative
+where tipo = 'STANDARD';
+
+BEGIN
+
+while data_loop &lt;= p_data_fine loop
+
+  begin 
+    select count(data) into conta_festivi
+    from ap_festivita
+    where to_char(data,'ddmm') = to_char(data_loop,'ddmm');
+    exception when no_data_found then conta_festivi := 0;
+  end;
+  if to_char(data_loop,'D') in (6,7) 
+  then conta_festivi := conta_festivi + 1;
+  end if; 
+  if conta_festivi = 0 -- il giorno considerato non è un festivo
+  then 
+    if trunc(data_loop) = trunc(p_data_inizio) -- verifico se sono nel primo giorno dell'intervallo
+       then minuti_data_inizio := to_char(p_data_inizio,'SSSSS')/60;
+       else minuti_data_inizio := 0;
+    end if;
+    if trunc(data_loop) = trunc(p_data_fine) -- verifico se sono nell'ultimo giorno dell'intervallo
+       then minuti_data_fine := to_char(p_data_fine,'SSSSS')/60;
+       else minuti_data_fine := 1440;
+    end if;
+    for f in fasce loop
+    conta_minuti_totale := conta_minuti_totale + analizzo_ore(minuti_data_inizio,minuti_data_fine,f.inizio,f.fine);
+    end loop;
+  end if;
+data_loop := data_loop + 1;
+end loop;
+return_value := round(conta_minuti_totale/60,2);
+return return_value;
+END; </pre>	</td></tr>
+</table></div>

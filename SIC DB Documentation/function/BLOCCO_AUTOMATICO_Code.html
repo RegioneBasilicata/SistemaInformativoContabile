@@ -1,0 +1,229 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BLOCCO_AUTOMATICO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BLOCCO_AUTOMATICO.html">Details</a></div></div>
+<div class="tab"><div><a href="BLOCCO_AUTOMATICO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BLOCCO_AUTOMATICO_References.html">References</a></div></div>
+<div class="tab"><div><a href="BLOCCO_AUTOMATICO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BLOCCO_AUTOMATICO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function      blocco_automatico(p_anno in NUMBER, p_capitolo in varchar2, p_cassa varchar2) return number IS
+
+vanno_esercizio_attivo1       number(4);
+vanno_esercizio_attivo2       number(4);
+vanno_esercizio_attivo3       number(4);
+vanno_esercizio_previsione1   number(4);
+vanno_esercizio_previsione2   number(4);
+vanno_esercizio_previsione3   number(4);
+vanno_esercizio_provvisorio1 number(4);
+vanno_esercizio_provvisorio2 number(4);
+vanno_esercizio_provvisorio3 number(4);
+vbil_provvisorio_aperto    varchar2(1);
+vbil_provvisorio_visibile  varchar2(1);
+vbil_previsione_aperto     varchar2(1);
+vbil_previsione_visibile   varchar2(1);
+vbil_assestamento_aperto   varchar2(1);
+vbil_assestamento_visibile varchar2(1);
+vattivo_previsione              varchar2(1);
+vattivo_variazione              varchar2(1);
+vattivo_assestamento            varchar2(1);
+
+importo number(15,2) := 0;
+
+visibilita varchar2(1);
+
+anno_appoggio number(4);
+
+BEGIN
+
+ visibilita := 'S';
+
+ begin
+  select 
+    anno_esercizio_attivo1
+   ,anno_esercizio_attivo2
+   ,anno_esercizio_attivo3
+   ,anno_previsione1
+   ,anno_previsione2
+   ,anno_previsione3
+   ,anno_provvisiorio1
+   ,anno_provvisiorio2
+   ,anno_provvisiorio3
+   ,bilancio_provvisorio_aperto
+   ,bilancio_provvisorio_visibile
+   ,bilancio_previsione_aperto
+   ,bilancio_previsione_visibile
+   ,bilancio_assestamento_aperto
+   ,bilancio_assestamento_visibile
+   ,attivo_previsione
+   ,attivo_variazione
+   ,attivo_assestamento
+   into 
+    vanno_esercizio_attivo1
+   ,vanno_esercizio_attivo2
+   ,vanno_esercizio_attivo3
+   ,vanno_esercizio_previsione1
+   ,vanno_esercizio_previsione2
+   ,vanno_esercizio_previsione3
+   ,vanno_esercizio_provvisorio1
+   ,vanno_esercizio_provvisorio2
+   ,vanno_esercizio_provvisorio3
+   ,vbil_provvisorio_aperto
+   ,vbil_provvisorio_visibile
+   ,vbil_previsione_aperto
+   ,vbil_previsione_visibile
+   ,vbil_assestamento_aperto
+   ,vbil_assestamento_visibile
+   ,vattivo_previsione
+   ,vattivo_variazione
+   ,vattivo_assestamento
+  from fin_t_dati_generali2;
+  exception when no_data_found then visibilita:='N';
+ end;
+
+ if visibilita = 'N' 
+   then return(0);
+ end if;
+
+-- I Caso - Bilancio Provvisorio Aperto
+-- Se il bilancio provvisorio è aperto e il bilancio di previsione risulta non visibile,
+-- per gli anni dell'esercizio provvisorio, mi calcolo lo stanziamento eventualmente inserito in fase di bilancio di previsione.
+-- al termine degli IF, se l'importo è negativo, vuol dire che hanno abbattuto la quota di previsione
+-- riveniente dagli anni precedenti. In tal caso restituisco il valore al fine di sottrarlo in automatico alla competenza.
+-- Se invece il valore è maggiore di zero vuol dire che hanno aumentato il valore della competenza per l'anno e quindi 
+-- passo 0 in quanto la somma comunque non è vista perchè il bilancio di previsione non è visibile.
+
+
+  if p_cassa = 'N' and 
+     vbil_provvisorio_aperto='S' and 
+     vbil_previsione_visibile='N' 
+     then
+     if p_anno = vanno_esercizio_provvisorio1
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_provvisorio1 
+        and d.segment2 = p_capitolo
+        and  d.doc_type in ('B_COM_POS','B_COM_NEG');
+     end if;   
+
+     if p_anno = vanno_esercizio_provvisorio2
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_provvisorio2
+        and d.segment2 = p_capitolo
+        and d.doc_type in ('B_PL1_POS','B_PL1_NEG');
+     end if;
+
+     if p_anno = vanno_esercizio_provvisorio3
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_provvisorio3
+        and d.segment2 = p_capitolo
+        and d.doc_type in ('B_PL2_POS','B_PL2_NEG');
+     end if;
+
+     if importo &lt; 0
+        then return(abs(importo));
+        else return(0);
+     end if;
+  end if;
+-- Fine I Caso.
+
+-- II Caso - Bilancio Assestamento in corso
+-- Se il bilancio assestamento è aperto e risulta non visibile,
+-- per gli anni dell'esercizio attivo, mi calcolo lo stanziamento eventualmente inserito come assestamento (A_COM, APL).
+-- al termine degli IF, se l'importo è negativo, vuol dire che hanno abbattuto la quota di competenza del capitolo. 
+-- In tal caso restituisco il valore al fine di sottrarlo in automatico alla competenza ed evitare che possano utilizzarla.
+-- Se invece il valore è maggiore di zero vuol dire che hanno aumentato il valore della competenza per l'anno e quindi 
+-- passo 0 in quanto la somma comunque non è vista perchè il bilancio di assestamento non è visibile.
+
+  if p_cassa = 'N' and 
+     vbil_assestamento_aperto='S' and 
+     vbil_assestamento_visibile='N' 
+     then
+     if p_anno = vanno_esercizio_attivo1
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_attivo1 
+        and d.segment2 = p_capitolo
+        and  d.doc_type in ('A_COM_POS','A_COM_NEG');
+     end if;   
+
+     if p_anno = vanno_esercizio_attivo2
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_attivo2 
+        and d.segment2 = p_capitolo
+        and  d.doc_type in ('A_PL1_POS','A_PL1_NEG');
+     end if;   
+
+     if p_anno = vanno_esercizio_attivo3
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_attivo3 
+        and d.segment2 = p_capitolo
+        and  d.doc_type in ('A_PL2_POS','A_PL2_NEG');
+     end if;   
+
+     if importo &lt; 0
+        then return(abs(importo));
+        else return(0);
+     end if;
+  end if;
+-- Fine II Caso.
+
+
+  if p_cassa = 'S' and 
+     vbil_assestamento_aperto='S' and 
+     vbil_assestamento_visibile='N' 
+     then
+     if p_anno = vanno_esercizio_attivo1
+        then 
+        select 
+        nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+        into importo
+        from  fin_t_documenti d
+        where d.segment8 = vanno_esercizio_attivo1 
+        and d.segment2 = p_capitolo
+        and  d.doc_type in ('A_CAS_POS','A_CAS_NEG');
+     end if;   
+     if importo &lt; 0
+        then return(abs(importo));
+        else return(0);
+     end if;
+  end if;
+
+  return(0);
+
+END;</pre>	</td></tr>
+</table></div>

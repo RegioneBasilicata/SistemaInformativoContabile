@@ -1,0 +1,38 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CANCELLAZIONE_RIACCERTAMENTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CANCELLAZIONE_RIACCERTAMENTO.html">Details</a></div></div>
+<div class="tab"><div><a href="CANCELLAZIONE_RIACCERTAMENTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CANCELLAZIONE_RIACCERTAMENTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="CANCELLAZIONE_RIACCERTAMENTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CANCELLAZIONE_RIACCERTAMENTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function cancellazione_riaccertamento (p_anno in number, p_capitolo in varchar2) return number is
+
+importo  number(15,2) := 0;
+
+begin
+
+select sum(importo_riaccertamento) into importo
+from fin_T_riaccertamenti
+where anno_bilancio_riaccertamento=p_anno+1
+and capitolo=p_capitolo
+and nvl(flag_elimina,'N')='N'--solo documenti riaccertati quindi solo N Luigi Pierro 05-06-2019
+and tipo_documento like 'IMP%';
+return nvl(importo,0);
+
+
+end;</pre>	</td></tr>
+</table></div>
