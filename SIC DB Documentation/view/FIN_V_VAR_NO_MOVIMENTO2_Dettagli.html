@@ -1,0 +1,94 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_V_VAR_NO_MOVIMENTO2</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_V_VAR_NO_MOVIMENTO2.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_V_VAR_NO_MOVIMENTO2_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_V_VAR_NO_MOVIMENTO2_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_V_VAR_NO_MOVIMENTO2_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_V_VAR_NO_MOVIMENTO2_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_V_VAR_NO_MOVIMENTO2</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>3002</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select a."DOC_ID",a."CODE_COMBINATION_ID",a."CURRENCY_CODE",a."BUDG_CODE_COMBINATION_ID",a."DOC_TYPE",a."EXPEDIENT_ID",a."DOC_SEQUENCE_ID",a."DOC_SEQUENCE_VALUE",a."BASE_DOCUMENT_FLAG",a."DATE_CREATED",a."ACTUAL_FLAG",a."BUDGETARY_CONTROL_STATUS",a."SET_OF_BOOKS_ID",a."GL_DATE",a."PERIOD_NAME",a."CHECK_STOCK_ID",a."BANK_ACCOUNT_ID",a."PREVIOUS_DOC_ID",a."BATCH_ID",a."EXT_DOCUMENT_REF",a."EXT_DOC_APPLICATION_SOURCE",a."JE_BATCH_ID",a."PACKET_ID",a."UNRESERVATION_PACKET_ID",a."REMARKS",a."CURRENCY_CONVERSION_RATE",a."CURRENCY_CONVERSION_TYPE",a."CURRENCY_CONVERSION_DATE",a."OPEN_BALANCE_PROPOSED",a."OPEN_BALANCE_POSTED",a."CLOSED_AMOUNT_PROPOSED",a."CLOSED_AMOUNT_POSTED",a."EXP_PHASE_AMOUNT_PROPOSED",a."EXP_PHASE_AMOUNT_POSTED",a."EXT_BUDGET_AMOUNT",a."DOCUMENT_AMOUNT",a."DOCUMENT_BASE_AMOUNT",a."APPROVAL_STATUS_FLAG",a."PROPOSAL_STATUS_FLAG",a."AUDITING_STATUS_FLAG",a."POSTING_STATUS_FLAG",a."DELETION_STATUS_FLAG",a."PAYMENT_STATUS_FLAG",a."GROUP_PAYMENTS_FLAG",a."DELETION_REASON",a."REVERTION_REASON",a."COMMITMENT_YEAR",a."DESCRIPTION",a."ATTRIBUTE_CATEGORY",a."ATTRIBUTE1",a."ATTRIBUTE2",a."ATTRIBUTE3",a."ATTRIBUTE4",a."ATTRIBUTE5",a."ATTRIBUTE6",a."ATTRIBUTE7",a."ATTRIBUTE8",a."ATTRIBUTE9",a."ATTRIBUTE10",a."ATTRIBUTE11",a."ATTRIBUTE12",a."ATTRIBUTE13",a."ATTRIBUTE14",a."ATTRIBUTE15",a."ATTRIBUTE16",a."ATTRIBUTE17",a."ATTRIBUTE18",a."ATTRIBUTE19",a."ATTRIBUTE20",a."ATTRIBUTE21",a."ATTRIBUTE22",a."ATTRIBUTE23",a."ATTRIBUTE24",a."ATTRIBUTE25",a."ATTRIBUTE26",a."ATTRIBUTE27",a."ATTRIBUTE28",a."ATTRIBUTE29",a."ATTRIBUTE30",a."ATTRIBUTE31",a."ATTRIBUTE32",a."ATTRIBUTE33",a."ATTRIBUTE34",a."ATTRIBUTE35",a."ATTRIBUTE36",a."ATTRIBUTE37",a."ATTRIBUTE38",a."ATTRIBUTE39",a."ATTRIBUTE40",a."ATTRIBUTE41",a."ATTRIBUTE42",a."ATTRIBUTE43",a."ATTRIBUTE44",a."ATTRIBUTE45",a."ATTRIBUTE46",a."ATTRIBUTE47",a."ATTRIBUTE48",a."ATTRIBUTE49",a."ATTRIBUTE50",a."CONCURRENT_REQUEST_ID",a."CREATED_BY",a."CREATION_DATE",a."LAST_UPDATED_BY",a."LAST_UPDATE_DATE",a."WF_ITEM_TYPE",a."WF_ITEM_KEY",a."ADMINISTRATIVE_EXPEDIENT",a."PLURIANNUAL_YEAR",a."LATEST_COMMITMENT_YEAR",a."PENDING_OBLIGATION_YEAR",a."BUDGET_TYPE",a."FUNDS_CHECK_GL_DATE",a."LATEST_PENDING_OBLIGATION_YEAR",a."WORKFLOW_FLAG",a."REGISTRY_STATUS_FLAG",a."PERENTI_STATUS",a."PERENTI_REQUEST_ID",a."SEGMENT2",a."SEGMENT4",a."SEGMENT8",a."SEGMENT3",a."SEGMENT7",a."DATA_APPROVAZIONE",a."DATA_PERENZIONE",a."DATA_PRESCRIZIONE",a."DATA_ATTO_AUTORIZZATIVO",a."CODICE_ASP",a."CODICE_DIRETTRICE",a."CODICE_RISULTATI",a."CODICE_OG_PARTE1",a."CODICE_OG_PARTE2",a."CODICE_OG_PARTE3",a."DOC_ID_CAPO_FILIERA",a."SEGMENT9",a."SEGMENT11",a."PREIMPEGNO_AUTOMATICO",a."CODICE_GESTIONALE_SIOPE",a."MANDREV_SOSTITUITO" from fina_documenti a 
+where 
+a.doc_type in ('A_COM_NEG','A_COM_POS','V_COM_POS','V_COM_NEG') 
+and a.previous_doc_id is null 
+and nvl(a.segment11,'NA') &lt;> 'NA'
+and a.segment9 not in ('AVANZO','AV_REG')
+and a.segment8 = 2009
+and a.doc_id not in 
+(
+select b.previous_doc_id 
+from fina_documenti b 
+where b.previous_doc_id = a.doc_id
+)</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

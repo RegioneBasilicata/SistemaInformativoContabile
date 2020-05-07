@@ -1,0 +1,178 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CERTIFICAZIONE_LETTERA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CERTIFICAZIONE_LETTERA.html">Details</a></div></div>
+<div class="tab"><div><a href="CERTIFICAZIONE_LETTERA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CERTIFICAZIONE_LETTERA_References.html">References</a></div></div>
+<div class="tab"><div><a href="CERTIFICAZIONE_LETTERA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CERTIFICAZIONE_LETTERA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE      certificazione_lettera (pcodice_lettera in varchar2, panno_elaborazione in number,pdata_stampa in date,pfile_report in varchar2) IS
+/* --------------------------------------------------------------------------------
+ estrapola e salva in fin_certificazioni_770 i beneficiari a cui sono state fatte
+ ritenute che devono essere comunicate al'aggenzia dell'entrata. Legge i dati dalla
+ documenti se le reversali rientrano nei capitoli presenti in 
+ fin_raggr_capitoli_dettaglio    per l'anno in elaborazione o se i mandati hanno
+ il flag valido 770 a S
+ ---------------------------------------------------------------------------------*/
+
+cont number;
+controllo_lettera number;
+alert_button number;
+
+cursor lettera is 
+SELECT
+id_creditore,
+codice_sede_fornitore,
+tipo_ritenuta,
+sum(importo_lordo) importo_lordo,
+sum(importo_non_soggetto) importo_non_soggetto,
+sum(imponibile) imponibile,
+sum(irpef) irpef,
+sum(ritenuta_previdenziale) ritenuta_previdenziale,
+sum(ritenuta_prev_percipiente) ritenuta_prev_percipiente,
+sum(ritenuta_prev_erogante) ritenuta_prev_erogante,
+sum(addizionale_comunale) addizionale_comunale,
+sum(addizionale_regionale) addizionale_regionale,
+da_stampare from 
+(SELECT   DISTINCT
+            r.id_fornitore id_creditore,
+            r.codice_sede_fornitore codice_sede_fornitore,
+            UPPER (m.tipologia_reddito) tipo_ritenuta,
+            sum(nvl(m.importo_totale_mandato,0)) importo_lordo,
+            sum(nvl(m.importo_totale_mandato,0) - nvl(m.imponibile_irpef,0)) importo_non_soggetto,
+            sum(nvl(m.imponibile_irpef,0)) imponibile,
+            sum(nvl(r.importo_totale_reversale,0)) irpef,
+            sum(nvl(m.ritenuta_previdenziale_ente,0) + nvl(m.ritenuta_previdenziale_ben,0)) ritenuta_previdenziale,
+            sum(nvl(m.ritenuta_previdenziale_ben,0)) ritenuta_prev_percipiente,
+            sum(nvl(m.ritenuta_previdenziale_ente,0)) ritenuta_prev_erogante,
+            sum(nvl(m.addizionale_comunale,0)) addizionale_comunale,
+            sum(nvl(m.addizionale_regionale,0)) addizionale_regionale,
+            nvl(z.stampa_certificazioni,'S') da_stampare
+     FROM   fina_reversali r, fin_t_rev_coll rc, fina_mandati m,fina_raggr_capitoli_dettaglio z
+    WHERE   r.numero_reversale >(panno_elaborazione*100000) and
+            r.numero_reversale &lt;((panno_elaborazione + 1)*100000) and
+            r.capitolo_entrata IN
+                  (SELECT codice_capitolo
+                   FROM   fina_raggr_capitoli_dettaglio
+                   WHERE  codice_raggruppamento = 1
+                   AND   anno =TO_NUMBER(TO_CHAR (r.data_emissione_reversale,'yyyy')))
+            AND r.data_storno IS NULL
+            AND r.numero_reversale = rc.rev_codice(+)
+            AND rc.rev_mand_cod = m.numero_mandato(+)
+            AND m.data_storno(+) IS NULL
+            AND r.id_fornitore = m.id_fornitore
+            AND r.capitolo_entrata = z.codice_capitolo(+) 
+            AND z.codice_raggruppamento(+) = 1 
+            AND z.anno(+) = panno_elaborazione        
+            group by 
+            r.id_fornitore,
+            r.codice_sede_fornitore,
+            UPPER (m.tipologia_reddito),
+            nvl(z.stampa_certificazioni,'S')
+   UNION
+   SELECT   DISTINCT
+            m.id_fornitore id_creditore,--id_fornitore,
+            m.codice_sede_fornitore, --codice_sede_fornitore,
+            UPPER (m.tipologia_reddito) tipo_ritenuta,
+            sum(nvl(m.importo_totale_mandato,0)) importo_lordo,
+            sum(nvl(m.importo_totale_mandato,0) - nvl(m.imponibile_irpef,0)) importo_non_soggetto,
+            sum(nvl(m.imponibile_irpef,0)) imponibile,
+            sum(nvl(m.ritenuta_irpef,0)) irpef,
+            sum(nvl(m.ritenuta_previdenziale_ente,0) + nvl(m.ritenuta_previdenziale_ben,0)) ritenuta_previdenziale,
+            sum(nvl(m.ritenuta_previdenziale_ben,0)) ritenuta_prev_percipiente,
+            sum(nvl(m.ritenuta_previdenziale_ente,0)) ritenuta_prev_erogante,
+            sum(nvl(m.addizionale_comunale,0)) addizionale_comunale,
+            sum(nvl(m.addizionale_regionale,0)) addizionale_regionale,
+            'S' da_stampare
+     FROM   fina_mandati m
+    WHERE   m.numero_mandato >(panno_elaborazione*100000) and
+            m.numero_mandato &lt;((panno_elaborazione+1)*100000) and
+            m.data_storno IS NULL AND NVL (m.valido770, 'N') in ('Y','S')
+            AND m.numero_mandato NOT IN
+                     (SELECT DISTINCT rev_mand_cod FROM fina_rev_coll)
+   GROUP BY m.id_fornitore,
+            m.codice_sede_fornitore, 
+            UPPER (m.tipologia_reddito),
+            'S')
+group by id_creditore,codice_sede_fornitore,tipo_ritenuta,da_stampare;
+
+r lettera%ROWTYPE;
+
+begin
+
+ cont :=0;
+
+
+delete fina_certificazioni_770 where codice_lettera = pcodice_lettera;
+
+FOR r IN lettera LOOP
+ cont := cont + 1;
+
+  begin
+	insert into fina_certificazioni_770
+	(
+	 codice_lettera, 
+   codice_terza_parte, 
+   codice_sede_fornitore, 
+   tipo_ritenuta,
+   lordo, 
+   importo_non_sogg, 
+   deduzione_art_10_bis, 
+   imponibile, 
+   irpef, 
+   ritenute_previdenziali,
+   contributi_soggetto_erogante,
+   addizionale_comunale, 
+   addizionale_regionale, 
+   detraz_fam_car, 
+   detraz_lav_dip, 
+   mesi, 
+   giorni, 
+   testo_aggiuntivo, 
+   da_stampare, 
+   data_stampa, 
+   file_stampa
+  )
+   values 
+  (
+	pcodice_lettera,
+	r.id_creditore,
+	r.codice_sede_fornitore,
+	r.tipo_ritenuta,
+	r.importo_lordo,
+	r.importo_non_soggetto,
+	0,
+	r.imponibile,
+  r.irpef,
+  r.ritenuta_prev_percipiente,
+  r.ritenuta_prev_erogante,
+	r.addizionale_comunale,
+	r.addizionale_regionale,
+	0,
+	0,
+	0,
+	0,
+	null,
+	r.da_stampare,
+	pdata_stampa,
+	pfile_report
+	);
+	end ;
+end loop;
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

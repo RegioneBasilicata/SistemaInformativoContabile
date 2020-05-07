@@ -1,0 +1,179 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_V_APPOGGIO_CERTIFICATI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_V_APPOGGIO_CERTIFICATI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_V_APPOGGIO_CERTIFICATI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_V_APPOGGIO_CERTIFICATI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_V_APPOGGIO_CERTIFICATI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_V_APPOGGIO_CERTIFICATI_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_V_APPOGGIO_CERTIFICATI</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>6182</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT DISTINCT TO_NUMBER (TO_CHAR (r.data_emissione_reversale, 'yyyy') 
+                             ) anno, 
+                   r.numero_reversale numero_reversale, 
+                   r.capitolo_entrata capitolo_entrata, 
+                   r.importo_totale_reversale importo_totale_reversale, 
+                   r.data_emissione_reversale data_emissione_reversale, 
+                   r.partita_iva partita_iva, r.codice_fiscale codice_fiscale, 
+                   r.stato_fornitore fisico_giuridico, 
+                   r.id_fornitore id_fornitore, 
+                   r.codice_sede_fornitore codice_sede_fornitore, 
+                   r.nome_fornitore nome_fornitore, 
+                   r.data_nascita data_nascita, 
+                   r.indirizzo_sede indirizzo_res, r.citta_sede citta_res, 
+                   r.nazione_sede nazione_res, r.provincia_sede provincia_res, 
+                   r.cap_sede cap_res, rc.rev_mand_cod numero_mandato, 
+                   m.data_emissione_mandato data_emissione_mandato, 
+                   m.oggetto_mandato oggetto_mandato, 
+                   m.stato_fornitore stato_fornitore, 
+                   UPPER (m.tipologia_reddito) tipologia_reddito, 
+                   m.capitolo_spesa capitolo_spesa, 
+                   m.importo_totale_mandato totale_mandato, 
+                   m.imponibile_irpef imponibile_irpef, 
+                   m.ritenuta_irpef ritenuta_irpef, 
+                   m.addizionale_comunale addizionale_comunale, 
+                   m.addizionale_regionale addizionale_regionale, 
+                   m.ritenuta_previdenziale_ente ritenuta_prev_erogante, 
+                   m.ritenuta_previdenziale_ben ritenuta_prev_percipiente, 
+                     m.ritenuta_previdenziale_ente 
+                   + m.ritenuta_previdenziale_ben ritenuta_previdenziale 
+              FROM fina_reversali r, fin_t_rev_coll rc, fina_mandati m 
+             WHERE r.capitolo_entrata IN ( 
+                      SELECT codice_capitolo 
+                        FROM fina_raggr_capitoli_dettaglio 
+                       WHERE codice_raggruppamento = 1 
+                         AND anno = 
+                                TO_NUMBER 
+                                         (TO_CHAR (r.data_emissione_reversale, 
+                                                   'yyyy' 
+                                                  ) 
+                                         )) 
+               AND r.data_storno IS NULL 
+               AND r.numero_reversale = rc.rev_codice(+) 
+               AND rc.rev_mand_cod = m.numero_mandato(+) 
+               AND m.data_storno(+) IS NULL 
+               AND r.id_fornitore = m.id_fornitore 
+   UNION 
+   SELECT DISTINCT TO_NUMBER (TO_CHAR (m.data_emissione_mandato, 'yyyy')) 
+                                                                         anno, 
+                 --to_number(to_char(r.data_emissione_reversale,'yyyy')) anno, 
+                   0,                --r.numero_reversale    numero_reversale, 
+                     NULL,           --r.capitolo_entrata    capitolo_entrata, 
+                          0, 
+                       --r.importo_totale_reversale  importo_totale_reversale, 
+                            m.data_emissione_mandato, 
+                       --r.data_emissione_reversale  data_emissione_reversale, 
+                                                     NULL, 
+                                               --r.partita_iva    partita_iva, 
+                                                          NULL, 
+                                          --r.codice_fiscale   codice_fiscale, 
+                                                               NULL, 
+                                       --r.stato_fornitore   fisico_giuridico, 
+                   m.id_fornitore,           --r.id_fornitore    id_fornitore, 
+                                  m.codice_sede_fornitore, 
+                             --r.codice_sede_fornitore  codice_sede_fornitore, 
+                                                          m.nome_fornitore, 
+                                          --r.nome_fornitore   nome_fornitore, 
+                   TO_DATE ('01.01.2001', 'dd.mm.yyyy'), 
+                                             --r.data_nascita    data_nascita, 
+                                                        NULL, 
+                                           --r.indirizzo_sede   indirizzo_res, 
+                                                             NULL, 
+                                                  --r.citta_sede    citta_res, 
+                                                                  NULL, 
+                                              --r.nazione_sede    nazione_res, 
+                                                                       NULL, 
+                                           --r.provincia_sede   provincia_res, 
+                   NULL,                             --r.cap_sede     cap_res, 
+                        m.numero_mandato, --rc.rev_mand_cod    numero_mandato, 
+                   m.data_emissione_mandato data_emissione_mandato, 
+                   m.oggetto_mandato oggetto_mandato, 
+                   m.stato_fornitore stato_fornitore, 
+                   UPPER (m.tipologia_reddito) tipologia_reddito, 
+                   m.capitolo_spesa capitolo_spesa, 
+                   m.importo_totale_mandato totale_mandato, 
+                   m.imponibile_irpef imponibile_irpef, 
+                   m.ritenuta_irpef ritenuta_irpef, 
+                   m.addizionale_comunale addizionale_comunale, 
+                   m.addizionale_regionale addizionale_regionale, 
+                   m.ritenuta_previdenziale_ente ritenuta_prev_erogante, 
+                   m.ritenuta_previdenziale_ben ritenuta_prev_percipiente, 
+				   m.ritenuta_previdenziale_ente + 
+                   m.ritenuta_previdenziale_ben ritenuta_previdenziale 
+              FROM fina_mandati m 
+             WHERE m.data_storno IS NULL 
+               AND NVL (m.valido770, 'N') = 'Y' 
+               AND m.numero_mandato NOT IN (SELECT DISTINCT rev_mand_cod 
+                                                       FROM fina_rev_coll)
+</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

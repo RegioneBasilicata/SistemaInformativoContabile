@@ -1,0 +1,182 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_IMP_MAND_CONTRATTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_IMP_MAND_CONTRATTO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_IMP_MAND_CONTRATTO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_IMP_MAND_CONTRATTO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_IMP_MAND_CONTRATTO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_IMP_MAND_CONTRATTO_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2013-10-10</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_IMP_MAND_CONTRATTO</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>3910</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT bgg.tab_codice cod_tipo_contratto,    bgg.progr numero_contratto,    i.progr_rata PROGR_RATA,
+    i.progr_imp PROGR_IMP,    btg.descrizione tipo_contratto,    bgg.ult_descr desc_contratto,
+    brg.data_scad data_scad,    brg.importo importo ,    brg.mod_pag_inc mod_pag,    brg.num_pag_inc num_pag ,
+    bgg.num_contratto num_repertorio ,    bgg.data_contratto data_contratto,    brg.stato stato,
+    brg.id_atto id_atto, di.doc_type , di.attribute13 imp_tipo_atto,    di.attribute14 imp_num_atto,
+    di.data_atto_autorizzativo imp_data_atto,    di.open_balance_proposed imp_pro,
+    di.doc_sequence_value imp_seq_val,   di.date_created imp_data_cr,    di.doc_id imp_doc_id,
+    di.doc_id_capo_filiera imp_capo_fil,    di.document_amount imp_doc_amount
+    ,d.attribute13 tipo_atto,    d.attribute14 num_atto,
+    d.data_atto_autorizzativo data_atto,
+    d.open_balance_proposed , 
+    d.doc_sequence_value ,
+    d.date_created ,
+    d.doc_id ,
+    d.doc_id_capo_filiera ,
+    d.document_amount
+  FROM bi_impegni_x_rate i ,
+    bi_rate_gest brg ,
+    bi_tabelle_gest btg ,
+    bi_generale_gest bgg ,
+    fin_t_documenti di ,
+    at_atti_testa at ,
+    at_richieste_intema ai
+    ,fin_t_documenti d
+  WHERE 
+  brg.att_pass                      = 'P'
+  AND brg.tab_codice                = btg.codice
+  AND brg.tab_codice                = bgg.tab_codice
+  AND brg.gen_progr                 = bgg.progr
+  AND i.tab_codice                  =brg.tab_codice
+  AND i.gen_progr                   =brg.gen_progr
+  AND i.progr_rata                  =brg.progr_rata
+  AND brg.id_atto                   =at.id_atto
+  AND ai.codice_esterno             =at.id_atto
+  AND ai.applicativo_richiedente    = 'SIC'
+  AND (
+      (i.doc_id_impegno is not null and di.doc_id=i.doc_id_impegno) 
+      or (i.doc_id_impegno is null and di.doc_type in ('IMP','IMP-DEF') and 
+       lpad(di.attribute14,5,'0') = SUBSTR(ai.numero_definitivo,LENGTH(ai.numero_definitivo)-4,5) and
+       di.attribute13='DETERMINA' and
+       to_char(di.data_atto_autorizzativo,'yyyy')=SUBSTR(ai.numero_definitivo,6,4) and
+       di.segment3=SUBSTR(ai.numero_definitivo,1,4))
+       ) 
+      AND (d.doc_type ='MAND' and 
+       lpad(d.attribute14,5,'0') = SUBSTR(ai.numero_definitivo,LENGTH(ai.numero_definitivo)-4,5) and
+       d.attribute13='DETERMINA' and
+       to_char(d.data_atto_autorizzativo,'yyyy')=SUBSTR(ai.numero_definitivo,6,4) and
+       d.segment3=SUBSTR(ai.numero_definitivo,1,4))
+UNION
+SELECT 
+    bgg.tab_codice,
+    bgg.progr,
+    brg.progr_rata ,
+    i.progr_imp ,
+    btg.descrizione,
+    bgg.ult_descr,
+    brg.data_scad,
+    brg.importo ,
+    brg.mod_pag_inc,
+    brg.num_pag_inc ,
+    bgg.num_contratto ,
+    bgg.data_contratto ,
+    brg.stato ,
+    brg.id_atto ,
+    di.doc_type ,
+    di.attribute13,
+    di.attribute14,
+    di.data_atto_autorizzativo,
+    di.open_balance_proposed,
+    di.doc_sequence_value,
+    di.date_created,
+    di.doc_id,
+    di.doc_id_capo_filiera,
+    di.document_amount,
+    d.attribute13,
+    d.attribute14,
+    d.data_atto_autorizzativo,
+    d.open_balance_proposed ,
+    d.doc_sequence_value ,
+    d.date_created ,
+    d.doc_id ,
+    d.doc_id_capo_filiera ,
+    d.document_amount
+  FROM bi_impegni_x_rate i ,
+    bi_rate_gest brg ,
+    bi_tabelle_gest btg ,
+    bi_generale_gest bgg ,
+    fin_t_documenti di 
+    ,fin_t_documenti d
+  WHERE   
+  brg.att_pass                  = 'P'
+  AND brg.tab_codice                = btg.codice
+  AND brg.tab_codice                = bgg.tab_codice
+  AND brg.gen_progr                 = bgg.progr
+  AND i.tab_codice(+)               =brg.tab_codice
+  AND i.gen_progr(+)                =brg.gen_progr
+  AND i.progr_rata(+)               =brg.progr_rata
+  AND 0=(select count(*) from at_richieste_intema where codice_esterno = nvl(brg.id_atto,0))
+  AND di.doc_id(+)=i.doc_id_impegno
+  AND d.doc_id_capo_filiera(+)=di.doc_id_capo_filiera
+  and d.doc_type(+)='MAND'</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

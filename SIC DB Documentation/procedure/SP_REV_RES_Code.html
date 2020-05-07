@@ -1,0 +1,132 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP_REV_RES</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP_REV_RES.html">Details</a></div></div>
+<div class="tab"><div><a href="SP_REV_RES_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP_REV_RES_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP_REV_RES_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP_REV_RES_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure SP_REV_RES(p_anno in number) authid definer as
+
+esercizio number := p_anno;
+
+id_causale number := 0;
+descr_causale varchar2(2000);
+id_rev number;
+
+id_pn_testa number := 0;
+indice number :=0; --indice
+conto_dare number;
+conto_avere number;
+numero_acc number;
+
+cursor res is
+select codice
+,anno_residuo
+,numero_residuo numero
+from sa_piano_dei_conti
+where nvl(tipo_residuo,'X') = 'ACC'
+and numero_residuo is not null;
+
+cursor rev is
+select distinct d.date_created data_doc,
+d.doc_id doc_id
+,d.description||' Reversale n.'||d.doc_sequence_value descrizione
+,nvl(d.document_amount,0) importo_rev
+,d.created_by utente
+from fin_t_documenti d
+where d.segment8 = esercizio
+and d.doc_type = 'REV'--and d.doc_type = 'ACC'--
+and nvl(d.open_balance_proposed,0) > 0 --and nvl(d.deletion_status_flag,'N') = 'N'--
+and d.previous_doc_id in (select doc_id from fin_t_documenti where doc_type = 'ACC' and doc_sequence_value = numero_acc)
+order by 1,2;
+
+
+BEGIN
+
+
+for r in res loop
+numero_acc := r.numero;
+
+for i in rev loop
+
+id_rev := i.doc_id;
+id_pn_testa := 0;
+ 
+  -- PRIMA NOTA TESTA
+  -- stacca id per sa_prima_nota_testa
+      select nvl(max(num_reg),0) + 1 into id_pn_testa
+      from sa_prima_nota_testa
+      where data = i.data_doc;
+    --FINE   
+    -- inserisco la testata in sa_prima_nota_testa
+    insert into sa_prima_nota_testa(DATA,NUM_REG,DOC_ID,DESCRIZIONE_MOV,SA_CC_ID,utente)
+    values
+    (i.data_doc,
+     id_pn_testa,
+     i.doc_id,
+     i.descrizione,
+     73, --causale contabile "Incasso crediti v/Stato per residui attivi anni precedenti"
+     i.utente
+    );
+    commit;
+  -- FINE PNT
+  
+      -- stacco identificativo univoco e progressivo per il rigo della sa_prima_nota_corpo
+        SELECT sq_sapc.NEXTVAL into indice 
+        FROM dual;
+        -- ****
+        insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+        values
+        (i.data_doc,
+        id_pn_testa,
+         8, -- Tesoreria Sanità
+         indice,
+         'D',
+         nvl(i.importo_rev,0)
+        );
+        commit;
+  
+    -- stacco identificativo univoco e progressivo per il rigo della sa_prima_nota_corpo
+    SELECT sq_sapc.NEXTVAL into indice 
+    FROM dual;
+    -- ****
+    insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+    values
+    (i.data_doc,
+    id_pn_testa,
+    r.codice, -- Credito per residui anno yyyy
+    indice,
+    'A',
+    nvl(i.importo_rev,0)
+    );
+    commit;
+ 
+  -- FINE causali guidate
+ 
+  end loop;
+ /* -- elimino le scritture relativi a MAndati eliminate
+    delete sa_prima_nota_testa where nvl(doc_id,0) in (select doc_id
+    from fin_t_documenti
+    where doc_type = 'REV'
+    and nvl(open_balance_proposed,0) = 0
+    and segment8 = esercizio);
+    commit;
+  -- FINE STORNI*/
+  end loop;
+  
+END;</pre>	</td></tr>
+</table></div>

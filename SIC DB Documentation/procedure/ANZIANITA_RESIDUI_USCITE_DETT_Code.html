@@ -1,0 +1,296 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ANZIANITA_RESIDUI_USCITE_DETT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_DETT.html">Details</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_DETT_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_DETT_References.html">References</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_DETT_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ANZIANITA_RESIDUI_USCITE_DETT_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure ANZIANITA_RESIDUI_USCITE_DETT (p_anno in number,p_codice_meccanografico in varchar2) as
+
+v_compe number := 0;
+v_cassa number := 0;
+--p_anno number := 2015;
+anno_fin number := p_anno;
+codice_mecc varchar2(20) := nvl(p_codice_meccanografico,'XXXXXXXXXX');
+
+cap_dip number := 0;
+-- **** fine variabili
+
+--data_generazione date := to_date('3112'||p_anno,'ddmmyyyy');
+
+capitolo varchar2(6);
+uff_si_no varchar2(1);
+p_capitoli_vincolati varchar2(2000);
+
+cursor capitoli is
+SELECT DISTINCT bc.CODICE codice_capitolo,
+  bc.DESC_CAPITOLO desc_capitolo,
+  bc.CODICE_MECCANOGRAFICO codice_meccanografico,
+  bc.CODICE_BILANCIO_SIOPE siope_bil,
+  bc.CODICE_GESTIONALE_SIOPE siope_gest,
+  bc.NB_TITOLO nb_titolo,
+  bc.desc_nb_titolo nb_titolo_desc,
+  bc.pcf nb_pcf,
+  bc.desc_pcf nb_pcf_desc,
+  NVL(ftb.previsto_attuale,0) previsione_competenza_capitoli,
+  NVL(ftb.residuo,0) previsione_residuo_capitoli,
+  NVL(ftb.cassa,0) previsione_cassa_capitoli ,
+  NVL(cd.motivazione_esclusione,'') motivazione_esclusione
+FROM vw_nb_articoli bc,
+  fin_t_bilancio ftb ,
+  fin_t_capitoli_dipartimenti cd
+WHERE bc.anno = anno_fin
+AND bc.eu     = 'U'
+AND bc.codice NOT LIKE '0000%'
+AND ftb.anno = bc.anno
+AND ftb.eu
+  ||ftb.articolo = bc.eu
+  ||bc.codice
+AND cd.anno(+)     = bc.anno
+AND cd.capitolo(+) = bc.eu
+  ||bc.codice
+ORDER BY bc.codice;
+
+cursor vincoli is
+select distinct 'E'||capitolo_entrata capitolo_entrata
+from VW_VINCOLI_DEFINITIVI
+where anno = anno_fin
+and capitolo_uscita = capitolo;
+
+cursor residui_iniziali is
+select d.doc_type tipo_doc
+  ,d.doc_id doc_id
+  ,d.doc_sequence_value numero_doc
+  ,d.description oggetto
+  ,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) residuo
+  ,d.segment3 ufficio
+  ,d.segment8 anno_doc
+  ,d.attribute13 tipo_atto
+  ,d.attribute14 numero_atto
+  ,d.data_atto_autorizzativo data_atto
+  from fin_t_impegni_residui r
+  ,fin_t_documenti d
+  where r.ANNO_FINANZIARIO = p_anno
+  and nvl(r.RESIDUO_INIZIALE,0) > 0
+  and residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) > 0
+  and nvl(r.perenzione,'N') = 'N'
+  and r.capitolo_spesa_corrente = capitolo
+  and d.doc_id = r.DOC_ID_IMPEGNO
+UNION
+  select d.doc_type tipo_doc
+  ,d.doc_id doc_id
+  ,d.doc_sequence_value numero_doc
+  ,d.description oggetto
+  ,(residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)) residuo
+  ,d.segment3 ufficio
+  ,d.segment8 anno_doc
+  ,d.attribute13 tipo_atto
+  ,d.attribute14 numero_atto
+  ,d.data_atto_autorizzativo data_atto
+  from fin_t_impegni_residui r
+  ,fin_t_documenti d
+  where r.ANNO_FINANZIARIO = p_anno
+  and nvl(r.perenzione,'N') = 'S'
+  and r.capitolo_spesa_corrente = capitolo
+  and d.doc_id = r.DOC_ID_IMPEGNO
+  and (residuo_imp_data(d.doc_id,to_date('3112'||p_anno-1,'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)) > 0
+/*UNION
+  select d.doc_type tipo_doc
+  ,d.doc_id doc_id
+  ,d.doc_sequence_value numero_doc
+  ,d.description oggetto
+  ,(r.residuo_iniziale - (residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0))) residuo
+  ,d.segment3 ufficio
+  ,d.segment8 anno_doc
+  ,d.attribute13 tipo_atto
+  ,d.attribute14 numero_atto
+  ,d.data_atto_autorizzativo data_atto
+  from fin_t_impegni_residui r
+  ,fin_t_documenti d
+  where r.ANNO_FINANZIARIO = p_anno
+  and nvl(r.perenzione,'N') = 'S'
+  and r.capitolo_spesa_corrente = capitolo
+  and d.doc_id = r.DOC_ID_IMPEGNO
+  and (residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)) >= 0
+UNION
+  select d.doc_type tipo_doc
+  ,d.doc_id doc_id
+  ,d.doc_sequence_value numero_doc
+  ,d.description oggetto
+  ,nvl(r.RESIDUO_INIZIALE,0) residuo
+  ,d.segment3 ufficio
+  ,d.segment8 anno_doc
+  ,d.attribute13 tipo_atto
+  ,d.attribute14 numero_atto
+  ,d.data_atto_autorizzativo data_atto
+  from fin_t_impegni_residui r
+  ,fin_t_documenti d
+  where r.ANNO_FINANZIARIO = p_anno
+  and nvl(r.perenzione,'N') = 'S'
+  and r.capitolo_spesa_corrente = capitolo
+  and d.doc_id = r.DOC_ID_IMPEGNO
+  and (residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)) &lt; 0
+  and r.RESIDUO_INIZIALE > 0*/
+  order by 3;
+  
+cursor residui_anno is
+select d.doc_type tipo_doc
+  ,d.doc_id doc_id
+  ,d.doc_sequence_value numero_doc
+  ,d.description oggetto
+  ,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) residuo
+  ,d.segment3 ufficio
+  ,d.attribute13 tipo_atto
+  ,d.attribute14 numero_atto
+  ,d.data_atto_autorizzativo data_atto
+  from fin_t_documenti d
+  where d.doc_type like 'IMP%'
+  and nvl(d.deletion_status_flag,'N') = 'N'
+  and nvl(d.auditing_status_flag,'X') = 'I'
+  and d.segment8 = p_anno  
+  and d.segment2 = capitolo
+  and residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) > 0;
+		  
+begin
+delete tmp_anzianita_residui_dett where anno = p_anno and substr(capitolo,1,1) = 'U';
+commit;
+
+
+for cap in capitoli loop
+capitolo := 'U'||cap.codice_capitolo;
+p_capitoli_vincolati := '';
+ for v in vincoli loop
+  p_capitoli_vincolati := p_capitoli_vincolati||v.capitolo_entrata||'-';
+ end loop;
+  p_capitoli_vincolati := trim(trailing '-' from p_capitoli_vincolati);
+   for ri in residui_iniziali loop
+	insert into TMP_ANZIANITA_RESIDUI_DETT(ANNO
+    ,CAPITOLO
+    ,TIPO_DOC
+    ,NUMERO_DOC
+    ,OGGETTO_DOC
+    ,RES_ANNO1
+    ,RES_ANNO2
+    ,RES_ANNO3
+    ,RES_ANNO4
+    ,RES_ANNO5
+    ,RES_ANNO6
+    ,RES_ANNO7
+  	,RIMANENZA
+    ,RES_CORRENTI
+    ,OGGETTO_CAPITOLO
+    ,DIPARTIMENTO
+    ,UFFICIO
+    ,CAPITOLI_VINCOLATI
+    ,TIPO_ATTO
+	,NUMERO_ATTO
+	,DATA_ATTO
+	,NB_TITOLO
+	,NB_TITOLO_DESC
+	,NB_PCF
+	,NB_PCF_DESC
+    )
+    values(
+    p_anno
+    ,capitolo
+    ,ri.tipo_doc
+    ,ri.numero_doc
+    ,ri.oggetto,
+    case when ri.anno_doc &lt;= (p_anno - 7) then nvl(ri.residuo,0) else 0 end,
+	case when ri.anno_doc = (p_anno - 6) then nvl(ri.residuo,0) else 0 end,
+	case when ri.anno_doc = (p_anno - 5) then nvl(ri.residuo,0) else 0 end,
+	case when ri.anno_doc = (p_anno - 4) then nvl(ri.residuo,0) else 0 end,
+	case when ri.anno_doc = (p_anno - 3) then nvl(ri.residuo,0) else 0 end,
+	case when ri.anno_doc = (p_anno - 2) then nvl(ri.residuo,0) else 0 end,
+	case when ri.anno_doc = (p_anno - 1) then nvl(ri.residuo,0) else 0 end,
+	nvl(ri.residuo,0),
+	0,
+	cap.desc_capitolo,
+	substr(ri.ufficio,1,2),
+	ri.ufficio,
+	p_capitoli_vincolati,
+	ri.tipo_atto,
+	ri.numero_atto,
+	ri.data_atto,
+	cap.nb_titolo,
+	cap.NB_TITOLO_DESC,
+	cap.NB_PCF,
+	cap.NB_PCF_DESC
+	);
+  commit;
+    end loop;
+   for ra in residui_anno loop
+    insert into TMP_ANZIANITA_RESIDUI_DETT(ANNO
+    ,CAPITOLO
+    ,TIPO_DOC
+    ,NUMERO_DOC
+    ,OGGETTO_DOC
+    ,RES_ANNO1
+    ,RES_ANNO2
+    ,RES_ANNO3
+    ,RES_ANNO4
+    ,RES_ANNO5
+    ,RES_ANNO6
+    ,RES_ANNO7
+   	,RIMANENZA
+    ,RES_CORRENTI
+    ,OGGETTO_CAPITOLO
+    ,DIPARTIMENTO
+    ,UFFICIO
+    ,CAPITOLI_VINCOLATI
+    ,TIPO_ATTO
+	,NUMERO_ATTO
+	,DATA_ATTO
+	,NB_TITOLO
+	,NB_TITOLO_DESC
+	,NB_PCF
+	,NB_PCF_DESC
+    )
+    values(
+    p_anno
+    ,capitolo
+    ,ra.tipo_doc
+    ,ra.numero_doc
+    ,ra.oggetto,
+    0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	nvl(ra.residuo,0),
+	cap.desc_capitolo,
+	substr(ra.ufficio,1,2),
+	ra.ufficio,
+	p_capitoli_vincolati,
+	ra.tipo_atto,
+	ra.numero_atto,
+	ra.data_atto,
+	cap.nb_titolo,
+	cap.NB_TITOLO_DESC,
+	cap.NB_PCF,
+	cap.NB_PCF_DESC
+	);
+  commit; 
+   end loop;
+
+capitolo := '';
+end loop;
+end;</pre>	</td></tr>
+</table></div>

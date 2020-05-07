@@ -1,0 +1,35 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>DEMO_ORDER_ITEMS_GET_PRICE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="DEMO_ORDER_ITEMS_GET_PRICE.html">Details</a></div></div>
+<div class="tab"><div><a href="DEMO_ORDER_ITEMS_GET_PRICE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="DEMO_ORDER_ITEMS_GET_PRICE_References.html">References</a></div></div>
+<div class="tab"><div><a href="DEMO_ORDER_ITEMS_GET_PRICE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="DEMO_ORDER_ITEMS_GET_PRICE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2"."DEMO_ORDER_ITEMS_GET_PRICE"
+before insert or update on demo_order_items for each row
+declare
+  l_list_price number;
+begin
+-- First, we need to get the current list price of the order line item
+select list_price into l_list_price from demo_product_info
+  where product_id = :new.product_id;
+
+-- Once we have the correct price, we will update the order line with the correct price
+:new.unit_price := l_list_price;
+
+end;</pre>	</td></tr>
+</table></div>

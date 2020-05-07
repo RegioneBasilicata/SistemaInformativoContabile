@@ -1,0 +1,1766 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>EQUILIBRI_RENDICONTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="EQUILIBRI_RENDICONTO.html">Details</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_RENDICONTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_RENDICONTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="EQUILIBRI_RENDICONTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="EQUILIBRI_RENDICONTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      EQUILIBRI_RENDICONTO(p_anno in number,p_utente in varchar2,p_id_report in number) as
+
+-- la procedura, per dare dati aggiornati, richiede che siano stato lanciate le procedure del Consuntivo (entrate e uscite)
+ 
+ riga number :=0;
+ c1 VARCHAR2(1000); --descrizione voce
+ c2 VARCHAR2(100); -- segno (+)/(-)
+ c3 VARCHAR2(100); -- desc colonna importi
+ c4 VARCHAR2(1); -- per Evidenziare la riga corrispondente nel report
+ c5 VARCHAR2(1000); --TAG BDAP
+
+ n1 NUMBER := 0; -- per colonna "Accertamenti/Impegni"
+ nx number := 0; -- per valori di appoggio
+
+ A_eq number := 0;  -- A/1)Risultato di competenza di parte corrente
+ A_eq2 number := 0; -- A/2) Equilibrio di bilancio  di parte corrente 
+ A_eq3 number := 0; -- A/3)  Equilibrio complessivo di parte corrente
+ 
+ B_eq number := 0;  -- B1) Risultato di competenza in c/capitale
+ B_eq2 number := 0; -- B/2) Equilibrio di bilancio  in c/capitale
+ B_eq3 number := 0; -- B/3)  Equilibrio complessivo in c/capitale
+ 
+ C_eq number := 0;  -- C/1) Variazioni attività finanziaria - saldo di competenza
+ C_eq2 number := 0; -- C/2) Variazioni attività finanziaria - equilibrio di bilancio
+ C_eq3 number := 0; -- C/3) Variazioni attività finanziaria - equilibrio complessivo
+ 
+ D1_eq number := 0; -- D/1) RISULTATO DI COMPETENZA (D/1 = A/1 + B/1)
+ D2_eq number := 0; -- D/2) EQUILIBRIO DI BILANCIO (D/2 = A/2 + B/2)
+ D3_eq number := 0; -- D/3) EQUILIBRIO COMPLESSIVO (D/3 = A/3 + B/3)
+ 
+ SAL_eq number := 0; -- Equilibrio di parte corrente ai fini della copertura degli investimenti plurien.
+
+ v1 NUMBER := 0; -- utilizzato come appoggio
+ v2 NUMBER := 0; -- utilizzato come appoggio
+ v3 NUMBER := 0; -- utilizzato come appoggio
+ v4 NUMBER := 0; -- utilizzato come appoggio
+ v5 NUMBER := 0; -- utilizzato come appoggio
+ v6 NUMBER := 0; -- utilizzato come appoggio
+
+ i number := 0; --contatore generico
+ imp_man number := 0; --utilizzato per la quota da inserire extracontabilmente 
+ utilizzo_av_corr number := 0; ----utilizzato per inserire la quota di Utilizzo risultato di amministrazione destinato al finanziamento delle spese correnti e al rimborso di prestiti
+ fpv_e_corrente number := 0; --utilizzato per inserire la quota di FPV entrate di parte corrente
+ fpv_e_capitale number := 0; --utilizzato per inserire la quota di FPV entrate di parte capitale
+ fpv_u_corrente number := 0; --utilizzato per inserire la quota di FPV uscite di parte corrente
+ fpv_u_capitale number := 0; --utilizzato per inserire la quota di FPV uscite di parte capitale
+ 
+ fpv_e_corr_libero number := 0; --utilizzato per inserire la quota di FPV entrate di parte corrente NON VINCOLATA
+ fpv_u_corr_libero number := 0; --utilizzato per inserire la quota di FPV uscite di parte corrente NON VINCOLATA
+ fpv_u_204 number := 0; --utilizzato per inserire la quota di FPV uscite di parte corrente Titolo 2.04
+ 
+
+ vdata_elaborazione date;
+ p_anno1 number(4);
+ p_anno2 number(4);
+
+ capitolo_entrata varchar2(6);
+ impegnato_vinc number := 0;
+ impegnato_vinc_ver number := 0;
+ impegnato_mutui number := 0;
+ impegnato_vinc1 number := 0;
+ impegnato_vinc2 number := 0;
+ impegnato_fpv number := 0;
+
+
+ capitolo_uscita varchar2(6);
+
+ cursor e_vinc is
+ select TIPO_CAPITOLO||capitolo capitolo
+ ,nvl(ACCERTAMENTI_IMPEGNI_COMPE,0) ACCERTATO
+ ,note_sanita
+ from fin_t_consuntivo_excel
+ where ANNO_CONSUNTIVO = p_anno
+ and UTENTE = p_utente
+ and TIPO_CAPITOLO = 'E'
+ and nvl(nb_entrata_ricorrente,'N') = 'N'
+ and note_sanita is not null;
+
+ cursor u_vinc is
+ select tipo_capitolo||capitolo capitolo
+ ,nvl(avanzo_vincolato,0) avanzo_vincolato,nvl(mutui,0) mutui
+   from fin_t_consuntivo_excel u
+   where u.ANNO_CONSUNTIVO = p_anno
+   and u.UTENTE = p_utente
+   and u.TIPO_CAPITOLO = 'U'
+   and instr(u.note_sanita,capitolo_entrata) > 0;
+
+
+-- Vale a partire dal rendiconto 2016.
+
+BEGIN
+
+ if p_anno &lt; 2019 
+ then EQUILIBRI_RENDICONTO_OLD (p_anno,p_utente,p_id_report);
+ return;
+ else
+
+     DELETE fin_t_rendiconto_equilibri 
+     WHERE utente = p_utente AND anno = p_anno;
+     COMMIT;
+    
+
+     select nvl(sum(nvl(fpv,0)),0) into fpv_u_corrente
+     from fin_t_consuntivo_excel
+     where ANNO_CONSUNTIVO = p_anno
+     and UTENTE = p_utente
+     and TIPO_CAPITOLO = 'U'
+     and NB_TITOLO = '1';
+    
+     select nvl(sum(nvl(fpv,0)),0) into fpv_u_capitale
+     from fin_t_consuntivo_excel
+     where ANNO_CONSUNTIVO = p_anno
+     and UTENTE = p_utente
+     and TIPO_CAPITOLO = 'U'
+     and NB_TITOLO = '2';
+     
+     select nvl(sum(nvl(fpv,0)),0) into fpv_u_204
+     from fin_t_consuntivo_excel
+     where ANNO_CONSUNTIVO = p_anno
+     and UTENTE = p_utente
+     and TIPO_CAPITOLO = 'U'
+     and nb_macroaggregato = '204';
+    
+    
+     -- riga 1 intestazione principale 
+    
+     riga := 1;
+     c1 := 'EQUILIBRI DI BILANCIO';
+     c2 := '';
+     c3 := 'COMPETENZA (ACCERTAMENTI E IMPEGNI IMPUTATI ALL''ESERCIZIO)';
+    
+    
+      INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car03,utente,num_ord_riga,anno) 
+      VALUES (c1,c2,c3,p_utente,riga,p_anno);  
+      commit;
+    
+    
+    -- riga 2 Utilizzo risultato di amministrazione
+     riga := 2;
+     c1 := 'Utilizzo risultato di amministrazione destinato al finanziamento delle spese correnti e al rimborso di prestiti';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_UtilizzoRisultatoAmmFinanzSpeseCorrenti';-- riga TAG BDAP
+     n1 := 0; 
+    
+          select nvl(sum(avanzo_vincolato),0) into n1
+          from fin_t_consuntivo_excel
+          where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = 1
+          and nvl(AVANZO_VINCOLATO,0) > 0;
+    
+     utilizzo_av_corr := n1;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+     A_eq := A_eq + n1;
+    
+    -- riga 3 Ripiano disavanzo di amministrazione
+     riga := 3;
+     c1 := 'Ripiano disavanzo  di amministrazione esercizio precedente';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_RipianoDisavanzoAmmEsercizioPrecedente';-- riga TAG BDAP
+     n1 := 0;
+    
+          select nvl(disavanzo_amministrazione,0)
+          into n1
+          from fin_t_dati_generali
+          where anno_finanziario = p_anno;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+     A_eq := A_eq - n1;
+    
+    -- riga 4 FPV corrente Entrata
+     riga := 4;
+     c1 := 'Fondo pluriennale vincolato per spese correnti iscritto in entrata ';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_FPVSpeseCorrentiIscrittoEntrata';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+        select 
+        NVL(SUM(nvl(FPV_FONTE,0)),0)
+        into fpv_e_corrente
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = '1';
+          
+          n1 := fpv_e_corrente;
+    
+      INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+     commit;
+    
+     A_eq := A_eq + n1;
+    
+    -- riga 5 Entrate 1,2,3
+     riga := 5;
+     c1 := 'Entrate titoli 1-2-3';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_EntrateTitoli1-2-3';-- riga TAG BDAP
+     n1 := 0;
+    
+        select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO1,1,1) in ('1','2','3');
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq + n1;
+    
+    -- riga 6 Entrate in conto capitale per contributi agli investimenti
+     riga := 6;
+     c1 := 'Entrate in conto capitale per Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_EntrateCCapitaleContribInvestRimborsoPrestitiPA';-- riga TAG BDAP
+     n1 := 0;
+    
+        select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and NB_LIVELLO3 = '4020600';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq + n1;
+    
+    -- riga 7 Entrate Titolo  4.03   - Altri trasferimenti in conto capitale
+     riga := 7;
+     c1 := 'Entrate Titolo  4.03 - Altri trasferimenti in conto capitale';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_EntrateTitolo4.03';-- riga TAG BDAP
+     n1 := 0;
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO2,1,3) = '403';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq + n1;
+    
+    -- riga 8 Entrate in c/capitale destinate all'estinzione anticipata di prestiti
+     riga := 8;
+     c1 := 'Entrate in c/capitale destinate all''estinzione anticipata di prestiti';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_EntrateCCapitaleEAP';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+      select 
+        NVL(SUM(nvl(document_amount,0)),0)
+        into n1
+        from fin_t_documenti
+        where segment8 = p_anno
+          and doc_type = 'ACC'
+          and nvl(deletion_status_flag,'N') = 'N'
+          and substr(attribute16,1,9) = 'E.4.02.06'; -- ##################### DA verificare #################
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq + n1;
+    
+    -- riga 9 Entrate per accensioni di prestiti destinate all'estinzione anticipata di prestiti
+     riga := 9;
+     c1 := 'Entrate per accensioni di prestiti destinate all''estinzione anticipata di prestiti';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_EntrateAccensPrestitiEAP';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_9'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq + n1;
+    
+    -- riga 10 Entrate di parte capitale destinate a spese correnti in base a specifiche disposizioni di legge o  dei principi contabili
+     riga := 10;
+     c1 := 'Entrate di parte capitale destinate a spese correnti in base a specifiche disposizioni di legge o  dei principi contabili';
+     c2 := '(+)';
+     c5 := 'EQREG-COR_EntrateParteCapitaleDestinateSpeseCorrenti';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_10'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+     riga := 11;
+    A_eq := A_eq + n1;
+    
+    -- riga 11 Spese Correnti
+     c1 := 'Spese correnti';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_SpeseCorrenti';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+      select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = '1';
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq - n1;
+    
+    -- riga 12 Fondo pluriennale vincolato di parte corrente (di spesa)
+     riga := 12;
+     c1 := 'Fondo pluriennale vincolato di parte corrente (di spesa)';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_SpeseCorrentiFPV';-- riga TAG BDAP
+     n1 := fpv_u_corrente;
+    
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq - n1;
+    
+    -- riga 13 Spese Titolo 2.04 -  Altri trasferimenti in conto capitale
+     riga := 13;
+     c1 := 'Spese Titolo 2.04 -  Altri trasferimenti in conto capitale';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_SpeseTitolo2.04';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and nb_macroaggregato = '204';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq - n1;
+    
+     -- riga 14 Fondo pluriennale vincolato di spesa - titolo 2.04  Altri trasferimenti in conto capitale
+     riga := 14;
+     c1 := 'Fondo pluriennale vincolato di spesa - titolo 2.04  Altri trasferimenti in conto capitale';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_SpeseTitolo2.04FPV';-- riga TAG BDAP
+     n1 := nvl(fpv_u_204,0);
+   
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq - n1;
+    
+    
+     -- riga 16 Rimborso prestiti
+     riga := 16;
+     c1 := 'Rimborso prestiti';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_RimborsoPrestiti';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = '4';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq - n1;
+    
+     -- riga 17   - di cui per estinzione anticipata di prestiti 
+     riga := 17;
+     c1 := '   - di cui per estinzione anticipata di prestiti ';
+     c2 := null;
+     c5 := 'EQREG-COR_RimborsoPrestitiEAP';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_17'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+      
+     -- riga 18  Fondo anticipazioni di liquidità 
+     riga := 18;
+     c1 := 'Fondo anticipazioni di liquidità';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_RimborsoPrestitiFAL';-- riga TAG BDAP
+     n1 := 0;
+     
+     -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'RIGA18'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+     A_eq := A_eq - n1;
+    
+   
+     c2 := '(+)';
+    -- riga 25 Utilizzo risultato di amministrazione  per il finanziamento di spese d’investimento
+     riga := 25;
+     c1 := 'Utilizzo risultato di amministrazione  per il finanziamento di spese di investimento';
+     c5 := 'EQREG-CAP_UtilizzoRisultatoAmmFinanzSpeseInvestimento';-- riga TAG BDAP
+     n1 := 0;
+    
+          select nvl(sum(avanzo_vincolato),0) into n1
+          from fin_t_consuntivo_excel
+          where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = 2
+          and nvl(AVANZO_VINCOLATO,0) > 0;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+    
+    -- riga 26 Fondo pluriennale vincolato per spese in conto capitale iscritto in entrata
+     riga := 26;
+     c1 := 'Fondo pluriennale vincolato per spese in conto capitale iscritto in entrata';
+     c2 := '(+)';
+     c5 := 'EQREG-CAP_FPVSpeseCCapitaleIscrittoEntrata';-- riga TAG BDAP
+     n1 := 0;
+    
+     select 
+        NVL(SUM(nvl(FPV_FONTE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = '2';
+    
+      INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+     commit;
+    
+     B_eq := B_eq + n1;
+    
+     -- riga 27 Entrate in conto capitale (Titolo 4)
+     riga := 27;
+     c1 := 'Entrate in conto capitale (Titolo 4)';
+     c2 := '(+)';
+     c5 := 'EQREG-CAP_EntrateContoCapitale';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO1,1,1) = '4';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+    -- riga 28 Entrate Titolo 5.01.01 -  Alienazioni  di partecipazioni 
+    riga := 28;
+     c1 := 'Entrate Titolo 5.01.01 - Alienazioni di partecipazioni';
+     c2 := '(+)';
+     c5 := 'EQREG-CAP_EntrateTitolo5.01.01';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO3,1,5) = '50101';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+    
+    -- riga 29 Entrate per accensioni di prestiti (titolo 6)
+     riga := 29;
+     c1 := 'Entrate per accensioni di prestiti (titolo 6)';
+     c2 := '(+)';
+     c5 := 'EQREG-CAP_EntrateAccensioniPrestiti';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO1,1,1) = '6';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+    
+    
+    -- *********************************
+    -- riga 30 eliminata da RGS dal 2019
+    -- *********************************
+  
+  
+    -- riga 31 Entrate in conto capitale per Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche (2)
+     riga := 31;
+     c1 := 'Entrate in conto capitale per Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche (2)';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_EntrateCCapitaleContribInvestRimborsoPrestitiPA';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     -- ricavo n1 da fnd_reports_importi_man
+     -- *** coincide con il valore della riga 6 ****
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_6'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+    
+   -- riga 32 Entrate in c/capitale destinate all'estinzione anticipata di prestiti
+     riga := 32;
+     c1 := 'Entrate in c/capitale destinate all''estinzione anticipata di prestiti';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_EntrateCCapitaleEAP';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+     -- *** coincide con il valore della riga 8 ****
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_8'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+   -- riga 33 Entrate di parte capitale destinate a spese correnti in base a specifiche disposizioni di legge o  dei principi contabili
+     riga := 33;
+     c1 := 'Entrate di parte capitale destinate a spese correnti in base a specifiche disposizioni di legge o dei principi contabili';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_EntrateParteCapitaleDestinateSpeseCorrenti';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+     -- *** coincide con il valore della riga 10 ****
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_10'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+   -- riga 34 Entrate per accensioni di prestiti destinate all'estinzione anticipata di prestiti
+     riga := 34;
+     c1 := 'Entrate per accensioni di prestiti destinate all''estinzione anticipata di prestiti';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_EntrateAccensPrestitiEAP';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+     -- *** coincide con il valore della riga 9 ****
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'XXX_9'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+    
+    -- riga 35 Entrate Titolo  4.03   - Altri trasferimenti in conto capitale
+     riga := 35;
+     c1 := 'Entrate Titolo 4.03 - Altri trasferimenti in conto capitale';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_EntrateTitolo4.03';-- riga TAG BDAP
+     n1 := 0;
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO2,1,3) = '403';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+   -- riga 36 Spese in conto capitale
+     riga := 36;
+     c1 := 'Spese in conto capitale';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_SpeseContoCapitale';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = '2';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+  -- riga 37 Fondo pluriennale vincolato di parte capital (di spesa)
+     riga := 37;
+     c1 := 'Fondo pluriennale vincolato in c/capitale (di spesa)';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_SpeseContoCapitaleFPV';-- riga TAG BDAP
+     n1 := fpv_u_capitale;
+    
+    
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    B_eq := B_eq - n1;
+    
+ -- riga 38 Spese Titolo 3.01.01 - Acquisizioni di partecipazioni e conferimenti di capitale
+     riga := 38;
+     c1 := 'Spese Titolo 3.01.01 - Acquisizioni di partecipazioni e conferimenti di capitale';
+     c2 := '(-)';
+     c5 := 'EQREG-CAP_SpeseTitolo3.01.01';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and substr(nb_piano_conti_fina,3,7) = '3.01.01';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+  -- riga 39 Fondo pluriennale vincolato per Acquisizioni di partecipazioni e conferimenti di capitale  (di spesa)
+     riga := 39;
+     c1 := 'Fondo pluriennale vincolato per Acquisizioni di partecipazioni e conferimenti di capitale  (di spesa)';
+     c2 := '(9)';
+     c5 := 'EQREG-CAP_FPVAcquisizioniPartecipazioniConferimentiCapitale';-- riga TAG BDAP
+     n1 := 0;
+    
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'riga39'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+    -- riga 40 Spese Titolo 2.04 -  Altri trasferimenti in conto capitale
+     riga := 40;
+     c1 := 'Spese Titolo 2.04 -  Altri trasferimenti in conto capitale';
+     c2 := '(+)';
+     c5 := 'EQREG-CAP_SpeseTitolo2.04';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and nb_macroaggregato = '204';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+  -- riga 41 Fondo pluriennale vincolato di spesa - titolo 2.04   Altri trasferimenti in conto capitale
+     riga := 41;
+     c1 := 'Fondo pluriennale vincolato di spesa - titolo 2.04   Altri trasferimenti in conto capitale';
+     c2 := '(9)';
+     c5 := 'EQREG-CAP_SpeseTitolo2.04FPV';-- riga TAG BDAP
+     n1 := fpv_u_204;
+        
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+    -- riga 42 Disavanzo derivante da debito autorizzato e non contratto ripianato con accensione di prestiti
+     riga := 42;
+     c1 := 'Disavanzo derivante da debito autorizzato e non contratto ripianato con accensione di prestiti';
+     c2 := '(-)';
+     c4 := 'S';--grassetto sinistro
+     c5 := 'EQREG-CAP_DisavanzoPregressoDebitoAutorizzatoNonContratto';-- riga TAG BDAP ********* DA VERIFICARE!!!!**********
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+     -- *** coincide con il valore della riga 9 ****
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'RIGA42'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq - n1;
+    
+   -- riga 43 Variazioni di attività finanziarie (se positivo) 
+     riga := 43;
+     c1 := 'Variazioni di attività finanziarie (se positivo)';
+     c2 := '(+)';
+     c5 := 'EQREG-CAP_VariazioniAttivitaFinanziariePositivo';-- riga TAG BDAP
+     n1 := 0;
+    
+      if B_eq > 0
+      then n1 := B_eq;
+      end if;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    B_eq := B_eq + n1;
+    
+    -- riga 44 B1) Risultato di competenza in c/capitale
+     riga := 44;
+     c5 := 'EQREG-CAP_EquilibrioParteCapitale';-- riga TAG BDAP
+     c1 := 'B1) Risultato di competenza in c/capitale';
+     c2 := '';
+     c4 := 'E';
+     n1 := B_eq;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+    
+  -- riga 45 - Risorse accantonate in c/capitale stanziate nel bilancio dell'esercizio N  
+     riga := 45;
+     c1 := '- Risorse accantonate in c/capitale stanziate nel bilancio dell''esercizio N';
+     c2 := '-';
+     c5 := 'EQREG-CAP_RisorseAccantonateContoCapitaleBilancio';-- riga TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA45'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      B_eq2 := B_eq - n1;
+    
+   -- riga 46 - Risorse vincolate i conto capitale nel bilancio 
+     riga := 46;
+     c1 := '- Risorse vincolate in conto capitale nel bilancio';
+     c2 := '-';
+     c5 := 'EQREG-CAP_RisorseVincolateContoCapitaleBilancio';-- riga TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA46'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      B_eq2 := B_eq2 - n1;
+    
+   -- riga 47 B/2) Equilibrio di bilancio  in c/capitale
+     riga := 47;
+     c1 := 'B/2) Equilibrio di bilancio in c/capitale';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-CAP_EquilibrioParteCapitale';-- riga TAG BDAP
+     n1 := B_eq2;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+    
+    
+   -- riga 48 - - Variazione accantonamenti di parte corrente effettuata in sede di rendiconto'(+)/(-) **** valore già preso nella riga 23 quindi non inserisco tag BDAP
+     riga := 48;
+     c1 := '- Variazione accantonamenti di parte corrente effettuata in sede di rendiconto (+)/(-)';
+     c2 := '-';
+     c5 := '';-- **** valore già preso nella riga 23 quindi non inserisco tag BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA23'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      B_eq3 := B_eq2 - n1; 
+    
+    -- riga 49 B/3)  Equilibrio complessivo in c/capitale
+     riga := 49;
+     c1 := 'B/3) Equilibrio complessivo in c/capitale';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-CAP_EquilibrioComplessivoContoCapitale';-- riga TAG BDAP
+     n1 := B_eq3;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+    
+  -- riga 50 di cui Disavanzo da debito autorizzato e non contratto formatosi nell'esercizio
+     riga := 50;
+     c1 := 'di cui Disavanzo da debito autorizzato e non contratto formatosi nell''esercizio';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-CAP_EquilibrioComplDisDebitoAutorizzatoNonContratto'; -- tag BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA50'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+    
+    -- riga 51 Utilizzo risultato di amministrazione per  l'incremento di  attività finanziarie 
+     riga := 51;
+     c1 := 'Utilizzo risultato di amministrazione per l''incremento di attività finanziarie';
+     c2 := '(+)';
+     c5 := 'EQREG-VAR_UtilizzoRisultatoAmmFinanzAttivitaFinanziarie';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'RIGA51'
+      end;
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq + n1;
+    
+   
+    -- riga 52 Fondo pluriennale vincolato per incremento di attività finanziarie  iscritto in entrata
+     riga := 52;
+     c1 := 'Fondo pluriennale vincolato per incremento di attività finanziarie iscritto in entrata';
+     c2 := '(+)';
+     c5 := 'EQREG-VAR_FPVAttivitaFinanziarieIscrittoEntrata';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'RIGA52'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq + n1;
+    
+  
+    -- riga 53 Entrate titolo 5.00  -  Riduzioni attività finanziarie 
+     riga := 53;
+     c1 := 'Entrate titolo 5.00  -  Riduzioni attività finanziarie ';
+     c2 := '(+)';
+     c5 := 'EQREG-VAR_EntrateTitolo5.00';-- riga TAG BDAP
+     n1 := 0;
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO1,1,1) = '5';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq + n1;
+    
+   -- riga 54 Spese titolo 3.00 - Incremento attività finanziarie
+     riga := 54;
+     c1 := 'Spese titolo 3.00 - Incremento attività finanziarie';
+     c2 := '(-)';
+     c5 := 'EQREG-VAR_SpeseTitolo3.00';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'U'
+          and UTENTE = p_utente
+          and NB_TITOLO = '3';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq - n1;
+    
+    
+   -- riga 55 Fondo pluriennale vincolato per incremento di attività finanziarie (di spesa)
+     riga := 55;
+     c1 := 'Fondo pluriennale vincolato per incremento di attività finanziarie (di spesa)';
+     c2 := '(-)';
+     c5 := 'EQREG-VAR_FPVAttivitaFinanziarieSpesa';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'RIGA55'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq - n1;
+    
+    
+    -- riga 56 Entrate Titolo 5.01.01 -  Alienazioni  di partecipazioni 
+    riga := 56;
+     c1 := 'Entrate Titolo 5.01.01 -  Alienazioni  di partecipazioni';
+     c2 := '(-)';
+     c5 := 'EQREG-VAR_EntrateTitolo5.01.01';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and TIPO_CAPITOLO = 'E'
+          and UTENTE = p_utente
+          and substr(NB_LIVELLO3,1,5) = '50101';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq - n1;
+    
+  -- riga 57 Spese Titolo 3.01.01 - Acquisizioni di partecipazioni e conferimenti di capitale 
+    riga := 57;
+     c1 := 'Spese Titolo 3.01.01 - Acquisizioni di partecipazioni e conferimenti di capitale';
+     c2 := '(+)';
+     c5 := 'EQREG-VAR_SpeseTitolo3.01.01';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+     select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+          and TIPO_CAPITOLO = 'U'
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+          and UTENTE = p_utente
+          and substr(nb_piano_conti_fina,3,7) = '3.01.01';
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq + n1;
+    
+    
+   -- riga 58 Fondo pluriennale vincolato per Acquisizioni di partecipazioni e conferimenti di capitale (di spesa)
+     riga := 58;
+     c1 := 'Fondo pluriennale vincolato per Acquisizioni di partecipazioni e conferimenti di capitale (di spesa)';
+     c2 := '(+)';
+     c5 := 'EQREG-VAR_SpeseTitolo3.01.01FPV';-- riga TAG BDAP
+     n1 := 0;
+    
+    
+    -- ricavo n1 da fnd_reports_importi_man
+      begin 
+       select nvl(importo,0)
+       into n1
+       from fnd_reports_importi_man
+       where nome_campo_report = 'RIGA58'
+       and valore_parametro_anno = p_anno
+       and id_report = p_id_report;
+       exception when no_data_found then n1 := 0;
+      end;
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    C_eq := C_eq + n1;  
+    
+  
+   
+   -- riga 59 C/1) Variazioni attività finanziaria - saldo di competenza
+     riga := 59;
+     c1 := 'C/1) Variazioni attività finanziaria - saldo di competenza';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-VAR_VariazioniAttivitaFinanziaria';-- riga TAG BDAP
+     n1 := C_eq;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+    
+  -- riga 60 - Risorse accantonate in c/capitale stanziate nel bilancio dell'esercizio N  *** stesso valore della riga 45
+     riga := 60;
+     c1 := '- Risorse accantonate in c/capitale stanziate nel bilancio dell''esercizio N';
+     c2 := '(-)';
+     c5 := '';-- *** stesso valore della riga 45 quindi non ripeto il TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA45'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      C_eq2 := C_eq - n1;
+    
+   -- riga 61 - Risorse vincolate i conto capitale nel bilancio *** stesso valore della riga 46
+     riga := 61;
+     c1 := '- Risorse vincolate in conto capitale nel bilancio';
+     c2 := '(-)';
+     c5 := '';-- *** stesso valore della riga 46 quindi non ripeto il TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA46'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      C_eq2 := C_eq2 - n1;
+    
+   -- riga 62 C/2) Variazioni attività finanziaria - equilibrio di bilancio
+     riga := 62;
+     c1 := 'C/2) Variazioni attività finanziaria - equilibrio di bilancio';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-VAR_EquilibrioBilancio';-- riga TAG BDAP
+     n1 := C_eq2;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+    
+    
+   -- riga 63 - Variazione accantonamentiin c/capitale effettuata in sede di rendiconto'(+)/(-)
+     riga := 63;
+     c1 := '- Variazione accantonamenti in c/capitale effettuata in sede di rendiconto (+)/(-)';
+     c2 := '(-)';
+     c5 := 'EQREG-VAR_VariazioneAccantonamentiRendiconto';--  tag BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA63'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      C_eq3 := C_eq2 - n1; 
+    
+  -- riga 64 C/3) Variazioni attività finanziaria - equilibrio complessivo
+     riga := 64;
+     c1 := 'C/3) Variazioni attività finanziaria - equilibrio complessivo';
+     c2 := '';
+     c4 := 'E';
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+     c5 := 'EQREG-VAR_EquilibrioComplessivo';-- riga TAG BDAP
+     n1 := C_eq3;
+    
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+    
+    
+    
+  -- ************* riga da inserire qui perchè nel calcolo entrano componenti calcolati dopo ************* 
+   
+   -- ****** da inserire dopo la riga 64 Variazioni di attività finanziarie C_eq3
+    -- riga 15 Variazioni di attività finanziarie (se negativo) 
+     riga := 15;
+     c1 := 'Variazioni di attività finanziarie (se negativo)';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_VariazioniAttivitaFinanziarieNegativo';-- riga TAG BDAP
+     n1 := 0;
+    
+      if C_eq3 &lt; 0
+      then n1 := C_eq3;
+      end if;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    A_eq := A_eq - n1;
+    
+    -- riga 19 A/1)Risultato di competenza di parte corrente
+     riga := 19;
+     c1 := 'A/1)Risultato di competenza di parte corrente';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-COR_EquilibrioParteCorrente';-- riga TAG BDAP
+     n1 := A_eq;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit;
+   
+ -- ******************************************************************************************************** 
+  
+  
+  
+  -- riga 65 ********** RIGA VUOTA ***************
+     riga := 65;
+     c1 := '';
+     c2 := '';
+     c4 := '';
+     c5 := '';-- riga TAG BDAP
+     n1 := 0;
+  
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+  
+   -- riga 66 D/1) RISULTATO DI COMPETENZA (D/1 = A/1 + B/1)
+     riga := 66;
+     c1 := 'D/1) RISULTATO DI COMPETENZA (D/1 = A/1 + B/1)';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG_EquilibrioFinale';-- riga TAG BDAP
+     n1 := A_eq + B_eq;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+  
+  -- riga 67 D/2) EQUILIBRIO DI BILANCIO (D/2 = A/2 + B/2)
+     riga := 67;
+     c1 := 'D/2) EQUILIBRIO DI BILANCIO (D/2 = A/2 + B/2)';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG_EquilibrioFinaleBilancio';-- riga TAG BDAP
+     n1 := A_eq2 + B_eq2;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+  
+  -- riga 68 D/3) EQUILIBRIO COMPLESSIVO (D/3 = A/3 + B/3)
+     riga := 68;
+     c1 := 'D/3) EQUILIBRIO COMPLESSIVO (D/3 = A/3 + B/3)';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG_EquilibrioFinaleComplessivo';-- riga TAG BDAP
+     n1 := A_eq3 + B_eq3;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+  
+  -- riga 69 di cui Disavanzo da debito autorizzato e non contratto formatosi nell'esercizio *** corrispondel alla riga 50
+     riga := 69;
+     c1 := 'di cui Disavanzo da debito autorizzato e non contratto formatosi nell''esercizio';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-CAP_EquilibrioComplDisDebitoAutorizzatoNonContratto'; -- corrispondel alla riga 50 e non inserisco il tag BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA50'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);   
+     commit;
+  
+  
+  -- riga 70 Saldo corrente ai fini della copertura degli investimenti pluriennali delle Regioni  a statuto ordinario
+     riga := 70;
+     c1 := 'Saldo corrente ai fini della copertura degli investimenti pluriennali delle Regioni  a statuto ordinario';
+     c2 := '';
+     c4 := 'S';
+     c5 := '';-- riga TAG BDAP
+     n1 := null;
+  
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit; 
+  
+ 
+  -- riga 71 A/1)Risultato di competenza di parte corrente *** corrisponde al valore della riga 19 ***
+     riga := 71;
+     c1 := 'A/1)Risultato di competenza di parte corrente';
+     c2 := '';
+     c4 := 'S';
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+     c5 := 'EQREG-SAL_EquilibrioParteCorrente';-- riga TAG BDAP
+     n1 := A_eq;
+    
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit;
+    
+    SAL_eq :=  SAL_eq + n1;
+  
+ 
+  -- riga 72 Utilizzo risultato di amministrazione destinato al finanziamento di spese correnti e al rimborso di prestiti ***
+     riga := 72;
+     c1 := 'Utilizzo risultato di amministrazione destinato al finanziamento di spese correnti e al rimborso di prestiti';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_UtilizzoRisultatoAmmFinanzSpeseCorrenti';-- riga TAG BDAP
+     n1 := 0;
+     
+       select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA72'
+          and id_report = p_id_report;
+    
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);  
+    commit;
+ 
+  SAL_eq :=  SAL_eq - n1;
+  
+ -- riga 73 Entrate non ricorrenti che non hanno dato copertura a impegni *** 
+    riga := 73;
+     c1 := 'Entrate non ricorrenti che non hanno dato copertura a impegni';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_EntrateNonRicorrentiNoCoperturaImpegni';-- riga TAG BDAP
+     n1 := 0;
+    
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA73'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+   SAL_eq :=  SAL_eq - n1;
+   
+   -- riga 74 Fondo pluriennale vincolato per spese correnti iscritto in entrata al netto delle componenti non vincolate derivanti dal riaccertamento ord.
+     riga := 74;
+     c1 := 'Fondo pluriennale vincolato per spese correnti iscritto in entrata al netto delle componenti non vincolate derivanti dal riaccertamento ord.';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_FPVSpeseCorrentiIscrittoEntrata';-- riga TAG BDAP
+     n1 := 0;
+    
+            select nvl(sum(nvl(c.fpv_fonte,0)),0) into fpv_e_corr_libero
+            from fin_t_consuntivo_excel c
+            where c.anno_consuntivo = p_anno
+            and c.utente = p_utente
+            and c.tipo_capitolo = 'U'
+            and nvl(c.fpv_fonte,0) > 0
+            and nvl(c.entrate_libere,0) > 0
+            and c.nb_titolo = '1';
+            
+        n1 := fpv_e_corrente - fpv_e_corr_libero;
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+    SAL_eq :=  SAL_eq - n1;
+        
+       
+-- riga 75 - Risorse accantonate  di parte corrente non sanitarie stanziate nel bilancio dell'esercizio N
+     riga := 75;
+     c1 := '- Risorse accantonate di parte corrente non sanitarie stanziate nel bilancio dell''esercizio N';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_RisorseAccantonateNonSanitarieBilancio';-- riga TAG BDAP
+     n1 := 0;
+    
+            select nvl(sum(nvl(c.accant_stanziati_eser,0)),0) into n1
+            from tb_risorse_accantonate c
+            ,fin_t_articoli a
+            where c.anno = p_anno
+            and a.anno = c.anno
+            and a.eu||a.codice = c.cap_u
+            and nvl(a.nb_titolo,99) = '1'
+            and nvl(a.sanita_sn,'N') = 'N';
+            
+       
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+    SAL_eq :=  SAL_eq - n1;
+    
+-- riga 76 - Variazione accantonamenti di parte corrente non sanitarie effettuata in sede di rendiconto'(+)/(-)(12)
+     riga := 76;
+     c1 := '- Variazione accantonamenti di parte corrente non sanitarie effettuata in sede di rendiconto (+)/(-)';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_VariazioneAccantonamentiNonSanitarieRendiconto';-- riga TAG BDAP
+     n1 := 0;
+    
+            select nvl(sum(nvl(c.variazioni_rendiconto,0)),0) into n1
+            and a.anno = c.anno
+            from tb_risorse_accantonate c
+            ,fin_t_articoli a
+            where c.anno = p_anno
+            and a.eu||a.codice = c.cap_u
+            and nvl(a.nb_titolo,99) = '1'
+            and nvl(a.sanita_sn,'N') = 'N';
+       
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+    SAL_eq :=  SAL_eq - n1;    
+    
+-- riga 77 - Risorse vincolate di parte corrente nel bilancio  non sanitarie
+     riga := 77;
+     c1 := '- Risorse vincolate di parte corrente nel bilancio non sanitarie';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_RisorseVincolateNonSanitarieBilancio';-- riga TAG BDAP
+     n1 := 0;
+    
+            select nvl(sum(nvl(c.ris_vinc_3112,0)),0) into n1
+            from tb_risorse_vincolate c
+            ,fin_t_articoli a
+            where c.anno = p_anno
+            and a.anno = c.anno
+            and a.eu||a.codice = c.cap_u
+            and nvl(a.nb_titolo,99) = '1'
+            and nvl(a.sanita_sn,'N') = 'N';
+       
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+    SAL_eq :=  SAL_eq - n1;    
+    
+ -- riga 78 Entrate titoli 1-2-3 destinate al finanziamento del SSN
+     riga := 79;
+     c1 := 'Entrate titoli 1-2-3 destinate al finanziamento del SSN';
+     c2 := '(-)';
+     c5 := 'EQREG-SAL_EntrateTitoli1-2-3FinanzSSN';-- riga TAG BDAP
+     n1 := 0;
+    
+    -- si considerano i capitoli di entrata non ricorrente non vincolati???
+     /* select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+        and TIPO_CAPITOLO = 'E'
+        and UTENTE = p_utente
+        and substr(nb_livello1,1,1) in ('1','2','3')
+        and nvl(SANITA_SN,'N') = 'S';*/
+    
+       --- considerarele Entrate (non vincolate) che finanziano UScite Correnti sanità con entrate_libere o fpv_fonte > 0
+       -- prendiamo le Uscite su indicazione SARLI 01/08/2017 in quanto un particolare capitolo di Entrata pur non avendo un vincolo diretto è da considerarsi a finanziamento SSN
+    
+        select NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+        and TIPO_CAPITOLO = 'U'
+        and UTENTE = p_utente
+        and nb_titolo = '1'
+        and nvl(SANITA_SN,'N') = 'S'
+        and (note_sanita is not null or (nvl(entrate_libere,0) + nvl(fpv_fonte,0)+nvl(avanzo_vincolato,0)) > 0);
+    
+    
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+    SAL_eq :=  SAL_eq - n1;   
+
+   -- riga 81 Spese correnti finanziate da entrate destinate al SSN
+     riga := 81;
+     c1 := 'Spese correnti finanziate da entrate destinate al SSN';
+     c2 := '(+)';
+     c5 := 'EQREG-SAL_SpeseCorrentiFinanzEntrateSSN';-- riga TAG BDAP
+     n1 := 0;
+    
+        select 
+        NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+        into n1
+        from fin_t_consuntivo_excel
+        where ANNO_CONSUNTIVO = p_anno
+        and TIPO_CAPITOLO = 'U'
+        and UTENTE = p_utente
+        and NB_TITOLO = '1'
+        and nvl(SANITA_SN,'N') = 'S'
+        and  (note_sanita is not null or (nvl(entrate_libere,0) + nvl(fpv_fonte,0)+nvl(avanzo_vincolato,0)) > 0);
+    
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+    
+  SAL_eq :=  SAL_eq + n1;   
+    
+ -- riga 82 Equilibrio di parte corrente ai fini della copertura degli investimenti plurien.
+     riga := 82;
+     c1 := 'Equilibrio di parte corrente ai fini della copertura degli investimenti plurien.';
+     c2 := '';
+     c4 := 'S';
+     c5 := 'EQREG-SAL_EquilibrioParteCorrenteCoperturaInvestPluriennali';-- riga TAG BDAP
+     n1 := SAL_eq;
+    
+          
+     INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);   
+     commit;
+ 
+
+ -- riga 20 - Risorse accantonate  di parte corrente stanziate nel bilancio dell''esercizio N
+     riga := 20;
+     c1 := '- Risorse accantonate  di parte corrente stanziate nel bilancio dell''esercizio N';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_RisorseAccantonateParteCorrenteBilancio';-- riga TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA20'
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     commit;
+     
+      A_eq2 := A_eq - n1;
+    
+   -- riga 21 - Risorse vincolate di parte corrente nel bilancio 
+     riga := 21;
+     c1 := '- Risorse vincolate di parte corrente nel bilancio';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_RisorseVincolateParteCorrenteBilancio';-- riga TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA21'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      A_eq2 := A_eq2 - n1;
+      
+ -- riga 22 A/2) Equilibrio di bilancio  di parte corrente 
+     riga := 22;
+     c1 := 'A/2) Equilibrio di bilancio di parte corrente ';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-COR_EquilibrioBilancioParteCorrente';-- riga TAG BDAP
+     n1 := A_eq2;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit;
+   
+ -- riga 23  Variazione accantonamenti di parte corrente effettuata in sede di rendiconto'(+)/(-)
+     riga := 23;
+     c1 := '- Variazione accantonamenti di parte corrente effettuata in sede di rendiconto (+)/(-)';
+     c2 := '(-)';
+     c5 := 'EQREG-COR_VariazioneAccantonamentiParteCorrenteRendiconto';-- riga TAG BDAP
+     n1 := 0;
+     
+     select nvl(sum(nvl(importo,0)),0)
+          into n1
+          from fnd_reports_importi_man
+          where valore_parametro_anno = p_anno
+          and nome_campo_report = 'RIGA23'
+          and id_report = p_id_report;
+    
+        INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car05,num01,utente,num_ord_riga,anno) 
+     VALUES (c1,c2,c5,n1,p_utente,riga,p_anno);   
+     commit;
+     
+      A_eq3 := A_eq2 - n1; 
+      
+   -- riga 24 A/3)  Equilibrio complessivo di parte corrente
+     riga := 24;
+     c1 := 'A/3)  Equilibrio complessivo di parte corrente';
+     c2 := '';
+     c4 := 'E';
+     c5 := 'EQREG-COR_EquilibrioComplessivoParteCorrente';-- riga TAG BDAP
+     n1 := A_eq3;
+    
+    INSERT INTO fin_t_rendiconto_equilibri (car01,car02,car04,car05,num01,utente,num_ord_riga,anno) 
+    VALUES (c1,c2,c4,c5,n1,p_utente,riga,p_anno);  
+    commit;
+
+  
+ end if;
+ END;</pre>	</td></tr>
+</table></div>

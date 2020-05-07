@@ -1,0 +1,140 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FCORETTIBDAP_LDREG</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FCORETTIBDAP_LDREG.html">Details</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_LDREG_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_LDREG_References.html">References</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_LDREG_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FCORETTIBDAP_LDREG_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure fcorettibdap_LDREG(p_anno in number,p_utente in varchar2,p_id_ente in varchar2) as
+
+c_riga     number; -- conta le righe
+
+-- fcoretti (sezione declare)
+
+v_contenuto VARCHAR2(4000);
+v_contenuto1 VARCHAR2(4000);
+v_contenuto2 VARCHAR2(4000);
+
+-- ATTENZIONE, LA CONDIZIONE SU TIPO_RIGA DEVE INCLUDERE SOLO VALORI POI TRATTATI NELL'IF
+CURSOR sdb_ldreg IS
+SELECT tipo_riga,
+       LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO,0),'9999999990.00')) stabil,
+       LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO1,0),'9999999990.00')) stabil1,
+       LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO2,0),'9999999990.00')) stabil2
+FROM fin_t_previsione_ldr
+WHERE anno = p_anno AND
+      tipo_bilancio = 'E'  AND
+      tipo_riga IN ('I)','DEBAUTOR1','DEBAUTOR2','DEBCONTR','TOTDEBREG','M)','A)','C)',
+                    'GARANZIECONC','GARANZIE','DICUIGARANZ','D)','L)','H)','G)','F)','E)','B)');
+begin
+
+-- fcoretti (sezione DATA MANIPULATION)
+/* TOGLIERE --> */ c_riga := 100000; 
+/* TOGLIERE --> */ delete fin_t_bdap where contenuto like '%&lt;sp:LDREG%';
+
+ FOR r in sdb_ldreg LOOP
+  IF r.tipo_riga = 'I)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_ContributiErarialiRateAmmortamentoMutui decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_ContributiErarialiRateAmmortamentoMutui>';
+    v_contenuto1 := '&lt;sp:LDREG_ContributiErarialiRateAmmortamentoMutui decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_ContributiErarialiRateAmmortamentoMutui>';
+    v_contenuto2 := '&lt;sp:LDREG_ContributiErarialiRateAmmortamentoMutui decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_ContributiErarialiRateAmmortamentoMutui>';
+  ELSIF r.tipo_riga = 'DEBAUTOR1' THEN
+    v_contenuto :=  '&lt;sp:LDREG_DebitoAutorizzatoEsercizio decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_DebitoAutorizzatoEsercizio>';
+    v_contenuto1 := '&lt;sp:LDREG_DebitoAutorizzatoEsercizio decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_DebitoAutorizzatoEsercizio>';
+    v_contenuto2 := '&lt;sp:LDREG_DebitoAutorizzatoEsercizio decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_DebitoAutorizzatoEsercizio>';
+  ELSIF r.tipo_riga = 'DEBAUTOR2' THEN
+    v_contenuto :=  '&lt;sp:LDREG_DebitoAutorizzatoLeggeEsame decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_DebitoAutorizzatoLeggeEsame>';
+    v_contenuto1 := '&lt;sp:LDREG_DebitoAutorizzatoLeggeEsame decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_DebitoAutorizzatoLeggeEsame>';
+    v_contenuto2 := '&lt;sp:LDREG_DebitoAutorizzatoLeggeEsame decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_DebitoAutorizzatoLeggeEsame>';
+  ELSIF r.tipo_riga = 'DEBCONTR' THEN
+    v_contenuto :=  '&lt;sp:LDREG_DebitoContrattoEsercizioPrec decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_DebitoContrattoEsercizioPrec>';
+    v_contenuto1 := '&lt;sp:LDREG_DebitoContrattoEsercizioPrec decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_DebitoContrattoEsercizioPrec>';
+    v_contenuto2 := '&lt;sp:LDREG_DebitoContrattoEsercizioPrec decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_DebitoContrattoEsercizioPrec>';
+  ELSIF r.tipo_riga = 'TOTDEBREG' THEN
+    v_contenuto :=  '&lt;sp:LDREG_DebitoTotale decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_DebitoTotale>';
+    v_contenuto1 := '&lt;sp:LDREG_DebitoTotale decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_DebitoTotale>';
+    v_contenuto2 := '&lt;sp:LDREG_DebitoTotale decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_DebitoTotale>';
+  ELSIF r.tipo_riga = 'M)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_DisponibileNuoveRateAmmortamento decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_DisponibileNuoveRateAmmortamento>';
+    v_contenuto1 := '&lt;sp:LDREG_DisponibileNuoveRateAmmortamento decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_DisponibileNuoveRateAmmortamento>';
+    v_contenuto2 := '&lt;sp:LDREG_DisponibileNuoveRateAmmortamento decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_DisponibileNuoveRateAmmortamento>';
+  ELSIF r.tipo_riga = 'A)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_EntrateCorrentiNaturaTributariaContributivaPerequativa decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_EntrateCorrentiNaturaTributariaContributivaPerequativa>';
+    v_contenuto1 := '&lt;sp:LDREG_EntrateCorrentiNaturaTributariaContributivaPerequativa decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_EntrateCorrentiNaturaTributariaContributivaPerequativa>';
+    v_contenuto2 := '&lt;sp:LDREG_EntrateCorrentiNaturaTributariaContributivaPerequativa decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_EntrateCorrentiNaturaTributariaContributivaPerequativa>';
+  ELSIF r.tipo_riga = 'C)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_EntrateTributarieNettoSanita decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_EntrateTributarieNettoSanita>';
+    v_contenuto1 := '&lt;sp:LDREG_EntrateTributarieNettoSanita decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_EntrateTributarieNettoSanita>';
+    v_contenuto2 := '&lt;sp:LDREG_EntrateTributarieNettoSanita decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_EntrateTributarieNettoSanita>';
+  ELSIF r.tipo_riga = 'GARANZIECONC' THEN
+    v_contenuto :=  '&lt;sp:LDREG_GaranzieLimiteIndebitamento decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_GaranzieLimiteIndebitamento>';
+    v_contenuto1 := '&lt;sp:LDREG_GaranzieLimiteIndebitamento decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_GaranzieLimiteIndebitamento>';
+    v_contenuto2 := '&lt;sp:LDREG_GaranzieLimiteIndebitamento decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_GaranzieLimiteIndebitamento>';
+  ELSIF r.tipo_riga = 'GARANZIE' THEN
+    v_contenuto :=  '&lt;sp:LDREG_GaranziePrestateAltrePA decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_GaranziePrestateAltrePA>';
+    v_contenuto1 := '&lt;sp:LDREG_GaranziePrestateAltrePA decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_GaranziePrestateAltrePA>';
+    v_contenuto2 := '&lt;sp:LDREG_GaranziePrestateAltrePA decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_GaranziePrestateAltrePA>';
+  ELSIF r.tipo_riga = 'DICUIGARANZ' THEN
+    v_contenuto :=  '&lt;sp:LDREG_GaranziePrestateAltrePAAccantonamento decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_GaranziePrestateAltrePAAccantonamento>';
+    v_contenuto1 := '&lt;sp:LDREG_GaranziePrestateAltrePAAccantonamento decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_GaranziePrestateAltrePAAccantonamento>';
+    v_contenuto2 := '&lt;sp:LDREG_GaranziePrestateAltrePAAccantonamento decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_GaranziePrestateAltrePAAccantonamento>';
+  ELSIF r.tipo_riga = 'D)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_LivelloMassimoSpesaAnnuale decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_LivelloMassimoSpesaAnnuale>';
+    v_contenuto1 := '&lt;sp:LDREG_LivelloMassimoSpesaAnnuale decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_LivelloMassimoSpesaAnnuale>';
+    v_contenuto2 := '&lt;sp:LDREG_LivelloMassimoSpesaAnnuale decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_LivelloMassimoSpesaAnnuale';
+  ELSIF r.tipo_riga = 'L)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_RateDebitiEsclusiLimitiIndebitamento decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_RateDebitiEsclusiLimitiIndebitamento>';
+    v_contenuto1 := '&lt;sp:LDREG_RateDebitiEsclusiLimitiIndebitamento decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_RateDebitiEsclusiLimitiIndebitamento>';
+    v_contenuto2 := '&lt;sp:LDREG_RateDebitiEsclusiLimitiIndebitamento decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_RateDebitiEsclusiLimitiIndebitamento>';
+  ELSIF r.tipo_riga = 'H)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_RateMutuiPrestitiAutorizzatiLeggeEsame decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_RateMutuiPrestitiAutorizzatiLeggeEsame>';
+    v_contenuto1 := '&lt;sp:LDREG_RateMutuiPrestitiAutorizzatiLeggeEsame decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_RateMutuiPrestitiAutorizzatiLeggeEsame>';
+    v_contenuto2 := '&lt;sp:LDREG_RateMutuiPrestitiAutorizzatiLeggeEsame decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_RateMutuiPrestitiAutorizzatiLeggeEsame>';
+  ELSIF r.tipo_riga = 'G)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_RateMutuiPrestitiDebitoPotenziale decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_RateMutuiPrestitiDebitoPotenziale>';
+    v_contenuto1 := '&lt;sp:LDREG_RateMutuiPrestitiDebitoPotenziale decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_RateMutuiPrestitiDebitoPotenziale>';
+    v_contenuto2 := '&lt;sp:LDREG_RateMutuiPrestitiDebitoPotenziale decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_RateMutuiPrestitiDebitoPotenziale>';
+  ELSIF r.tipo_riga = 'F)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_RateMutuiPrestitiEsercizio decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_RateMutuiPrestitiEsercizio>';
+    v_contenuto1 := '&lt;sp:LDREG_RateMutuiPrestitiEsercizio decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_RateMutuiPrestitiEsercizio>';
+    v_contenuto2 := '&lt;sp:LDREG_RateMutuiPrestitiEsercizio decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_RateMutuiPrestitiEsercizio>';
+  ELSIF r.tipo_riga = 'E)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_RateMutuiPrestitiEsercizioPrec decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_RateMutuiPrestitiEsercizioPrec>';
+    v_contenuto1 := '&lt;sp:LDREG_RateMutuiPrestitiEsercizioPrec decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_RateMutuiPrestitiEsercizioPrec>';
+    v_contenuto2 := '&lt;sp:LDREG_RateMutuiPrestitiEsercizioPrec decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_RateMutuiPrestitiEsercizioPrec>';
+  ELSIF r.tipo_riga = 'B)' THEN
+    v_contenuto :=  '&lt;sp:LDREG_TributiFinanziamentoSanita decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:LDREG_TributiFinanziamentoSanita>';
+    v_contenuto1 := '&lt;sp:LDREG_TributiFinanziamentoSanita decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:LDREG_TributiFinanziamentoSanita>';
+    v_contenuto2 := '&lt;sp:LDREG_TributiFinanziamentoSanita decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:LDREG_TributiFinanziamentoSanita>';
+  END IF;
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,v_contenuto1);
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,v_contenuto2);
+
+ END LOOP;  -- sdb_ldreg
+
+COMMIT;
+
+
+
+end;</pre>	</td></tr>
+</table></div>

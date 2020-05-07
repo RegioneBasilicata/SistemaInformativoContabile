@@ -1,0 +1,143 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CONSUNTIVO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CONSUNTIVO.html">Details</a></div></div>
+<div class="tab"><div><a href="CONSUNTIVO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CONSUNTIVO_References.html">References</a></div></div>
+<div class="tab"><div><a href="CONSUNTIVO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CONSUNTIVO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PACKAGE consuntivo AS
+
+-- varibili utilizzate per inserire il risultato delle stored procedure
+
+-- procedura U_MOVIMENTI_COMPETENZA (UMC)
+UMC_w_imp_acc_competenza number(15,2);
+UMC_w_man_rev_competenza number(15,2);
+
+-- procedura U_CONSUNTIVO_PERENTI (UCP) 
+UCP_w_residuo_consuntivo number(15,2);
+UCP_w_man_rev_residui number(15,2);
+UCP_w_variazioni_residui number(15,2);
+UCP_w_per_anno1 number(15,2);
+UCP_w_per_anno2 number(15,2);
+UCP_w_per_anno3 number(15,2);
+
+-- procedura U_CONSUNTIVO_PERENTI_SUCC (UCPS) 
+UCPS_w_man_rev_residui number(15,2);
+UCPS_w_pag_per_anno1 number(15,2);
+UCPS_w_pag_per_anno2 number(15,2);
+UCPS_w_pag_per_anno3 number(15,2);
+
+-- procedura U_CONSUNTIVO_RESIDUI (UCR)
+UCR_w_residuo_consuntivo number(15,2);
+UCR_w_man_rev_residui number(15,2);
+UCR_w_variazioni_residui number(15,2);
+UCR_w_residuo_perenzioni number(15,2);
+UCR_w_pag_anno1 number(15,2);
+UCR_w_pag_anno2 number (15,2);
+UCR_w_pag_anno3 number (15,2);
+
+-- procedura E_MOVIMENTI_COMPETENZA (EMC)
+EMC_w_imp_acc_competenza number(15,2);
+EMC_w_man_rev_competenza number(15,2);
+
+-- procedura E_MOVIMENTI_MAGGIORI_INCASSI (EMMI) 
+EMMI_w_man_rev_residui number(15,2);
+EMMI_w_variazioni_residui number(15,2);
+
+-- procedura E_MOVIMENTI_RESIDUI (EMR)
+EMR_w_residuo_consuntivo number(15,2);
+EMR_w_man_rev_residui number(15,2);
+EMR_w_variazioni_residui number(15,2);
+
+
+-- FINE varibili utilizzate per inserire il risultato delle stored procedure
+
+
+correttivo number(15,2);
+
+colonna_corr varchar2(10);
+
+c1_corr number (15,2);
+c2_corr number (15,2);
+c3_corr number (15,2);
+c4_corr number (15,2);
+c5_corr number (15,2);
+c6_corr number (15,2);
+c7_corr number (15,2);
+c8_corr number (15,2);
+c9_corr number (15,2);
+c10_corr number (15,2);
+c11_corr number (15,2);
+c12_corr number (15,2);
+c13_corr number (15,2);
+
+c1_a number (15,2);
+c1_b number (15,2);
+
+a_compe number;
+a_cassa number;
+v_compe number;
+v_cassa number;
+
+blocco_compe number;
+blocco_cassa number;
+blocco_compe_riacc number;
+
+
+wprevisione_competenza number (15,2);
+wprevisione_cassa number (15,2);
+
+wanno number(4);
+wcapitolo varchar2(6);
+wdata date;
+
+procedure calcolo
+(
+p_anno in number,
+p_capitolo in varchar2,
+p_data in date,
+c1 out number,
+c2 out number,
+c3 out number,
+c4 out number,
+c5 out number,
+c6 out number,
+c7 out number,
+c8 out number,
+c9 out number,
+c10 out number,
+c11 out number,
+c12 out number,
+c13 out number,
+c14 out number,
+c15 out number,
+c16 out number,
+c17 out number,
+c18 out number,
+c19 out number,
+c20 out number
+);
+
+procedure preimpegni
+(
+p_anno in number,
+p_capitolo in varchar2,
+p_preimpegni_residui out number
+);
+
+end consuntivo;</pre>	</td></tr>
+</table></div>

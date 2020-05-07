@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CONDIVIDI_IMPEGNI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CONDIVIDI_IMPEGNI.html">Details</a></div></div>
+<div class="tab"><div><a href="CONDIVIDI_IMPEGNI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CONDIVIDI_IMPEGNI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CONDIVIDI_IMPEGNI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CONDIVIDI_IMPEGNI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure condividi_impegni (p_anno in number, p_numero_imp in varchar2, p_struttura in varchar2) is
+
+p_titolare varchar2(5);
+p_capitolo_rich varchar2(6);
+
+p_id number := 0;
+
+begin
+	begin
+	select max(id) + 1 into p_id
+	from fin_t_cdg_richieste;
+	exception when no_data_found then p_id := 1;
+	end;
+
+
+
+insert into fin_t_cdg_richieste (ID
+,STRUTTURA_RICHIEDENTE
+,DATA
+,PROGR
+,CAPITOLO_RICH
+,STRUTTURA_TITOLARE_ORIGINE
+,IMPORTO_RICH
+,DATA_FINE_RICH
+,MOTIVAZ_RICH
+,STRUTTURA_TITOLARE_CDG
+,FL_DECISIONE_TITOLARE
+,MOTIVAZ_RIFIUTO_TITOLARE
+,IMPORTO_TITOLARE
+,DATA_FINE_TITOLARE
+,FL_DECISIONE_CDG
+,MOTIVAZ_RIFIUTO_CDG
+,IMPORTO_CDG
+,DATA_FINE_CDG
+,DATA_CREAZIONE
+,UTENTE_CREAZIONE
+,UTENTE_AGGIORNAMENTO
+,DATA_AGGIORNAMENTO
+,TITOLARITA
+,FL_DECIS_DIRIG_RICH
+,FL_DECIS_DIRIG_TIT
+,FL_SOLO_LIQUIDAZIONE
+,FL_SU_PREIMPEGNO
+,ID_PREIMPEGNO
+,FL_INSERITA_DA_TITOLARE)
+	select 
+	p_id
+	,p_struttura
+	,trunc(sysdate,'dd')
+	,p_id
+	,substr(d.segment2,2,5)
+	,d.segment3
+	,0
+	,to_date('3112'||p_anno,'ddmmyyyy')
+	,'Condivisione automatica impegno '||d.doc_sequence_value
+	,d.segment3
+	,'A'
+	,null
+	,0
+	,to_date('3112'||p_anno,'ddmmyyyy')
+	,'A'
+	,null
+	,0
+	,to_date('3112'||p_anno,'ddmmyyyy')
+	,trunc(sysdate,'dd')
+	,1000
+	,null
+	,null
+	,'T'
+	,'A'
+	,'A'
+	,'S'
+	,'N'
+	,null
+	,null
+	from fin_t_documenti d
+	where d.doc_type like 'IMP%'
+	and d.doc_sequence_value = p_numero_imp
+	and nvl(d.deletion_status_flag,'N') = 'N';
+
+commit;
+
+insert into FIN_T_STRU_CAP_IMPEGNI(richiesta,numero_impegno) values (p_id,p_numero_imp);
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_DOCUMENTI_ENTRATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_DOCUMENTI_ENTRATE.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_ENTRATE_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_ENTRATE_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_DOCUMENTI_ENTRATE_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_ENTRATE_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2017-01-20</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_DOCUMENTI_ENTRATE</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1587</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT 'Entrate' e_u
+,a.doc_type tipo_doc_liv1
+,a.date_created data_doc_liv1
+,a.doc_sequence_value numero_doc_liv1
+,a.description ogg_doc_liv1
+,nvl(a.DOCUMENT_AMOUNT,0) importo_doc_liv1
+,nvl(a.OPEN_BALANCE_PROPOSED,0) residuo_doc_liv1
+,a.SEGMENT2 capitolo_doc_liv1
+,a.ATTRIBUTE16 pcf_doc_liv1
+,a.ATTRIBUTE13 tipo_atto_doc_liv1
+,a.ATTRIBUTE14 num_atto_doc_liv1
+,a.DATA_ATTO_AUTORIZZATIVO dataatto_doc_liv1
+,(select decode(user_name,'ORACLE','Importato da mainframe',user_name) from fnd_user where fnd_user.USER_ID = nvl(a.CREATED_BY,1000)) creatoda_doc_liv1
+,a.DATA_PERENZIONE perenzione_doc_liv1
+,a.DATA_PRESCRIZIONE prescrizione_doc_liv1
+,r.doc_type tipo_doc_liv2
+,r.doc_sequence_value numero_doc_liv2
+,r.description ogg_doc_liv2
+,nvl(r.DOCUMENT_AMOUNT,0) importo_doc_liv2
+,nvl(r.OPEN_BALANCE_PROPOSED,0) residuo_doc_liv2
+,r.SEGMENT2 capitolo_doc_liv2
+,r.ATTRIBUTE16 pcf_doc_liv2
+,r.ATTRIBUTE13 tipo_atto_doc_liv2
+,r.ATTRIBUTE14 num_atto_doc_liv2
+,r.DATA_ATTO_AUTORIZZATIVO dataatto_doc_liv2
+,(select decode(user_name,'ORACLE','Importato da mainframe',user_name) from fnd_user where USER_ID = nvl(r.CREATED_BY,1000)) creatoda_doc_liv2
+,null tipo_doc_liv3
+,null numero_doc_liv3
+,null ogg_doc_liv3
+,null importo_doc_liv3
+,null capitolo_doc_liv3
+,null pcf_doc_liv3
+,null tipo_atto_doc_liv3
+,null num_atto_doc_liv3
+,null dataatto_doc_liv3
+,null creatoda_doc_liv3
+   FROM fin_t_documenti a
+   ,fin_t_documenti r
+   WHERE nvl(a.DELETION_STATUS_FLAG,'N') = 'N'
+   and a.doc_type = 'ACC'
+   and r.previous_doc_id(+) = a.doc_id
+   and nvl(r.OPEN_BALANCE_PROPOSED(+),0) > 0
+      ORDER BY 1,2,3,5</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

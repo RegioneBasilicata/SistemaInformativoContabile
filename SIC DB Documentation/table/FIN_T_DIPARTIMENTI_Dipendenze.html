@@ -1,0 +1,279 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_DIPARTIMENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Flashback.html">Flashback</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_T_DIPARTIMENTI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_DIPARTIMENTI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dipendenze"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>OWNER</th>
+	<th>NAME</th>
+	<th>TYPE</th>
+	<th>REFERENCED_OWNER</th>
+	<th>REFERENCED_NAME</th>
+	<th>REFERENCED_TYPE</th>
+</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_DIPARTIMENTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_UFFICI_DATA</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_AMM_X_UFF</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>RAGIONERIA</td>
+<td>FIN_V_PREIMP_DIP</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_DIPARTIMENTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_UFFICI_DATA</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">GAT2</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">FIN_V_PREIMP_DIP</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">VIEW</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">GAT2</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">GAT2</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">VM_COSTI_BENI_MOBILI</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">MATERIALIZED VIEW</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">GAT2</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_PERSONALE_DIP_G</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../trigger/LOG_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../trigger/LOG_DIPARTIMENTI.html">LOG_DIPARTIMENTI</a></td>
+<td><a href="../trigger/LOG_DIPARTIMENTI.html">TRIGGER</a></td>
+<td><a href="../trigger/LOG_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../trigger/LOG_DIPARTIMENTI.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../trigger/LOG_DIPARTIMENTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_ARTICOLI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_PERSONALE_DIP</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_PERSONALE_DIP</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_AMM_X_UFF</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_ARTICOLI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../synonym/FINA_T_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../synonym/FINA_T_DIPARTIMENTI.html">FINA_T_DIPARTIMENTI</a></td>
+<td><a href="../synonym/FINA_T_DIPARTIMENTI.html">SYNONYM</a></td>
+<td><a href="../synonym/FINA_T_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../synonym/FINA_T_DIPARTIMENTI.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../synonym/FINA_T_DIPARTIMENTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../synonym/FINA_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../synonym/FINA_DIPARTIMENTI.html">FINA_DIPARTIMENTI</a></td>
+<td><a href="../synonym/FINA_DIPARTIMENTI.html">SYNONYM</a></td>
+<td><a href="../synonym/FINA_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../synonym/FINA_DIPARTIMENTI.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../synonym/FINA_DIPARTIMENTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../view/VW_DIPARTIMENTI.html">VW_DIPARTIMENTI</a></td>
+<td><a href="../view/VW_DIPARTIMENTI.html">VIEW</a></td>
+<td><a href="../view/VW_DIPARTIMENTI.html">GAT2</a></td>
+<td><a href="../view/VW_DIPARTIMENTI.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../view/VW_DIPARTIMENTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">GAT2</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">VW_DIPARTIMENTI_STRUTTURE</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">VIEW</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">GAT2</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>WS_PROVVEDIMENTI_AMM</td>
+<td>PACKAGE BODY</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_MISSIONI_DIP_MATRICOLA.html">GAT2</a></td>
+<td><a href="../view/VW_MISSIONI_DIP_MATRICOLA.html">VW_MISSIONI_DIP_MATRICOLA</a></td>
+<td><a href="../view/VW_MISSIONI_DIP_MATRICOLA.html">VIEW</a></td>
+<td><a href="../view/VW_MISSIONI_DIP_MATRICOLA.html">GAT2</a></td>
+<td><a href="../view/VW_MISSIONI_DIP_MATRICOLA.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../view/VW_MISSIONI_DIP_MATRICOLA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_MISSIONI_DIPARTIMENTO.html">GAT2</a></td>
+<td><a href="../view/VW_MISSIONI_DIPARTIMENTO.html">VW_MISSIONI_DIPARTIMENTO</a></td>
+<td><a href="../view/VW_MISSIONI_DIPARTIMENTO.html">VIEW</a></td>
+<td><a href="../view/VW_MISSIONI_DIPARTIMENTO.html">GAT2</a></td>
+<td><a href="../view/VW_MISSIONI_DIPARTIMENTO.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../view/VW_MISSIONI_DIPARTIMENTO.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP</td>
+<td>SIMIP_ATTIVITA_NOTTURNE</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">GAT2</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">CONTROLLO_DI_GESTIONE</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">PROCEDURE</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">GAT2</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>IMPORT_STRUTTURE_REGIONE</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>DAVIDE_DELIBERE</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_DIPARTIMENTI</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">GAT2</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">PDP2_COMPONI_OBSTRAT</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">PROCEDURE</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">GAT2</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">FIN_T_DIPARTIMENTI</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">TABLE</a></td>
+	</tr>
+</table></div>

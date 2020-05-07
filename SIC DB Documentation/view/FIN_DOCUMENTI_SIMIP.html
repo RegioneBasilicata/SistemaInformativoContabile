@@ -1,0 +1,1349 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_DOCUMENTI_SIMIP</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_DOCUMENTI_SIMIP.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_DOCUMENTI_SIMIP_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_DOCUMENTI_SIMIP_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_DOCUMENTI_SIMIP_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_DOCUMENTI_SIMIP_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+	<th>INSERTABLE</th>
+	<th>UPDATABLE</th>
+	<th>DELETABLE</th>
+</tr>
+	<tr>
+<td>CODICE_VERSAMENTO_BONIFICI</td>
+<td>VARCHAR2(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>115</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PROGRESSIVO_ANA</td>
+<td>NUMBER(4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>116</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_CUP</td>
+<td>VARCHAR2(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>117</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_CIG</td>
+<td>VARCHAR2(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>118</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_LIQUIDAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>119</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_IMPEGNO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>120</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NAZIONE_BANCA</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>94</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CAP_BANCA</td>
+<td>VARCHAR2(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>95</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PROVINCIA_BANCA</td>
+<td>VARCHAR2(2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>96</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_CODICE_METODO_PAGAMENTO</td>
+<td>NUMBER(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>97</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_METODO_PAGAMENTO</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>98</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_IBAN</td>
+<td>VARCHAR2(32)</td>
+<td>Yes</td>
+<td>null</td>
+<td>99</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_CONTO_CORRENTE</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>100</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_ABI</td>
+<td>VARCHAR2(5)</td>
+<td>Yes</td>
+<td>null</td>
+<td>101</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_CAB</td>
+<td>VARCHAR2(5)</td>
+<td>Yes</td>
+<td>null</td>
+<td>102</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_BANCA</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>103</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_INDIRIZZO_BANCA</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>104</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_CITTA_BANCA</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>105</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_NAZIONE_BANCA</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>106</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_CAP_BANCA</td>
+<td>VARCHAR2(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>107</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PV_PROVINCIA_BANCA</td>
+<td>VARCHAR2(2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>108</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DESC_PAGAMENTO_TESORIERE</td>
+<td>VARCHAR2(100)</td>
+<td>Yes</td>
+<td>null</td>
+<td>109</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DOC_ID</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>110</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ANAGRAFICA_DELEGATO</td>
+<td>VARCHAR2(60)</td>
+<td>Yes</td>
+<td>null</td>
+<td>111</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_FISCALE_DELEGATO</td>
+<td>VARCHAR2(16)</td>
+<td>Yes</td>
+<td>null</td>
+<td>112</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PROVINCIA_TESORERIA</td>
+<td>VARCHAR2(2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>113</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>COMMISSIONI</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>114</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_MANDATO</td>
+<td>NUMBER(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_MAND_MAINFRAME</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_EMISSIONE_MANDATO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>VALIDO_ANNULLATO</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>TIPOLOGIA_MANDATO</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_STORNO</td>
+<td>NUMBER(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_STORNO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPORTO_LORDO_DOCUMENTO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>OGGETTO_MANDATO</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>OGGETTO_LIQUIDAZIONE</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>OGGETTO_IMPEGNO</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>STAMPA_AVVISO_MANDATO</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_GESTIONALE_SIOPE</td>
+<td>VARCHAR2(4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ID_FORNITORE</td>
+<td>NUMBER(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_SEDE_FORNITORE</td>
+<td>NUMBER(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATO_SENSIBILE</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>VECCHIO_CODICE_FORNITORE</td>
+<td>VARCHAR2(30)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_FORNITORE</td>
+<td>NUMBER(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NOME_FORNITORE</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_NASCITA</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_FISCALE</td>
+<td>VARCHAR2(16)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PARTITA_IVA</td>
+<td>VARCHAR2(11)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>RAPPRESENTANTE_LEGALE</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODFISC_RAPPRESENTANTE_LEGALE</td>
+<td>VARCHAR2(16)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATANASC_RAPPRESENTANTE_LEGALE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NOME_SEDE_FORNITORE</td>
+<td>VARCHAR2(300)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>INDIRIZZO_FORNITORE</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CITTA_FORNITORE</td>
+<td>VARCHAR2(200)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PROVINCIA_FORNITORE</td>
+<td>VARCHAR2(20)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CAP_FORNITORE</td>
+<td>VARCHAR2(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NAZIONE_FORNITORE</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>STATO_FORNITORE</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>BOLLO</td>
+<td>VARCHAR2(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>TIPOLOGIA_REDDITO</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>VALIDO770</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CAPITOLO_SPESA</td>
+<td>VARCHAR2(6)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>PIANO_CONTI_FINA</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_MECCANOGRAFICO</td>
+<td>VARCHAR2(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>MISSIONE_PROGRAMMA_TITOLO</td>
+<td>VARCHAR2(62)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>UPB</td>
+<td>VARCHAR2(7)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>VOCE_PIANO_CONTI</td>
+<td>VARCHAR2(25)</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_REGISTRAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPORTO_TOTALE_MANDATO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPORTO_NETTO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>44</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPONIBILE_IRPEF</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>45</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>RITENUTA_IRPEF</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>46</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ADDIZIONALE_COMUNALE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>47</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ADDIZIONALE_REGIONALE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>48</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPONIBILE_PREVIDENZIALE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>49</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>RITENUTE_PREVIDENZIALI_ENTE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>50</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>RITENUTE_PREVIDENZIALI_BEN</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>51</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ALTRE_RITENUTE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>52</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPONIBILE_IRAP</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>53</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPOSTA_IRAP</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>54</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IVA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>55</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>SISTEMAZIONE_CONTABILE</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>56</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_MANDATO_SOSTITUITO</td>
+<td>NUMBER(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>57</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_LIQUIDAZIONE</td>
+<td>NUMBER(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>58</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_LIQ_MAINFRAME</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>59</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_IMPEGNO</td>
+<td>NUMBER(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>60</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_IMP_MAINFRAME</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>61</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_IMPEGNO_RIF_PERENTE</td>
+<td>NUMBER(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>62</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_IMP_RIF_PER_MAINFRAME</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>63</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPORTO_IMPEGNO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>64</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>TIPO_IMPEGNO</td>
+<td>VARCHAR2(15)</td>
+<td>Yes</td>
+<td>null</td>
+<td>65</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IMPORTO_LIQUIDAZIONE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>66</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ESERCIZIO_MANDATO</td>
+<td>NUMBER(4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>67</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ESERCIZIO_IMPEGNO</td>
+<td>NUMBER(4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>68</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ESERCIZIO_IMPEGNO_RIF_PERENTE</td>
+<td>NUMBER(4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>69</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ESERCIZIO_LIQUIDAZIONE</td>
+<td>NUMBER(4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>70</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DIPARTIMENTO</td>
+<td>VARCHAR2(25)</td>
+<td>Yes</td>
+<td>null</td>
+<td>71</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ID_PROVVEDIMENTO_LIQ</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>72</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ID_PROVVEDIMENTO_CALCOLATO_LIQ</td>
+<td>VARCHAR2(38)</td>
+<td>Yes</td>
+<td>null</td>
+<td>73</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ID_PROVVEDIMENTO_IMP</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>74</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ID_PROVVEDIMENTO_CALCOLATO_IMP</td>
+<td>VARCHAR2(38)</td>
+<td>Yes</td>
+<td>null</td>
+<td>75</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>TIPO_ATTO_LIQ</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>76</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_ATTO_LIQ</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>77</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_ATTO_LIQ</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>78</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>TIPO_ATTO_IMP</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>79</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>NUMERO_ATTO_IMP</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>80</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>DATA_ATTO_IMP</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>81</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>COMPILATORE</td>
+<td>VARCHAR2(100)</td>
+<td>Yes</td>
+<td>null</td>
+<td>82</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CODICE_METODO_PAGAMENTO</td>
+<td>VARCHAR2(25)</td>
+<td>Yes</td>
+<td>null</td>
+<td>83</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>METODO_PAGAMENTO</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>84</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>INFO_PAGAMENTO</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>85</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>INFO_AGGIUNTIVE</td>
+<td>VARCHAR2(481)</td>
+<td>Yes</td>
+<td>null</td>
+<td>86</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CONTO_CORRENTE</td>
+<td>VARCHAR2(240)</td>
+<td>Yes</td>
+<td>null</td>
+<td>87</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>IBAN</td>
+<td>VARCHAR2(32)</td>
+<td>Yes</td>
+<td>null</td>
+<td>88</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>ABI</td>
+<td>VARCHAR2(5)</td>
+<td>Yes</td>
+<td>null</td>
+<td>89</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CAB</td>
+<td>VARCHAR2(5)</td>
+<td>Yes</td>
+<td>null</td>
+<td>90</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>BANCA</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>91</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>INDIRIZZO_BANCA</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>92</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+	<tr>
+<td>CITTA_BANCA</td>
+<td>VARCHAR2(2000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>93</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+	</tr>
+</table></div>

@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_DOCUMENTI_CAPO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_DOCUMENTI_CAPO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_CAPO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_CAPO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_DOCUMENTI_CAPO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_CAPO_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2016-10-14</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_DOCUMENTI_CAPO</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>323</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select d.doc_id doc_id,d.segment8 anno,c.doc_id doc_id_capo_filiera,c.segment8 anno_capo_filiera
+from fin_t_documenti d
+,fin_t_documenti c
+where nvl(d.deletion_status_flag,'N') = 'N'
+and decode(d.doc_type,'MAND',nvl(d.open_balance_proposed,0),'REV',nvl(d.open_balance_proposed,0),1) > 0
+and c.doc_id = d.doc_id_capo_filiera</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

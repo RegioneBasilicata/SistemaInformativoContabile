@@ -1,0 +1,66 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VARIAZIONE_RESIDUO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VARIAZIONE_RESIDUO.html">Details</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_RESIDUO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_RESIDUO_References.html">References</a></div></div>
+<div class="tab"><div><a href="VARIAZIONE_RESIDUO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="VARIAZIONE_RESIDUO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure variazione_residuo
+(w_anno in number 
+,w_capitolo in varchar2
+,w_utente in varchar2
+,w_stanziamento_ini out number
+,w_variazione_pos out number
+,w_variazione_neg out number
+,w_stanziamento_fin out number) AS
+
+variazione number(15,2):=0;
+
+begin
+
+begin
+  select 
+  residuo_previsione(w_anno,w_capitolo)
+  ,residui_iniziali 
+  into 
+  w_stanziamento_ini
+  ,w_stanziamento_fin
+  from  fin_t_consuntivo_excel
+  where anno_consuntivo = w_anno
+  and tipo_capitolo||capitolo = w_capitolo
+  and utente = w_utente;
+  exception when no_data_found then--modifica 22-05-2019 Gerry per gestire i casi in cui non ci sono valori
+  w_stanziamento_ini := 0;
+  w_stanziamento_fin := 0;
+ end;
+
+variazione := nvl(w_stanziamento_fin,0) - nvl(w_stanziamento_ini,0);
+if variazione = 0
+    then 
+    w_variazione_pos := 0;
+    w_variazione_neg := 0;
+    elsif variazione &lt; 0
+          then     
+          w_variazione_pos := 0;
+          w_variazione_neg := abs(variazione);
+          else     
+          w_variazione_neg := 0;
+          w_variazione_pos := variazione;
+ end if;
+
+end;</pre>	</td></tr>
+</table></div>

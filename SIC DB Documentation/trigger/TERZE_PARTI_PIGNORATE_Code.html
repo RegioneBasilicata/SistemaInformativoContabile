@@ -1,0 +1,56 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TERZE_PARTI_PIGNORATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TERZE_PARTI_PIGNORATE.html">Details</a></div></div>
+<div class="tab"><div><a href="TERZE_PARTI_PIGNORATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TERZE_PARTI_PIGNORATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="TERZE_PARTI_PIGNORATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TERZE_PARTI_PIGNORATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER TERZE_PARTI_PIGNORATE
+AFTER INSERT ON FIN_T_DOCUMENTI_TERZE_PARTI
+FOR EACH ROW
+DECLARE 
+imp_da_ass number;
+begin
+-- da attivare per far creare in automatico il legame agli atti di pignoramento
+imp_da_ass:=:NEW.AMOUNT;
+for pp in (
+select p.id,p.imp_da_acc-nvl(sum(l.importo),0) da_pign
+from fin_t_documenti d,bi_atti_pignoramenti p,bi_atti_pign_liq l
+where d.doc_id=:NEW.doc_id and
+d.doc_type='LIQ' and -- solo per documenti liquidazioni
+nvl(p.imp_da_acc,0)>0 
+and fornitore=:NEW.ID_ANA
+and l.id_atto(+)=p.id
+group by p.id,p.imp_da_acc
+having imp_da_acc-nvl(sum(l.importo),0)>0
+order by id) loop
+if imp_da_ass>pp.da_pign then
+ insert into bi_atti_pign_liq
+   (ID_ATTO,DOC_ID_LIQ,THIRD_PARTY_LINE_NUM,IMPORTO,NOTE)
+  values
+   (pp.id,:NEW.doc_id,:NEW.THIRD_PARTY_LINE_NUM,pp.da_pign,'Inserimento automatico');
+   imp_da_ass:=imp_da_ass-pp.da_pign;
+elsif imp_da_ass>0 then
+ insert into bi_atti_pign_liq
+   (ID_ATTO,DOC_ID_LIQ,THIRD_PARTY_LINE_NUM,IMPORTO,NOTE)
+  values
+   (pp.id,:NEW.doc_id,:NEW.THIRD_PARTY_LINE_NUM,imp_da_ass,'Inserimento automatico');
+   imp_da_ass:=0;
+end if;
+end loop;
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,172 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLO_PAG_POR_RESIDUI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLO_PAG_POR_RESIDUI.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLO_PAG_POR_RESIDUI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLO_PAG_POR_RESIDUI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLO_PAG_POR_RESIDUI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLO_PAG_POR_RESIDUI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE calcolo_pag_por_residui (p_anno in number,p_data in date) IS
+quota_ue_res number := 0;
+quota_ue_competenza number := 0;
+quota_ue_impegni  number := 0;
+quota_ue_avanzo number := 0;
+q_avanzo number := 0;
+q_avanzo_ue number := 0;
+perc_avanzo number := 0;
+pag_compe number := 0;
+imp_compe number := 0;
+capitolo_corr varchar2(6);
+data_mov date := nvl(p_data,to_date('3112'||p_anno||' 00:00','ddmmyyyy HH24:MI'));
+
+cursor capitoli is
+select anno
+,capitolo
+,nvl(p_anno1,0) p_anno1
+,nvl(p_anno2,0) p_anno2
+,nvl(p_anno3,0) p_anno3
+,nvl(p_anno4,0) p_anno4
+,nvl(p_anno5,0) p_anno5
+,nvl(p_anno6,0) p_anno6
+,nvl(p_anno7,0) p_anno7
+,nvl(p_anno_cor,0) p_anno_cor
+,nvl(p_avanzo,0) p_avanzo
+from fin_t_por_patto
+where anno = p_anno;
+
+cursor residui is 
+select anno,anno_residuo,capitolo,sum(nvl(SOMME_RISC_PAGATE,0)) pagamenti
+from fin_t_spu29 s
+where s.anno = p_anno
+and s.capitolo = capitolo_corr
+and nvl(s.SOMME_RISC_PAGATE,0) > 0
+group by s.anno,s.anno_residuo,s.capitolo;
+
+BEGIN
+ if p_anno &lt; 2013 
+ then aggiorna_perc_por(p_anno);
+ end if;
+ 
+ spu29_u(p_anno);
+
+ for cap in capitoli loop
+ 	capitolo_corr := cap.capitolo;
+ 	if (cap.p_anno1 + cap.p_anno2 + cap.p_anno3 + cap.p_anno4 + cap.p_anno5 + cap.p_anno6 + cap.p_anno7) > 0
+ 			then
+ 	 for res in residui loop
+  if (res.anno_residuo &lt;= p_anno - 7) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno1);
+ 		elsif (res.anno_residuo = p_anno - 6) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno2);
+ 			elsif (res.anno_residuo = p_anno - 5) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno3);
+ 					elsif (res.anno_residuo = p_anno - 4) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno4);
+ 						elsif (res.anno_residuo = p_anno - 3) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno5);
+ 							elsif (res.anno_residuo = p_anno - 2) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno6);
+ 								elsif (res.anno_residuo = p_anno - 1) then quota_ue_res := quota_ue_res + ((res.pagamenti)*cap.p_anno7);
+ 								end if;
+ 	 end loop;
+ 	 end if;
+ 	if ( cap.p_anno_cor > 0 or (cap.p_avanzo >0 and p_anno &lt;> 2010)) -- and p_anno &lt;> 2010) serve per tenere fuori il capitolo U36206
+ 		then
+ 	begin
+ 	select sum(nvl(d.open_balance_proposed,0)) into pag_compe
+ 	from fin_t_documenti d
+ 	,fin_t_documenti d1
+ 	where d.doc_type = 'MAND'
+ 	and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+ 	and d.segment8 = p_anno
+ 	and d.segment2 = cap.capitolo
+ 	-- richiesta Sarli mail del 11/12/2008
+ 	and d.doc_sequence_value &lt;> '200815608'
+ 	-- fine richiesta
+  and d.date_created &lt;= data_mov
+ 	and d1.doc_id = d.doc_id_capo_filiera
+ 	and d1.segment8 = d.segment8;
+ 	exception when no_data_found then pag_compe := 0;
+ 	end ;
+ 	
+ 	begin
+ 	select nvl(sum(nvl(document_amount,0)),0) into imp_compe
+ 	from fin_t_documenti 
+ 	where doc_type like 'IMP%'
+ 	and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ 	and segment8 = p_anno
+ 	and segment2 = cap.capitolo
+ 		-- richiesta Sarli mail del 11/12/2008
+ 	and doc_sequence_value &lt;> '200805462'
+ 	-- fine richiesta
+  and date_created &lt;= data_mov;
+ 	exception when no_data_found then imp_compe := 0;
+ 	end ;
+ 	
+ 	--prendo la quota avanzo del capitolo e la percentuale UE
+ 	begin
+ 	select nvl(quota_avanzo,0), nvl(percentuale,0) 
+ 	into q_avanzo,perc_avanzo
+ 	from FIN_PERC_AVANZO_UE
+ 	where anno = p_anno
+ 	and capitolo = cap.capitolo;
+ 	exception when no_data_found then q_avanzo := 0;perc_avanzo:=0;
+ 	end;
+ 	-- ***
+ 	
+ 	
+ 	if q_avanzo > 0 
+ 		then
+ 		if imp_compe &lt;= q_avanzo 
+ 			then quota_ue_impegni := nvl(imp_compe,0)* nvl(cap.p_avanzo,0);
+ 		else quota_ue_impegni := (q_avanzo*nvl(cap.p_avanzo,0)) + ((nvl(imp_compe,0) - q_avanzo)*nvl(cap.p_anno_cor,0));
+ 		end if;
+ 		else quota_ue_impegni := nvl(imp_compe,0)*nvl(cap.p_anno_cor,0);
+ 		end if;
+ 	 
+ 	 
+ 	 if q_avanzo > 0 
+ 		then
+ 		if nvl(pag_compe,0) &lt;= q_avanzo 
+ 			then quota_ue_competenza := nvl(pag_compe,0)* nvl(cap.p_avanzo,0);
+ 		else quota_ue_competenza := (q_avanzo*nvl(cap.p_avanzo,0)) + ((nvl(pag_compe,0) - q_avanzo)*nvl(cap.p_anno_cor,0));
+ 		end if;
+ 		else quota_ue_competenza :=  nvl(pag_compe,0)*nvl(cap.p_anno_cor,0);
+ 		end if;
+ 	--quota_ue_competenza := nvl(pag_compe,0)*nvl(cap.p_anno_cor,0);
+ 	
+ 	end if;
+  
+  -- richiesta SARLI con mail del 25/03/2011
+  if cap.capitolo in ('U36206','U12506','U20202','U24153','U36812') and p_anno = 2010
+  then quota_ue_impegni := 0;
+  end if;
+  if cap.capitolo = 'U36711' and p_anno = 2010
+  then quota_ue_impegni := 1490000;
+  end if;
+   	-- *** FINE richiesta SARLI ***
+    -- richiesta SARLI con mail LAGALA del 30/03/2011
+  if cap.capitolo = 'U36206' and p_anno = 2010
+  then quota_ue_competenza := 0;
+  end if;
+	-- *** FINE richiesta SARLI ***
+    
+ 	update fin_t_por_patto p set p.quota_ue_residuo = round(nvl(quota_ue_res,0),0),p.quota_ue_compe = round(quota_ue_competenza,0),p.quota_ue_imp = round(quota_ue_impegni,0)
+ 	where p.anno = p_anno and p.capitolo = cap.capitolo;
+ 	commit;
+ 	quota_ue_res := 0;
+ 	quota_ue_competenza := 0;
+ 	quota_ue_impegni := 0;
+ 	imp_compe := 0;
+ 	pag_compe := 0;
+ 	
+ 	end loop; 
+END;</pre>	</td></tr>
+</table></div>

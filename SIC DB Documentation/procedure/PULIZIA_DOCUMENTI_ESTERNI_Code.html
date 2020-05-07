@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PULIZIA_DOCUMENTI_ESTERNI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PULIZIA_DOCUMENTI_ESTERNI.html">Details</a></div></div>
+<div class="tab"><div><a href="PULIZIA_DOCUMENTI_ESTERNI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PULIZIA_DOCUMENTI_ESTERNI_References.html">References</a></div></div>
+<div class="tab"><div><a href="PULIZIA_DOCUMENTI_ESTERNI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PULIZIA_DOCUMENTI_ESTERNI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure pulizia_documenti_esterni is
+primo_punt number;
+begin
+for d in (select origine,nome_file,count(*)
+           from vw_documenti_esterni
+           group by origine,nome_file
+           having count(*)>1 or
+           nome_file is null) loop
+
+   -- modifica puntatori in file esterni
+   select min(puntatore)
+    into primo_punt
+    from vw_documenti_esterni
+    where nome_file=d.nome_file and
+          origine=d.origine;
+   
+   for f in 
+     (select puntatore
+              from vw_documenti_esterni
+              where nvl(nome_file,'zzz')=nvl(d.nome_file,'zzz') and
+                    origine=d.origine and
+                    (nome_file is null or puntatore&lt;>primo_punt)) loop
+   
+      -- cancella file fisico  su disco
+      -- DBMS_BACKUP_RESTORE.deletefile('/mnt/nfs/file_esterni/'||f.puntatore||d.nome_file);
+      utl_file.fremove('/mnt/nfs/file_esterni/',f.puntatore||d.nome_file); 
+      --
+                 
+      if d.origine='CONTRATTI'
+        then update bi_doc_gest
+              set documento=primo_punt
+                  where documento=f.puntatore;
+      elsif  d.origine='FATTURE'
+             then update tb_fatture_allegati
+                  set documento=primo_punt
+                  where documento=f.puntatore;
+      elsif  d.origine='MANUTENZIONI'
+             then update tb_manutenzione_documenti
+                  set documento=primo_punt
+                  where documento=f.puntatore;
+      elsif  d.origine='BENI IMMOBILI'
+             then update bi_doc_est
+                  set documento=primo_punt
+                  where documento=f.puntatore;
+      elsif  d.origine='BENI MOBILI'
+             then update tb_doc_cesp
+                  set documento=primo_punt
+                  where documento=f.puntatore;
+      elsif  d.origine='ARTICOLI'
+             then update ec_articoli
+                  set punt_immagine=primo_punt
+                  where punt_immagine=f.puntatore;
+      elsif  d.origine='ATTI'
+             then update at_puntatori_allegati
+                  set puntatore=primo_punt
+                  where puntatore=f.puntatore;
+      elsif  d.origine='LAV_PREST'
+             then update tb_lav_prest
+                  set punt_immagine=primo_punt
+                  where punt_immagine=f.puntatore;
+      elsif  d.origine='MISSIONI'
+             then update ap_missioni_doc
+                  set id_doc=primo_punt
+                  where id_doc=f.puntatore;
+      elsif  d.origine='PIGNORAMENTI'
+             then update bi_pign_doc
+                  set id_doc=primo_punt
+                  where id_doc=f.puntatore;
+      elsif  d.origine='DOC_GARE'
+             then update af_documenti_gare
+                  set id_doc=primo_punt
+                  where id_doc=f.puntatore;
+      elsif  d.origine='DOC_GARE_FORNITORI'
+             then update af_documenti_gare_fornitori
+                  set id_doc=primo_punt
+                  where id_doc=f.puntatore;
+      elsif  d.origine='DOC_ISCRIZIONE_ALBO'
+             then update af_documenti_iscrizione_forn
+                  set id_doc=primo_punt
+                  where id_doc=f.puntatore;
+      end if;
+      delete fin_t_file_esterni
+       where id=f.puntatore;
+   end loop;
+end loop;                     
+end;</pre>	</td></tr>
+</table></div>

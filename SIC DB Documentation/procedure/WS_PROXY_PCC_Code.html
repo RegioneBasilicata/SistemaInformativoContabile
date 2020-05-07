@@ -1,0 +1,483 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>WS_PROXY_PCC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="WS_PROXY_PCC.html">Details</a></div></div>
+<div class="tab"><div><a href="WS_PROXY_PCC_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="WS_PROXY_PCC_References.html">References</a></div></div>
+<div class="tab"><div><a href="WS_PROXY_PCC_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="WS_PROXY_PCC_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure ws_proxy_pcc is
+  Sec_Id          Number;
+	l_envelope CLOB;
+	l_risultato xmltype;
+	l_res VARCHAR2(4000);
+	l_op  number(8);
+	l_imp_fatt number;
+	l_tot_impon number;
+	l_tot_iva number;
+	l_data_scad date;
+	l_cod_benef varchar2(20);
+  l_cod_fisc_tr  varchar2(16);
+  l_vers_appl    varchar2(10);
+  l_identif_pcc  varchar2(10);
+  l_conta        number;
+  l_stato        varchar2(5);
+  l_progr_pcc    varchar2(50);
+  l_split_payment varchar2(2);
+  l_imp_liq       number(10,2);
+  l_imp_no_liq    number(10,2);
+  l_imp_sosp      number(10,2);
+  l_imp_pag       number(10,2);
+  l_imp_cert      number(10,2);
+  l_id            number;
+  l_idfisc        varchar2(16);
+  l_id_pcc        varchar2(35);
+  l_cod_err       varchar2(50);
+  l_descr_err     varchar2(2000);
+  l_stato_deb     varchar2(5);
+  l_sdeb_agg      varchar2(5);
+begin
+Select Apex_Util.Find_Security_Group_Id (P_Workspace => 'SIC') 
+  Into   Sec_Id
+  From   Dual;
+Apex_Util.Set_Security_Group_Id(P_Security_Group_Id => Sec_Id);
+
+l_cod_fisc_tr:='80002950766';
+l_vers_appl:= '1.0';
+l_identif_pcc:='141809';
+
+-- Primo step aggiorno flussi pagamento fatture. Inviando questo flusso la restante quota viene posta in automatico
+-- dalla pcc sospesa
+for pag in (select p.chiave,p.progr,p.CP_IMP_PAG,p.CP_NATURA,p.CP_CAPITOLI,
+							p.CP_IMPEGNO,p.CP_MAND_NUM,p.CP_MAND_DATA,p.CP_CIG,p.CP_CUP,p.CP_DESCR_PAG,
+							mf.importo_fattura,mf.iva_sp,wif.RIFERIMENTOSDI,f.data_doc,f.num_doc,f.finta_id fornitore,
+							sf.id_pcc,sf.data_ult_agg,sf.stato,sf.split_payment,wif.IDPAESE_HCP||wif.IDCODICE_HCP id_fisc
+							from pcc_azioni_fatt p,fin_t_documenti m,fin_t_mandati_fatture mf,tb_doc_iva f,
+							gat2_ws.fe_testata_fattura wtf,gat2_ws.fe_dati_invio_fattura wif,pcc_stato_fatture sf
+							where p.azione='CP' and
+							cp_mand_num is not null and
+							p.data_invio_flusso is null and
+							m.doc_id(+)=p.doc_id and
+							nvl(m.doc_type,'MAND')='MAND' and
+							nvl(m.open_balance_proposed,p.CP_IMP_PAG)>0 and
+							mf.id_documento(+)=p.doc_id and
+							mf.id_fattura(+)=p.chiave and
+							f.chiave=p.chiave and
+							wtf.IDTESTATAFATTURA(+)=f.IDTESTATAFATTURA and
+							wif.IDDATIINVIOFATTURA(+)=wtf.IDDATIINVIOFATTURA and
+/*              wif.RIFERIMENTOSDI in (23969992,24306522,24449302,28026841,28026856,28026860,28027568,28027406,
+28028305,28028463,28028415,28026814,28026491,28026857,28027402,28026943,
+28027570,28058657,28084820,28223074,28225077,28196534,28270488,28244531,
+28299854,28307097,28300480,28299319,28303918,28306602,28305102,28345450,
+28300724,28345451,28334126,28303223,28308155,28345449,28303728,28345446,
+28302809,28394488,28397364,28459165,28523713,28319001,28051041) and*/
+              --to_char(wif.data_protocollo,'yyyymm') in ('201601','201602') and
+							sf.chiave_fattura(+)=p.chiave and
+							nvl(sf.stato,'RI')&lt;>'LA'
+							order by p.creato_il,p.chiave,p.progr) loop
+-- invio flusso pagamento per le fatture per le quali c'e' il riferimento sdi(fatture elettroniche) o id_pcc(vecchie fatture inviate)
+if pag.id_pcc is not null or
+	 pag.RIFERIMENTOSDI is not null then
+  select pcc_seq.nextval 
+   into l_op
+   from dual;
+  if length(pag.id_fisc)>2 then
+     l_idfisc :=pag.id_fisc;
+  else
+     select decode(partita_iva,null,codice_fiscale,'IT'||partita_iva)
+       into l_idfisc
+       from fin_t_anagrafica
+       where id=pag.fornitore;
+  end if;
+  l_envelope := '&lt;SOAP_ENV:Envelope xmlns:SOAP_ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fat="http://www.tesoro.it/fatture">
+	   &lt;SOAP_ENV:Header/>
+	   &lt;SOAP_ENV:Body>
+      &lt;fat:proxyOperazioneContabileRichiestaTipo>
+         &lt;testataRichiesta>
+					  &lt;codiceFiscaleTrasmittente>'||l_cod_fisc_tr||'&lt;/codiceFiscaleTrasmittente>
+					  &lt;timestampTrasmissione>'||to_char(sysdate,'yyyy-mm-dd')||'T'||to_char(sysdate,'hh24:mi:ss')||'&lt;/timestampTrasmissione>
+					  &lt;versioneApplicativa>'||l_vers_appl||'&lt;/versioneApplicativa>
+					  &lt;identificativoPCCAmministrazione>'||l_identif_pcc||'&lt;/identificativoPCCAmministrazione>
+            &lt;identificativoTransazionePA>REGBAS'||lpad(l_op,8,0)||'&lt;/identificativoTransazionePA>
+         &lt;/testataRichiesta>
+         &lt;datiRichiesta>';
+  if pag.id_pcc is not null then
+ 		l_envelope := l_envelope||'
+ 			  &lt;identificazionePCC>'||pag.id_pcc||'&lt;/identificazionePCC>';
+  else
+ 		l_envelope := l_envelope||'
+ 			  &lt;identificazioneSDI>
+				  &lt;lottoSDI>'||pag.RIFERIMENTOSDI||'&lt;/lottoSDI>
+				  &lt;numeroFattura>'||pag.num_doc||'&lt;/numeroFattura>
+			  &lt;/identificazioneSDI>';
+  end if;			  
+  l_envelope := l_envelope||'
+            &lt;listaOperazione>
+               &lt;operazione>
+                  &lt;tipoOperazione>CP&lt;/tipoOperazione>
+                  &lt;progressivoOperazione>00001&lt;/progressivoOperazione>
+                  &lt;strutturaDatiOperazione>
+                    &lt;pagamento>
+                      &lt;importoPagato>'||ltrim(to_char(pag.CP_IMP_PAG,'999999990.00'))||'&lt;/importoPagato>
+                      &lt;naturaSpesa>'||nvl(pag.CP_NATURA,'NA')||'&lt;/naturaSpesa>
+                      &lt;!--Optional:-->
+                      &lt;capitoliSpesa>'||pag.CP_CAPITOLI||'&lt;/capitoliSpesa>
+                      &lt;!--Optional:-->
+                      &lt;estremiImpegno>'||pag.CP_IMPEGNO||'&lt;/estremiImpegno>
+                      &lt;!--Optional:-->
+                      &lt;mandatoPagamento>
+                         &lt;numero>'||pag.CP_MAND_NUM||'&lt;/numero>
+                         &lt;dataMandatoPagamento>'||to_char(pag.CP_MAND_DATA,'yyyy-mm-dd')||'&lt;/dataMandatoPagamento>
+                      &lt;/mandatoPagamento>
+                      &lt;idFiscaleIVABeneficiario>'||l_idfisc||'&lt;/idFiscaleIVABeneficiario>
+                      &lt;codiceCIG>'||nvl(pag.CP_CIG,'NA')||'&lt;/codiceCIG>
+                      &lt;codiceCUP>'||nvl(pag.CP_CUP,'NA') ||'&lt;/codiceCUP>
+                    &lt;/pagamento>
+                &lt;/strutturaDatiOperazione>
+               &lt;/operazione>
+            &lt;/listaOperazione>
+         &lt;/datiRichiesta>
+      &lt;/fat:proxyOperazioneContabileRichiestaTipo>
+	   &lt;/SOAP_ENV:Body>
+	&lt;/SOAP_ENV:Envelope>';
+  l_conta:=1;
+  l_res:='KO';
+-- aggiornamento 14/02/2018 il flusso di pagamento non viene' piu' inviato effettivamente alla pcc ma viene solo memorizzato in maniera tale
+-- da poter aggiornare lo stato della fattura della pcc
+-- max 3 tentativi di chiamata
+  l_res:='OK';
+  /*while l_res='KO' and l_conta&lt;3 loop
+   l_risultato:=apex_web_service.make_request(
+              p_url => 'http://pdd.regione.basilicata.it:8080/pdd/PD/PD_FatturePCC', 
+              p_action => 'wSProxyOperazioneContabile',
+              p_envelope => l_envelope);
+                     
+   l_res := APEX_WEB_SERVICE.PARSE_XML(
+          p_xml => l_risultato,
+          p_xpath => '//datiRisposta/esitoTrasmissione/text()');
+   l_conta:=l_conta+1;
+  end loop; */         
+  l_id_pcc:=null;
+  l_cod_err:=null;
+  l_descr_err:=null;        
+  /*if l_res='OK' then
+    l_id_pcc := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/identificativoTransazionePCC/text()');
+  else 
+    l_cod_err := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/listaErroreTrasmissione/erroreTrasmissione/codice/text()');
+    l_descr_err := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/listaErroreTrasmissione/erroreTrasmissione/descrizione/text()');
+  
+  end if;*/	
+  select nvl(max(id),0)+1
+   into l_id
+   from pcc_flussi;
+   
+  insert into pcc_flussi
+    (id, data_ric_proxy, chiave_fattura, progr_azione, tipo_richiesta, id_ente,
+     risposta_imm, cod_err_imm, descr_err_imm, id_pcc, xml_inviato, xml_risp)
+    values
+    (l_id,sysdate, pag.chiave, pag.progr, 'CP', 'REGBAS'||lpad(l_op,8,0),
+     l_res, l_cod_err, l_descr_err, l_id_pcc,l_envelope,null); --l_risultato.getclobval()); 
+     update pcc_azioni_fatt set
+      data_invio_flusso = sysdate
+      where chiave=pag.chiave and
+            progr=pag.progr;
+  commit;
+ end if;
+end loop;							
+
+-- Aggiorno data scadenze per fatture non completamente pagate. Anche questo step aggiorna la quota parte della fattura
+-- non pagata come sospesa
+for sc in (select p.chiave,p.progr,p.CS_DATA_SCAD,p.CS_IMPORTO,wif.RIFERIMENTOSDI,f.data_doc,f.num_doc,f.finta_id fornitore,
+							sf.id_pcc,sf.data_ult_agg,sf.stato,sf.split_payment,wif.IDPAESE_HCP||wif.IDCODICE_HCP id_fisc
+							from pcc_azioni_fatt p, tb_doc_iva f, gat2_ws.fe_testata_fattura wtf,
+                   gat2_ws.fe_dati_invio_fattura wif,pcc_stato_fatture sf
+							where p.azione='CS' and
+							p.data_invio_flusso is null and
+							f.chiave=p.chiave and
+							wtf.IDTESTATAFATTURA=f.IDTESTATAFATTURA and
+							wif.IDDATIINVIOFATTURA=wtf.IDDATIINVIOFATTURA and
+              --to_char(wif.data_protocollo,'yyyymm') in ('201601','201602') and
+							sf.chiave_fattura(+)=p.chiave and
+							nvl(sf.stato,'RI')&lt;>'LA' and
+              0=(select count(*) 
+                   from pcc_flussi 
+                   where trunc(data_ric_proxy,'dd')=trunc(sysdate,'dd') and
+                         chiave_fattura=p.chiave and
+                         nvl(risposta_imm,'KO')='OK') 
+							order by p.creato_il,p.chiave,p.progr) loop
+
+  select pcc_seq.nextval 
+   into l_op
+   from dual;
+  l_envelope := '&lt;SOAP_ENV:Envelope xmlns:SOAP_ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fat="http://www.tesoro.it/fatture">
+	   &lt;SOAP_ENV:Header/>
+	   &lt;SOAP_ENV:Body>
+      &lt;fat:proxyOperazioneContabileRichiestaTipo>
+         &lt;testataRichiesta>
+					  &lt;codiceFiscaleTrasmittente>'||l_cod_fisc_tr||'&lt;/codiceFiscaleTrasmittente>
+					  &lt;timestampTrasmissione>'||to_char(sysdate,'yyyy-mm-dd')||'T'||to_char(sysdate,'hh24:mi:ss')||'&lt;/timestampTrasmissione>
+					  &lt;versioneApplicativa>'||l_vers_appl||'&lt;/versioneApplicativa>
+					  &lt;identificativoPCCAmministrazione>'||l_identif_pcc||'&lt;/identificativoPCCAmministrazione>
+            &lt;identificativoTransazionePA>REGBAS'||lpad(l_op,8,0)||'&lt;/identificativoTransazionePA>
+         &lt;/testataRichiesta>
+         &lt;datiRichiesta>';
+  if sc.id_pcc is not null then
+ 		l_envelope := l_envelope||'
+ 			  &lt;identificazionePCC>'||sc.id_pcc||'&lt;/identificazionePCC>';
+  else
+ 		l_envelope := l_envelope||'
+ 			  &lt;identificazioneSDI>
+				  &lt;lottoSDI>'||sc.RIFERIMENTOSDI||'&lt;/lottoSDI>
+				  &lt;numeroFattura>'||sc.num_doc||'&lt;/numeroFattura>
+			  &lt;/identificazioneSDI>';
+  end if;			  
+  l_envelope := l_envelope||'
+            &lt;listaOperazione>
+               &lt;operazione>
+                  &lt;tipoOperazione>CS&lt;/tipoOperazione>
+                  &lt;progressivoOperazione>00001&lt;/progressivoOperazione>
+                  &lt;strutturaDatiOperazione>
+                    &lt;comunicazioneScadenza>
+                       &lt;comunicaScadenza>SI&lt;/comunicaScadenza>
+                       &lt;dataScadenza>'||to_char(sc.cs_data_scad,'yyyy-mm-dd') ||'&lt;/dataScadenza>
+                    &lt;/comunicazioneScadenza>
+                &lt;/strutturaDatiOperazione>
+               &lt;/operazione>
+            &lt;/listaOperazione>
+         &lt;/datiRichiesta>
+      &lt;/fat:proxyOperazioneContabileRichiestaTipo>
+	   &lt;/SOAP_ENV:Body>
+	&lt;/SOAP_ENV:Envelope>';
+  l_conta:=1;
+  l_res:='KO';
+-- max 3 tentativi di chiamata
+  while l_res='KO' and l_conta&lt;3 loop
+   l_risultato:=apex_web_service.make_request(
+              p_url => 'http://pdd.regione.basilicata.it:8080/pdd/PD/PD_FatturePCC', 
+              p_action => 'wSProxyOperazioneContabile',
+              p_envelope => l_envelope);
+                     
+   l_res := APEX_WEB_SERVICE.PARSE_XML(
+          p_xml => l_risultato,
+          p_xpath => '//datiRisposta/esitoTrasmissione/text()');
+   l_conta:=l_conta+1;
+  end loop;          
+  l_id_pcc:=null;
+  l_cod_err:=null;
+  l_descr_err:=null;        
+  if l_res='OK' then
+    l_id_pcc := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/identificativoTransazionePCC/text()');
+  else 
+    l_cod_err := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/listaErroreTrasmissione/erroreTrasmissione/codice/text()');
+    l_descr_err := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/listaErroreTrasmissione/erroreTrasmissione/descrizione/text()');
+  
+  end if;	
+  select nvl(max(id),0)+1
+   into l_id
+   from pcc_flussi;
+   
+  insert into pcc_flussi
+    (id, data_ric_proxy, chiave_fattura, progr_azione, tipo_richiesta, id_ente,
+     risposta_imm, cod_err_imm, descr_err_imm, id_pcc, xml_inviato, xml_risp)
+    values
+    (l_id,sysdate, sc.chiave, sc.progr, 'CS', 'REGBAS'||lpad(l_op,8,0),
+     l_res, l_cod_err, l_descr_err, l_id_pcc,l_envelope,l_risultato.getclobval()); 
+  update pcc_azioni_fatt set
+    data_invio_flusso = sysdate
+    where chiave=sc.chiave and
+          progr=sc.progr;
+  commit;
+end loop;		
+
+-- Aggiorno fatture sospese per elenco fatture che non sono rientrate nel flussi precedenti 
+-- L'impostazione dellla data scadenza pone in stato stospesa la fattura quindi e' inutile inviare il flusso
+for sosp in (select p.chiave,p.CO_STATO,p.progr,p.CO_CAUSALE,p.CO_IMPORTO,p.CO_NATURA,p.CO_CIG,p.CO_CUP,
+              wif.RIFERIMENTOSDI,f.data_doc,f.num_doc,f.finta_id fornitore,
+							sf.id_pcc,sf.data_ult_agg,sf.stato,sf.split_payment,wif.IDPAESE_HCP||wif.IDCODICE_HCP id_fisc
+							from pcc_azioni_fatt p, tb_doc_iva f, gat2_ws.fe_testata_fattura wtf,
+                   gat2_ws.fe_dati_invio_fattura wif,pcc_stato_fatture sf
+							where p.azione='CO' and
+              --p.CO_STATO='SOSP' and
+							p.data_invio_flusso is null and
+							f.chiave=p.chiave and
+							wtf.IDTESTATAFATTURA=f.IDTESTATAFATTURA and
+							wif.IDDATIINVIOFATTURA=wtf.IDDATIINVIOFATTURA and
+              --to_char(wif.data_protocollo,'yyyymm') in ('201601','201602') and
+							sf.chiave_fattura(+)=p.chiave and
+							nvl(sf.stato,'RI')&lt;>'LA' and
+            -- controlla che non ci siano flussi inviati nella stessa data (pagamento o scadenza nella stessa data)
+                   from pcc_flussi 
+            -- o comunque flussi accettati di scadenza inviati in precedenza 
+              (p.CO_STATO='SOSP' and
+               (0=(select count(*) 
+                   where trunc(data_ric_proxy,'dd')=trunc(sysdate,'dd') and
+                         chiave_fattura=p.chiave and
+                         nvl(risposta_imm,'KO')='OK') and
+                0=(select count(*) 
+                   from pcc_flussi 
+                   where --trunc(data_ric_proxy,'dd')=trunc(sysdate,'dd') and
+                         chiave_fattura=p.chiave  and
+                         tipo_richiesta='CS' and
+                         nvl(risposta_query,'KO')='OK')) or
+                p.CO_STATO&lt;>'SOSP')       
+							order by p.creato_il,p.chiave,p.progr) loop
+  if upper(sosp.CO_STATO) in ('SOSP','SOSPDANL','SOSPDALIQ') then
+     l_stato_deb:='SOSP';
+     l_sdeb_agg:='SO';
+  elsif upper(sosp.CO_STATO) in ('LIQ','LIQDANL','LIQDASOSP') then
+     l_stato_deb:='LIQ';
+    l_sdeb_agg:='LI';
+  else
+     l_stato_deb:='NOLIQ';
+    l_sdeb_agg:='NL';
+  end if;     
+  select pcc_seq.nextval 
+   into l_op
+   from dual;
+  l_envelope := '&lt;SOAP_ENV:Envelope xmlns:SOAP_ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fat="http://www.tesoro.it/fatture">
+	   &lt;SOAP_ENV:Header/>
+	   &lt;SOAP_ENV:Body>
+      &lt;fat:proxyOperazioneContabileRichiestaTipo>
+         &lt;testataRichiesta>
+					  &lt;codiceFiscaleTrasmittente>'||l_cod_fisc_tr||'&lt;/codiceFiscaleTrasmittente>
+					  &lt;timestampTrasmissione>'||to_char(sysdate,'yyyy-mm-dd')||'T'||to_char(sysdate,'hh24:mi:ss')||'&lt;/timestampTrasmissione>
+					  &lt;versioneApplicativa>'||l_vers_appl||'&lt;/versioneApplicativa>
+					  &lt;identificativoPCCAmministrazione>'||l_identif_pcc||'&lt;/identificativoPCCAmministrazione>
+            &lt;identificativoTransazionePA>REGBAS'||lpad(l_op,8,0)||'&lt;/identificativoTransazionePA>
+         &lt;/testataRichiesta>
+         &lt;datiRichiesta>';
+  if sosp.id_pcc is not null then
+ 		l_envelope := l_envelope||'
+ 			  &lt;identificazionePCC>'||sosp.id_pcc||'&lt;/identificazionePCC>';
+  else
+ 		l_envelope := l_envelope||'
+ 			  &lt;identificazioneSDI>
+				  &lt;lottoSDI>'||sosp.RIFERIMENTOSDI||'&lt;/lottoSDI>
+				  &lt;numeroFattura>'||sosp.num_doc||'&lt;/numeroFattura>
+			  &lt;/identificazioneSDI>';
+  end if;			  
+  l_envelope := l_envelope||'
+            &lt;listaOperazione>
+               &lt;operazione>
+                  &lt;tipoOperazione>CO&lt;/tipoOperazione>
+                  &lt;progressivoOperazione>00001&lt;/progressivoOperazione>
+                  &lt;strutturaDatiOperazione>
+                     &lt;listaContabilizzazione>
+                        &lt;contabilizzazione>
+                           &lt;importoMovimento>'||ltrim(to_char(abs(sosp.co_importo),'999999990.00'))||'&lt;/importoMovimento>
+                           &lt;naturaSpesa>'||nvl(sosp.co_natura,'NA')||'&lt;/naturaSpesa>
+                           &lt;operazione>
+                              &lt;statoDebito>'||l_stato_deb||'&lt;/statoDebito>';
+  if l_stato_deb='SOSP' then            
+  l_envelope := l_envelope||'
+                              &lt;causale>'||sosp.co_causale||'&lt;/causale>';
+  end if;                              
+  l_envelope := l_envelope||'
+                           &lt;/operazione>
+                           &lt;codiceCIG>'||nvl(sosp.co_cig,'NA')||'&lt;/codiceCIG>
+                           &lt;codiceCUP>'||nvl(sosp.co_cup,'NA')||'&lt;/codiceCUP>
+                        &lt;/contabilizzazione>
+                     &lt;/listaContabilizzazione>
+                &lt;/strutturaDatiOperazione>
+               &lt;/operazione>
+            &lt;/listaOperazione>
+         &lt;/datiRichiesta>
+      &lt;/fat:proxyOperazioneContabileRichiestaTipo>
+	   &lt;/SOAP_ENV:Body>
+	&lt;/SOAP_ENV:Envelope>';
+  l_conta:=1;
+  l_res:='KO';
+-- max 3 tentativi di chiamata
+  while l_res='KO' and l_conta&lt;3 loop
+   l_risultato:=apex_web_service.make_request(
+              p_url => 'http://pdd.regione.basilicata.it:8080/pdd/PD/PD_FatturePCC', 
+              p_action => 'wSProxyOperazioneContabile',
+              p_envelope => l_envelope);
+                     
+   l_res := APEX_WEB_SERVICE.PARSE_XML(
+          p_xml => l_risultato,
+          p_xpath => '//datiRisposta/esitoTrasmissione/text()');
+   l_conta:=l_conta+1;
+  end loop;
+             
+  l_id_pcc:=null;
+  l_cod_err:=null;
+  l_descr_err:=null;        
+  if l_res='OK' then
+    l_id_pcc := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/identificativoTransazionePCC/text()');
+  else 
+    l_cod_err := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/listaErroreTrasmissione/erroreTrasmissione/codice/text()');
+    l_descr_err := APEX_WEB_SERVICE.PARSE_XML(
+                p_xml => l_risultato,
+                p_xpath => '//datiRisposta/listaErroreTrasmissione/erroreTrasmissione/descrizione/text()');
+  
+  end if;	
+  select nvl(max(id),0)+1
+   into l_id
+   from pcc_flussi;
+   
+  insert into pcc_flussi
+    (id, data_ric_proxy, chiave_fattura, progr_azione, tipo_richiesta, id_ente,
+     l_res, l_cod_err, l_descr_err, l_id_pcc,l_envelope,l_risultato.getclobval()); 
+     risposta_imm, cod_err_imm, descr_err_imm, id_pcc, xml_inviato, xml_risp)
+    values
+    (l_id,sysdate, sosp.chiave, sosp.progr, l_sdeb_agg, 'REGBAS'||lpad(l_op,8,0),
+  update pcc_azioni_fatt set
+    data_invio_flusso = sysdate
+    where chiave=sosp.chiave and
+          progr=sosp.progr;
+  commit;
+end loop;		
+-- aggiorna sospensione non inviate perche' e' stato inviato un flusso scadenza
+update pcc_azioni_fatt a
+ set a.data_invio_flusso = to_date(to_char(sysdate,'yyyymmdd')||'2359','yyyymmddhh24mi')
+ where a.azione in ('CO','CS') and
+       --CO_STATO='SOSP' and
+			 a.data_invio_flusso is null and
+       0=(select count(*) 
+            from pcc_flussi f
+            where f.chiave_fattura=a.chiave and
+                  trunc(f.data_ric_proxy,'DD')=trunc(a.data_invio_flusso,'DD') and
+                  nvl(f.risposta_imm,'KO')='KO');
+
+-- aggiorna flussi inviati ma non ricevuti (senza data risposta servizio) in modo da reinviarli il giorno successivo 
+update pcc_azioni_fatt a
+set a.data_invio_flusso=null
+where (chiave,progr) in 
+(select chiave_fattura,progr_azione
+           from pcc_flussi f
+           where trunc(f.data_ric_proxy,'DD')=trunc(a.data_invio_flusso,'DD') and
+                 f.risposta_imm is null);
+                 
+commit;
+end;</pre>	</td></tr>
+</table></div>

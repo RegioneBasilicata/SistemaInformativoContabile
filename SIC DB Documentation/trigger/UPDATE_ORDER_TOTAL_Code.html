@@ -1,0 +1,32 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>UPDATE_ORDER_TOTAL</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="UPDATE_ORDER_TOTAL.html">Details</a></div></div>
+<div class="tab"><div><a href="UPDATE_ORDER_TOTAL_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="UPDATE_ORDER_TOTAL_References.html">References</a></div></div>
+<div class="tab"><div><a href="UPDATE_ORDER_TOTAL_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="UPDATE_ORDER_TOTAL_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2"."UPDATE_ORDER_TOTAL"
+after insert or update or delete on demo_order_items
+begin
+
+-- Update the Order Total when any order item is changed
+
+update demo_orders set order_total =
+  (select sum(unit_price*quantity) from demo_order_items
+    where demo_order_items.order_id = demo_orders.order_id);
+end;</pre>	</td></tr>
+</table></div>

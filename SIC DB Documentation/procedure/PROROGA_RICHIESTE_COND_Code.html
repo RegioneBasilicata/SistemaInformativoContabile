@@ -1,0 +1,153 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PROROGA_RICHIESTE_COND</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PROROGA_RICHIESTE_COND.html">Details</a></div></div>
+<div class="tab"><div><a href="PROROGA_RICHIESTE_COND_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PROROGA_RICHIESTE_COND_References.html">References</a></div></div>
+<div class="tab"><div><a href="PROROGA_RICHIESTE_COND_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PROROGA_RICHIESTE_COND_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure Proroga_richieste_cond (p_anno in number, p_data_fine in date) is 
+-- procedura da usare ad inizio anno se è necessario prorogare le richieste per SOLA LIQUIDAZIONE fatto nell'anno n-1 ai primi mesi dell'anno n
+
+p_codice_parte1 varchar2(100);
+p_codice_parte2 varchar2(100);
+p_ufficio varchar2(10);
+
+
+  cursor richieste is 
+  select id 
+  ,struttura_richiedente ufficio
+  ,capitolo_rich capitolo
+  ,data
+  ,data_fine_rich
+  from fin_t_cdg_richieste
+  where to_char(data,'yyyy') = p_anno-1
+  and nvl(FL_DECISIONE_CDG,'X') = 'A'
+  and to_char(data_fine_cdg,'yyyy') = p_anno - 1
+  and nvl(FL_SOLO_LIQUIDAZIONE,'X') = 'S';
+  
+  cursor obiettivi is
+  select CODICE_PARTE1  p_codice_parte1
+        ,CODICE_PARTE2 p_codice_parte2
+  from  fin_t_obiettivi_gestionali
+        where anno = p_anno
+        and ufficio = p_ufficio
+        and codice_parte3 = '0'
+        and data_assestamento = TO_DATE('01011900','DDMMYYYY');
+
+BEGIN
+
+      FOR r IN richieste loop
+      p_ufficio := r.ufficio;
+      
+      update fin_t_cdg_richieste set data_fine_rich = p_data_fine, data_fine_cdg = p_data_fine where id = r.id;
+
+      BEGIN
+        -- **** inserimento record sulla Strutture_Capitoli
+        INSERT INTO fin_t_strutture_capitoli
+         (FIN_T_DIPARTIMENTI_ANNO
+         ,FIN_T_DIPARTIMENTI_CODICE
+         ,FIN_T_STRUTTURE_ANNO
+         ,FIN_T_STRUTTURE_CODICE
+         ,CAPITOLO_ANNO
+         ,CAPITOLO_EU
+         ,CAPITOLO_CODICE
+         ,VALIDITA_DAL
+         ,VALIDITA_AL
+         ,DATA_ASSESTAMENTO
+         ,AGGIORNATO_DA
+         ,DATA_AGGIORNAMENTO
+         ,TITOLARITA
+         ,IMPORTO_CONDIVISIONE
+         ,DATA_I_CONDIVISIONE
+         ,DATA_F_CONDIVISIONE
+         ,IMPORTO_IMPEGNATO
+         ,IMPORTO_PRENOTATO) VALUES
+         (p_anno
+          ,substr(r.ufficio,1,2)
+          ,p_anno
+          ,r.ufficio
+          ,p_anno
+          ,'U'
+          ,r.capitolo
+          ,r.data
+          ,p_data_fine
+          ,TO_DATE('01011900','DDMMYYYY')
+          ,1000
+          ,sysdate
+          ,'D'
+          ,0
+          ,r.data
+          ,r.data_fine_rich
+          ,0
+          ,0);  
+       EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+
+        UPDATE fin_t_strutture_capitoli
+        SET importo_condivisione = importo_condivisione,
+            data_i_condivisione = LEAST(data_i_condivisione,r.data),
+            data_f_condivisione = GREATEST(data_f_condivisione,p_data_fine),
+            aggiornato_da = 1000,
+            data_aggiornamento = SYSDATE
+        WHERE FIN_T_DIPARTIMENTI_ANNO = p_anno AND
+              FIN_T_DIPARTIMENTI_CODICE = substr(r.ufficio,1,2) AND
+              FIN_T_STRUTTURE_ANNO = p_anno AND
+              FIN_T_STRUTTURE_CODICE = r.ufficio AND
+              CAPITOLO_ANNO = p_anno AND
+              CAPITOLO_EU = 'U' AND
+              CAPITOLO_CODICE = r.capitolo AND
+              DATA_ASSESTAMENTO = TO_DATE('01011900','DDMMYYYY');
+         END;
+         
+         for o in obiettivi loop
+       BEGIN
+        INSERT INTO fin_t_obiettivi_gest_capitoli
+         (fin_t_asp_anno,fin_t_asp_codice,fin_t_direttrice_anno,fin_t_direttrice_codice,fin_t_risultati_anno,
+          fin_t_risultati_codice,fin_t_og_anno,fin_t_og_codice_parte1,fin_t_og_codice_parte2,fin_t_og_codice_parte3,
+          capitolo_anno,capitolo_eu,capitolo_codice,data_assestamento,titolarita,
+          importo_condivisione,data_i_condivisione,data_f_condivisione) VALUES
+         (p_anno,'0',p_anno,'0',p_anno,
+         'X',p_anno,o.p_codice_parte1,o.p_codice_parte2,'0',
+          p_anno,'U',r.capitolo,TO_DATE('01011900','DDMMYYYY'),'D',
+          0,r.data,p_data_fine);  
+       EXCEPTION WHEN DUP_VAL_ON_INDEX THEN
+
+        UPDATE fin_t_obiettivi_gest_capitoli
+        SET importo_condivisione = importo_condivisione,
+            data_i_condivisione = LEAST(data_i_condivisione,r.data),
+            data_f_condivisione = GREATEST(data_f_condivisione,p_data_fine),
+            aggiornato_da = 1000,
+            data_aggiornamento = SYSDATE
+        WHERE FIN_T_ASP_ANNO = p_anno AND
+              FIN_T_ASP_CODICE = '0' AND
+              FIN_T_DIRETTRICE_ANNO = p_anno AND
+              FIN_T_DIRETTRICE_CODICE = '0' AND
+              FIN_T_RISULTATI_ANNO = p_anno AND
+              FIN_T_RISULTATI_CODICE = 'X' AND 
+              FIN_T_OG_ANNO = p_anno AND
+              FIN_T_OG_CODICE_PARTE1 = o.p_codice_parte1 AND
+              FIN_T_OG_CODICE_PARTE2 = o.p_codice_parte2 AND
+              FIN_T_OG_CODICE_PARTE3 = '0' AND
+              CAPITOLO_ANNO = p_anno AND
+              CAPITOLO_EU = 'U' AND
+              CAPITOLO_CODICE = r.capitolo AND
+              DATA_ASSESTAMENTO = TO_DATE('01011900','DDMMYYYY');
+       END;
+       END LOOP;
+     END LOOP; 
+     commit;
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,72 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LETT_DATI_IMP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LETT_DATI_IMP.html">Details</a></div></div>
+<div class="tab"><div><a href="LETT_DATI_IMP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LETT_DATI_IMP_References.html">References</a></div></div>
+<div class="tab"><div><a href="LETT_DATI_IMP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LETT_DATI_IMP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure LETT_DATI_IMP (sel_mia in varchar2,risultato1 out varchar2,risultato2 out varchar2,risultato3 out varchar2,
+risultato4 out varchar2,risultato5 out varchar2,risultato6 out varchar2,risultato7 out varchar2,risultato8 out varchar2,
+risultato9 out varchar2,risultato10 out varchar2) is
+  TYPE cursor_ref IS REF CURSOR;
+  c1 cursor_ref;
+  TYPE ris1 IS TABLE OF NUMBER;
+  TYPE ris2 IS TABLE OF NUMBER;
+  TYPE ris3 IS TABLE OF NUMBER;
+  TYPE ris4 IS TABLE OF NUMBER;
+  TYPE ris5 IS TABLE OF NUMBER;
+  TYPE ris6 IS TABLE OF NUMBER;
+  TYPE ris7 IS TABLE OF NUMBER;
+  TYPE ris8 IS TABLE OF NUMBER;
+  TYPE ris9 IS TABLE OF NUMBER;
+  TYPE ris10 IS TABLE OF NUMBER;
+
+  --TYPE risultati IS TABLE OF n_ris;
+
+  ok_ris1 ris1;
+  ok_ris2 ris2;
+  ok_ris3 ris3;
+  ok_ris4 ris4;
+  ok_ris5 ris5;
+  ok_ris6 ris6;
+  ok_ris7 ris7;
+  ok_ris8 ris8;
+  ok_ris9 ris9;
+  ok_ris10 ris10;
+
+  rows_fetched NUMBER;
+  tot1         NUMBER;
+BEGIN
+--  OPEN c1 FOR 'SELECT :col FROM vw_dati_imp where comdef=:com and prvdef=:prov' USING colonna1,comune1,provincia1;
+  tot1:=0;
+--  OPEN c1 FOR 'SELECT :colonna1 FROM AGR_IMP_AZIENDA d, AGR_IMP_ANAG a where d.codaz=a.codaz and a.comdef=:comune1 and prvdef=:provincia1' USING colonna1,comune1,provincia1;
+--  sel_mia:='SELECT sum(SAT1) FROM AGR_IMP_AZIENDA';
+  OPEN c1 FOR sel_mia;
+
+  FETCH c1 BULK COLLECT INTO ok_ris1,ok_ris2,ok_ris3,ok_ris4,ok_ris5,ok_ris6,ok_ris7,ok_ris8,ok_ris9,ok_ris10;
+  risultato1:=ok_ris1(1);
+  risultato2:=ok_ris2(1);
+  risultato3:=ok_ris3(1);
+  risultato4:=ok_ris4(1);
+  risultato5:=ok_ris5(1);
+  risultato6:=ok_ris6(1);
+  risultato7:=ok_ris7(1);
+  risultato8:=ok_ris8(1);
+  risultato9:=ok_ris9(1);
+  risultato10:=ok_ris10(1);
+END;</pre>	</td></tr>
+</table></div>

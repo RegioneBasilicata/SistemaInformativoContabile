@@ -1,0 +1,214 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BDAP_CONSOLIDATO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BDAP_CONSOLIDATO.html">Details</a></div></div>
+<div class="tab"><div><a href="BDAP_CONSOLIDATO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BDAP_CONSOLIDATO_References.html">References</a></div></div>
+<div class="tab"><div><a href="BDAP_CONSOLIDATO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BDAP_CONSOLIDATO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure BDAP_CONSOLIDATO (p_anno number) as
+--'899342930540086001' -- codice BDAP REGIONE
+
+c_riga number:= 0;
+link_href varchar2(2000);
+p_utente varchar2(25) := 'CONS'||p_anno;
+risultato_es_prec number := 0;
+p_id_ente varchar2(50) := '899342930540086001';
+
+-- ******* select STato PAtrimoniale
+cursor sp is
+select '&lt;sr:'||tag_bdap||' decimals="2" contextRef="i_'||anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto
+,'&lt;sr:'||tag_bdap||' decimals="2" contextRef="i_'||(anno-1)||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo1,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto1
+from (SELECT
+c.anno,
+b.tag_bdap,
+decode(b.tipo,'A',1,'P',2,3),
+b.ordinamento_stampa,
+sum(nvl(c.IMPORTO,0)) importo,
+sum(nvl(c.IMPORTO1,0)) importo1
+FROM
+regbas_consolidato.CONS_BIL_CONSOLIDATO c 
+,regbas_consolidato.CONS_PIACEE b
+WHERE
+c.anno = p_anno
+and b.id = c.ID_CONTO
+and b.tipo in ('A','P','CO')
+and b.TAG_BDAP is not null
+--and nvl(b.aggregato,'X') &lt;> 'S'
+group by
+c.anno,
+decode(b.tipo,'A',1,'P',2,3),
+b.ordinamento_stampa,
+b.TAG_BDAP
+order by decode(b.tipo,'A',1,'P',2,3),
+b.ordinamento_stampa);
+-- **********************************
+
+-- ******* select Conto Economico
+cursor ce is 
+select '&lt;sr:'||tag_bdap||' decimals="2" contextRef="d_'||anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto
+,'&lt;sr:'||tag_bdap||' decimals="2" contextRef="d_'||(anno-1)||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(importo1,0),'9999999990.00'))||'&lt;/sr:'||tag_bdap||'>' contenuto1
+from (SELECT
+c.anno,
+b.tag_bdap,
+b.ordinamento_stampa,
+sum(nvl(c.IMPORTO,0)) importo,
+sum(nvl(c.IMPORTO1,0)) importo1
+FROM
+regbas_consolidato.CONS_BIL_CONSOLIDATO c 
+,regbas_consolidato.CONS_PIACEE b
+WHERE
+c.anno = p_anno
+and b.id = c.ID_CONTO
+and b.tipo = 'E'
+and b.TAG_BDAP is not null
+group by
+c.anno,
+b.ordinamento_stampa,
+b.TAG_BDAP
+order by b.ordinamento_stampa);
+-- ************************************
+
+-- *********** FINE CURSORI
+
+
+
+
+begin
+ delete fin_t_bdap where anno = p_anno and utente = p_utente and substr(tipo_trasmissione,1,4) = 'CONS';
+  commit;
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',010,'&lt;?xml version="1.0" encoding="UTF-8"?>');
+
+-- anche gli ENTI STRUMENTALI seguono gli schemi REGIONE
+ -- if p_id_ente='899342930540086001' --REGIONE
+ --  then 
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',020,'  &lt;xbrli:xbrl xmlns:sre="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/regioni/2016-10-18" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:sr="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/2016-10-18" xmlns:common="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/common/2016-10-18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink">');
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',030,'   &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-sdb-cons_2016-10-18.xsd"/>');
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',020,'  &lt;xbrli:xbrl xmlns:sre="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/regioni/2017-09-29" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:sr="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/2017-09-29" xmlns:common="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/common/2017-09-29" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',030,'   &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-sdb-cons_2017-09-29.xsd"/>');
+ -- else 
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',020,'  &lt;xbrli:xbrl xmlns:sre="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/enti/2016-10-18" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:sr="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/2016-10-18" xmlns:common="http://www.rgs.mef.gov.it/xbrl/bdap/sdb/rend/common/2016-10-18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink">');
+--insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',030,'   &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-sdb-rend-enti_2016-10-18.xsd"/>');
+ -- end if;
+
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',040,'   &lt;xbrli:context id="d_'||p_anno||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',050,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',060,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',070,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',080,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',090,'       &lt;xbrli:startDate>'||p_anno||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',100,'       &lt;xbrli:endDate>'||p_anno||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',110,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',120,'   &lt;/xbrli:context>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',130,'   &lt;xbrli:context id="i_'||p_anno||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',140,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',150,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',160,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',170,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',180,'       &lt;xbrli:instant>'||p_anno||'-12-31&lt;/xbrli:instant>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',190,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',200,'   &lt;/xbrli:context>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',210,'  &lt;xbrli:context id="i_'||p_anno||'ape">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',220,'    &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',230,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',240,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',250,'    &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',260,'      &lt;xbrli:instant>'||p_anno||'-01-01&lt;/xbrli:instant>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',270,'    &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',280,'  &lt;/xbrli:context>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',290,'  &lt;xbrli:unit id="eur">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',300,'    &lt;xbrli:measure>iso4217:EUR&lt;/xbrli:measure>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',310,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',320,'  &lt;xbrli:unit id="pure">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',330,'    &lt;xbrli:measure>xbrli:pure&lt;/xbrli:measure>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',340,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',345,'   &lt;xbrli:context id="d_'||(p_anno-1)||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',350,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',360,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',370,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',380,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',390,'       &lt;xbrli:startDate>'||(p_anno-1)||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',400,'       &lt;xbrli:endDate>'||(p_anno-1)||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',410,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',420,'   &lt;/xbrli:context>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',430,'   &lt;xbrli:context id="i_'||(p_anno-1)||'">');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',440,'     &lt;xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',450,'       &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',460,'     &lt;/xbrli:entity>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',470,'     &lt;xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',480,'       &lt;xbrli:instant>'||(p_anno-1)||'-12-31&lt;/xbrli:instant>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',490,'     &lt;/xbrli:period>');
+insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',500,'   &lt;/xbrli:context>');
+-- SDB
+
+-- setto valore riga
+c_riga := 600;
+
+-- determino (se presente) risultato esercizio anno precedente
+    select nvl(sum(nvl(importo,0)),0)
+    into risultato_es_prec
+    from regbas_consolidato.CONS_BIL_CONSOLIDATO
+    where anno = p_anno-1
+    and CODICE_CONTO = 'EG27';
+
+-- ************ CE + SP ***************
+--Genera_Economica.piacee_importi(p_anno,99999);
+-- ************ DATI CE ***************
+
+for c in ce loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','M',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+  if nvl(risultato_es_prec,0) &lt;> 0
+    then 
+    insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','M',c_riga,c.contenuto1);
+    c_riga := c_riga + 1;
+  end if;
+
+end loop;
+  commit;
+
+-- *********** FINE CE *************
+
+-- ************ DATI SP ***************
+
+for c in sp loop
+
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','M',c_riga,c.contenuto);
+
+  c_riga := c_riga + 1;
+
+  if risultato_es_prec &lt;> 0
+    then 
+    insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','M',c_riga,c.contenuto1);
+    c_riga := c_riga + 1;
+  end if;
+
+end loop;
+  commit;
+
+-- *********** FINE SP *************
+
+-- ******* Chiusura FILE XBLR ******
+ insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'CONSSDB','T',c_riga,'&lt;/xbrli:xbrl>');
+   commit;
+-- *********************************
+END;</pre>	</td></tr>
+</table></div>

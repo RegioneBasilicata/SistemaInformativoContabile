@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LOG_ARTICOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LOG_ARTICOLI.html">Details</a></div></div>
+<div class="tab"><div><a href="LOG_ARTICOLI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LOG_ARTICOLI_References.html">References</a></div></div>
+<div class="tab"><div><a href="LOG_ARTICOLI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LOG_ARTICOLI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER LOG_ARTICOLI 
+after delete or update
+on fin_t_articoli
+for each row
+declare
+tipo_aggiornamento varchar2(1);
+data_aggiornamento date;
+begin
+if updating
+   then tipo_aggiornamento := 'U';
+   else tipo_aggiornamento := 'D';
+end if;
+data_aggiornamento := sysdate;
+insert into fin_t_log_articoli values
+(:OLD.ANNO,
+:OLD.EU,
+:OLD.TITOLO,
+:OLD.CATEGORIA,
+:OLD.CAPITOLO,
+:OLD.CODICE,
+:OLD.DESCRIZIONE,
+:OLD.CODICE_NUM,
+:OLD.CODICE_MECCANOGRAFICO,
+:OLD.TITOLO_SETTORE_RUBRICA,
+:OLD.CODICE_STATISTICO,
+:OLD.CODICE_PRECEDENTE,
+:OLD.CODICE_PRECEDENTE2,
+:OLD.CODICE_PRECEDENTE3,
+:OLD.CODICE_PRECEDENTE4,
+:OLD.CODICE_PRECEDENTE5,
+:OLD.FLAG_MUTUO,
+:OLD.FLAG_SPESA_OBBLIGATORIA,
+:OLD.FLAG_AVANZO_VINCOLATO,
+:OLD.FLAG_SPESE_CORRENTI,
+:OLD.FLAG_SPESE_INVESTIMENTO,
+:OLD.FLAG_SPESE_ANNUALITA,
+:OLD.FLAG_SPESE_RIMBORSO_PRESTITI,
+:OLD.FLAG_ASSEGNAZIONE_STATO_UE,
+:OLD.DIPARTIMENTO,
+:OLD.NATURA_SPESA,
+:OLD.NATURA_ENTRATA,
+:OLD.FONTE_FINANZIAMENTO,
+:OLD.LEGGE_ISTITUTIVA,
+:OLD.PROVVEDIMENTO,
+:OLD.PIANO_DEI_CONTI,
+:OLD.PIANO_DEI_CONTI2,
+:OLD.PIANO_DEI_CONTI3,
+:OLD.PIANO_DEI_CONTI4,
+:OLD.PIANO_DEI_CONTI5,
+:OLD.FLAG_ASSESTAMENTO,
+:OLD.TABELLA,
+:OLD.ANNO_ISTITUZIONE,
+:OLD.ABILITATO,
+:OLD.MODIFICATO_NUOVO,
+:OLD.FLAG_PERENTI,
+:OLD.ANNO_TERMINALE_TABELLA,
+:OLD.CODICE_BILANCIO_SIOPE,
+:OLD.CODICE_GESTIONALE_SIOPE,
+tipo_aggiornamento,
+data_aggiornamento,
+:OLD.SANITA_SN            ,
+:OLD.NOTE_SANITA          ,
+:OLD.NB_PIANO_CONTI_FINA  ,
+:OLD.NB_PIANO_CONTI_ECON  ,
+:OLD.NB_PIANO_CONTI_PATR  ,
+:OLD.NB_CODICE_TRANSAZIONE,
+:OLD.NB_ENTRATA_RICORRENTE,
+:OLD.NB_TITOLO            ,
+:OLD.NB_MACROAGGREGATO    ,
+:OLD.NB_COFOG_II_LIVELLO  ,
+:OLD.NB_ID_PADRE          ,
+:OLD.NB_PRU               ,
+:OLD.CONTO_SANITA         ,
+:OLD.NB_FPV               ,
+:OLD.NB_CAPITOLO_FPV      ,
+:OLD.FONDO                ,
+:OLD.VOCE_PSI_IMP         ,
+:OLD.VOCE_PSI_PAG         ,
+:OLD.VOCE_PSI_PAG2        ,
+:OLD.CONTO_SANITA2        ,
+nvl(v('APP_USER'),user));
+end;</pre>	</td></tr>
+</table></div>

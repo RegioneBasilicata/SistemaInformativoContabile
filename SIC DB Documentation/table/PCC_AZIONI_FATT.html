@@ -1,0 +1,303 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PCC_AZIONI_FATT</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="PCC_AZIONI_FATT.html">Colonne</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="PCC_AZIONI_FATT_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>CHIAVE</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PROGR</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AZIONE</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RC_DATA_RIC</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RC_NOTE</td>
+<td>VARCHAR2(1024 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_IMPORTO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_NATURA</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_CAPITOLO</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_STATO</td>
+<td>VARCHAR2(9 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_CAUSALE</td>
+<td>VARCHAR2(7 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_DESCR</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_IMPEGNO</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_CIG</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CO_CUP</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CS_COM_SCAD</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CS_IMPORTO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CS_DATA_SCAD</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_IMP_PAG</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_NATURA</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_CAPITOLI</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_IMPEGNO</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_MAND_NUM</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_MAND_DATA</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_CIG</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_CUP</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CP_DESCR_PAG</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RF_DATA</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RF_NOTE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATO_DA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATO_IL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AGGIORNATO_DA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AGGIORNATO_IL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_INVIO_FLUSSO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOC_ID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>id del mandato o storno per movimenti CP</td>
+	</tr>
+</table></div>

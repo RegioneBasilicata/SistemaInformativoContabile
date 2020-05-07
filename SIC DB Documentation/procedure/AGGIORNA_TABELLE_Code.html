@@ -1,0 +1,339 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_TABELLE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_TABELLE.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_TABELLE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_TABELLE_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_TABELLE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_TABELLE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE      aggiorna_tabelle (wanno in NUMBER, wusername in VARCHAR2, wmessaggio out VARCHAR2) IS
+
+ultimo_anno_aperto number;
+
+begin
+wmessaggio := 'Aggiornamento Tabelle Esercizio Attivo da Precedente&lt;br>';
+
+/*select NVl(max (anno_finanziario),0) into ultimo_anno_aperto
+from fin_t_dati_generali;
+
+if wanno &lt;= ultimo_anno_aperto
+   then wmessaggio := 'Anno Contabile gia'' Presente&lt;br>';
+  	    return;
+end if;
+*/
+
+-- Tabelle Importi Manuali Report
+delete fnd_reports_importi_man where valore_parametro_anno=wanno;
+commit;
+
+insert into fnd_reports_importi_man
+(nome_campo_report
+,descrizione_campo_report
+,importo
+,valore_parametro_anno
+,id_report
+,utente_creazione
+,data_creazione
+,utente_aggiornamento
+,data_aggiornamento)
+select 
+ nome_campo_report
+,descrizione_campo_report
+,0
+,wanno
+,id_report
+,utente_creazione
+,data_creazione
+,null
+,null
+from fnd_reports_importi_man
+where valore_parametro_anno = wanno - 1;
+exception when dup_val_on_index then null;--22/10/2019 Gerry per modifica campi UFADL_ENTRATE_ANNO, UFADL_ENTRATE_ANNO1, UFADL_ENTRATE_ANNO2
+wmessaggio := wmessaggio ||  'Generazione Importi Manuali Reports&lt;br>';
+commit;
+
+
+-- Tabelle Legge Finanziaria
+delete fin_t_tabelle_legge_finanz where anno=wanno;
+commit;
+
+insert into fin_t_tabelle_legge_finanz 
+(anno
+,codice
+,descrizione
+,programma_stampa
+,anno_terminale
+,descrizione_assestamento)
+select
+wanno
+,codice
+,descrizione
+,programma_stampa
+,anno_terminale
+,descrizione_assestamento
+from fin_t_tabelle_legge_finanz 
+where anno = wanno -1;
+wmessaggio := wmessaggio ||  'Generazione Tabelle Legge Finanziaria Completata&lt;br>';
+
+
+-- Tabelle Modulo Fiscale
+delete fin_raggr_capitoli_dettaglio where anno=wanno;
+commit;
+delete fin_raggr_capitoli_testata where anno=wanno;
+commit;
+
+insert into fin_raggr_capitoli_testata
+(codice
+,descrizione
+,tipo_report
+,anno)
+select 
+codice
+,descrizione
+,tipo_report
+,wanno
+from fin_raggr_capitoli_testata
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  'Generazione Mod.Fiscale Testata&lt;br>';
+commit;
+
+insert into fin_raggr_capitoli_dettaglio
+(codice_raggruppamento
+,codice_capitolo
+,anno
+,tipologia_reddito
+,stampa_certificazioni)
+select 
+ codice_raggruppamento
+,codice_capitolo
+,wanno
+,tipologia_reddito
+,stampa_certificazioni
+from fin_raggr_capitoli_dettaglio
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  'Generazione Mod.Fiscale Dettaglio&lt;br>';
+commit;
+
+/* Per adesso non faccio modifiche sul capitoli 
+Bisogna capire se lanciare una copia
+-- Capitoli
+insert into fin_t_articoli
+(ANNO
+,EU
+,TITOLO
+,CATEGORIA
+,CAPITOLO
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM
+,CODICE_MECCANOGRAFICO
+,TITOLO_SETTORE_RUBRICA
+,CODICE_STATISTICO
+,CODICE_PRECEDENTE
+,CODICE_PRECEDENTE2
+,CODICE_PRECEDENTE3
+,CODICE_PRECEDENTE4
+,CODICE_PRECEDENTE5
+,FLAG_MUTUO
+,FLAG_SPESA_OBBLIGATORIA
+,FLAG_AVANZO_VINCOLATO
+,FLAG_SPESE_CORRENTI
+,FLAG_SPESE_INVESTIMENTO
+,FLAG_SPESE_ANNUALITA
+,FLAG_SPESE_RIMBORSO_PRESTITI
+,FLAG_ASSEGNAZIONE_STATO_UE
+,DIPARTIMENTO
+,NATURA_SPESA
+,NATURA_ENTRATA
+,FONTE_FINANZIAMENTO
+,LEGGE_ISTITUTIVA
+,PROVVEDIMENTO
+,PIANO_DEI_CONTI
+,PIANO_DEI_CONTI2
+,PIANO_DEI_CONTI3
+,PIANO_DEI_CONTI4
+,PIANO_DEI_CONTI5
+,FLAG_ASSESTAMENTO
+,TABELLA
+,ANNO_ISTITUZIONE
+,ABILITATO
+,MODIFICATO_NUOVO
+,FLAG_PERENTI
+,ANNO_TERMINALE_TABELLA
+,CODICE_BILANCIO_SIOPE
+,CODICE_GESTIONALE_SIOPE
+,SANITA_SN
+,NOTE_SANITA
+,NB_PIANO_CONTI_FINA
+,NB_PIANO_CONTI_ECON
+,NB_PIANO_CONTI_PATR
+,NB_CODICE_TRANSAZIONE
+,NB_ENTRATA_RICORRENTE
+,NB_TITOLO
+,NB_MACROAGGREGATO
+,NB_COFOG_II_LIVELLO
+,NB_ID_PADRE
+,NB_PRU
+,CONTO_SANITA
+,NB_FPV
+,NB_CAPITOLO_FPV
+,FONDO
+,VOCE_PSI_IMP
+,VOCE_PSI_PAG
+,VOCE_PSI_PAG2
+,CONTO_SANITA2
+,NB_USCITA_RICORRENTE
+,CHIAVE_CONTABILE
+,COD_CONTO_EVIDENZA
+,TIPO_ENTRATA
+,TIPO_CONTABILITA_ENTE_RICEV
+,DESTINAZIONE)
+select 
+ WANNO
+,EU
+,TITOLO
+,CATEGORIA
+,CAPITOLO
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM
+,CODICE_MECCANOGRAFICO
+,TITOLO_SETTORE_RUBRICA
+,CODICE_STATISTICO
+,eu||codice
+,null
+,null
+,null
+,null
+,FLAG_MUTUO
+,FLAG_SPESA_OBBLIGATORIA
+,FLAG_AVANZO_VINCOLATO
+,FLAG_SPESE_CORRENTI
+,FLAG_SPESE_INVESTIMENTO
+,FLAG_SPESE_ANNUALITA
+,FLAG_SPESE_RIMBORSO_PRESTITI
+,FLAG_ASSEGNAZIONE_STATO_UE
+,DIPARTIMENTO
+,NATURA_SPESA
+,NATURA_ENTRATA
+,FONTE_FINANZIAMENTO
+,LEGGE_ISTITUTIVA
+,PROVVEDIMENTO
+,PIANO_DEI_CONTI
+,PIANO_DEI_CONTI2
+,PIANO_DEI_CONTI3
+,PIANO_DEI_CONTI4
+,PIANO_DEI_CONTI5
+,'N' -- FLAG_ASSESTAMENTO
+,TABELLA
+,ANNO_ISTITUZIONE
+,nvl(ABILITATO,'S')
+,NULL -- Modificato / Nuovo
+,FLAG_PERENTI
+,ANNO_TERMINALE_TABELLA
+,CODICE_BILANCIO_SIOPE
+,CODICE_GESTIONALE_SIOPE
+,SANITA_SN
+,NOTE_SANITA
+,NB_PIANO_CONTI_FINA
+,NB_PIANO_CONTI_ECON
+,NB_PIANO_CONTI_PATR
+,NB_CODICE_TRANSAZIONE
+,NB_ENTRATA_RICORRENTE
+,NB_TITOLO
+,NB_MACROAGGREGATO
+,NB_COFOG_II_LIVELLO
+,NB_ID_PADRE + 100000 --NB_ID_PADRE
+,NB_PRU
+,CONTO_SANITA
+,NB_FPV
+,NB_CAPITOLO_FPV
+,FONDO
+,VOCE_PSI_IMP
+,VOCE_PSI_PAG
+,VOCE_PSI_PAG2
+,CONTO_SANITA2
+,NB_USCITA_RICORRENTE
+,CHIAVE_CONTABILE
+,COD_CONTO_EVIDENZA
+,TIPO_ENTRATA
+,TIPO_CONTABILITA_ENTE_RICEV
+,DESTINAZIONE
+from 
+fin_t_articoli 
+where 
+anno = wanno - 1 and
+nvl(abilitato,'S') &lt;> 'N';
+wmessaggio := wmessaggio ||  'Generazione Capitoli Completata&lt;br>';
+commit;
+*/
+-- Dati Generali
+update fin_t_dati_generali 
+set ATTIVO = 'S' 
+   ,AVANZO_AMMINISTRAZIONE = 0
+   ,CASSA = 0
+   ,VARIAZIONE_AVANZO_PIU=0
+   ,VARIAZIONE_AVANZO_MENO=0
+   ,AVANZO_REGIONALE=0
+   ,VARIAZIONE_CASSA_PIU=0
+   ,VARIAZIONE_CASSA_MENO=0
+   ,BILANCIO_PREVISIONE_APERTO='S'
+   ,VISIBILITA_ASSESTAMENTO='S' 
+   ,RUOLO_VISIBILITA_ASSESTAMENTO=null
+   ,VISIBILITA_PREVISIONE='S'
+   ,RUOLO_OPERAZIONI_RAGIONERIA=null
+   ,DATA_ATTO_ASSESTAMENTO=null
+   ,NUMERO_ATTO_ASSESTAMENTO=null
+   ,VARIAZIONE_AVANZO_DELIBERA=0
+   ,OBIETTIVO_PATTO_STABILITA=0
+   ,OBIETTIVO_PATTO_STABILITA_IMP=0
+   ,SFORAMENTO_PATTO_PREC=0
+   ,QUOTA_ENTI_LOCALI=0
+   ,DISAVANZO_AMMINISTRAZIONE=0
+   ,MANUTENZIONE_SISTEMA='N'
+   ,MESSAGGIO_MANUTENZIONE_SISTEMA=null
+   ,MANUTENZIONE_PACKAGE='N'
+   ,MSG_MANUTENZIONE_PACKAGE=null
+   ,VARIAZIONE_DISAVANZO_PIU=0
+   ,VARIAZIONE_DISAVANZO_MENO=0
+   ,DISAVANZO_REGIONALE=0
+   ,QUOTA_ENTI_LOCALI_IMP=0
+   ,DISAVANZO_EFFETTIVO_ANNI_PREC=0
+   ,ATTIVO_PLURIENNALE='N'
+   ,FPV_CORRENTE=nvl(FPV_CORRENTE,0)+NVL(VARIAZIONE_FPV_CORRENTE,0)
+   ,FPV_CAPITALE=nvl(FPV_CAPITALE,0)+NVL(VARIAZIONE_FPV_CAPITALE,0)
+   ,ATTIVO_PROVVEDIMENTI='N'
+   ,VARIAZIONE_FPV_CORRENTE=0
+   ,VARIAZIONE_FPV_CAPITALE=0
+   ,DATA_APPROVAZIONE_PREVISIONE=null
+   ,DATA_CHIUSURA_ECONOMICA=null
+   ,FONDOCASSA_DICUI_SANITA=0
+   ,RISULTATO_ESERCIZIO=0
+   ,FL_SCHEDE_VALUTAZIONE_VISIBILI='N'
+where anno_finanziario = wanno;
+wmessaggio := wmessaggio ||  'Aggiornamento Dati Generali Completata&lt;br>';
+commit;
+
+-- Aggiorna Tabelle per Controllo di Gestione.
+--controllo_di_gestione(wanno);
+
+commit;
+
+wmessaggio := wmessaggio ||  'Aggiornamento Anno Contabile '||to_char(wanno)||' Completata&lt;br>';
+
+
+end;</pre>	</td></tr>
+</table></div>

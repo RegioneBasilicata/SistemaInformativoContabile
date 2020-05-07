@@ -1,0 +1,199 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CPT_TOTALI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="CPT_TOTALI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="CPT_TOTALI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ANNO</td>
+<td>NUMBER(4,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_ENTE</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DENOMINAZIONE_ENTE</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_COMUNE_ENTE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMUNE_ENTE</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PROVINCIA_ENTE</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_CPT_LIVELLO1</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_CPT_LIVELLO1</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_CPT_LIVELLO2</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_CPT_LIVELLO2</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_CPT_LIVELLO3</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_CPT_LIVELLO3</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ID_CPT_SETTORE</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_CPT_SETTORE</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EU</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>IMPORTO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ABILITATO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TERMINATO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTUFFCPTTOT</td>
+<td>VARCHAR2(500 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTECPTTOTAL</td>
+<td>VARCHAR2(500 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+</table></div>

@@ -1,0 +1,728 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CERTIFICAZIONE_UNICA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CERTIFICAZIONE_UNICA.html">Details</a></div></div>
+<div class="tab"><div><a href="CERTIFICAZIONE_UNICA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CERTIFICAZIONE_UNICA_References.html">References</a></div></div>
+<div class="tab"><div><a href="CERTIFICAZIONE_UNICA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CERTIFICAZIONE_UNICA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE certificazione_unica (pcodice_lettera in varchar2) as
+
+ linebuf01 VARCHAR2(1900);
+ riga number;
+ cont NUMBER := 0;
+ numero_record_G NUMBER(9) := 0;
+ numero_record_H NUMBER(9) := 0;
+ numero_record number(9):=0;
+ alert_button NUMBER;
+
+ lordo_record_g_2005 number(15,2) :=0;
+
+ campocodice varchar2(8);
+ campovalore varchar2(16);  
+--1234567890123456
+
+ codice_fiscale_ente varchar2(16);-- := '80002950766';
+ denominazione_ente1 varchar2(16);--:='REGIONE BASILICA';
+ denominazione_ente2 varchar2(16);-- :='+TA';
+ comune_ente varchar2(16);-- :='POTENZA';
+ provincia_ente varchar2(4);-- :='PZ';
+ cap_ente varchar2(5);-- := '85100';
+ indirizzo_ente1 varchar2(16);--:= 'Via Vincenzo Ver';
+ indirizzo_ente2 varchar2(16);--:= '+rastro,4';
+ telefono_ente varchar2(16);-- := '0971668274';
+ posta_elettronica_ente1 varchar2(16);--:= 'ufficio.ragioner';
+ posta_elettronica_ente2 varchar2(16);--:= '+ia@cert.regione';
+ posta_elettronica_ente3 varchar2(16);--:= '+basilicata.it'; 
+ cf_ente_previdenziale varchar2(16);
+
+
+ -- variabili per tipo record A: Testata
+ A01 VARCHAR2(1) := 'A';
+ A02 VARCHAR2(14) := RPAD(' ',14,' ');
+ A03 VARCHAR2(5) := 'CUR18';  -- Modifica 2018
+ A04 VARCHAR2(2) := '10';
+ A05 VARCHAR2(16);-- := rpad(codice_fiscale_ente,16,' '); -- codice fiscale regione 
+ A06_28 VARCHAR2(483) := RPAD(' ',483,' ');
+ A29 VARCHAR2(4) := LPAD(' ',4,' ');
+ A30 VARCHAR2(4) := LPAD(' ',4,' ');
+ A31_33 VARCHAR2(1368) := RPAD(' ',1368,' ');
+ A34 VARCHAR2(1) := 'A';
+ A35 VARCHAR2(2) := chr(10)||chr(13); 
+
+ B01 varchar2(1) :='B';
+ B02 varchar2(16);--:=rpad(codice_fiscale_ente,16,' ');
+ B03 varchar2(8) := '00000001';
+ B04_07 varchar2(48):= lpad(' ',48,' ');
+ B08 varchar2(16);-- := rpad(codice_fiscale_ente,16,' ');
+ B09_11 varchar2(3) := ' 00';
+ B12_13 varchar2(44) := lpad(' ',44,' ');
+ B14 varchar2(60);--:= rpad('REGIONE BASILICATA',60,' ');
+ B15 varchar2(100);-- := rpad('ufficio.ragioneria@cert.regionebasilicata.it',100,' ');
+ B16 varchar2(12);-- :=rpad('0971668274',12,' ');
+
+ B17   varchar2(1); -- := '0'; -- eventi eccezionali  Modifica 2018
+
+ B18 varchar2(16);-- :=rpad('LVRMTR57R45G942B',16,' '); -- cf dirigente
+ B19 varchar2(2);-- := rpad('14',2,' ');-- tipologia dirigente
+ B20 varchar2(24);-- := rpad('LAVIERI',24,' '); --cognome dirigente
+ B21 varchar2(20);-- := rpad('MARIA TERESA',20,' '); --nome dirigente
+ B22 varchar2(11);-- := rpad(codice_fiscale_ente,16,' ');
+
+-- B23 varchar2(8) ;  Modifica 2017
+ B23 varchar2(19) := lpad(' ',19,' ');    -- Modifica 2017
+
+ B24 varchar2(8) ;
+ B25 varchar2(2) :='01';
+ B26 varchar2(16) := lpad(' ',16,' '); 
+ B27 varchar2(10) := '0000000000';
+
+ -- variabili per tipo record Z: Coda
+ Z01 VARCHAR2(1) := 'Z';
+ Z02 VARCHAR2(14) := RPAD(' ',14,' ');
+ Z03 VARCHAR2(9);
+ Z04 VARCHAR2(9);
+ Z05 VARCHAR2(9);
+ Z06 VARCHAR2(9);
+ Z07 VARCHAR2(9);
+ Z08 VARCHAR2(1837) := RPAD(' ',1837,' ');
+ Z09 VARCHAR2(1);
+ Z10 VARCHAR2(2);
+
+
+--VARIABILI RECORD D
+ D01 VARCHAR2(1) := 'D';
+ D02 VARCHAR2(16);-- := rpad(codice_fiscale_ente,16,' ');
+ D03 VARCHAR2(8) := LPAD('1',8,' ');
+ D04 VARCHAR2(16);
+ D05 VARCHAR2(5) :=LPAD('1',5,' ');
+ D06 VARCHAR2(17):=LPAD('0',17,'0');
+ D07 VARCHAR2(6) :=LPAD('0',6,'0');
+ D08 VARCHAR2(14):=LPAD(' ',14,' ');
+ D09 VARCHAR2(1):=LPAD(' ',1,' ');
+ D10 VARCHAR2(4):=LPAD(' ',4,' ');
+ D11 VARCHAR2(1) := '0';
+
+ DA001001_1 varchar2(24);
+ DA001002_1 varchar2(24);
+ DA001002_2 varchar2(24);
+ DA001003_1 varchar2(24);
+ DA001004_1 varchar2(24);
+ DA001005_1 varchar2(24);
+ DA001006_1 varchar2(24);
+ DA001006_2 varchar2(24);
+ DA001007_1 varchar2(24);
+ DA001007_2 varchar2(24);
+ DA001008_1 varchar2(24);
+ DA001009_1 varchar2(24);
+ DA001009_2 varchar2(24);
+ DA001009_3 varchar2(24);
+ DA001010_1 varchar2(24);
+ DA001011_1 varchar2(24); 
+
+ da002001 varchar2(24);
+ da002002 varchar2(24);
+ da002002_1 varchar2(24);
+ da002003 varchar2(24);
+ da002003_1 varchar2(24);
+ da002004 varchar2(24);
+ da002005 varchar2(24);
+ da002006 varchar2(24);
+ da002006_1 varchar2(24);
+ da002007 varchar2(24);
+ da002020 varchar2(24);
+ da002020_1 varchar2(24);
+ da002021 varchar2(24);
+ da002022 varchar2(24);
+
+ da003001 varchar2(24);
+ da003002 varchar2(24);
+
+ -- variabili per tipo record G: Lavoro Dipendente e Assimilati
+-- G01 VARCHAR2(1) := 'G';
+-- G02 VARCHAR2(16);-- := rpad('80002950766',16,' ');
+-- G03 VARCHAR2(8) := '       1';
+-- G04 VARCHAR2(3) := '   ';
+-- G05 VARCHAR2(1) := ' ';
+-- G06 VARCHAR2(16);
+-- G07_08 VARCHAR2(300) := RPAD(' ',28,' '); 
+-- G09 VARCHAR2(16) := rpad('08245660017',16,' ');
+
+ DB001001 varchar2(24);
+ DB001002 varchar2(24);
+ DB001004 varchar2(24);
+ DB001006 varchar2(24);
+ DB001008 varchar2(24);
+ DB001010 varchar2(24);
+ DB001021 varchar2(24);
+ DB001022 varchar2(24);
+ DB001027 varchar2(24);
+ DB001261 varchar2(24);
+ DB001263 varchar2(24);
+ DB001496 varchar2(24);
+ DB001497 varchar2(24);
+ DB001498 varchar2(24);
+ DB001499 varchar2(24);
+ DB001391 varchar2(24);
+ DB001393 varchar2(24);
+ DB601001 varchar2(24);
+ DB601004 varchar2(24);
+
+-- variabili per tipo record H: Lavoro Autonomo e Assimilati
+
+ AU001001 varchar2(24);
+ AU001004 varchar2(24);
+ AU001006 varchar2(24);
+ AU001007 varchar2(24);
+ AU001008 varchar2(24);
+ AU001009 varchar2(24);
+ AU001013 varchar2(24);
+
+ AU001029 varchar2(24) := 'AU001029'||cf_ente_previdenziale;--rpad('80078750587',16,' '); -- modifica 2017 cod.fiscale Ente previdenziale. Quello è dell'INPS
+
+ AU001034 varchar2(24);
+ AU001035 varchar2(24);
+
+ CURSOR record_GH IS 
+	select 
+	c.tipo_anagrafica,
+	c.codice_fiscale, 
+	c.partita_iva,
+	a.tipo_ritenuta, 
+	c.denominazione nominativo,
+	c.cognome,
+	c.nome,
+	c.sesso, 
+	b.descrizione descr_comune_nascita,
+	b.provincia  provincia_nascita,
+	nvl(a.codice_fiscale_coniuge,'123') codice_fiscale_coniuge,
+	nvl(a.lordo,0) lordo, 
+	nvl(a.irpef,0) irpef, 
+	nvl(a.imponibile,0) imponibile,
+	nvl(a.importo_non_sogg,0) importo_non_sogg,
+	nvl(a.addizionale_regionale,0) addizionale_regionale,
+	nvl(a.addizionale_comunale,0) addizionale_comunale,
+	nvl(a.deduzione_art_10_bis,0) deduzione_art_10_bis,
+	nvl(a.mesi,0) mesi,
+	nvl(a.giorni,0) giorni,
+	nvl(a.detraz_lav_dip,0) detraz_lav_dip, 
+	nvl(a.detraz_fam_car,0) detraz_fam_car,
+	nvl(a.ritenute_previdenziali,0) 	ritenute_previdenziali,
+	nvl(a.contributi_soggetto_erogante,0) 	contributi_soggetto_erogante,
+	c.data_ns data_nascita, 
+	d.indirizzo indirizzo_fornitore, 
+	b1.descrizione citta_fornitore, 
+	b1.codice_bel_fiore belfiore,
+	b1.provincia provincia_fornitore, 
+	b1.cap cap_fornitore
+  from  fina_certificazioni_770 a, 
+        fina_anagrafica c,
+        fina_ana_sedi d,
+		    fina_comuni b,
+  		  fina_comuni b1  		  
+  where --a.tipo_ritenuta in ('BS','IF','LD','LSU','LDT','LA','LAB') and --LDT = Lavoro Dipendente tassazione separata -  LAB Lavoro Autonomo Causale B AU001001
+        --a.tipo_ritenuta in ('IF','LD') and --LDT = Lavoro Dipendente tassazione separata -  LAB Lavoro Autonomo Causale B AU001001
+        a.tipo_ritenuta in ('LA','IF','LD','LSU') and -- Giunta
+        a.da_stampare = 'S' and
+        a.codice_lettera = pcodice_lettera and
+        a.codice_terza_parte = 142239 and --Richiesta Ianiello del 04-05-2020
+-- richiesta Ianniello del 21,05,2018 - per invio dei soli LA con cod.fiscale
+/*a.codice_terza_parte not in 
+(746
+,4655
+,4698
+,8194
+,8202
+,11131
+,25493
+,30301
+,43678
+,48607
+,55780
+,82191
+,84167
+,84410
+,99506
+,99825
+,104853
+,105349
+,107132
+,112479
+,112673
+,123350
+,123352
+,123912
+,127255
+,132434
+,133937
+,134823
+,135516
+,135862
+,136150
+,136402
+,136405
+,137000
+,137286
+,137287
+,137923
+,138204
+,138235
+,126761) and  */ 
+        d.id_ana = a.codice_terza_parte and
+        d.id_sede= a.codice_sede_fornitore and
+        c.id(+) = d.id_ana and
+        c.id_comune_ns = b.id(+) and
+        d.id_comune_sede = b1.id(+)
+   order by a.tipo_ritenuta;
+
+BEGIN
+
+ delete tmp_risposte_procedure where funzione ='Certificazione Unica';
+ commit;
+
+ select count(*) 
+ into numero_record_g
+ from fina_certificazioni_770
+ where da_stampare = 'S'
+ and tipo_ritenuta &lt;> 'LA'
+ and codice_lettera = pcodice_lettera;
+
+ select count(*) 
+ into numero_record_h
+ from fina_certificazioni_770
+ where da_stampare = 'S'
+ and  tipo_ritenuta = 'LA'
+ and codice_lettera = pcodice_lettera;
+
+ select 
+ codice_fiscale_ente
+ ,denominazione_ente1
+ ,denominazione_ente2
+ ,comune_ente
+ ,provincia_ente
+ ,cap_ente
+ ,indirizzo_ente1
+ ,indirizzo_ente2
+ ,telefono_ente
+ ,posta_elettronica_ente1
+ ,posta_elettronica_ente2
+ ,posta_elettronica_ente3
+ ,rpad(cf_dirigente,16,' ')
+ ,rpad(tipologia_dirigente,2,' ')
+ ,rpad(cognome_dirigente,24,' ')
+ ,rpad(nome_dirigente,20,' ')
+ ,CODICE_FORNITURA
+ ,rpad(denominazione_ente1||substr(denominazione_ente2,2),60,' ') denominazione_completa
+ ,rpad(posta_elettronica_ente1||substr(posta_elettronica_ente2,2)||substr(posta_elettronica_ente3,2),100,' ') email_completa
+ ,rpad(telefono_ente,12,' ')
+ ,rpad(codice_fiscale_ente,16,' ')
+ ,rpad(codice_fiscale_ente,16,' ')
+ ,rpad(codice_fiscale_ente,16,' ')
+ ,rpad(codice_fiscale_ente,11,' ')
+ ,rpad(codice_fiscale_ente,16,' ')
+ ,cf_ente_previdenziale
+ ,eventi_eccezionali
+ into 
+ codice_fiscale_ente
+ ,denominazione_ente1
+ ,denominazione_ente2
+ ,comune_ente
+ ,provincia_ente
+ ,cap_ente
+ ,indirizzo_ente1
+ ,indirizzo_ente2
+ ,telefono_ente
+ ,posta_elettronica_ente1
+ ,posta_elettronica_ente2
+ ,posta_elettronica_ente3
+ ,B18 -- cf dirigente
+ ,B19 --tipologia dirigente
+ ,B20 --cognome dirigente
+ ,B21 -- nome dirigente
+ ,A03 -- codice fornitura
+ ,B14 -- denominazione ente completa
+ ,B15 -- email completa
+ ,B16 -- telefono
+ ,A05 -- codice fiscale ente
+ ,B02 -- codice fiscale ente
+ ,B08 -- codice fiscale ente
+ ,B22 -- codice fiscale ente
+ ,D02 -- codice fiscale ente
+ ,cf_ente_previdenziale
+ ,b17 --eventi eccezionali
+ from fin_t_certificazioni_parametri;
+
+ riga :=0;
+
+-- :messaggio := 'Record G';
+
+ cont := 0;
+
+ -- Scrivo Record A
+    linebuf01 := A01||A02||A03||A04||A05||A06_28||A29||A30||A31_33||A34;
+    riga:=riga+1;
+    risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+
+ -- Scrivo Record B MNTLEI60A27F158H
+--  B23:=substr(to_char(nvl(numero_record_g,0)+nvl(numero_record_h,0),'00000000'),2,8); --Modifica 2017
+  B24:=substr(to_char(nvl(numero_record_h,0),'00000000'),2,8);
+-- linebuf01 :='B80002950766     00000001                                                80002950766      00                                            REGIONE BASILICATA                                          ufficio.ragioneria@cert.regionebasilicata.it                                                        0971668274              MNTLEI60A27F158H14MANTI                   ELIO                80002950766000001520000012601                0000000000                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    A';
+  linebuf01:=B01||B02||B03||B04_07||B08||B09_11||B12_13||B14||B15||B16||B17||B18||B19||B20||B21||B22||B23||B24||B25||B26||B27; 
+  linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+  riga:=riga+1;
+  risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+
+  numero_record_g :=0;
+  numero_record_h :=0;
+ -- inizio Record D
+ for g in record_gh loop
+
+ /* if mod(cont,10) = 0 
+  	then
+  	:messaggio := 'Record elaborati: '||TO_CHAR(cont);
+	 synchronize;
+  end if;
+*/
+ cont := cont + 1;
+
+ D01 := 'D';
+ D02 := rpad(codice_fiscale_ente,16,' ');
+ D03 := LPAD('1',8,'0');
+ if g.tipo_anagrafica = 'F'
+    then D04 := rpad(g.codice_fiscale,16,' ');
+    else D04 := rpad(nvl(g.codice_fiscale,nvl(g.partita_iva,' ')),16,' ');
+ end if;	
+ D05 :=substr(to_char(cont,'00000'),2,5);
+ D06 :=LPAD('0',17,'0');
+ D07 :=LPAD('0',6,'0');
+ D08 :=LPAD(' ',14,' ');
+ D09 :=LPAD(' ',1,' ');
+ D10 :=LPAD(' ',4,' ');
+ D11 := '0';
+
+ linebuf01 := d01||d02||d03||d04||d05||d06||d07||d08||d09||d10||d11;
+
+ da001001_1:='DA001001'||rpad(codice_fiscale_ente,16,' ');
+ da001002_1:='DA001002'||rpad(denominazione_ente1,16,' ');
+ if denominazione_ente2 is not null
+    then da001002_2:='DA001002'||rpad(denominazione_ente2,16,' ');
+    else da001002_2:=null;
+ end if;
+ da001004_1:='DA001004'||rpad(comune_ente,16,' ');
+ da001005_1:='DA001005'||rpad(provincia_ente,16,' ');
+ da001006_1:='DA001006'||rpad(cap_ente,16,' ');
+ da001007_1:='DA001007'||rpad(indirizzo_ente1,16,' ');
+ if indirizzo_ente2 is not null
+    then da001007_2:='DA001007'||rpad(indirizzo_ente2,16,' ');
+    else da001007_2:=null;
+ end if;
+ da001008_1:='DA001008'||rpad(telefono_ente,16,' ');
+ da001009_1:='DA001009'||rpad(posta_elettronica_ente1,16,' ');
+ da001009_2:='DA001009'||rpad(posta_elettronica_ente2,16,' ');
+ if posta_elettronica_ente3 is not null
+    then da001009_3:='DA001009'||rpad(posta_elettronica_ente3,16,' ');
+    else da001009_3:=null;
+ end if;
+
+ linebuf01 := linebuf01||da001001_1||da001002_1||da001002_2||da001004_1||da001005_1||da001006_1||da001007_1||da001007_2||da001008_1||da001009_1||da001009_2||da001009_3; 
+
+ if g.tipo_anagrafica = 'F'
+  then 
+    da002001 := 'DA002001'||rpad(nvl(g.codice_fiscale,' '),16,' ');
+       else da002002_1 := null;
+    da002002 := 'DA002002'||rpad((substr(nvl(g.cognome,' '),1,16)),16,' ');
+    if length(g.cognome) > 16
+       then da002002_1 := 'DA002002+'||rpad((substr(nvl(g.cognome,' '),17,15)),15,' ');
+    end if;
+    da002003 := 'DA002003'||rpad((substr(nvl(g.nome,' '),1,16)),16,' ');
+    if length(g.nome) > 16
+       then da002003_1 := 'DA002003+'||rpad((substr(nvl(g.nome,' '),17,15)),15,' ');
+       else da002003_1 := null;
+    end if; 
+    da002004 := 'DA002004'||rpad(g.sesso,16,' ');  
+    da002005 := 'DA002005'||lpad(nvl(to_char(g.data_nascita,'ddmmyyyy'),' '),16,' ');
+    da002006 := 'DA002006'||rpad((substr(nvl(g.descr_comune_nascita,' '),1,16)),16,' ');
+    if length(g.descr_comune_nascita) > 16
+       then da002006_1 := 'DA002006+'||rpad((substr(nvl(g.descr_comune_nascita,' '),17,15)),15,' ');
+       else da002006_1 := null;
+    end if;	 
+    da002007 := 'DA002007'||rpad((substr(nvl(g.provincia_nascita,' '),1,16)),16,' ');
+  else 
+    da002001 := 'DA002001'||rpad(nvl(g.codice_fiscale,nvl(g.partita_iva,' ')),16,' ');  -- secondo le indicazioni ricevute il 27.02.2014 da Ianniello e da Pompeo, bisogna indicare il codice fiscale se presente anche per le partite iva.
+    da002002 := 'DA002002'||rpad((substr(nvl(g.nominativo,' '),1,16)),16,' ');
+    if length(g.nominativo) > 16
+       then da002002_1 := 'DA002002+'||rpad((substr(nvl(g.nominativo,' '),17,15)),15,' ');
+       else da002002_1 := null;
+    end if;	 
+    da002003 := null;
+    da002003_1 := null;
+    da002004 := null;
+    da002005 := null;
+    da002006 := null;
+    da002006_1 := null;
+    da002007 :=null;
+ end if;		 
+    da002020 := 'DA002020'||rpad((substr(nvl(g.citta_fornitore,' '),1,16)),16,' ');
+    if length(g.citta_fornitore) > 16
+       then da002020_1 := 'DA002020+'||rpad((substr(nvl(g.citta_fornitore,' '),17,15)),15,' ');
+       else da002020_1 := null;
+    end if;
+    da002021 := 'DA002021'||rpad(nvl(g.provincia_fornitore,' '),16,' ');
+    da002022 := 'DA002022'||rpad(nvl(g.belfiore,' '),16,' ');
+
+    da003001 := 'DA003001'||lpad(to_char(sysdate,'ddmmyyyy'),16,' ');
+    da003002 := 'DA003002'||lpad('1',16,' ');
+
+ linebuf01 := linebuf01||da002001||da002002||da002002_1||da002003||da002003_1||da002004||da002005||da002006||da002006_1||da002007||da002020||da002020_1||da002021||da002022||da003001||da003002;
+ linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+ riga:=riga+1;
+ risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+
+-- record G (&lt;>LA)
+ if g.tipo_ritenuta &lt;> 'LA' and
+ 	  g.tipo_ritenuta &lt;> 'LAB'  -- modifica 2017 per gestione LAB
+ 	then
+ 	numero_record_g := numero_record_g + 1;
+    d01 := 'G';  
+    linebuf01 := d01||d02||d03||d04||d05||d06||d07||d08||d09||d10||d11;
+
+    lordo_record_g_2005 := nvl(g.imponibile,0) + nvl(g.deduzione_art_10_bis,0)+ nvl(g.detraz_fam_car,0);
+
+  	if g.tipo_ritenuta in ('BS','LD','IF') 
+ 	   then 
+     if nvl(lordo_record_g_2005,0)>0
+     	  then if g.tipo_ritenuta in ('LD')
+     	       then 
+     	       DB001001 := 'DB001001'||substr(to_char(nvl(lordo_record_g_2005,0),'0000000000000D00'),2,16);
+     	       DB001002 := null;
+     	       DB001004 := null;
+     	       DB001008 := 'DB001008'||lpad('01012015',16,' '); -- Data Inizio Rapporto - obbligatorio per db001001 e db001004, ma non ho il valore imposto 01012015.
+             DB001010 := 'DB001010'||lpad('1',16,' '); -- in forza al 31.12. - obbligatorio per db001001,db001002 e db001004, ma non ho il valore imposto 1.
+             DB001391 := 'DB001391'||lpad('2',16,' ');        -- BONUS IRPEF fisso 2 perchè non ho il valore.
+     	       DB001393 := null;
+             elsif g.tipo_ritenuta in ('IF') -- se la ritenuta è IF
+     	  	   then 
+     	  	   DB001001 := null;
+     	  	   DB001002 := null;
+     	       DB001004 := 'DB001004'||substr(to_char(nvl(lordo_record_g_2005,0),'0000000000000D00'),2,16); 
+     	       DB001008 := null;
+             DB001010 := null;
+             DB001391 := null;
+     	  	   DB001393 := null; 
+             elsif g.tipo_ritenuta in ('BS') -- se la ritenuta è BS -- Ho deciso in autonomia rispetto al 2015. in quanto il campo è dedicato al lavoro a tempo determinato (ritengo che le BS siano tali)
+     	  	   then 
+     	  	   DB001001 := null;
+     	       DB001002 := 'DB001002'||substr(to_char(nvl(lordo_record_g_2005,0),'0000000000000D00'),2,16); 
+     	  	   DB001004 := null;
+     	       DB001008 := 'DB001008'||lpad('01012015',16,' '); -- Data Inizio Rapporto - obbligatorio per db001001 e db001004, ma non ho il valore imposto 01012015.
+             DB001010 := 'DB001010'||lpad('1',16,' '); -- in forza al 31.12. - obbligatorio per db001001,db001002 e db001004, ma non ho il valore imposto 1.
+             DB001391 := null;
+     	  	   DB001393 := null; -- in attesa di chiarimenti lo imposto a null 'DB001121'||lpad('0,00',16,' ');        -- CREDITO BONUS IPRPEF fisso 0 vedi sopra              
+			       end if;
+     	  else DB001001 := null;
+     	       DB001002 := null;
+     	       DB001004 := null;
+     	       DB001008 := null;
+             DB001010 := null;
+
+             DB001391 := null;
+     	       DB001393 := null;
+     end if;
+
+
+/* 
+    if g.tipo_ritenuta = 'BS' 
+     	  then DB001002 := 'DB001002'||lpad('2',16,' ');
+        else DB001002 := 'DB001002'||lpad('1',16,' ');  
+     end if;
+*/        
+         DB001006 := 'DB001006'||lpad(to_char((nvl(g.mesi,0) * 30) + nvl(g.giorni,0),'000'),16,' '); 
+     if nvl(g.mesi,0) + nvl(g.giorni,0) > 0
+     	  then DB001006 := 'DB001006'||lpad(to_char((nvl(g.mesi,0) * 30) + nvl(g.giorni,0),'000'),16,' '); 
+     	  --DB001006 := 'DB001006'||substr(to_char((nvl(g.mesi,0) * 30) + nvl(g.giorni,0),'0000000000000000'),2,16); -- solo BS
+        else DB001006 := null;
+     end if;
+
+     if nvl(g.irpef,0)>0
+     	  then DB001021 := 'DB001021'||substr(to_char(nvl(g.irpef,0),'0000000000000D00'),2,16);
+        else DB001021 := null;
+     end if;
+
+     if nvl(g.addizionale_regionale,0)>0
+     	  then DB001022 := 'DB001022'||substr(to_char(nvl(g.addizionale_regionale,0),'0000000000000D00'),2,16);
+        else DB001022 := null;
+     end if;
+
+     if nvl(g.addizionale_comunale,0)>0
+        then DB001027 := 'DB001027'||substr(to_char(nvl(g.addizionale_comunale,0),'0000000000000D00'),2,16);
+        else DB001027 := null;
+     end if;
+
+/* spostato in alto
+    if DB001001 &lt;> null or
+    	 DB001002 &lt;> null
+    	 then  
+       DB001008 := 'DB001008'||lpad('01012015',16,' '); -- Data Inizio Rapporto - obbligatorio per db001001 e db001004, ma non ho il valore imposto 01012015.
+       DB001010 := 'DB001010'||lpad('1',16,' '); -- in forza al 31.12. - obbligatorio per db001001,db001002 e db001004, ma non ho il valore imposto 1.
+       else 
+    	 DB001008 := null;
+    	 DB001010 := null;
+     end if;
+*/
+    if g.codice_fiscale_coniuge &lt;> '123' -- vedi l'nvl della select del cursore
+ 	   then 
+ 	   DB601001 := 'DB601001'||lpad('1',16,' ');
+     DB601004 := 'DB601004'||lpad(g.codice_fiscale_coniuge,16,' ');
+     else
+ 	   DB601001 := null;
+     DB601004 := null;
+    end if;
+
+     linebuf01 := linebuf01||DB001001||DB001002||DB001004||DB001006||DB001008||DB001010||DB001021||DB001022||DB001027||DB001391||DB001393||DB601001||DB601004; 
+
+	   linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+    riga:=riga+1;
+    risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+ 	end if;
+
+    if g.tipo_ritenuta = 'LDT'
+ 	   then 
+ 	   DB001261 := 'DB001261'||substr(to_char(nvl(g.lordo,0),'0000000000000D00'),2,16);
+     DB001263 := 'DB001263'||substr(to_char(nvl(g.irpef,0),'0000000000000D00'),2,16);
+     linebuf01 := linebuf01||DB001261||DB001263;
+	   linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+    riga:=riga+1;
+    risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+    end if;
+
+    if g.tipo_ritenuta = 'LSU'
+ 	   then
+	   if nvl(g.importo_non_sogg,0)>0
+	      then DB001496 := 'DB001496'||substr(to_char(nvl(g.importo_non_sogg,0),'0000000000000D00'),2,16);
+          else DB001496 := null;
+       end if;	   
+ 	   end if;	
+ 	   if nvl(g.imponibile,0) > 0
+ 	   	  then DB001497 := 'DB001497'||substr(to_char(nvl(g.imponibile,0),'0000000000000D00'),2,16);
+ 	      else DB001497 := null;
+ 	   if nvl(g.irpef,0) > 0
+        then DB001498 := 'DB001498'||substr(to_char(nvl(g.irpef,0),'0000000000000D00'),2,16);
+ 	      else DB001498 := null;
+ 	   end if;	
+ 	   if nvl(g.addizionale_regionale,0) > 0
+        then DB001499 := 'DB001499'||substr(to_char(nvl(g.addizionale_regionale,0),'0000000000000D00'),2,16);
+        else DB001499 := null;
+     end if;
+     linebuf01 := linebuf01||DB001496||DB001497||DB001498||DB001499;
+	   linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+     riga:=riga+1;
+     risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+    end if;
+
+/* l'ho messo solo per gli LD vedi sopra
+    if g.codice_fiscale_coniuge &lt;> null
+ 	   then 
+ 	   DB601329 := 'DB601001'||substr(to_char(nvl(g.lordo,0),'0000000000000D00'),2,16);
+     DB601330 := 'DB601004'||substr(to_char(nvl(g.irpef,0),'0000000000000D00'),2,16);
+     linebuf01 := linebuf01||DB601001||DB601004;
+	   linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+     riga=riga+1;
+     risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+    end if;
+*/
+
+
+-- Record H (LA)
+    else 
+    numero_record_h := numero_record_h + 1;
+    D01 := 'H';  
+    linebuf01 := d01||d02||d03||d04||d05||d06||d07||d08||d09||d10||d11;
+/* richiesta giuseppina - Da Togliere non appena finito il 2017
+    if g.tipo_anagrafica = 'F' 
+   		 then AU001001 := 'AU001001'||rpad('M',16,' ');
+ 	     else AU001001 := 'AU001001'||rpad('A',16,' ');
+ 	  end if;
+*/
+AU001001 := 'AU001001'||rpad('A',16,' '); -- da togliere non appena finiziamo il 2017
+--modifica 2017 	     
+    if g.tipo_ritenuta = 'LAB'
+   		 then AU001001 := 'AU001001'||rpad('B',16,' ');
+  	end if;
+-- fine modifica 2017
+
+    if nvl(g.importo_non_sogg,0) &lt;> 0
+--       then AU001006 := 'AU001006'||lpad('3',16,' '); modifica 2017
+      -- then AU001006 := 'AU001006'||lpad('5',16,' '); -- modifica 2017
+       then AU001006 := 'AU001006'||lpad('7',16,' '); --modifica 2020
+       else AU001006 := null;
+    end if;	
+
+    if nvl(g.lordo,0) > 0
+    	 then AU001004 := 'AU001004'||substr(to_char(nvl(g.lordo,0),'0000000000000D00'),2,16);
+       else AU001004 := null;
+    end if;
+
+    if nvl(g.importo_non_sogg,0) > 0
+    	 then AU001007 := 'AU001007'||substr(to_char(nvl(g.importo_non_sogg,0),'0000000000000D00'),2,16);
+  	   else AU001007 := null;
+    end if;  	
+
+  	if nvl(g.imponibile,0)> 0
+  	   then AU001008 := 'AU001008'||substr(to_char(nvl(g.imponibile,0),'0000000000000D00'),2,16);
+  	   else AU001008 := null;
+    end if;  	
+
+    end if;
+  	if nvl(g.irpef,0)>0
+  	   then AU001009 := 'AU001009'||substr(to_char(nvl(g.irpef,0),'0000000000000D00'),2,16);
+       else AU001009 := null;
+
+    if nvl(g.addizionale_regionale,0)>0
+  	   then AU001013 := 'AU001013'||substr(to_char(nvl(g.addizionale_regionale,0),'0000000000000D00'),2,16);
+  	   else AU001013 := null;
+    end if;
+
+    if nvl(g.contributi_soggetto_erogante,0)>0
+    	 then AU001034 := 'AU001034'||substr(to_char(nvl(g.contributi_soggetto_erogante,0),'0000000000000D00'),2,16);
+  	   else AU001034 := null;
+    end if;  	
+
+  	if nvl(g.ritenute_previdenziali,0)>0
+  		 then AU001035 := 'AU001035'||substr(to_char(nvl(g.ritenute_previdenziali,0),'0000000000000D00'),2,16);
+  	   else AU001035 := null;
+  	end if;
+
+  	if nvl(AU001035,'Z')||nvl(AU001034,'Z')='ZZ'
+       then AU001029 :=null;
+       else AU001029 := 'AU001029'||rpad('80078750587',16,' '); -- modifica 2017 codice fiscale ente prev. Questo è inps.
+  	end if;
+
+--    linebuf01 := linebuf01||AU001001||AU001004||AU001006||AU001007||AU001008||AU001009||AU001013||AU001034||AU001035; modifica 2017
+    linebuf01 := linebuf01||AU001001||AU001004||AU001006||AU001007||AU001008||AU001009||AU001013||AU001029||AU001034||AU001035; -- modifica 2017
+    linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+    riga:=riga+1;
+    risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+ end if;
+
+ END LOOP;
+
+  linebuf01 := 'Z'||rpad(' ',14,' ')||'000000001000000000'||substr(to_char(nvl(cont,0),'000000000'),2,9)||substr(to_char(nvl(numero_record_g,0),'000000000'),2,9)||substr(to_char(nvl(numero_record_h,0),'000000000'),2,9)||'000000000'; -- l'ultima costante rappresenta i record L
+  linebuf01 := rpad(linebuf01,1897,' ')||'A'; 
+  riga:=riga+1;
+  risposte_procedure ('Certificazione Unica','CU_'||pcodice_lettera||'*'||to_char(riga,'000000000'),linebuf01);
+
+ END;</pre>	</td></tr>
+</table></div>

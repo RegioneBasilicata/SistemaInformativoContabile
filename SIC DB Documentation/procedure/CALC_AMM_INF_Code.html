@@ -1,0 +1,247 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALC_AMM_INF</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALC_AMM_INF.html">Details</a></div></div>
+<div class="tab"><div><a href="CALC_AMM_INF_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALC_AMM_INF_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALC_AMM_INF_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALC_AMM_INF_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure calc_amm_inf (data_reg in date) is
+c_fondo_ord  number(10,2);
+c_fondo_ant  number(10,2);
+c_fondo_perd number(10,2);
+c_fondo_ind  number(10,2);
+c_fondo_civ  number(10,2);
+c_residuo_att number(10,2);
+c_residuo_civil number(10,2);
+c_residuo_calc number(10,2);
+c_residuo_civil_calc number(10,2);
+totc_fondo_ord  number(12,2);
+totc_fondo_ant  number(12,2);
+totc_fondo_perd number(12,2);
+totc_fondo_ind  number(12,2);
+totc_fondo_civ  number(12,2);
+old_cat         number;
+c_costo_amm     number(12,2);
+c_costo_non_amm number(12,2);
+c_anno_ini      number(4);
+c_des_cat       varchar2(200);
+c_tipo_cesp     varchar2(1);
+c_gru_immob     varchar2(10);
+c_mas_immob     varchar2(10);
+c_con_immob     varchar2(10);
+c_gru_amm_ord   varchar2(10);
+c_mas_amm_ord   varchar2(10);
+c_con_amm_ord   varchar2(10);
+c_gru_amm_ant   varchar2(10);
+c_mas_amm_ant   varchar2(10);
+c_con_amm_ant   varchar2(10);
+c_gru_amm_ind   varchar2(10);
+c_mas_amm_ind   varchar2(10);
+c_con_amm_ind   varchar2(10);
+c_gru_fondo_ant varchar2(10);
+c_mas_fondo_ant varchar2(10);
+c_con_fondo_ant varchar2(10);
+c_gru_fondo_ord varchar2(10);
+c_mas_fondo_ord varchar2(10);
+c_con_fondo_ord varchar2(10);
+c_gru_fondo_ind varchar2(10);
+c_mas_fondo_ind varchar2(10);
+c_con_fondo_ind varchar2(10);
+c_gru_costo     varchar2(10);
+c_mas_costo     varchar2(10);
+c_con_costo     varchar2(10);
+prog            NUMBER(1);
+NUM_REG         NUMBER;
+a_tipo_amm      number;
+a_perc_amm      number;
+a_perc_std      number;
+a_perc_I        number;
+a_perc_min      number;
+a_max_imp_100   number;
+a_imp_max       number;
+a2_tipo_amm     number;
+a2_perc_amm     number;
+BEGIN
+IF DATA_REG IS NULL THEN
+    RETURN;
+END IF;
+DELETE tb_app_amm
+   WHERE UTENTE=user;
+
+for r in (SELECT 'M' tipo,ce.cod_inv, ce.descr_agg,
+       ce.bf_tipo,ce.bf_data,ce.bf_numero,ce.bf_fornitore,ce.bf_progr_rigo,
+       ce.amm_anno_inizio_utilizzo, ce.amm_costo_ammortizzabile,
+       ce.amm_costo_non_ammortizzabile, ce.amm_fondo_ordinario, ce.amm_fondo_indeducibile,
+       ce.amm_fondo_anticipato, ce.amm_fondo_perso, ce.amm_tipo_ammortamento,ce.amm_aliq_amm,
+       ce.categoria,ce.sotto_cat,ce.dettaglio_cat,
+       (nvl(amm_costo_ammortizzabile,0)+nvl(amm_costo_non_ammortizzabile,0))-
+       (nvl(amm_fondo_ordinario,0)+nvl(amm_fondo_anticipato,0)+nvl(amm_fondo_indeducibile,0)+nvl(amm_fondo_perso,0)) residuo,
+       cat.descrizione des_cat,cat.aliq_amm cat_aliq,cat.tipo_ammortamento cat_tipo_amm,
+       cat.gru_immob, cat.mas_immob, cat.con_immob,
+       cat.gru_amm_ord, cat.mas_amm_ord, cat.con_amm_ord,
+       cat.gru_amm_ant, cat.mas_amm_ant, cat.con_amm_ant,
+       cat.gru_amm_ind, cat.mas_amm_ind, cat.con_amm_ind,
+       cat.gru_fondo_ant, cat.mas_fondo_ant, cat.con_fondo_ant,
+       cat.gru_fondo_ord, cat.mas_fondo_ord, cat.con_fondo_ord,
+       cat.gru_plus, cat.mas_plus, cat.con_plus,
+       cat.gru_plus_ind, cat.mas_plus_ind, cat.con_plus_ind,
+       cat.gru_fondo_ind, cat.mas_fondo_ind, cat.con_fondo_ind,
+       cat.gru_minus, cat.mas_minus,cat.con_minus,
+       cat.gru_minus_ind, cat.mas_minus_ind,cat.con_minus_ind,
+       cat.gru_costo, cat.mas_costo,cat.con_costo,
+       scat.descrizione des_scat,scat.aliq_amm scat_aliq,scat.tipo_ammortamento scat_tipo_amm,
+       dett.descrizione dett_scat,dett.aliq_amm dett_aliq,dett.tipo_ammortamento dett_tipo_amm
+  FROM tb_beni_mobili ce, tb_cat_cesp cat, 
+       tb_scat_cesp scat, tb_dett_scat dett
+ WHERE ce.categoria=2 and
+       --ce.amm_anno_inizio_utilizzo>=2012 and
+	     ce.amm_anno_inizio_utilizzo&lt;=to_char(data_reg,'yyyy') and
+       (ce.data_dism is null or to_char(ce.data_dism,'yyyy')>=to_char(data_reg,'yyyy')) and
+       (--amm_costo_ammortizzabile is null or
+       (nvl(amm_costo_ammortizzabile,1)&lt;>0 and
+       (nvl(amm_costo_ammortizzabile,0)+nvl(amm_costo_non_ammortizzabile,0))>
+       (nvl(amm_fondo_ordinario,0)+nvl(amm_fondo_anticipato,0)+nvl(amm_fondo_indeducibile,0)+nvl(amm_fondo_perso,0)))) and
+       cat.cod_cat = ce.categoria and
+       scat.tbctc_cod_cat = ce.categoria and
+       scat.progr = ce.sotto_cat and
+       dett.tsp_tbctc_cod_cat = ce.categoria and
+       dett.tsp_progr = ce.sotto_cat and
+       dett.progr = ce.dettaglio_cat
+ ORDER BY 18,19,20) loop
+
+ c_costo_amm:=r.amm_costo_ammortizzabile;
+ c_anno_ini:=r.amm_anno_inizio_utilizzo;
+
+if r.amm_tipo_ammortamento is not null then
+	 a_tipo_amm:=r.amm_tipo_ammortamento;           
+elsif r.dett_tipo_amm is not null then
+	 a_tipo_amm:=r.dett_tipo_amm;           
+elsif r.scat_tipo_amm is not null then
+	 a_tipo_amm:=r.scat_tipo_amm;           
+else a_tipo_amm:=r.cat_tipo_amm;           
+end if;
+select t.perc_amm_std,t.perc_i_anno,t.perc_min_rid,t.imp_amm_100,t.imp_max_amm
+   into a_perc_std,a_perc_I,a_perc_min,a_max_imp_100,a_imp_max
+        from tb_tipi_ammortamenti t
+        where  t.id(+)=a_tipo_amm;
+        
+if r.amm_aliq_amm is not null then
+   a_perc_amm :=r.amm_aliq_amm;
+elsif r.dett_aliq is not null then
+   a_perc_amm :=r.dett_aliq;
+elsif r.scat_aliq is not null then
+   a_perc_amm :=r.scat_aliq;
+elsif r.cat_aliq is not null then
+   a_perc_amm :=r.cat_aliq;
+else
+   a_perc_amm :=a_perc_std;
+end if;   
+
+--setta variabili aliquota per calcolo ammortamento
+if nvl(r.amm_fondo_ordinario,0)=0 then
+	 if nvl(c_costo_amm,0)&lt;nvl(a_max_imp_100,0) then
+	 	  a_perc_amm:=100;
+	 	  a_perc_std:=100;
+	 else
+	 	  a_perc_amm:=a_perc_I;
+	 end if;
+end if;
+
+c_residuo_att:=r.residuo; 
+-- calcolo ammortamento  
+IF a_perc_amm=a_perc_std THEN
+   c_fondo_ord:=ROUND(c_costo_amm*a_perc_amm/100,2);
+   c_fondo_ind:=ROUND(nvl(c_costo_non_amm,0)*a_perc_amm/100,2);
+   IF c_fondo_ord > c_residuo_att or
+      abs(c_fondo_ord - c_residuo_att) between .01 and .05 THEN
+      c_fondo_ord:=c_residuo_att;
+   END IF;
+   c_fondo_ant:=0;
+   c_fondo_perd:=0;
+ELSIF a_perc_amm>a_perc_std THEN
+   c_fondo_ord:=ROUND(c_costo_amm*a_perc_std/100,2);
+   c_fondo_ind:=ROUND(nvl(c_costo_non_amm,0)*a_perc_amm/100,2);
+   IF c_fondo_ord > c_residuo_att or
+      abs(c_fondo_ord - c_residuo_att) between .01 and .05 THEN 
+      c_fondo_ord:=c_residuo_att;
+   END IF;
+   c_fondo_ant:=ROUND(c_costo_amm*(a_perc_amm-a_perc_std)/100,2);
+   IF c_fondo_ant > (c_residuo_att+c_fondo_ord) THEN
+      c_fondo_ant:=(c_residuo_att+c_fondo_ord);
+   END IF;
+   c_fondo_perd:=0;
+ELSE
+   if a_perc_amm>=a_perc_min then
+     c_fondo_ord:=ROUND(c_costo_amm*a_perc_amm/100,2);
+     c_fondo_ind:=ROUND(nvl(c_costo_non_amm,0)*a_perc_amm/100,2);
+     IF c_fondo_ord > c_residuo_att or
+        abs(c_fondo_ord - c_residuo_att) between .01 and .05 THEN
+        c_fondo_ord:=c_residuo_att;
+     END IF;
+     c_fondo_perd:=0;
+   else
+     c_fondo_ord:=ROUND(c_costo_amm*a_perc_amm/100,2);
+     c_fondo_ind:=ROUND(nvl(c_costo_non_amm,0)*a_perc_amm/100,2);
+     IF c_fondo_ord > c_residuo_att or
+        abs(c_fondo_ord - c_residuo_att) between .01 and .05 THEN
+        c_fondo_ord:=c_residuo_att;
+     END IF;
+      c_fondo_perd:=ROUND(c_costo_amm*(a_perc_min-a_perc_amm)/100,2);
+   END IF;
+END IF;
+
+-- fine calcolo ammortamento  
+  
+if nvl(c_fondo_ord,0)>0 then  
+  totc_fondo_ord:=totc_fondo_ord + c_fondo_ord;
+  totc_fondo_ant:=totc_fondo_ant + c_fondo_ant;
+  totc_fondo_perd:=totc_fondo_perd + c_fondo_perd;
+  totc_fondo_ind:=totc_fondo_ind + c_fondo_ind;
+  totc_fondo_civ:=totc_fondo_civ + c_fondo_civ;
+  insert into tb_app_amm
+   (CODICE,UTENTE,ANNO_INIZIO,DESCRIZIONE,DES_CAT,DATA_AMMORTAMENTO,
+    TIPO_CESP,COD_CAT,PERC_AMM_FISC,COSTO_STOR,COSTO_INDETR,COSTO_CIVIL,
+    FONDO_ORD,FONDO_ANT,FONDO_IND,FONDO_PERD,FONDO_CIV,AMM_ORD,AMM_ANT,
+    AMM_IND,AMM_PERD,PERC_AMM_CIV,AMM_CIVIL)
+   values
+   (r.cod_inv,user,c_anno_ini,r.descr_agg,r.des_cat,DATA_REG,
+--   (r.codice,'MAX',r.anno_ini_util,r.descrizione,r.des_cat,:DATA_REG,
+    r.tipo,r.categoria,a_perc_amm,c_COSTO_AMM,c_COSTO_NON_AMM,null,
+    r.amm_fondo_ordinario,r.amm_fondo_anticipato,r.amm_fondo_indeducibile,r.amm_fondo_perso,null,C_FONDO_ORD,
+    C_FONDO_ANT,C_FONDO_IND,C_FONDO_PERD,null,null);
+-- aggiorna scheda e crea rigo ammortamento
+    UPDATE tb_beni_mobili SET
+        --sit_al = :DATA_REG,
+      --amm_costo_ammortizzabile=c_costo_amm,
+      --amm_costo_non_ammortizzabile=c_costo_non_amm,
+      amm_fondo_ordinario = nvl(amm_fondo_ordinario,0)+c_fondo_ord,
+      amm_fondo_anticipato = nvl(amm_fondo_anticipato,0)+c_fondo_ant,
+      amm_fondo_indeducibile = nvl(amm_fondo_indeducibile,0)+c_fondo_ind,
+      amm_fondo_perso = nvl(amm_fondo_perso,0)+c_fondo_perd,
+      amm_aliq_amm =null
+      WHERE cod_inv = r.cod_inv;
+      INSERT INTO TB_AMM_CESP
+        (COD_INV,ANNO,DATA_CREAZIONE,PERC_AMM_FISC,AMM_ORD,
+         AMM_IND,AMM_ANT,FONDO_PERD,PERC_AMM_CIV,AMM_CIVIL,tipo_tab_amm)
+        VALUES
+        (r.cod_inv,TO_CHAR(DATA_REG,'yyyy'),DATA_REG,a_perc_amm,c_fondo_ord,
+         c_fondo_ind,c_fondo_ant,c_fondo_perd,null,null,a_tipo_amm);
+    COMMIT;
+END IF;
+END LOOP;
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,276 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ANZIANITA_RESIDUI_USCITE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE.html">Details</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_References.html">References</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_USCITE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ANZIANITA_RESIDUI_USCITE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure anzianita_residui_uscite (p_anno in number) is
+
+	begin
+    	delete tmp_anzianita_residui_dett where anno = p_anno and substr(capitolo,1,1) = 'U';
+    	commit;	
+     
+      delete tmp_anzianita_perenti_dett where anno = p_anno;
+    	commit;
+	-- *** inserisco i reisdui passivi anni precedenti ******
+
+		insert into tmp_anzianita_residui_dett (
+			ANNO
+			,CAPITOLO
+			,TIPO_DOC
+			,NUMERO_DOC
+			,OGGETTO_DOC
+			,OGGETTO_CAPITOLO
+      ,DIPARTIMENTO
+			,UFFICIO
+			,TIPO_ATTO
+			,NUMERO_ATTO
+			,DATA_ATTO
+			,NB_TITOLO
+			,NB_TITOLO_DESC
+			,NB_PCF
+			,NB_PCF_DESC
+			,RES_ANNO1
+			,RES_ANNO2
+			,RES_ANNO3
+			,RES_ANNO4
+			,RES_ANNO5
+			,RES_ANNO6
+			,RES_ANNO7
+			,RIMANENZA)
+		select p_anno
+			,r.capitolo_spesa_corrente
+			,d.doc_type
+			,r.NUMERO_IMPEGNO
+			,r.OGGETTO_IMPEGNO
+			,a.desc_capitolo
+      ,substr(d.segment3,1,2)
+			,d.segment3
+			,d.attribute13
+			,d.attribute14
+			,d.data_atto_autorizzativo
+			,a.NB_TITOLO
+			,a.desc_nb_titolo
+			,d.attribute16
+			,p.descrizione
+			,decode(sign((p_anno - d.segment8) - 7), 1,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 6), 0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 5), 0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 4), 0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 3), 0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 2), 0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 1), 0,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy'))
+		from fin_t_impegni_residui r
+		,fin_t_documenti d
+		,vw_nb_articoli a
+		,nb_pcf_05 p
+	    where r.ANNO_FINANZIARIO = p_anno
+	    and nvl(r.RESIDUO_INIZIALE,0) > 0
+	    and nvl(r.perenzione,'N') = 'N'
+	    and d.doc_id = r.DOC_ID_IMPEGNO
+	    and d.doc_type like 'IMP%'
+	    and a.anno = r.ANNO_FINANZIARIO
+	    and a.eu||a.codice = r.CAPITOLO_SPESA_CORRENTE
+	    and p.ANNO(+) = p_anno
+	    and p.CODICE_FINALE(+) = d.attribute16
+	    and residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) > 0;
+        commit;
+
+    -- *** inserisco residui passivi parzialmente in perenzione ***
+    insert into tmp_anzianita_residui_dett (
+			ANNO
+			,CAPITOLO
+			,TIPO_DOC
+			,NUMERO_DOC
+			,OGGETTO_DOC
+			,OGGETTO_CAPITOLO
+      ,DIPARTIMENTO
+			,UFFICIO
+			,TIPO_ATTO
+			,NUMERO_ATTO
+			,DATA_ATTO
+			,NB_TITOLO
+			,NB_TITOLO_DESC
+			,NB_PCF
+			,NB_PCF_DESC
+			,RES_ANNO1
+			,RES_ANNO2
+			,RES_ANNO3
+			,RES_ANNO4
+			,RES_ANNO5
+			,RES_ANNO6
+			,RES_ANNO7
+			,RIMANENZA)
+		select p_anno
+			,r.capitolo_spesa_corrente
+			,d.doc_type
+			,r.NUMERO_IMPEGNO
+			,r.OGGETTO_IMPEGNO
+			,a.desc_capitolo
+      ,substr(d.segment3,1,2)
+			,d.segment3
+			,d.attribute13
+			,d.attribute14
+			,d.data_atto_autorizzativo
+			,a.NB_TITOLO
+			,a.desc_nb_titolo
+			,d.attribute16
+			,p.descrizione
+			,decode(sign((p_anno - d.segment8) - 7), 1,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,decode(sign((p_anno - d.segment8) - 6), 0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,decode(sign((p_anno - d.segment8) - 5), 0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,decode(sign((p_anno - d.segment8) - 4), 0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,decode(sign((p_anno - d.segment8) - 3), 0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,decode(sign((p_anno - d.segment8) - 2), 0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,decode(sign((p_anno - d.segment8) - 1), 0,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0)
+			,(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0))
+		from fin_t_impegni_residui r
+		,fin_t_documenti d
+		,vw_nb_articoli a
+		,nb_pcf_05 p
+	    where r.ANNO_FINANZIARIO = p_anno
+	    and nvl(r.RESIDUO_INIZIALE,0) > 0
+	    and nvl(r.perenzione,'N') = 'S'
+	    and d.doc_id = r.DOC_ID_IMPEGNO
+	    and d.doc_type like 'IMP%'
+	    and a.anno = r.ANNO_FINANZIARIO
+	    and a.eu||a.codice = r.CAPITOLO_SPESA_CORRENTE
+	    and p.ANNO(+) = p_anno
+	    and p.CODICE_FINALE(+) = d.attribute16
+	    and (residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)) > 0;
+        commit;
+
+
+
+
+	-- *** inserisco i reisdui passivi anni p_anno ******
+
+		insert into tmp_anzianita_residui_dett (
+			ANNO
+			,CAPITOLO
+			,TIPO_DOC
+			,NUMERO_DOC
+			,OGGETTO_DOC
+			,OGGETTO_CAPITOLO
+      ,DIPARTIMENTO
+			,UFFICIO
+			,TIPO_ATTO
+			,NUMERO_ATTO
+			,DATA_ATTO
+			,NB_TITOLO
+			,NB_TITOLO_DESC
+			,NB_PCF
+			,NB_PCF_DESC
+			,RES_CORRENTI)
+		select p_anno
+			,d.segment2
+			,d.doc_type
+			,d.DOC_SEQUENCE_VALUE
+			,d.description
+			,a.desc_capitolo
+      ,substr(d.segment3,1,2)
+			,d.segment3
+			,d.attribute13
+			,d.attribute14
+			,d.data_atto_autorizzativo
+			,a.NB_TITOLO
+			,a.desc_nb_titolo
+			,d.attribute16
+			,p.descrizione
+			,residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy'))
+		from fin_t_documenti d
+		,vw_nb_articoli a
+		,nb_pcf_05 p
+	    where d.segment8 = p_anno
+	    and d.doc_type like 'IMP%'
+	    and nvl(d.deletion_status_flag,'N') = 'N'
+	    and a.anno = d.segment8
+	    and a.eu||a.codice = d.segment2
+	    and p.ANNO = d.segment8
+	    and p.CODICE_FINALE = d.attribute16
+	    and residuo_imp_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) > 0;
+	    commit;
+	 -- *********** fine residui da perenti ******
+
+	 -- ****** inserisco i perenti **************
+	 insert into tmp_anzianita_perenti_dett (
+			ANNO
+			,CAPITOLO
+			,OGGETTO_CAPITOLO
+			,TIPO_IMP
+			,NUMERO_IMP
+			,OGGETTO_IMP
+			,DIPARTIMENTO
+			,TIPO
+			,UFFICIO
+			,NB_TITOLO
+			,NB_TITOLO_DESC
+			,NB_PCF
+			,NB_PCF_DESC
+			,PER_ANNO1
+			,PER_ANNO2
+			,PER_ANNO3
+			,PER_ANNO4
+			,PER_ANNO5
+			,PER_ANNO6
+			,PER_ANNO7
+			,RIMANENZA
+			,PER_CORRENTI
+			)
+		select p_anno
+			,r.capitolo_corr
+      ,a.DESC_CAPITOLO
+			,d.doc_type
+			,r.NUMERO_IMP
+			,d.description
+			,substr(d.segment3,1,2)
+			,'C'
+			,d.segment3
+			,a.NB_TITOLO
+			,a.desc_nb_titolo
+			,d.attribute16
+			,p.descrizione
+			,decode(sign((p_anno - d.segment8) - 7), 1,nvl(r.perenzione_attuale,0),0,nvl(perenzione_attuale,0),0)
+			,decode(sign((p_anno - d.segment8) - 6), 0,nvl(r.perenzione_attuale,0),0)
+			,decode(sign((p_anno - d.segment8) - 5), 0,nvl(r.perenzione_attuale,0),0)
+			,decode(sign((p_anno - d.segment8) - 4), 0,nvl(r.perenzione_attuale,0),0)
+			,decode(sign((p_anno - d.segment8) - 3), 0,nvl(r.perenzione_attuale,0),0)
+			,decode(sign((p_anno - d.segment8) - 2), 0,nvl(r.perenzione_attuale,0),0)
+			,decode(sign((p_anno - d.segment8) - 1), 0,nvl(r.perenzione_attuale,0),0)
+			,nvl(r.perenzione_attuale,0)
+			,0
+		from fin_t_perenti_excel r
+		,fin_t_documenti d
+		,vw_nb_articoli a
+		,nb_pcf_05 p
+	    where r.ANNO = p_anno
+	    and nvl(r.perenzione_attuale,0) > 0
+	    and d.doc_sequence_value = r.NUMERO_IMP
+	    and d.doc_type like 'IMP%'
+	    and a.anno = r.ANNO
+	    and a.eu||a.codice = r.CAPITOLO_CORR
+	    and p.ANNO(+) = p_anno
+	    and p.CODICE_FINALE(+) = d.attribute16
+	    ;
+        commit;
+
+
+
+		END;</pre>	</td></tr>
+</table></div>

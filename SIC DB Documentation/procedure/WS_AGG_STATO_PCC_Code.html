@@ -1,0 +1,157 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>WS_AGG_STATO_PCC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="WS_AGG_STATO_PCC.html">Details</a></div></div>
+<div class="tab"><div><a href="WS_AGG_STATO_PCC_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="WS_AGG_STATO_PCC_References.html">References</a></div></div>
+<div class="tab"><div><a href="WS_AGG_STATO_PCC_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="WS_AGG_STATO_PCC_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure ws_agg_stato_pcc is
+-- se a _chiave e' nullo legge tutti i flussi KO altrimenti solo i flussi della fattura
+  Sec_Id          Number;
+	l_envelope CLOB;
+	l_risultato xmltype;
+	l_res VARCHAR2(4000);
+  l_cod_fisc_tr  varchar2(16);
+  l_vers_appl    varchar2(10);
+  l_identif_pcc  varchar2(10);
+  l_conta        number;
+  l_stato        varchar2(5);
+  l_progr_pcc    varchar2(50);
+  l_split_payment varchar2(2);
+  l_imp_liq       number(10,2);
+  l_imp_no_liq    number(10,2);
+  l_imp_sosp      number(10,2);
+  l_imp_pag       number(10,2);
+  l_imp_cert      number(10,2);
+  l_id            number;
+  l_cod_err       varchar2(50);
+  l_descr_err     varchar2(2000);
+begin
+Select Apex_Util.Find_Security_Group_Id (P_Workspace => 'SIC') 
+  Into   Sec_Id
+  From   Dual;
+Apex_Util.Set_Security_Group_Id(P_Security_Group_Id => Sec_Id);
+
+l_cod_fisc_tr:='80002950766';
+l_vers_appl:= '1.0';
+l_identif_pcc:='141809';
+
+-- aggiorna stato pcc per tutte le fatture che non hanno ancora uno stato pcc aggiornato in caso di aggiornamento multiplo
+ for fn in (select d.chiave,wif.RIFERIMENTOSDI,d.num_doc,sf1.chiave_fattura
+              from tb_doc_iva d,	gat2_ws.fe_testata_fattura wtf,
+                   gat2_ws.fe_dati_invio_fattura wif,pcc_stato_fatture sf1
+							where nvl(d.stato,'S')&lt;>'A' and
+                    wtf.IDTESTATAFATTURA=d.IDTESTATAFATTURA and
+							      wif.IDDATIINVIOFATTURA=wtf.IDDATIINVIOFATTURA and
+                    sf1.chiave_fattura(+)=d.chiave
+							order by d.chiave) loop
+    l_envelope := '&lt;SOAP_ENV:Envelope xmlns:SOAP_ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fat="http://www.tesoro.it/fatture">
+	   &lt;SOAP_ENV:Header/>
+	   &lt;SOAP_ENV:Body>
+		  &lt;fat:readStatoFatturaRichiestaTipo>
+			&lt;testataRichiesta>
+			  &lt;codiceFiscaleTrasmittente>'||l_cod_fisc_tr||'&lt;/codiceFiscaleTrasmittente>
+			  &lt;timestampTrasmissione>'||to_char(sysdate,'yyyy-mm-dd')||'T'||to_char(sysdate,'hh24:mi:ss')||'&lt;/timestampTrasmissione>
+			  &lt;versioneApplicativa>'||l_vers_appl||'&lt;/versioneApplicativa>
+			  &lt;identificativoPCCAmministrazione>'||l_identif_pcc||'&lt;/identificativoPCCAmministrazione>
+			&lt;/testataRichiesta>
+			  &lt;datiRichiesta>
+            &lt;identificazioneSDI>
+              &lt;lottoSDI>'||fn.RIFERIMENTOSDI||'&lt;/lottoSDI>
+              &lt;numeroFattura>'||fn.num_doc||'&lt;/numeroFattura>
+            &lt;/identificazioneSDI>
+         &lt;/datiRichiesta>
+        &lt;/fat:readStatoFatturaRichiestaTipo>
+       &lt;/SOAP_ENV:Body>
+    &lt;/SOAP_ENV:Envelope>';
+    l_conta:=1;
+    l_res:='KO';
+-- max 3 tentativi di chiamata
+    while l_res='KO' and l_conta&lt;3 loop
+     l_risultato:=apex_web_service.make_request(
+                p_url => 'http://pdd.regione.basilicata.it:8080/pdd/PD/PD_FatturePCC', 
+                p_action => 'wSReadStatoFattura',
+                p_envelope => l_envelope);
+   
+     l_res := APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//datiRisposta/esitoTrasmissione/text()');
+     l_conta:=l_conta+1;
+    end loop;          
+    if l_res='OK' then
+     l_stato := APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//datiDocumento/statoDocumento/text()');
+     l_progr_pcc := APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//datiDocumento/progressivoRegistrazione/text()');  
+     l_split_payment := APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//datiDocumento/splitPayment/text()');  
+     l_imp_liq := to_number(replace(
+            APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//ripartizioneAttuale/importoLiquidato/text()')
+            ,'.',','));
+     l_imp_no_liq := to_number(replace(
+            APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//ripartizioneAttuale/importoNonLiquidato/text()')
+            ,'.',','));
+     l_imp_sosp := to_number(replace(
+            APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//ripartizioneAttuale/importoSospeso/text()')
+            ,'.',','));
+     l_imp_pag := to_number(replace(
+            APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//ripartizioneAttuale/importoPagato/text()')
+            ,'.',','));
+     l_imp_cert := to_number(replace(
+            APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//ripartizioneAttuale/importoCertificato/text()')
+            ,'.',','));
+   
+      if fn.chiave_fattura is not null then
+       update pcc_stato_fatture
+        set data_ult_agg=sysdate,
+           stato=l_stato,
+           split_payment=l_split_payment,
+           imp_liq=l_imp_liq,
+           imp_no_liq=l_imp_no_liq,
+           imp_sosp=l_imp_sosp,
+           imp_pag=l_imp_pag,
+           imp_cert=l_imp_cert
+        where chiave_fattura=fn.chiave;   
+      else  
+       insert into pcc_stato_fatture
+        (chiave_fattura, id_pcc, data_ult_agg, stato, split_payment,
+         imp_liq, imp_no_liq, imp_sosp, imp_pag, imp_cert)
+        values
+        (fn.chiave, l_progr_pcc, sysdate, l_stato, l_split_payment,
+         l_imp_liq, l_imp_no_liq, l_imp_sosp, l_imp_pag, l_imp_cert);
+      end if;
+     commit;
+    end if;         
+
+ end loop;	
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

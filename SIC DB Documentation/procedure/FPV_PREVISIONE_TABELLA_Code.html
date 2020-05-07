@@ -1,0 +1,313 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FPV_PREVISIONE_TABELLA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FPV_PREVISIONE_TABELLA.html">Details</a></div></div>
+<div class="tab"><div><a href="FPV_PREVISIONE_TABELLA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FPV_PREVISIONE_TABELLA_References.html">References</a></div></div>
+<div class="tab"><div><a href="FPV_PREVISIONE_TABELLA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FPV_PREVISIONE_TABELLA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure FPV_PREVISIONE_TABELLA(p_anno in number,p_anno_inizio_esercizio in number,p_data_stampa in date,p_utente in varchar2) as
+
+riga number := 0;
+
+capitolo_appoggio varchar2(6);
+
+delta_anno number;
+
+va1 number(15,2);
+vb1 number(15,2);
+vc1 number(15,2);
+vd1 number(15,2);
+ve1 number(15,2);
+vf1 number(15,2);
+vg1 number(15,2);
+vh1 number(15,2);
+
+va2 number(15,2);
+vb2 number(15,2);
+vc2 number(15,2);
+vd2 number(15,2);
+ve2 number(15,2);
+vf2 number(15,2);
+vg2 number(15,2);
+vh2 number(15,2);
+
+va0 number(15,2);
+vb0 number(15,2);
+vc0 number(15,2);
+vd0 number(15,2);
+ve0 number(15,2);
+vf0 number(15,2);
+vg0 number(15,2);
+vh0 number(15,2);
+
+cursor fpv is
+   select 
+    p_data_stampa data_stampa
+   ,p_utente utente
+   ,p_anno anno
+   ,a.car01 missione
+   ,a.car02 desc_missione
+   ,a.car03 programma
+   ,a.car04 desc_programma
+   ,a.car05 capitolo
+   ,b.descrizione desc_capitolo
+   ,b.nb_piano_conti_fina pcf
+   ,c.descrizione desc_pcf
+   ,sum(nvl(num01,0)) AX
+   ,sum(nvl(num02,0)) BX
+   ,sum(nvl(num01,0) - nvl(num02,0)) CX
+   ,sum(DECODE(car19,'D1',nvl(num04,0)* -1, nvl(num04,0))) DX
+   ,sum(DECODE(car19,'E1',nvl(num05,0)* -1, nvl(num05,0))) EX
+   ,sum(nvl(num06,0)) FX
+   ,sum(nvl(num07,0)) GX
+   ,sum((nvl(num01,0) - nvl(num02,0)) + DECODE(car19,'D2',nvl(num04,0),nvl(num04,0)* -1) + DECODE(car19,'E1',nvl(num05,0)* -1, nvl(num05,0)) + nvl(num06,0) + nvl(num07,0)) HX
+ from 
+ tmp_tabulati a,
+ fin_t_articoli b,
+ nb_pcf_04 c 
+ where a.car20='FPV'||p_utente 
+ and a.car19 &lt;> 'FPVFINALE'
+ and a.car05 = b.eu||b.codice
+ and b.anno = p_anno
+ and c.codice_finale = b.nb_piano_conti_fina
+ and c.anno=p_anno
+ group by car01,car02,car03,car04,car05,b.descrizione, b.nb_piano_conti_fina,c.descrizione;
+
+begin 
+ delta_anno:=p_anno - p_anno_inizio_esercizio;
+
+ for a in fpv loop
+
+ if delta_anno = 0
+    then
+    va0:=a.ax;
+    vb0:=a.bx;
+    vc0:=a.cx;
+    vd0:=a.dx;
+    ve0:=a.ex;
+    vf0:=a.fx;
+    vg0:=a.gx;
+    vh0:=a.hx;
+
+    va1:=0;
+    vb1:=0;
+    vc1:=0;
+    vd1:=0;
+    ve1:=0;
+    vf1:=0;
+    vg1:=0;
+    vh1:=0;
+
+    va2:=0;
+    vb2:=0;
+    vc2:=0;
+    vd2:=0;
+    ve2:=0;
+    vf2:=0;
+    vg2:=0;
+    vh2:=0;
+
+    elsif delta_anno=1
+    then 
+
+    va1:=a.ax;
+    vb1:=a.bx;
+    vc1:=a.cx;
+    vd1:=a.dx;
+    ve1:=a.ex;
+    vf1:=a.fx;
+    vg1:=a.gx;
+    vh1:=a.hx;
+
+    va0:=0;
+    vb0:=0;
+    vc0:=0;
+    vd0:=0;
+    ve0:=0;
+    vf0:=0;
+    vg0:=0;
+    vh0:=0;
+
+    va2:=0;
+    vb2:=0;
+    vc2:=0;
+    vd2:=0;
+    ve2:=0;
+    vf2:=0;
+    vg2:=0;
+    vh2:=0;
+
+    else
+
+    va2:=a.ax;
+    vb2:=a.bx;
+    vc2:=a.cx;
+    vd2:=a.dx;
+    ve2:=a.ex;
+    vf2:=a.fx;
+    vg2:=a.gx;
+    vh2:=a.hx;
+
+    va1:=0;
+    vb1:=0;
+    vc1:=0;
+    vd1:=0;
+    ve1:=0;
+    vf1:=0;
+    vg1:=0;
+    vh1:=0;
+
+    va0:=0;
+    vb0:=0;
+    vc0:=0;
+    vd0:=0;
+    ve0:=0;
+    vf0:=0;
+    vg0:=0;
+    vh0:=0;
+
+end if;
+
+begin 
+ select capitolo
+ into capitolo_appoggio 
+ from fin_t_previsione_fpv
+ where capitolo = a.capitolo
+ and utente = a.utente
+ and anno = p_anno_inizio_esercizio;
+ exception when no_data_found then capitolo_appoggio:=null;
+end;
+
+if capitolo_appoggio is null
+   then   
+   begin
+   insert into fin_t_previsione_fpv
+   (data_generazione
+   ,utente
+   ,riga
+   ,anno
+   ,missione
+   ,desc_missione
+   ,programma
+   ,desc_programma
+   ,capitolo
+   ,desc_capitolo
+   ,pcf
+   ,desc_pcf
+   ,A0
+   ,A1
+   ,A2
+   ,B0
+   ,B1
+   ,B2
+   ,C0
+   ,C1
+   ,C2
+   ,D0
+   ,D1
+   ,D2
+   ,E0
+   ,E1
+   ,E2
+   ,F0
+   ,F1
+   ,F2
+   ,G0
+   ,G1
+   ,G2
+   ,H0
+   ,H1
+   ,H2)
+   values
+   (a.data_stampa
+   ,a.utente
+   ,riga
+   ,p_anno_inizio_esercizio
+   ,a.missione
+   ,a.desc_missione
+   ,a.programma
+   ,a.desc_programma
+   ,a.capitolo
+   ,a.desc_capitolo
+   ,a.pcf
+   ,a.desc_pcf
+   ,va0
+   ,va1
+   ,va2
+   ,vb0
+   ,vb1
+   ,vb2
+   ,vc0
+   ,vc1
+   ,vc2
+   ,vd0
+   ,vd1
+   ,vd2
+   ,ve0
+   ,ve1
+   ,ve2
+   ,vf0
+   ,vf1
+   ,vf2
+   ,vg0
+   ,vg1
+   ,vg2
+   ,vh0
+   ,vh1
+   ,vh2);
+   end;
+   else
+   if delta_anno = 1
+    then
+    begin
+    update fin_t_previsione_fpv set
+    a1=va1,
+    b1=vb1,
+    c1=vc1,
+    d1=vd1,
+    e1=ve1,
+    f1=vf1,
+    g1=vg1,
+    h1=vh1
+    where capitolo = a.capitolo
+    and utente = a.utente
+    and anno = p_anno_inizio_esercizio;
+    end;
+    else
+    begin
+    update fin_t_previsione_fpv set
+    a2=va2,
+    b2=vb2,
+    c2=vc2,
+    d2=vd2,
+    e2=ve2,
+    f2=vf2,
+    g2=vg2,
+    h2=vh2
+    where capitolo = a.capitolo
+    and utente = a.utente
+    and anno = p_anno_inizio_esercizio;
+    end;
+   end if;
+ end if;
+
+ commit;
+
+
+ end loop;
+end;  </pre>	</td></tr>
+</table></div>

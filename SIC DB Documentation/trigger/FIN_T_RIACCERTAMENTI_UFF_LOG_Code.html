@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_RIACCERTAMENTI_UFF_LOG</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_T_RIACCERTAMENTI_UFF_LOG.html">Details</a></div></div>
+<div class="tab"><div><a href="FIN_T_RIACCERTAMENTI_UFF_LOG_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FIN_T_RIACCERTAMENTI_UFF_LOG_References.html">References</a></div></div>
+<div class="tab"><div><a href="FIN_T_RIACCERTAMENTI_UFF_LOG_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_T_RIACCERTAMENTI_UFF_LOG_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2"."FIN_T_RIACCERTAMENTI_UFF_LOG" 
+    BEFORE INSERT OR UPDATE ON FIN_T_RIACCERTAMENTI_UFFICI
+    FOR EACH ROW
+    DECLARE
+
+    wid number;
+
+    begin
+
+        begin
+          select nvl(max(id),0)+1
+          into wid
+          from fin_t_riaccertamenti_uff_log;
+        end;
+
+        insert into fin_t_riaccertamenti_uff_log (
+        ID
+        ,ANNO_BILANCIO_RIACCERTAMENTO
+        ,DOC_ID
+        ,ANNO_RIACCERTAMENTO1
+        ,ANNO_RIACCERTAMENTO2
+        ,ANNO_RIACCERTAMENTO3
+        ,IMPORTO_RIACCERTAMENTO1
+        ,IMPORTO_RIACCERTAMENTO2
+        ,IMPORTO_RIACCERTAMENTO3
+        ,IMPORTO_DA_ELIMINARE
+        ,CAPITOLO_RIACCERTAMENTO1
+        ,CAPITOLO_RIACCERTAMENTO2
+        ,CAPITOLO_RIACCERTAMENTO3
+        ,PCF_RIACCERTAMENTO1
+        ,PCF_RIACCERTAMENTO2
+        ,PCF_RIACCERTAMENTO3
+        ,NOTE_RIACCERTAMENTO
+        ,IMPORTO_RIACCERTAMENTO1_BIL
+        ,IMPORTO_RIACCERTAMENTO2_BIL
+        ,IMPORTO_RIACCERTAMENTO3_BIL
+        ,IMPORTO_DA_ELIMINARE_BIL
+        ,VALIDATO
+        ,UFFICIO
+        ,NOTE_UFFICIO_BILANCIO
+        ,NOTE_ELIMINA
+        ,STATO
+        ,USER_ID
+        ,DATA
+        ,CAPITOLO_RIACC1_BIL
+        ,CAPITOLO_RIACC2_BIL
+        ,CAPITOLO_RIACC3_BIL
+        ,PCF_RIACC1_BIL
+        ,PCF_RIACC2_BIL
+        ,PCF_RIACC3_BIL        
+        )
+        values (
+        wid
+        ,:new.ANNO_BILANCIO_RIACCERTAMENTO
+        ,:new.DOC_ID
+        ,:new.ANNO_RIACCERTAMENTO1
+        ,:new.ANNO_RIACCERTAMENTO2
+        ,:new.ANNO_RIACCERTAMENTO3
+        ,:new.IMPORTO_RIACCERTAMENTO1
+        ,:new.IMPORTO_RIACCERTAMENTO2
+        ,:new.IMPORTO_RIACCERTAMENTO3
+        ,:new.IMPORTO_DA_ELIMINARE
+        ,:new.CAPITOLO_RIACCERTAMENTO1
+        ,:new.CAPITOLO_RIACCERTAMENTO2
+        ,:new.CAPITOLO_RIACCERTAMENTO3
+        ,:new.PCF_RIACCERTAMENTO1
+        ,:new.PCF_RIACCERTAMENTO2
+        ,:new.PCF_RIACCERTAMENTO3
+        ,:new.NOTE_RIACCERTAMENTO
+        ,:new.IMPORTO_RIACCERTAMENTO1_BIL
+        ,:new.IMPORTO_RIACCERTAMENTO2_BIL
+        ,:new.IMPORTO_RIACCERTAMENTO3_BIL
+        ,:new.IMPORTO_DA_ELIMINARE_BIL
+        ,:new.VALIDATO
+        ,:new.UFFICIO
+        ,:new.NOTE_UFFICIO_BILANCIO
+        ,:new.NOTE_ELIMINA
+        ,:new.STATO
+        ,apex_procedure.getIdUtente(v('APP_USER'))
+        ,sysdate
+        ,:new.CAPITOLO_RIACC1_BIL
+        ,:new.CAPITOLO_RIACC2_BIL
+        ,:new.CAPITOLO_RIACC3_BIL
+        ,:new.PCF_RIACC1_BIL
+        ,:new.PCF_RIACC2_BIL
+        ,:new.PCF_RIACC3_BIL        
+        );
+end;</pre>	</td></tr>
+</table></div>

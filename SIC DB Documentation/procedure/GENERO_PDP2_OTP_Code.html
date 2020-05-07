@@ -1,0 +1,154 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>GENERO_PDP2_OTP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="GENERO_PDP2_OTP.html">Details</a></div></div>
+<div class="tab"><div><a href="GENERO_PDP2_OTP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="GENERO_PDP2_OTP_References.html">References</a></div></div>
+<div class="tab"><div><a href="GENERO_PDP2_OTP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="GENERO_PDP2_OTP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE genero_pdp2_otp(vanno in NUMBER, 
+                                           vufficio in VARCHAR2, 
+                                           vmatricola in NUMBER,
+					      vtipo_scheda IN VARCHAR2,
+                                           vmessaggio out varchar2) IS
+messaggio varchar2(100); 
+votp varchar2(20);
+appoggio_progressivo number;
+
+wNominativo varchar2(400);
+testo_mail clob;
+email_id number;
+wmail varchar2(1000);
+Sec_Id number;
+
+BEGIN
+
+   select nvl(max(progressivo_creazione),0) + 1
+   into appoggio_progressivo
+   from pdp2_otp
+   where anno=vanno
+   and matricola=vmatricola
+   and tipo_scheda = vtipo_scheda;
+
+
+
+
+  select genpassword(5,3,0) otp /* 0 perchè i caratteri speciali spesso nell'invio per email vengono storpiati, es. il &lt; arriva come tre caratteri strani */
+  into votp
+  from dual;
+
+   /*  Invio Email */
+
+
+   -- select cognome||' '||nome nominativo, email_address
+   -- into wNominativo, wmail
+   -- from fnd_user
+   -- where matricola = vmatricola;
+
+
+   -- f.coretti 28/06/2019
+   FOR r IN (SELECT cognome||' '||nome nominativo
+             FROM fin_t_pianta_organica
+             WHERE matricola = vmatricola
+			 ORDER BY data) LOOP
+     wNominativo := r.nominativo;     
+   END LOOP;
+   -- se la matricola è in pdp2_ind_mailotp_prioritari prendo la mail di là, se no da fnd_user
+   wmail := NULL;
+   FOR r IN ((SELECT 'B' ordine, 
+              indirizzo email_address
+			  FROM pdp2_ind_mailotp_prioritari
+			  WHERE matricola = vmatricola
+			  UNION 
+			  SELECT 'A' ordine, 
+              email_address
+			  FROM fnd_user
+			  WHERE matricola = vmatricola)
+			  ORDER BY 1) 
+
+   LOOP
+     wmail := r.email_address;     
+   END LOOP;
+
+   --
+   --
+
+   IF wmail IS NOT NULL
+    THEN
+     insert into pdp2_otp(
+       ANNO
+      ,UFFICIO
+      ,MATRICOLA
+      ,tipo_scheda
+      ,DATA_CREAZIONE
+      ,PROGRESSIVO_CREAZIONE
+      ,UTILIZZATA
+      ,OTP
+      ,MAIL_INVIATA
+     ) values 
+    (vanno
+     ,vufficio
+     ,vmatricola
+     ,vtipo_scheda
+     ,sysdate
+     ,appoggio_progressivo
+     ,null 
+     ,votp
+     ,wmail);
+
+     commit;
+
+   -- Setto modalita' operativa APEX per poter utilizzare l'apex mail
+   Select Apex_Util.Find_Security_Group_Id (P_Workspace => 'SIC')
+   Into   Sec_Id
+   From   Dual;  
+
+   Apex_Util.Set_Security_Group_Id(P_Security_Group_Id => Sec_Id);
+
+   testo_mail := '&lt;html>
+                    &lt;head>&lt;/head>
+                    &lt;body>
+                    Gentile '||wNominativo||',&lt;br>
+di seguito e'' riportato il tuo &lt;b>Codice identificativo univoco personale (OTP)&lt;/b>, utilizzabile una sola volta, da apporre a titolo di validazione della tua scheda di 
+valutazione personale per il '||vanno||', finalizzata alla erogazione della produttivita'' , dopo il colloquio con il proprio valutatore e la presa visione della stessa.&lt;br>&lt;br>
+Questo codice &lt;b>e'' stato generato il giorno '||to_char(sysdate,'dd/mm/yyyy')||' alle ore '||to_char(sysdate,'hh24:mi')||'&lt;/b>. Eventuali altri codici generati e comunicati precedentemente, non utilizzati, non sono piu'' validi.&lt;br>&lt;br>
+Ti ricordiamo che la conservazione in sicurezza del presente codice e'' tua responsabilita''   e solleva la Regione Basilicata da qualsiasi uso improprio dello stesso.&lt;br>&lt;br> 
+&lt;b>CODICE PERSONALE: '||votp||'&lt;/b>&lt;br>&lt;br> 
+&lt;em>Tale modalita'' di validazione delle schede di valutazione avviene in conformita'' a quanto stabilito dagli artt. 21 e 64 -septies del  nuovo Codice  dell''amministrazione Digitale 
+D.lgs 82/2005 ed in particolare "2 -septies . Un atto giuridico puo'' essere posto in essere da un soggetto identificato mediante SPID, nell''ambito di un sistema informatico 
+avente i requisiti fissati nelle regole tecniche adottate ai sensi dell''articolo 71, attraverso processi idonei a garantire, in maniera manifesta e inequivoca, 
+l''acquisizione della sua volonta''. Restano ferme le disposizioni concernenti il deposito degli atti e dei documenti in via telematica secondo la normativa anche regolamentare 
+in materia di processo telematico." tramite l''utilizzo del sistema regionale di autenticazione (Smartcard e/o PIN) che rispetta le specifiche tecniche adottate da SPID in 
+tema di certificazione e validazione delle Identita'' digitali.&lt;/em>&lt;br>&lt;br>&lt;br>
+Cordiali saluti&lt;br>
+'||to_char(sysdate,'dd/mm/yyyy')||' '||to_char(sysdate,'hh24:mi')||'&lt;br>&lt;br>
+________________________________________&lt;br>
+Non rispondere a questa mail in quanto e'' stata inviata attraverso un sistema automatico.
+                    &lt;/body>';
+
+     email_id := apex_mail.send(
+     p_to       => wmail,
+     p_from     =>  'noreply@regione.basilicata.it',
+     p_body     => testo_mail,
+     p_body_html => testo_mail,
+     p_subj     => 'Generazione nuovo codice OTP. Tipo Scheda: '||vtipo_scheda);
+
+     apex_mail.push_queue;      
+
+     vmessaggio := 'Codice Generato ed Inviato ';
+   END IF;
+END;</pre>	</td></tr>
+</table></div>

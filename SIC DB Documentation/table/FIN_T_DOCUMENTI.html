@@ -1,0 +1,1159 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_DOCUMENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_DOCUMENTI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_DOCUMENTI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>DOC_ID</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODE_COMBINATION_ID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CURRENCY_CODE</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BUDG_CODE_COMBINATION_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOC_TYPE</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EXPEDIENT_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOC_SEQUENCE_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOC_SEQUENCE_VALUE</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BASE_DOCUMENT_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATE_CREATED</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ACTUAL_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BUDGETARY_CONTROL_STATUS</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SET_OF_BOOKS_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>GL_DATE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PERIOD_NAME</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CHECK_STOCK_ID</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>utilizzato per indicare la quota parte di document_amount finanziata da FPV per gli impegni pluriennali il cui capitolo nell'anno relativo non risulta (ancora) finanziato da FPV. Se &lt;0 vuol dire che l'imp-plur è finanziato da accenrtamento pluriennale (quindi da entrate)</td>
+	</tr>
+	<tr>
+<td>BANK_ACCOUNT_ID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PREVIOUS_DOC_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BATCH_ID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EXT_DOCUMENT_REF</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EXT_DOC_APPLICATION_SOURCE</td>
+<td>VARCHAR2(30 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>JE_BATCH_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PACKET_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UNRESERVATION_PACKET_ID</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>REMARKS</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CURRENCY_CONVERSION_RATE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CURRENCY_CONVERSION_TYPE</td>
+<td>VARCHAR2(30 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CURRENCY_CONVERSION_DATE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OPEN_BALANCE_PROPOSED</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OPEN_BALANCE_POSTED</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CLOSED_AMOUNT_PROPOSED</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>Indica per gli impegni andati in perenzione l'importo della perenzione (consente di gestire la perenzione parziale)</td>
+	</tr>
+	<tr>
+<td>CLOSED_AMOUNT_POSTED</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EXP_PHASE_AMOUNT_PROPOSED</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EXP_PHASE_AMOUNT_POSTED</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EXT_BUDGET_AMOUNT</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOCUMENT_AMOUNT</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOCUMENT_BASE_AMOUNT</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>APPROVAL_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PROPOSAL_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AUDITING_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>POSTING_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DELETION_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PAYMENT_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>GROUP_PAYMENTS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>44</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DELETION_REASON</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>45</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>REVERTION_REASON</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>46</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMMITMENT_YEAR</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>47</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIPTION</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>48</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE_CATEGORY</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>49</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE1</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>50</td>
+<td>Reversale Collegata a mandati</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE2</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>51</td>
+<td>Contiene l'Obiettivo Operativo per il nuovo Piano delle Performance in vigore dal secondo semestre del 2014</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE3</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>52</td>
+<td>Importo Iva</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE4</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>53</td>
+<td>Conto Economica</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE5</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>54</td>
+<td>Imposta Irap</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE6</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>55</td>
+<td>Tipologia Reddito</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE7</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>56</td>
+<td>Contiene l'obiettivo operativo del Piano delle Performance dal 2016 in poi</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE8</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>57</td>
+<td>Ratei</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE9</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>58</td>
+<td>Risconti</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE10</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>59</td>
+<td>Documenti di Ragioneria :Valido 770 - Utilizzato anche nei movimenti di variazione per indicare se si tratta di una "Variazione Previsione Iniziale" (='Y'), ed in quelli di Bilancio Prev per indicare se Utilizzo Anticipato per l'AVANZO</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE11</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>60</td>
+<td>Reversali Collegate</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE12</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>61</td>
+<td>Chiave identificativa atto - a partire dai documenti del 2008 (se provvedimenti ha il dato). i Documenti 2002 con N in attribute12 sono ignorati.</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE13</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>62</td>
+<td>Tipo Atto Autorizzativo</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE14</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>63</td>
+<td>Data Atto Autorizzativo</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE15</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>64</td>
+<td>Numero Atto Autorizzativo</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE16</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>65</td>
+<td>Piano dei Conti Finanziario</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE17</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>66</td>
+<td>Assume il valore, per i documenti di bilancio di  SYSDATE. Utile per identificare i movimenti di assestamento/variazione pluriennali</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE18</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>67</td>
+<td>Doc_type originale per i documenti di bilancio, in caso di modifica del contenuto del campo DOC_TYPE.</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE19</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>68</td>
+<td>Documenti Bilancio. Per le chiavi contabili di avanzo riporta il capitolo di uscita destinatario quando viene inserito in un capitolo Fondo</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE20</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>69</td>
+<td>Imponibile IRAP</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE21</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>70</td>
+<td>Per gli impegni generati come riaccertamento di altri impegni, riporta il DOC_ID dell'impegno vecchio riaccertato.</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE22</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>71</td>
+<td>Per gli impegni generati come riaccertamento di altri impegni, riporta l'importo del riaccertamento dell'impegno vecchio.</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE23</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>72</td>
+<td>Per gli impegni sottoposti a riaccertamento riporta il DOC_ID dell'impegno nuovo generato in sua vece - Per i preimpegni riporta il numero del preimpegno provvisorio. Serve per identificare i preimpegni da quelli generati in automatico da provvedimenti.</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE24</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>73</td>
+<td>Per le ECONOMIE su impegni per RIACCERTAMENTI riporta la lettera S (economia_x_riaccertamento = 'S').</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE25</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>74</td>
+<td>Documenti Bilancio. Riporta il codice legato alla tabella FIN_T_CHIAVI_CONTABILI_ATTRIB per i movimenti con chiavi contabili</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE26</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>75</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE27</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>76</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE28</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>77</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE29</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>78</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE30</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>79</td>
+<td>Se uguale ad 'S' ed il tipo documento è un mandato, trattasi di Sistemazione Contabile</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE31</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>80</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE32</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>81</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE33</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>82</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE34</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>83</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE35</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>84</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE36</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>85</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE37</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>86</td>
+<td>contiene copia del segment3, utilizzato in caso di cambio codifica uffici</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE38</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>87</td>
+<td>contiene la sysdate (utile soprattutto per i documenti pluriennali)</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE39</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>88</td>
+<td>Dipartimento</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE40</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>89</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE41</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>90</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE42</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>91</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE43</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>92</td>
+<td>usato contabilità economica S = doc da non considerare nelle scritture perchè rilevato manualmente nell'anno di competenza</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE44</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>93</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE45</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>94</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE46</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>95</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE47</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>96</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE48</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>97</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE49</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>98</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTRIBUTE50</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>99</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONCURRENT_REQUEST_ID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>100</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATED_BY</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>101</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATION_DATE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>102</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LAST_UPDATED_BY</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>103</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LAST_UPDATE_DATE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>104</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>WF_ITEM_TYPE</td>
+<td>VARCHAR2(8 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>105</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>WF_ITEM_KEY</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>106</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ADMINISTRATIVE_EXPEDIENT</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>107</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PLURIANNUAL_YEAR</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>108</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LATEST_COMMITMENT_YEAR</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>109</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PENDING_OBLIGATION_YEAR</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>110</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BUDGET_TYPE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>111</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FUNDS_CHECK_GL_DATE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>112</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LATEST_PENDING_OBLIGATION_YEAR</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>113</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>WORKFLOW_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>114</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>REGISTRY_STATUS_FLAG</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>115</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PERENTI_STATUS</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>116</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PERENTI_REQUEST_ID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>117</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT2</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>118</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT4</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>119</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT8</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>120</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT3</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>121</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT7</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>122</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_APPROVAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>123</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_PERENZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>124</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_PRESCRIZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>125</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_ATTO_AUTORIZZATIVO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>126</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_ASP</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>127</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_DIRETTRICE</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>128</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_RISULTATI</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>129</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_OG_PARTE1</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>130</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_OG_PARTE2</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>131</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_OG_PARTE3</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>132</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOC_ID_CAPO_FILIERA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>133</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT9</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>134</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SEGMENT11</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>135</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PREIMPEGNO_AUTOMATICO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>136</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_GESTIONALE_SIOPE</td>
+<td>VARCHAR2(4 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>137</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MANDREV_SOSTITUITO</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>138</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>STAMPA_AVVISO_MANDATO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>139</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_CONTO_EVIDENZA</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>140</td>
+<td>O.I. Si tratta di CODICI conto indicati dalla Tesoreria all'Ente. Servono per valorizzare il tag conto_evidenza di mandati e reversali</td>
+	</tr>
+	<tr>
+<td>DATA_ESECUZIONE_PAGAMENTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>141</td>
+<td>null</td>
+	</tr>
+</table></div>

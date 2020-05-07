@@ -1,0 +1,167 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AP_AUTOPARCO</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="AP_AUTOPARCO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="AP_AUTOPARCO_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>CODICE</td>
+<td>NUMBER(3,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>REFERENTE</td>
+<td>NUMBER(6,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMUNE</td>
+<td>NUMBER(10,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>INDIRIZZO</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCR_FOGLIO</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VISIBILITA_ITINERARIO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ULTIMA_DATA_ST</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ULTIMO_NUM_ST</td>
+<td>NUMBER(8,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AUTISTA</td>
+<td>NUMBER(6,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MANUTENZIONI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AUTOM_DEFAULT</td>
+<td>VARCHAR2(12 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE_CREAZIONE</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_CREAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE_AGGIORNAMENTO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_AGGIORNAMENTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>E_MAIL</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+</table></div>

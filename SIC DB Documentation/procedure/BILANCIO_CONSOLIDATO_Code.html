@@ -1,0 +1,155 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BILANCIO_CONSOLIDATO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BILANCIO_CONSOLIDATO.html">Details</a></div></div>
+<div class="tab"><div><a href="BILANCIO_CONSOLIDATO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BILANCIO_CONSOLIDATO_References.html">References</a></div></div>
+<div class="tab"><div><a href="BILANCIO_CONSOLIDATO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BILANCIO_CONSOLIDATO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure bilancio_consolidato(p_anno in number) as
+
+cursor eli_giu is
+select CAPITOLO
+,RESIDUI_INIZIALI
+,PREVISIONI_DEFINITIVE_COMPE
+,PREVISIONI_DEFINITIVE_CASSA
+,ACCERTAMENTI_IMPEGNI_COMPE
+,RISCOSSIONI_PAGAMENTI_COMPE
+,RISCOSSIONI_PAGAMENTI_RES
+,RISCOSSIONI_PAGAMENTI_TOTALE
+,DIFFERENZA_PREVCOMPE_ACCERT
+,DIFFERENZA_PREVCOMPE_IMPEGNI
+,VARIAZIONE_RESIDUI
+,RIMANENZE_RESIDUI
+,RESIDUI_COMPETENZA
+,RESIDUI_FINALI
+,ECONOMIE_COMPETENZA
+,FPV
+,RIACCERTAMENTO_RESIDUI
+,ELIMINAZIONE_PERENZIONE
+,TOTALE_VARIAZIONI_RESIDUI
+from gat2.fin_t_elisione
+where anno = p_anno;
+
+cursor eli_cons is
+select CAPITOLO
+,RESIDUI_INIZIALI
+,PREVISIONI_DEFINITIVE_COMPE
+,PREVISIONI_DEFINITIVE_CASSA
+,ACCERTAMENTI_IMPEGNI_COMPE
+,RISCOSSIONI_PAGAMENTI_COMPE
+,RISCOSSIONI_PAGAMENTI_RES
+,RISCOSSIONI_PAGAMENTI_TOTALE
+,DIFFERENZA_PREVCOMPE_ACCERT
+,DIFFERENZA_PREVCOMPE_IMPEGNI
+,VARIAZIONE_RESIDUI
+,RIMANENZE_RESIDUI
+,RESIDUI_COMPETENZA
+,RESIDUI_FINALI
+,ECONOMIE_COMPETENZA
+,FPV
+,RIACCERTAMENTO_RESIDUI
+,ELIMINAZIONE_PERENZIONE
+,TOTALE_VARIAZIONI_RESIDUI
+from sic_consiglio.fin_t_elisione
+where anno = p_anno;
+
+
+begin
+
+-- elimino eventuali dati già importati del Consiglio Regionale PI 96016400762
+
+delete gat2.fin_t_consuntivo_excel 
+where anno_consuntivo = p_anno
+and utente = 'CONSOLIDATO'
+and CF_PI_ENTE = '96016400762'; 
+commit;
+
+-- Inserisco i dati del Consiglio Regionale PI 96016400762
+insert into fin_t_consuntivo_excel 
+select b.* from SIC_CONSIGLIO.FIN_T_CONSUNTIVO_EXCEL b
+where b.anno_consuntivo = p_anno
+and   b.utente = 'CONSOLIDATO'; 
+commit;
+
+-- elisione dati Giunta
+ for eg in eli_giu loop
+ 
+ update gat2.fin_t_consuntivo_excel c
+ set 
+ c.RESIDUI_INIZIALI                = nvl(c.RESIDUI_INIZIALI,0)             - nvl(eg.RESIDUI_INIZIALI,0)            ,
+ c.PREVISIONI_DEFINITIVE_COMPE     = nvl(c.PREVISIONI_DEFINITIVE_COMPE,0)  - nvl(eg.PREVISIONI_DEFINITIVE_COMPE,0) ,
+ c.PREVISIONI_DEFINITIVE_CASSA     = nvl(c.PREVISIONI_DEFINITIVE_CASSA,0)  - nvl(eg.PREVISIONI_DEFINITIVE_CASSA,0) ,
+ c.ACCERTAMENTI_IMPEGNI_COMPE      = nvl(c.ACCERTAMENTI_IMPEGNI_COMPE,0)   - nvl(eg.ACCERTAMENTI_IMPEGNI_COMPE,0)  ,
+ c.RISCOSSIONI_PAGAMENTI_COMPE     = nvl(c.RISCOSSIONI_PAGAMENTI_COMPE,0)  - nvl(eg.RISCOSSIONI_PAGAMENTI_COMPE,0) ,
+ c.RISCOSSIONI_PAGAMENTI_RES       = nvl(c.RISCOSSIONI_PAGAMENTI_RES,0)    - nvl(eg.RISCOSSIONI_PAGAMENTI_RES,0)   ,
+ c.RISCOSSIONI_PAGAMENTI_TOTALE    = nvl(c.RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(eg.RISCOSSIONI_PAGAMENTI_TOTALE,0),
+ c.DIFFERENZA_PREVCOMPE_ACCERT     = nvl(c.DIFFERENZA_PREVCOMPE_ACCERT,0)  - nvl(eg.DIFFERENZA_PREVCOMPE_ACCERT,0) ,
+ c.DIFFERENZA_PREVCOMPE_IMPEGNI    = nvl(c.DIFFERENZA_PREVCOMPE_IMPEGNI,0) - nvl(eg.DIFFERENZA_PREVCOMPE_IMPEGNI,0),
+ c.VARIAZIONE_RESIDUI              = nvl(c.VARIAZIONE_RESIDUI,0)           - nvl(eg.VARIAZIONE_RESIDUI,0)          ,
+ c.RIMANENZE_RESIDUI               = nvl(c.RIMANENZE_RESIDUI,0)            - nvl(eg.RIMANENZE_RESIDUI,0)           ,
+ c.RESIDUI_COMPETENZA              = nvl(c.RESIDUI_COMPETENZA,0)           - nvl(eg.RESIDUI_COMPETENZA,0)          ,
+ c.RESIDUI_FINALI                  = nvl(c.RESIDUI_FINALI,0)               - nvl(eg.RESIDUI_FINALI,0)              ,
+ c.ECONOMIE_COMPETENZA             = nvl(c.ECONOMIE_COMPETENZA,0)          - nvl(eg.ECONOMIE_COMPETENZA,0)         ,
+ c.FPV                             = nvl(c.FPV,0)                          - nvl(eg.FPV,0)                         ,
+ c.RIACCERTAMENTO_RESIDUI          = nvl(c.RIACCERTAMENTO_RESIDUI,0)       - nvl(eg.RIACCERTAMENTO_RESIDUI,0)      ,
+ c.ELIMINAZIONE_PERENZIONE         = nvl(c.ELIMINAZIONE_PERENZIONE,0)      - nvl(eg.ELIMINAZIONE_PERENZIONE,0)     ,
+ c.TOTALE_VARIAZIONI_RESIDUI       = nvl(c.TOTALE_VARIAZIONI_RESIDUI,0)    - nvl(eg.TOTALE_VARIAZIONI_RESIDUI,0)   ,
+ c.RES_PASS_PREC                   = nvl(c.RES_PASS_PREC,0)                - nvl(eg.RIMANENZE_RESIDUI,0)           ,
+ c.RES_PASS_COMPE                  = nvl(c.RES_PASS_COMPE,0)               - nvl(eg.RESIDUI_COMPETENZA,0)          ,
+ c.TOT_RES_PASS_RIP                = nvl(c.TOT_RES_PASS_RIP,0)             - nvl(eg.RESIDUI_FINALI,0)
+ where c.anno_consuntivo = p_anno
+ and c.tipo_capitolo||c.capitolo = eg.capitolo
+ and c.utente = 'CONSOLIDATO'
+ and c.CF_PI_ENTE = '80002950766';
+ commit;
+ end loop;
+ 
+ for ec in eli_cons loop
+ 
+ update fin_t_consuntivo_excel c
+ set
+ c.RESIDUI_INIZIALI                = nvl(c.RESIDUI_INIZIALI,0)             - nvl(ec.RESIDUI_INIZIALI,0)            ,
+ c.PREVISIONI_DEFINITIVE_COMPE     = nvl(c.PREVISIONI_DEFINITIVE_COMPE,0)  - nvl(ec.PREVISIONI_DEFINITIVE_COMPE,0) ,
+ c.PREVISIONI_DEFINITIVE_CASSA     = nvl(c.PREVISIONI_DEFINITIVE_CASSA,0)  - nvl(ec.PREVISIONI_DEFINITIVE_CASSA,0) ,
+ c.ACCERTAMENTI_IMPEGNI_COMPE      = nvl(c.ACCERTAMENTI_IMPEGNI_COMPE,0)   - nvl(ec.ACCERTAMENTI_IMPEGNI_COMPE,0)  ,
+ c.RISCOSSIONI_PAGAMENTI_COMPE     = nvl(c.RISCOSSIONI_PAGAMENTI_COMPE,0)  - nvl(ec.RISCOSSIONI_PAGAMENTI_COMPE,0) ,
+ c.RISCOSSIONI_PAGAMENTI_RES       = nvl(c.RISCOSSIONI_PAGAMENTI_RES,0)    - nvl(ec.RISCOSSIONI_PAGAMENTI_RES,0)   ,
+ c.RISCOSSIONI_PAGAMENTI_TOTALE    = nvl(c.RISCOSSIONI_PAGAMENTI_TOTALE,0) - nvl(ec.RISCOSSIONI_PAGAMENTI_TOTALE,0),
+ c.DIFFERENZA_PREVCOMPE_ACCERT     = nvl(c.DIFFERENZA_PREVCOMPE_ACCERT,0)  - nvl(ec.DIFFERENZA_PREVCOMPE_ACCERT,0) ,
+ c.DIFFERENZA_PREVCOMPE_IMPEGNI    = nvl(c.DIFFERENZA_PREVCOMPE_IMPEGNI,0) - nvl(ec.DIFFERENZA_PREVCOMPE_IMPEGNI,0),
+ c.VARIAZIONE_RESIDUI              = nvl(c.VARIAZIONE_RESIDUI,0)           - nvl(ec.VARIAZIONE_RESIDUI,0)          ,
+ c.RIMANENZE_RESIDUI               = nvl(c.RIMANENZE_RESIDUI,0)            - nvl(ec.RIMANENZE_RESIDUI,0)           ,
+ c.RESIDUI_COMPETENZA              = nvl(c.RESIDUI_COMPETENZA,0)           - nvl(ec.RESIDUI_COMPETENZA,0)          ,
+ c.RESIDUI_FINALI                  = nvl(c.RESIDUI_FINALI,0)               - nvl(ec.RESIDUI_FINALI,0)              ,
+ c.ECONOMIE_COMPETENZA             = nvl(c.ECONOMIE_COMPETENZA,0)          - nvl(ec.ECONOMIE_COMPETENZA,0)         ,
+ c.FPV                             = nvl(c.FPV,0)                          - nvl(ec.FPV,0)                         ,
+ c.RIACCERTAMENTO_RESIDUI          = nvl(c.RIACCERTAMENTO_RESIDUI,0)       - nvl(ec.RIACCERTAMENTO_RESIDUI,0)      ,
+ c.ELIMINAZIONE_PERENZIONE         = nvl(c.ELIMINAZIONE_PERENZIONE,0)      - nvl(ec.ELIMINAZIONE_PERENZIONE,0)     ,
+ c.TOTALE_VARIAZIONI_RESIDUI       = nvl(c.TOTALE_VARIAZIONI_RESIDUI,0)    - nvl(ec.TOTALE_VARIAZIONI_RESIDUI,0)   ,
+ c.RES_PASS_PREC                   = nvl(c.RES_PASS_PREC,0)                - nvl(ec.RIMANENZE_RESIDUI,0)           ,
+ c.RES_PASS_COMPE                  = nvl(c.RES_PASS_COMPE,0)               - nvl(ec.RESIDUI_COMPETENZA,0)          ,
+ c.TOT_RES_PASS_RIP                = nvl(c.TOT_RES_PASS_RIP,0)             - nvl(ec.RESIDUI_FINALI,0) 
+ where 
+ c.anno_consuntivo = p_anno
+ and c.tipo_capitolo||c.capitolo = ec.capitolo
+ and c.utente = 'CONSOLIDATO'
+ and c.CF_PI_ENTE = '96016400762';
+ commit;
+ end loop;
+-- RES_PASS_PREC = nvl(rimanenze_residui,0),res_pass_compe = nvl(residui_competenza,0), TOT_RES_PASS_RIP = nvl(residui_finali,0)
+end;</pre>	</td></tr>
+</table></div>

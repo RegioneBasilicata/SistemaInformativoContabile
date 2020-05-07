@@ -1,0 +1,2540 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BDAP_DCA_REND</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BDAP_DCA_REND.html">Details</a></div></div>
+<div class="tab"><div><a href="BDAP_DCA_REND_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BDAP_DCA_REND_References.html">References</a></div></div>
+<div class="tab"><div><a href="BDAP_DCA_REND_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BDAP_DCA_REND_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure BDAP_DCA_REND(p_anno in number) is
+
+p_utente varchar2(50):='CONS'||p_anno;
+p_id_ente varchar2(20);
+
+
+c_riga     number; -- conta le righe
+
+conta number :=0; -- conta le righe per il Quinto Livello 
+
+--*** Sezione DCA Dati COntabili Analitici
+cursor bdca_e is 
+select
+nb_PIANO_CONTI_FINA pcf1
+,'    &lt;dr:vocePDCI contextRef="d_'||anno_consuntivo||'">'||nb_PIANO_CONTI_FINA||'&lt;/dr:vocePDCI>'  pcf
+,'    &lt;dr:RS decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(RESIDUI_INIZIALI,0)),'9999999990.00'))||'&lt;/dr:RS>' rs
+,'    &lt;dr:CP decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(PREVISIONI_DEFINITIVE_COMPE,0)),'9999999990.00'))||'&lt;/dr:CP>' cp
+,'    &lt;dr:CS decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(PREVISIONI_DEFINITIVE_CASSA,0)),'9999999990.00'))||'&lt;/dr:CS>' cs
+,'    &lt;dr:R  decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(VARIAZIONE_RESIDUI,0)),'9999999990.00'))||'&lt;/dr:R>' r
+from fin_t_consuntivo_excel 
+where utente=p_utente
+and anno_consuntivo=p_anno
+and tipo_capitolo='E'
+and nb_PIANO_CONTI_FINA is not null
+group by nb_piano_conti_fina,anno_consuntivo
+order by 1;
+
+
+cursor bdca_u is 
+select 
+NB_PIANO_CONTI_FINA pcf1
+,nb_livello1 miss1
+,nb_livello2 prog1
+,'    &lt;dr:miss contextRef="d_'||anno_consuntivo||'">'||nb_livello1||'&lt;/dr:miss>'  miss
+,'    &lt;dr:prog contextRef="d_'||anno_consuntivo||'">'||nb_livello2||'&lt;/dr:prog>'  prog
+,'    &lt;dr:vocePDCI contextRef="d_'||anno_consuntivo||'">'||nb_PIANO_CONTI_FINA||'&lt;/dr:vocePDCI>'  pcf
+,'    &lt;dr:RS decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(RESIDUI_INIZIALI,0)),'9999999990.00'))||'&lt;/dr:RS>' rs
+,'    &lt;dr:CP decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(PREVISIONI_DEFINITIVE_COMPE,0)),'9999999990.00'))||'&lt;/dr:CP>' cp
+,'    &lt;dr:CS decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(PREVISIONI_DEFINITIVE_CASSA,0)),'9999999990.00'))||'&lt;/dr:CS>' cs
+,'    &lt;dr:R  decimals="2" contextRef="d_'||(anno_consuntivo)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(VARIAZIONE_RESIDUI,0)),'9999999990.00'))||'&lt;/dr:R>' r
+from fin_t_consuntivo_excel 
+where utente=p_utente
+and anno_consuntivo=p_anno
+and tipo_capitolo='U'
+and nb_PIANO_CONTI_FINA is not null
+group by nb_piano_conti_fina,nb_livello1,nb_livello2,anno_consuntivo
+order by 1,2,3;
+
+
+--*** Sezione per il Quinto Livello 
+/* Per definire il quinto livello, andiamo a fare una prima elaborazione scrivendo in tmp_tabulati 
+   e successivamente andiamo a leggete tmp_tabulati ed a scrivere i dati in bdap
+*/
+-- USCITE
+cursor rs is
+ select 
+a.liv1 miss
+,a.liv2 prog
+,decode(a.nb_cofog_ii_livello,null,null,substr(a.nb_cofog_ii_livello,1,3)||substr(a.nb_cofog_ii_livello,5,1)) cofog
+,d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'4','3') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'4','3') codsan
+,null cup
+,'RS' colonna
+,nvl(sum(nvl(r.residuo_iniziale,0)),0) importo
+from 
+fin_t_impegni_residui r
+,fin_t_documenti d
+,vw_nb_articoli a
+where r.anno_finanziario = p_anno
+and nvl(r.residuo_iniziale,0) > 0
+and nvl(r.perenzione,'n') = 'N'
+and d.doc_id = r.doc_id_impegno
+and a.eu||a.codice = r.capitolo_spesa_corrente
+and a.anno = p_anno
+group by a.liv1,a.liv2,a.nb_cofog_ii_livello,d.attribute16 ,a.nb_codice_transazione,nvl(a.sanita_sn,'N'),a.nb_entrata_ricorrente
+order by 1,2,4;
+
+cursor rsper is
+select 
+ a.liv1 miss
+,a.liv2 prog
+,decode(a.nb_cofog_ii_livello,null,null,substr(a.nb_cofog_ii_livello,1,3)||substr(a.nb_cofog_ii_livello,5,1)) cofog
+,d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'4','3') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'4','3') codsan
+,null cup
+,'RS' colonna
+,nvl(sum(residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0) importo
+from 
+ fin_t_impegni_residui r
+,fin_t_documenti d
+,vw_nb_articoli a
+where r.ANNO_FINANZIARIO = p_anno
+and nvl(r.perenzione,'N') = 'S'
+and a.eu||a.codice = r.capitolo_spesa_corrente
+and d.doc_id = r.DOC_ID_IMPEGNO
+and ((residuo_imp_data(d.doc_id,to_date('3112'||(p_anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0))) > 0
+and a.eu||a.codice = r.capitolo_spesa_corrente
+and a.anno = p_anno
+group by a.liv1,a.liv2,a.nb_cofog_ii_livello,d.attribute16 ,a.nb_codice_transazione,nvl(a.sanita_sn,'N'),a.nb_entrata_ricorrente
+order by 1,2,4;
+
+cursor imp is 
+select
+ a.liv1 miss
+,a.liv2 prog
+,decode(a.nb_cofog_ii_livello,null,null,substr(a.nb_cofog_ii_livello,1,3)||substr(a.nb_cofog_ii_livello,5,1)) cofog
+,d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'4','3') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'4','3') codsan
+,null cup
+,'I' colonna
+,sum(nvl(document_amount,0)) importo
+from 
+ fin_t_documenti d
+,vw_nb_articoli a
+where d.doc_type in ('IMP','IMP-PER','IMP-DEF')
+and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+and d.segment8 = p_anno 
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by a.liv1,a.liv2,a.nb_cofog_ii_livello,d.attribute16 ,a.nb_codice_transazione,nvl(a.sanita_sn,'N'),a.nb_entrata_ricorrente
+order by 1,2,4;
+
+cursor pc is
+select 
+ a.liv1 miss
+,a.liv2 prog
+,decode(a.nb_cofog_ii_livello,null,null,substr(a.nb_cofog_ii_livello,1,3)||substr(a.nb_cofog_ii_livello,5,1)) cofog
+,d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'4','3') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'4','3') codsan
+,decode(length(nvl(upper(dt.codice_cup),'Z')),15,upper(dt.codice_cup),null) cup
+,'PC' colonna
+,sum(nvl(dt.amount,0)) importo
+from
+ fin_t_documenti d
+,fin_t_documenti d1
+,fin_t_documenti_terze_parti dt
+,vw_nb_articoli a 
+ where d.doc_type = 'MAND'
+and nvl(d.open_balance_proposed,0) > 0 -- non è stornato
+and d.segment8 = p_anno 
+and d.doc_id_capo_filiera = d1.doc_id
+and d1.segment8 = d.segment8
+and dt.doc_id=d.doc_id
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by a.liv1, a.liv2, a.nb_cofog_ii_livello, d.attribute16 ,a.nb_codice_transazione,nvl(a.sanita_sn,'N'), a.nb_entrata_ricorrente,decode(length(nvl(upper(dt.codice_cup),'Z')),15,upper(dt.codice_cup),null)
+
+order by 1,2,4;
+
+cursor pr is 
+select 
+ a.liv1 miss
+,a.liv2 prog
+,decode(a.nb_cofog_ii_livello,null,null,substr(a.nb_cofog_ii_livello,1,3)||substr(a.nb_cofog_ii_livello,5,1)) cofog
+,d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'4','3') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'4','3') codsan
+,decode(length(nvl(upper(dt.codice_cup),'Z')),15,upper(dt.codice_cup),null) cup
+,'PR' colonna
+,sum(nvl(dt.amount,0)) importo
+from
+ fin_t_documenti d
+,fin_t_documenti d1
+,fin_t_documenti_terze_parti dt
+,vw_nb_articoli a 
+ where d.doc_type = 'MAND'
+and nvl(d.open_balance_proposed,0) > 0 -- non è stornato
+and d.segment8 = p_anno 
+and d.doc_id_capo_filiera = d1.doc_id
+and d1.segment8 &lt; d.segment8
+and dt.doc_id=d.doc_id
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by a.liv1, a.liv2, a.nb_cofog_ii_livello, d.attribute16 ,a.nb_codice_transazione,nvl(a.sanita_sn,'N'), a.nb_entrata_ricorrente,decode(length(nvl(upper(dt.codice_cup),'Z')),15,upper(dt.codice_cup),null)
+order by 1,2,4;
+
+cursor fpv is
+select 
+ a.liv1 miss
+,a.liv2 prog
+,decode(a.nb_cofog_ii_livello,null,null,substr(a.nb_cofog_ii_livello,1,3)||substr(a.nb_cofog_ii_livello,5,1)) cofog
+,decode(a.nb_titolo,'1','U.1.10.02.01.001','U.2.05.02.01.001') pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'4','3') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'4','3') codsan
+,null cup
+,'FPV' colonna
+,nvl(sum(nvl(r.fpv,0)),0) importo
+from 
+fin_t_consuntivo_excel r
+,vw_nb_articoli a
+where r.anno_consuntivo = p_anno
+and nvl(r.fpv,0) > 0
+and tipo_capitolo='U'
+and a.eu||a.codice = r.tipo_capitolo||capitolo
+and a.anno = r.anno_consuntivo
+group by a.liv1,a.liv2,a.nb_cofog_ii_livello,decode(a.nb_titolo,'1','U.1.10.02.01.001','U.2.05.02.01.001') ,a.nb_codice_transazione,nvl(a.sanita_sn,'N'),a.nb_entrata_ricorrente
+order by 1,2,4;
+
+
+-- ENTRATE
+cursor e_rs is
+select 
+ d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'2','1') sanita
+,'RS' colonna
+,nvl(sum(nvl(r.residuo_iniziale,0)),0) importo
+from 
+fin_t_accertamenti_residui r
+,fin_t_documenti d
+,vw_nb_articoli a
+where r.anno_finanziario = p_anno
+and nvl(r.residuo_iniziale,0) > 0
+and d.doc_id = r.doc_id_accertamento
+and a.eu||a.codice = r.capitolo_spesa_corrente -- non è un errore è proprio così che si chiama il campo
+and a.anno = p_anno
+group by d.attribute16, a.nb_codice_transazione, decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1'), decode(nvl(a.sanita_sn,'N'),'2','1')
+order by 1;
+
+cursor e_a is 
+select 
+ d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'2','1') sanita
+,'A' colonna
+,sum(nvl(document_amount,0)) importo
+from 
+ fin_t_documenti d
+,vw_nb_articoli a
+where d.doc_type in ('ACC')
+and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+and d.segment8 = p_anno 
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by d.attribute16, a.nb_codice_transazione, decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1'), decode(nvl(a.sanita_sn,'N'),'2','1')
+order by 1;
+
+cursor e_r is 
+select 
+ d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'2','1') sanita
+,'R' colonna
+,sum(nvl(document_amount,0)) importo
+from 
+ fin_t_documenti d
+,vw_nb_articoli a
+where d.doc_type in ('INSUS')
+and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+and d.segment8 = p_anno 
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by d.attribute16, a.nb_codice_transazione, decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1'), decode(nvl(a.sanita_sn,'N'),'2','1')
+order by 1;
+
+
+cursor e_rc is
+select 
+d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'2','1') sanita
+,'RC' colonna
+,sum(nvl(dt.amount,0)) importo
+from
+ fin_t_documenti d
+,fin_t_documenti d1
+,fin_t_documenti_terze_parti dt
+,vw_nb_articoli a 
+ where d.doc_type = 'REV'
+and nvl(d.open_balance_proposed,0) > 0 -- non è stornato
+and d.segment8 = p_anno 
+and d.doc_id_capo_filiera = d1.doc_id
+and d1.segment8 = d.segment8
+and dt.doc_id=d.doc_id
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by d.attribute16, a.nb_codice_transazione, decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1'), decode(nvl(a.sanita_sn,'N'),'2','1')
+order by 1;
+
+cursor e_rr is 
+select 
+d.attribute16 pcdi
+,a.nb_codice_transazione codue
+,decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1') ricorrente
+,decode(nvl(a.sanita_sn,'N'),'2','1') sanita
+,'RR' colonna
+,sum(nvl(dt.amount,0)) importo
+from
+ fin_t_documenti d
+,fin_t_documenti d1
+,fin_t_documenti_terze_parti dt
+,vw_nb_articoli a 
+ where d.doc_type = 'REV'
+and nvl(d.open_balance_proposed,0) > 0 -- non è stornato
+and d.segment8 = p_anno 
+and d.doc_id_capo_filiera = d1.doc_id
+and d1.segment8 &lt; d.segment8
+and dt.doc_id=d.doc_id
+and a.eu||a.codice = d.segment2
+and a.anno = p_anno
+group by d.attribute16, a.nb_codice_transazione, decode(nvl(a.nb_entrata_ricorrente,'N'),'2','1'), decode(nvl(a.sanita_sn,'N'),'2','1')
+order by 1;
+
+cursor DCAFEGest is 
+select 
+pcf1
+,vocePDCI
+,codUE
+,codEntric
+,codSan
+,'    &lt;dr:RS decimals="2" contextRef="d_'||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(rs1,0)),'9999999990.00'))||'&lt;/dr:RS>' rs
+,'    &lt;dr:CP decimals="2" contextRef="d_'||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(cp1,0)),'9999999990.00'))||'&lt;/dr:CP>' cp
+,'    &lt;dr:CS decimals="2" contextRef="d_'||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(cs1,0)),'9999999990.00'))||'&lt;/dr:CS>' cs
+,'    &lt;dr:R decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(r1,0)),'9999999990.00'))||'&lt;/dr:R>'   r
+,'    &lt;dr:A decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(a1,0)),'9999999990.00'))||'&lt;/dr:A>'   a
+,'    &lt;dr:RC decimals="2" contextRef="d_'||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(rc1,0)),'9999999990.00'))||'&lt;/dr:RC>' rc
+,'    &lt;dr:RR decimals="2" contextRef="d_'||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(rr1,0)),'9999999990.00'))||'&lt;/dr:RR>' rr
+,codUE1
+,codEntric1
+,codSan1
+from
+(
+select
+car01 pcf1
+,num02 anno1
+,car05 tag1
+,'    &lt;dr:vocePDCI contextRef="d_' ||num02||'">'||car01||'&lt;/dr:vocePDCI>'  vocePDCI
+,'    &lt;dr:codUE contextRef="d_'    ||num02||'">'||car02||'&lt;/dr:codUE>'     codUE
+,'    &lt;dr:codEntRic contextRef="d_'||num02||'">'||car03||'&lt;/dr:codEntRic>' codEntric
+,'    &lt;dr:codSan contextRef="d_'   ||num02||'">'||car04||'&lt;/dr:codSan>'    codSan
+,decode(car05,'RS',sum(nvl(num01,0)),0) rs1
+,decode(car05,'CP',sum(nvl(num01,0)),0) cp1
+,decode(car05,'CS',sum(nvl(num01,0)),0) cs1
+,decode(car05,'R',sum(nvl(num01,0)),0) r1
+,decode(car05,'A',sum(nvl(num01,0)),0) a1
+,decode(car05,'RC',sum(nvl(num01,0)),0) rc1
+,decode(car05,'RR',sum(nvl(num01,0)),0) rr1
+,car02 codUE1
+,car03 codEntric1
+,car04 codSan1
+from tmp_tabulati
+where utente=p_utente
+and num02=p_anno
+and car20='BDAP_E'
+--and car01='E.2.01.01.02.001'
+group by car01,car02,car03,car04,car05,num02
+order by 2,3,4,5
+,codUE
+)
+group by pcf1
+,vocePDCI
+,codEntric
+,codSan
+,codUE1
+,codEntric1
+,codSan1
+,anno1;
+
+
+cursor DCAFUGest is 
+select
+ pcf1
+,miss1
+,prog1
+,anno1
+,miss
+,prog
+,cofog
+,vocePDCI
+,codUE
+,codSpeRic
+,codSan
+,CUP
+,'    &lt;dr:RS decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(rs1,0)),'9999999990.00')) ||'&lt;/dr:RS>'  rs
+,'    &lt;dr:CP decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(cp1,0)),'9999999990.00')) ||'&lt;/dr:CP>'  cp
+,'    &lt;dr:CS decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(cs1,0)),'9999999990.00')) ||'&lt;/dr:CS>'  cs
+,'    &lt;dr:R decimals="2" contextRef="d_'  ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(r1,0)),'9999999990.00'))  ||'&lt;/dr:R>'   r
+,'    &lt;dr:I decimals="2" contextRef="d_'  ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(i1,0)),'9999999990.00'))  ||'&lt;/dr:I>'   i
+,'    &lt;dr:PC decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(pc1,0)),'9999999990.00')) ||'&lt;/dr:PC>'  pc
+,'    &lt;dr:PR decimals="2" contextRef="d_' ||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(pr1,0)),'9999999990.00')) ||'&lt;/dr:PR>'  pr
+,'    &lt;dr:FPV decimals="2" contextRef="d_'||(anno1)||'" unitRef="eur">'||ltrim(to_char(sum(nvl(fpv1,0)),'9999999990.00'))||'&lt;/dr:FPV>' fpv
+,cofog1
+,codue1
+,codSpeRic1
+,codSan1
+,cup1
+from
+(select
+car04 pcf1
+,car01 miss1
+,car02 prog1
+,num02 anno1
+,'    &lt;dr:miss contextRef="d_'     ||num02||'">'||car01||'&lt;/dr:miss>'      miss
+,'    &lt;dr:prog contextRef="d_'     ||num02||'">'||car02||'&lt;/dr:prog>'      prog
+,'    &lt;dr:cofog contextRef="d_'    ||num02||'">'||car03||'&lt;/dr:cofog>'     cofog
+,'    &lt;dr:vocePDCI contextRef="d_' ||num02||'">'||car04||'&lt;/dr:vocePDCI>'  vocePDCI
+,'    &lt;dr:codUE contextRef="d_'    ||num02||'">'||car05||'&lt;/dr:codUE>'     codUE
+,'    &lt;dr:codSpeRic contextRef="d_'||num02||'">'||car06||'&lt;/dr:codSpeRic>' codSpeRic
+,'    &lt;dr:codSan contextRef="d_'   ||num02||'">'||car07||'&lt;/dr:codSan>'    codSan
+,'    &lt;dr:CUP contextRef="d_'      ||num02||'">'||car08||'&lt;/dr:CUP>'       CUP
+,decode(car09,'RS' ,sum(nvl(num01,0)),0)  rs1
+,decode(car09,'CP' ,sum(nvl(num01,0)),0)  cp1
+,decode(car09,'CS' ,sum(nvl(num01,0)),0)  cs1
+,decode(car09,'R'  ,sum(nvl(num01,0)),0)   r1
+,decode(car09,'I'  ,sum(nvl(num01,0)),0)   i1
+,decode(car09,'PC' ,sum(nvl(num01,0)),0)  pc1
+,decode(car09,'PR' ,sum(nvl(num01,0)),0)  pr1
+,decode(car09,'FPV',sum(nvl(num01,0)),0) fpv1
+,car03 cofog1
+,car05 codUE1
+,car06 codSpeRic1
+,car07 codSan1
+,car08 cup1
+from tmp_tabulati
+where utente= p_utente
+and num02= p_anno
+and car20='BDAP_U'
+--and car04='U.1.03.01.01.001'
+group by car01,car02,car03,car04,car05,car06,car07,car08,car09,num02
+order by 4,5,6,7,8,9,10,11)
+group by pcf1, miss1, prog1, anno1, miss, prog, cofog, vocePDCI, codUE, codSpeRic, codSan, CUP, cofog1, codue1, codSpeRic1, codSan1, cup1;
+
+-- Sezione &lt;!-- DCA Conto Economico, valorizzazioni per le voci (VI livello) del PDCI-->
+cursor CE is
+select 
+ '&lt;dr:miss contextRef="d_'||p_anno||'">'||missione||'&lt;/dr:miss>' miss
+,'&lt;dr:prog contextRef="d_'||p_anno||'">'||programma||'&lt;/dr:prog>' prog
+,'&lt;dr:vocePDCI contextRef="d_'||p_anno||'">'||conto||'&lt;/dr:vocePDCI>' pdci
+,'&lt;dr:DareCE decimals="0" contextRef="d_'||p_anno||'" unitRef="eur">'||ltrim(to_char(SUM(DECODE(d_a,'D',nvl(importo,0),0)),'9999999990.00'))||'&lt;/dr:DareCE>' dare
+,'&lt;dr:AvereCE decimals="0" contextRef="d_'||p_anno||'" unitRef="eur">'||ltrim(to_char(SUM(DECODE(d_a,'A',nvl(importo,0),0)),'9999999990.00'))||'&lt;/dr:AvereCE>' avere
+from nb_prima_nota_corpo
+where to_char(t_data,'yyyy') = p_anno
+and tipo_conto = 'E'
+and missione is not null
+and programma is not null
+group by missione
+,programma
+,conto 
+order by 1,2,3;
+
+
+-- Sezione &lt;!-- DCA Stato Patrimoniale, valorizzazioni per le voci (VII livello) del PDCI-->
+cursor sp is
+select 
+ '&lt;dr:vocePDCI contextRef="d_'||p_anno||'">'||conto||'&lt;/dr:vocePDCI>' pdci
+,'&lt;dr:DareSP decimals="2" contextRef="i_'||p_anno||'" unitRef="eur">'||ltrim(to_char(SUM(DECODE(d_a,'D',nvl(importo,0),0)),'9999999990.00'))||'&lt;/dr:DareSP>' dare
+,'&lt;dr:AvereSP decimals="2" contextRef="i_'||p_anno||'" unitRef="eur">'||ltrim(to_char(SUM(DECODE(d_a,'A',nvl(importo,0),0)),'9999999990.00'))||'&lt;/dr:AvereSP>' avere
+,SUM(DECODE(d_a,'D',nvl(importo,0),0)) imp_dare
+,SUM(DECODE(d_a,'A',nvl(importo,0),0)) imp_avere
+from nb_prima_nota_corpo
+where to_char(t_data,'yyyy') = p_anno
+and tipo_conto in ('A','P')
+--and nvl(importo,0) &lt;> 0
+group by conto 
+order by 1;
+-- **** Fine SP ******
+
+--*** Fine Sezione DCA Dati COntabili Analitici
+
+begin
+
+ where anno_finanziario = p_anno;
+ begin
+ select nvl(codice_bdap,'X') into p_id_ente
+ from fin_t_dati_generali
+ exception when no_data_found then p_id_ente := 'X';
+ end;
+ 
+ delete fin_t_bdap where utente=p_utente and anno = p_anno and tipo_trasmissione='RENDDCA';
+    commit;
+ 
+ if p_id_ente &lt;> 'X'
+ then 
+    
+-- DBCA
+-- parte comune
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',010,'&lt;?xml version="1.0" encoding="UTF-8"?>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',020,'&lt;xbrli:xbrl xmlns:drr="http://www.rgs.mef.gov.it/xbrl/bdap/dca/rend/regioni/2016-08-26" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:dr="http://www.rgs.mef.gov.it/xbrl/bdap/dca/rend/2016-08-26" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xlink="http://www.w3.org/1999/xlink">');
+
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',030,'  ');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',040,'  &lt;!--RIFERIMENTO ALLA TASSONOMIA (entry point) -->');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',050,'  &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-dca-rend-regioni_2016-08-26.xsd"/>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',060,'  ');
+
+-- CONTESTI 
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',070,'  &lt;!-- CONTESTI -->');
+
+-- anno_0 
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',080,'  &lt;xbrli:context id="d_'||(p_anno)||'">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',090,'    &lt;xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',100,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',110,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',120,'    &lt;xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',130,'      &lt;xbrli:startDate>'||(p_anno)||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',140,'      &lt;xbrli:endDate>'||(p_anno)||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',150,'    &lt;/xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',160,'  &lt;/xbrli:context>');
+
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',170,'  &lt;xbrli:context id="i_'||(p_anno)||'">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',180,'    &lt;xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',190,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',200,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',210,'    &lt;xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',220,'      &lt;xbrli:instant>'||(p_anno)||'-12-31&lt;/xbrli:instant>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',230,'    &lt;/xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',240,'  &lt;/xbrli:context>');
+
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',250,'  ');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',260,'  &lt;!-- UNITA'' DI MISURA -->');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',270,'  &lt;xbrli:unit id="eur">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',280,'    &lt;xbrli:measure>iso4217:EUR&lt;/xbrli:measure>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',290,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',300,'  ');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',310,'  &lt;!-- FATTI DA RIPORTARE - INIZIO -->');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',320,'  ');
+
+c_riga := 400;
+
+for c in bdca_e loop
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  &lt;!-- '||c.pcf1||': dati provenienti dalla previsione (al IV livello) -->');
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,'  &lt;dr:DCAFEPrev>');
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  ,p_anno
+  values 
+  (p_utente
+  ,sysdate
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.pcf);
+  commit;
+
+ --- nell'XSD sembra non volere questo TAG 
+/*
+  if c.rs is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.rs);
+  commit;
+ end if;
+*/ 
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.cp);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.cs);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.r);
+  commit;
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  &lt;/dr:DCAFEPrev>');
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  ');
+
+  commit;
+
+ end loop;
+
+
+-- Quinto Livello Entrate
+
+ delete tmp_tabulati where utente= p_utente and num02=p_anno and car20='BDAP_E';
+ commit;
+
+-- residui 
+ for a in e_rs loop
+  conta :=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.sanita
+  ,a.colonna
+  ,'BDAP_E'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+-- accertamenti
+ for a in e_a loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.sanita
+  ,a.colonna
+  ,'BDAP_E'
+  ,a.importo
+  ,p_anno);
+  commit;
+
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.sanita
+  ,'CP'
+  ,'BDAP_E'
+  ,a.importo
+  ,p_anno);
+  commit;
+
+ end loop;
+
+-- Incassi Competenza
+ for a in e_rc loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.sanita
+  ,a.colonna
+  ,'BDAP_E'
+  ,a.importo
+  ,p_anno);
+  commit;
+
+--reinserisco il valore come CS al 5 livello
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car20
+  (p_utente
+  ,num01
+  ,num02)
+  values
+  ,conta
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.sanita
+  ,'CS'
+  ,'BDAP_E'
+  ,a.importo
+  ,p_anno);
+  commit;
+
+ end loop;
+
+
+-- Incassi Residui
+ for a in e_rr loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.sanita
+  ,a.colonna
+  ,'BDAP_E'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+
+-- ENTRATE V livello dati di gestione
+/*
+for c in DCAFEGest loop
+
+ if c.a  is not null or
+    c.rc is not null or
+    c.rr is not null 
+    then
+  c_riga:= c_riga+1 ;
+
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  &lt;!-- '||c.pcf1||': dati di gestione (al V livello) -->');
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,'  &lt;dr:DCAFEGest>');
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.vocePDCI);
+  commit;
+
+  if c.codUE1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.codUE);
+  commit;
+ end if;
+
+  if c.codEntric1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.codEntric);
+  commit;
+end if;
+
+  if c.codSan1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.codSan);
+  commit;
+
+  end if;
+
+
+  if c.a is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.a);
+  commit;
+ end if;
+
+  if c.rc is not null
+   then
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.RC);
+  commit;
+ end if;
+
+ if c.rr is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  commit;
+  ,'E'
+  ,c_riga
+  ,c.RR);
+ end if;
+
+  c_riga:= c_riga+1;
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  &lt;/dr:DCAFEGest>');
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  ');
+
+  commit;
+
+ end if;
+
+end loop;
+*/
+
+-- Entrate V livello tutti i dati
+for c in DCAFEGest loop
+
+  c_riga:= c_riga+1 ;
+
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  &lt;!-- '||c.pcf1||': tutti i dati al V livello -->');
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,'  &lt;dr:DCAFEGest>');
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.vocePDCI);
+  commit;
+
+  if c.codUE1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.codUE);
+  commit;
+ end if;
+
+ if c.codEntric1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.codEntric);
+  commit;
+ end if;
+
+ if c.codSan1 is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.codSan);
+  commit;
+ end if;
+
+-- sembra non essere richiesto nell'XSD 
+/* if c.rs is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.rs);
+  commit;
+ end if;
+*/
+
+ if c.cp is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.cp);
+  commit;
+ end if;
+
+ if c.cs is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.cs);
+  commit;
+ end if;
+
+ if c.r  is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.r);
+  commit;
+ end if;
+
+ if c.a is not null
+  then
+  (utente
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.a);
+  commit;
+ end if;
+
+ if c.rc is not null
+  then
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.RC);
+  commit;
+ end if;
+
+ if c.rr is not null
+  then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'E'
+  ,c_riga
+  ,c.RR);
+  commit;
+ end if;
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  &lt;/dr:DCAFEGest>');
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','E',c_riga,'  ');
+
+  commit;
+
+end loop;
+
+-- USCITE
+
+for c in bdca_u loop
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  &lt;!-- '||c.pcf1||' Miss/Prog '||c.miss1||'.'||c.prog1||': dati provenienti dalla previsione (al IV Livello) -->');
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,'  &lt;dr:DCAFUPrev>');
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.miss);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.prog);
+  commit;
+
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.pcf);
+  commit;
+
+
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.rs);
+  commit;
+
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cp);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cs);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.r);
+  commit;
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  &lt;/dr:DCAFUPrev>');
+  commit;
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  ');
+
+ end loop;
+
+
+-- Quinto Livello Uscite
+ delete tmp_tabulati where utente= p_utente and num02=p_anno and car20='BDAP_U';
+ commit;
+
+-- fpv  
+ for a in fpv loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car06
+  ,car07
+  ,car08
+  ,car09
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.miss
+  ,a.prog
+  ,a.cofog
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.codsan
+  ,a.cup
+  ,a.colonna
+  ,'BDAP_U'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+-- residui 
+ for a in rs loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car06
+  ,car07
+  ,car08
+  ,car09
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.miss
+  ,a.prog
+  ,a.cofog
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.codsan
+  ,a.cup
+  ,a.colonna
+  ,'BDAP_U'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+-- residui perenti 
+ for a in rsper loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car06
+  ,car07
+  ,car08
+  ,car09
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.miss
+  ,a.prog
+  ,a.cofog
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.codsan
+  ,a.cup
+  ,a.colonna
+  ,'BDAP_U'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+-- impegni
+ for a in imp loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car06
+  ,car07
+  ,car08
+  ,car09
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.miss
+  ,a.prog
+  ,a.cofog
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.codsan
+  ,a.cup
+  ,a.colonna
+  ,'BDAP_U'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+-- Pagamenti Competenza
+ for a in pc loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car06
+  ,car07
+  ,car08
+  ,car09
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.miss
+  ,a.prog
+  ,a.cofog
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.codsan
+  ,a.cup
+  ,a.colonna
+  ,'BDAP_U'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+-- Pagamenti Residui
+ for a in pr loop
+  conta:=conta+1;
+  insert into tmp_tabulati 
+  (utente
+  ,num_ord_riga
+  ,car01
+  ,car02
+  ,car03
+  ,car04
+  ,car05
+  ,car06
+  ,car07
+  ,car08
+  ,car09
+  ,car20
+  ,num01
+  ,num02)
+  values
+  (p_utente
+  ,conta
+  ,a.miss
+  ,a.prog
+  ,a.cofog
+  ,a.pcdi
+  ,a.codue
+  ,a.ricorrente
+  ,a.codsan
+  ,a.cup
+  ,a.colonna
+  ,'BDAP_U'
+  ,a.importo
+  ,p_anno);
+  commit;
+ end loop;
+
+
+-- USCITE V livello dati di gestione
+/*
+for c in DCAFUGest loop
+
+ if c.i  is not null or
+    c.pc is not null or
+    c.pr is not null or
+    c.fpv is not null 
+    then
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  &lt;!-- '||c.pcf1||' Miss/Prog '||c.miss1||'.'||c.prog1||': dati di gestione (al V livello) -->');
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,riga
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,'  &lt;dr:DCAFUGest>');
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.miss);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.prog);
+  commit;
+
+  if c.cofog1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cofog);
+  commit;
+ end if;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.vocePDCI);
+  commit;
+
+  if c.codUE1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.codUE);
+  commit;
+ end if;
+
+  if c.codSperic1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.codSperic);
+  commit;
+end if;
+
+  if c.codSan1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.codSan);
+  commit;
+
+  end if;
+
+  if c.cup1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cup);
+  commit;
+
+  end if;
+
+
+  if c.i is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.i);
+  commit;
+ end if;
+
+  if c.fpv is not null
+   then
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.fpv);
+  commit;
+ end if;
+
+ if c.pr is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,'U'
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,c_riga
+  ,c.PR);
+  commit;
+ end if;
+
+  if c.pc is not null
+   then
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.PC);
+  commit;
+ end if;
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  &lt;/dr:DCAFUGest>');
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  ');
+
+  commit;
+
+ end if;
+
+end loop;
+*/
+
+-- USCITE V livello tutti i dati di gestione
+for c in DCAFUGest loop
+
+ if c.rs is not null or
+    c.cp  is not null or
+    c.cs is not null or
+    c.r is not null or
+    c.i is not null or
+    c.fpv is not null or
+    c.pr is not null or
+    c.pc is not null 
+    then
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  &lt;!-- '||c.pcf1||': tutti i dati al V livello -->');
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,'  &lt;dr:DCAFUGest>');
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.miss);
+  commit;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.prog);
+  commit;
+
+ if c.cofog1 is not null
+   then  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cofog);
+  commit;
+ end if;
+
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.vocePDCI);
+  commit;
+
+  if c.codUE1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.codUE);
+  commit;
+ end if;
+
+  if c.codSperic1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.codSperic);
+  commit;
+end if;
+
+  if c.codSan1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,eu
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.codSan);
+  commit;
+
+  end if;
+
+  if c.cup1 is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cup);
+  commit;
+
+  end if;
+
+
+  if c.rs is not null
+   then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.rs);
+  commit;
+ end if;
+
+  if c.cp is not null
+   then
+   c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cp);
+  commit;
+ end if;
+
+ if c.cs is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.cs);
+  commit;
+ end if;
+
+ if c.r is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.r);
+  commit;
+ end if;
+
+ if c.i is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.i);
+  commit;
+ end if;
+
+ if c.fpv is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.fpv);
+  commit;
+ end if;
+
+ if c.pr is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  ,'RENDDCA'
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'U'
+  ,c_riga
+  ,c.pr);
+  commit;
+ end if;
+
+ if c.pc is not null
+ then
+  c_riga:= c_riga+1;
+
+  insert into fin_t_bdap
+  (utente
+  ,data_creazione
+  ,anno
+  ,tipo_trasmissione
+  ,eu
+  ,riga
+  ,contenuto)
+  values 
+  (p_utente
+  ,sysdate
+  ,p_anno
+  ,'RENDDCA'
+  ,'U'
+  ,c_riga
+  ,c.pc);
+  commit;
+ end if;
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  &lt;/dr:DCAFUGest>');
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  ');
+
+  commit;
+
+ end if;
+
+end loop;
+
+
+-- fine uscite
+
+-- **** DATI Conto Economico ******
+
+for c in ce loop
+    c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'&lt;dr:DCACE>');
+    c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,c.miss);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,c.prog);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,c.pdci);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,c.dare);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,c.avere);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'&lt;/dr:DCACE>');
+end loop;
+commit;
+
+-- **** Fine CE **********
+
+-- **** DATI SP ******
+
+for c in sp loop
+ if (nvl(c.imp_dare,0) + nvl(c.imp_avere,0)) &lt;> 0
+ then
+    c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','M',c_riga,'&lt;dr:DCASP>');
+   	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','M',c_riga,c.pdci);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','M',c_riga,c.dare);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','M',c_riga,c.avere);
+  	c_riga:= c_riga+1;
+  insert into fin_t_bdap(UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO) values (p_utente,sysdate,p_anno,'RENDDCA','M',c_riga,'&lt;/dr:DCASP>');
+ end if;
+ end loop;
+commit;
+
+-- **** Fine SP ******
+
+
+
+
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',c_riga,'  &lt;!-- FATTI DA RIPORTARE - FINE -->');
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','U',c_riga,'  ');
+  c_riga:= c_riga+1;
+  insert into fin_t_bdap values (p_utente,sysdate,p_anno,'RENDDCA','T',c_riga,'&lt;/xbrli:xbrl>');
+  commit;
+end if;
+
+end;</pre>	</td></tr>
+</table></div>

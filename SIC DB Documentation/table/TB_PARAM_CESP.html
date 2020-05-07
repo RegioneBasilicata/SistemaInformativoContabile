@@ -1,0 +1,351 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TB_PARAM_CESP</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="TB_PARAM_CESP.html">Colonne</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="TB_PARAM_CESP_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>VAL_AUM</td>
+<td>NUMBER(4,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>Valore di aumento (valore o perc a secondo del campo tipo_aum_ant)</td>
+	</tr>
+	<tr>
+<td>PERC_AMM_MIN</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>% ammortamento minimo fiscalmente deducibile</td>
+	</tr>
+	<tr>
+<td>IMP_MAX_CICL</td>
+<td>NUMBER(8,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>Importo max ammortizzabile per ciclomotori</td>
+	</tr>
+	<tr>
+<td>PERC_DED_AUTO</td>
+<td>NUMBER(3,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>Percentuale dell'importo max ammortizzabile per il calcolo dell'importo massimo deducibile</td>
+	</tr>
+	<tr>
+<td>IMP_MAX_AUTO</td>
+<td>NUMBER(8,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>Importo max ammortizzabile per autovetture</td>
+	</tr>
+	<tr>
+<td>TIPO_AUM_ANT</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>Tipo aumento aliquota std (+ o %)</td>
+	</tr>
+	<tr>
+<td>ID</td>
+<td>NUMBER(1,0)</td>
+<td>No</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PERC_DED_CICL</td>
+<td>NUMBER(3,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>Percentuale dell'importo max ammortizzabile per il calcolo dell'importo massimo deducibile</td>
+	</tr>
+	<tr>
+<td>ANNI_MAX_USATI</td>
+<td>NUMBER(1,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>Durata max ammortamenti anticipati beni usati</td>
+	</tr>
+	<tr>
+<td>PERC_DED_MOTO</td>
+<td>NUMBER(3,1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>Percentuale dell'importo max ammortizzabile per il calcolo dell'importo massimo deducibile</td>
+	</tr>
+	<tr>
+<td>ANNI_AMM_MAN</td>
+<td>NUMBER(1,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>Numero anni ammortamento manutenzioni</td>
+	</tr>
+	<tr>
+<td>MAX_ANNI_ANT</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>Numero anni massimo in cui si puo effettuare un ammortamento anticipato.</td>
+	</tr>
+	<tr>
+<td>IMP_MAX_MOTO</td>
+<td>NUMBER(8,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>Importo max ammortizzabile per motoveicoli</td>
+	</tr>
+	<tr>
+<td>PERC_DED_MAN</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>Percentuale deduzione per manutenzioni</td>
+	</tr>
+	<tr>
+<td>PERC_I_ANNO_IMMAT</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>Percentuale abbattimento aliquota per I anno ammortamenteo beni materiali</td>
+	</tr>
+	<tr>
+<td>IMP_MAX_100</td>
+<td>NUMBER(8,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>Importo max per ammortamento 100% I anno</td>
+	</tr>
+	<tr>
+<td>PERC_I_ANNO_MAT</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>Percentuale abbattimento aliquota per I anno ammortamenteo beni materiali</td>
+	</tr>
+	<tr>
+<td>DIR_IMM_ECON</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIR_IMM_AUTOP</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIR_IMM_MOBILI</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIR_IMM_IMMOBILI</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FTP_IND_ECON</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FTP_IND_AUTOP</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FTP_IND_MOBILI</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FTP_IND_IMMOBILI</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIR_IMPORT</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UPLOAD</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOWNLOAD</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DOWNLOAD_WEB</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_NUMGG_COMP_SCHEDA</td>
+<td>NUMBER(2,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>Applicazione "Monitoraggio". Numero di giorni a disposizione dell'Ufficio per la composizione della scheda di monitoraggio</td>
+	</tr>
+	<tr>
+<td>MON_FL_BLOCCO_NUOVE_SCH</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_FL_INVIATA_PRIMA_MAIL</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_FL_INVIATA_SECONDA_MAIL</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_FL_INVIATA_TERZA_MAIL</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIR_71AA</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_UTENTE_UPD_NUMGG</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_DATA_UPD_NUMGG</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MON_FL_BLOCCO_REP_TRIM</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>Applicazione "Monitoraggio". Ad uso amministratori procedura per stabilire se rendere accessibili i report di monitoraggio trimestrale dell'ultimo periodo trascorso</td>
+	</tr>
+	<tr>
+<td>MON_FL_INVIATA_MAIL_REPORT</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTE_STAMPA_X_STANZA</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+	</tr>
+</table></div>

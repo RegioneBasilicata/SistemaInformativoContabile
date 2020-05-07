@@ -1,0 +1,439 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_PREVISIONE</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_PREVISIONE.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_PREVISIONE_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>DATA_GENERAZIONE</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTENTE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RIGA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EU</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ANNO</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLO</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_CAPITOLO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ETITOLO_UMISSIONE</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_TITOLO_MISSIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ETIPOLOGIA_UPROGRAMMA</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_TIPOLOGIA_PROGRAMMA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ECATEGORIA</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_CATEGORIA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PIANO_CONTI_FINA</td>
+<td>VARCHAR2(16 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_PIANO_CONTI_FINA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TITOLO_USCITE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_TITOLO_USCITE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MACROAGGREGATO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_MACROAGGREGATO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COFOG_II_LIVELLO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCR_COFOG</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_FPV</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_CAPITOLO_FPV</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TABELLA_LEGGE_FINANZIARIA</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TLF_DESCRIZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_MUTUO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESA_OBBLIGATORIA</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_AVANZO_VINCOLATO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_CORRENTI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_INVESTIMENTO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_ANNUALITA</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_RIMBORSO_PRESTITI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_ASSEGNAZIONE_STATO_UE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RICORRENTE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SANITA</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DI_CUI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RESIDUO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMPETENZA_ANNO_PREC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMPETENZA_ANNO0</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMPETENZA_ANNO1</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMPETENZA_ANNO2</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CASSA_ANNO_PREC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CASSA_ANNO0</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_IMPEGNATO_ANNO0</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>44</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_IMPEGNATO_ANNO1</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>45</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_IMPEGNATO_ANNO2</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>46</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_FPV_ANNO_PREC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>47</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_FPV_ANNO0</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>48</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_FPV_ANNO1</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>49</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_FPV_ANNO2</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>50</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DICUI_IMPEGNATO_ANNO_PREC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>51</td>
+<td>null</td>
+	</tr>
+</table></div>

@@ -1,0 +1,327 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TRASPARENZA_RENDICONTO_E</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TRASPARENZA_RENDICONTO_E.html">Details</a></div></div>
+<div class="tab"><div><a href="TRASPARENZA_RENDICONTO_E_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TRASPARENZA_RENDICONTO_E_References.html">References</a></div></div>
+<div class="tab"><div><a href="TRASPARENZA_RENDICONTO_E_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TRASPARENZA_RENDICONTO_E_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure trasparenza_rendiconto_e (panno in number) as
+
+riga number;
+vanno number;
+
+
+vutente varchar2(100);
+cambio_titolo varchar2(10);
+cambio_titolo_desc varchar2(1000);
+
+tot_titolo_competenza number(15,2);
+tot_titolo_competenza_sanita number(15,2);
+tot_titolo_cassa number(15,2);
+tot_titolo_cassa_sanita number(15,2);
+
+tot_titoli_competenza number(15,2):=0;
+tot_titoli_competenza_sanita number(15,2):=0;
+tot_titoli_cassa number(15,2):=0;
+tot_titoli_cassa_sanita number(15,2):=0;
+
+tot_finale_competenza number(15,2);
+tot_finale_competenza_sanita number(15,2);
+tot_finale_cassa number(15,2);
+tot_finale_cassa_sanita number(15,2);
+
+
+cursor entrate_rendiconto is
+select
+anno_consuntivo
+,to_number(substr(nb_livello1,1,1)) titolo
+,desc_nb_livello1 Desc_titolo
+,substr(nb_livello2,1,5) tipologia
+,desc_nb_livello2 Desc_tipologia
+,nvl(sum(decode(nvl(sanita_sn,'N'),'N',nvl(previsioni_definitive_Compe,0))),0) competenza
+,nvl(sum(decode(nvl(sanita_sn,'N'),'S',nvl(previsioni_definitive_Compe,0))),0) competenza_sanita
+,nvl(sum(decode(nvl(sanita_sn,'N'),'N',nvl(previsioni_definitive_cassa,0))),0) cassa
+,nvl(sum(decode(nvl(sanita_sn,'N'),'S',nvl(previsioni_definitive_cassa,0))),0) cassa_sanita
+,utente
+from fin_T_consuntivo_excel
+where anno_consuntivo= vanno 
+and utente='CONS'||anno_consuntivo
+and tipo_capitolo='E'
+and nvl(desc_nb_livello1,'N')&lt;>'N'
+group by anno_consuntivo
+,to_number(substr(nb_livello1,1,1))
+,desc_nb_livello1 
+,substr(nb_livello2,1,5) 
+,desc_nb_livello2
+,utente 
+order by 2,4,3;
+
+begin
+
+ delete tmp_tabulati where car04 = 'ENTRATE_RENDICONTO';
+ commit;
+
+ cambio_titolo := '0';
+ cambio_titolo_desc := null;
+
+ riga:=0;
+ tot_finale_competenza :=0;
+ tot_finale_competenza_sanita:=0;
+ tot_finale_cassa:=0;
+ tot_finale_cassa_sanita:=0;
+ vanno :=panno;
+
+
+
+ for a in entrate_rendiconto loop
+  vutente := a.utente;
+
+  if a.titolo &lt;> cambio_titolo
+     then
+--scrivo totali per titolo     
+     riga:=riga+1;
+     insert into tmp_tabulati
+     (UTENTE
+     ,NUM_ORD_RIGA
+     ,CAR01
+     ,CAR02
+     ,CAR03
+     ,CAR04
+     ,NUM01
+     ,NUM02
+     ,NUM03
+     ,NUM04
+     ,NUM05)
+     values 
+     (vutente
+     ,riga
+     ,'T'
+     ,cambio_titolo||'0000'
+     ,'Totale TITOLO '||cambio_titolo||':'||cambio_titolo_desc
+     ,'ENTRATE_RENDICONTO'
+     ,vanno
+     ,tot_titolo_competenza
+     ,tot_titolo_competenza_sanita
+     ,tot_titolo_cassa
+     ,tot_titolo_cassa_sanita);
+
+-- azzero totali     
+     tot_titolo_competenza :=0;
+     tot_titolo_competenza_sanita:=0;
+     tot_titolo_cassa:=0;
+     tot_titolo_cassa_sanita:=0;
+
+-- inserisco testata nuovo titolo
+     riga:=riga+1;
+     cambio_titolo := a.titolo;
+     cambio_titolo_desc := a.desc_titolo;
+
+     insert into tmp_tabulati
+     (UTENTE
+     ,NUM_ORD_RIGA
+     ,CAR01
+     ,CAR02
+     ,CAR03
+     ,CAR04
+     ,NUM01
+     ,NUM02
+     ,NUM03
+     ,NUM04
+     ,NUM05)
+     values 
+     (vutente
+     ,riga
+     ,'T'
+     ,'TITOLO '||cambio_titolo
+     ,cambio_titolo_desc
+     ,'ENTRATE_RENDICONTO'
+     ,vanno
+     ,null
+     ,null
+     ,null
+     ,null);
+  end if;
+
+-- inserisco rigo_dettaglio
+  riga:=riga+1;
+
+  insert into tmp_tabulati
+  (UTENTE
+  ,NUM_ORD_RIGA
+  ,CAR01
+  ,CAR02
+  ,CAR03
+  ,CAR04
+  ,NUM01
+  ,NUM02
+  ,NUM03
+  ,NUM04
+  ,NUM05)
+  values 
+  (vutente
+  ,riga
+  ,'D'
+  ,decode(a.tipologia,'0','-',a.tipologia)
+  ,decode(a.tipologia,'0',a.desc_tipologia,'Tipologia '||substr(a.tipologia,3)||': '||a.desc_tipologia)
+  ,'ENTRATE_RENDICONTO'
+  ,vanno
+  ,a.competenza
+  ,a.competenza_sanita
+  ,a.cassa
+  ,a.cassa_sanita);
+
+-- totalizzo per titolo  
+  tot_titolo_competenza := tot_titolo_competenza + a.competenza;
+  tot_titolo_competenza_sanita := tot_titolo_competenza_sanita + a.competenza_sanita;
+  tot_titolo_cassa  := tot_titolo_cassa + a.cassa;
+  tot_titolo_cassa_sanita := tot_titolo_cassa_sanita + a.cassa_sanita;
+
+-- totalizzo per titoli complessivi  
+  if a.titolo &lt;> '0'
+     then
+     tot_titoli_competenza := tot_titoli_competenza + a.competenza;
+     tot_titoli_competenza_sanita := tot_titoli_competenza_sanita + a.competenza_sanita;
+     tot_titoli_cassa  := tot_titoli_cassa + a.cassa;
+     tot_titoli_cassa_sanita := tot_titoli_cassa_sanita + a.cassa_sanita;
+  end if;
+
+-- totalizzo per finale  
+  tot_finale_competenza := tot_finale_competenza + a.competenza;
+  tot_finale_competenza_sanita := tot_finale_competenza_sanita + a.competenza_sanita;
+  tot_finale_cassa  := tot_finale_cassa + a.cassa;
+  tot_finale_cassa_sanita := tot_finale_cassa_sanita + a.cassa_sanita;
+
+ COMMIT;    
+
+ end loop;
+
+-- inserisco ultimo totale titolo.
+ riga:=riga+1;
+ insert into tmp_tabulati
+ (UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03
+ ,CAR04
+ ,NUM01
+ ,NUM02
+ ,NUM03
+ ,NUM04
+ ,NUM05)
+ values 
+ (vutente
+ ,riga
+ ,'T'
+ ,cambio_titolo||'0000'
+ ,'Totale TITOLO '||cambio_titolo||':'||cambio_titolo_desc
+ ,'ENTRATE_RENDICONTO'
+ ,vanno
+ ,tot_titolo_competenza
+ ,tot_titolo_competenza_sanita
+ ,tot_titolo_cassa
+ ,tot_titolo_cassa_sanita);
+
+
+-- inserisco totale complessivo titoli
+ riga:=riga+1;
+ insert into tmp_tabulati
+ (UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03
+ ,CAR04
+ ,NUM01
+ ,NUM02
+ ,NUM03
+ ,NUM04
+ ,NUM05)
+ values 
+ (vutente
+ ,riga
+ ,'T'
+ ,'T'
+ ,'TOTALE TITOLI'
+ ,'ENTRATE_RENDICONTO'
+ ,vanno
+ ,tot_titoli_competenza
+ ,tot_titoli_competenza_sanita
+ ,tot_titoli_cassa
+ ,tot_titoli_cassa_sanita);
+
+-- inserisco totale finale
+ riga:=riga+1;
+ insert into tmp_tabulati
+ (UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03
+ ,CAR04
+ ,NUM01
+ ,NUM02
+ ,NUM03
+ ,NUM04
+ ,NUM05)
+ values 
+ (vutente
+ ,riga
+ ,'T'
+ ,'T'
+ ,'TOTALE GENERALE DELLE ENTRATE'
+ ,'ENTRATE_RENDICONTO'
+ ,vanno
+ ,tot_finale_competenza
+ ,tot_finale_competenza_sanita
+ ,tot_finale_cassa
+ ,tot_finale_cassa_sanita);
+
+ -- inserisco disavanzo formatosi nell'esercizio
+ riga:=riga+1;
+ insert into tmp_tabulati
+ (UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03
+ ,CAR04
+ ,NUM01
+ ,NUM02
+ ,NUM03
+ ,NUM04
+ ,NUM05)
+ select 
+  vutente
+ ,riga
+ ,'T'
+ ,'T'
+ ,'DISAVANZO FORMATOSI NELL''ESERCIZIO'
+ ,'ENTRATE_RENDICONTO'
+ ,vanno
+ ,q.e_accertamenti
+ ,null
+ ,null
+ ,null
+ from fin_t_rendiconto_qgr q
+where q.utente = 'CONS'||vanno
+and q.desc_rigo_entrata = 'DISAVANZO DELL''ESERCIZIO ';
+
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

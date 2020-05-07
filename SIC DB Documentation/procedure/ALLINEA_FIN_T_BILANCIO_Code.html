@@ -1,0 +1,1522 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ALLINEA_FIN_T_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ALLINEA_FIN_T_BILANCIO.html">Details</a></div></div>
+<div class="tab"><div><a href="ALLINEA_FIN_T_BILANCIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ALLINEA_FIN_T_BILANCIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="ALLINEA_FIN_T_BILANCIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ALLINEA_FIN_T_BILANCIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure  allinea_fin_t_bilancio (wanno in number,wutente in varchar2) authid definer as
+-- aggiornata il 06/03/2017 per tenere conto delle modifiche effettuate nel calcolo del consuntivo (per ridurre i tempi di calcolo)
+v_com_p number:=0;
+v_pl1_p number:=0;
+v_pl2_p number:=0;
+v_com_n number:=0;
+v_pl1_n number:=0;
+v_pl2_n number:=0;
+v_cas_p number:=0;
+v_cas_n number:=0;
+a_com_p number:=0;
+a_pl1_p number:=0;
+a_pl2_p number:=0;
+a_com_n number:=0;
+a_pl1_n number:=0;
+a_pl2_n number:=0;
+a_cas_p number:=0;
+a_cas_n number:=0;
+blocco_cas number := 0;
+sblocco_cas number := 0;
+blocco_com number := 0;
+sblocco_com number := 0;
+pre_imp_documenti number:=0;
+imp_documenti number:=0;
+mand_compe_documenti number:=0;
+mand_res_documenti number:=0;
+acc_documenti number:=0;
+rev_compe_documenti number:=0;
+rev_res_documenti number:=0;
+Liquidato_doc number(15,2) := 0;
+residui_iniziali number(15,2) := 0;
+residui_iniziali_per1 number(15,2) := 0;
+variazioni_residui number(15,2) := 0;
+fpv_rendiconto number(15,2) := 0;
+p_anno number; 
+
+/* LINO 8.1.2018
+E' possibile eseguire l'allinea bilancio solo per gli anni abilitati. Nel caso serva lanciarlo per un solo anno,
+basta impostare l'anno come parametro di input, altrimenti lasciare NULL
+*/
+cursor anni is
+select anno_finanziario from
+(
+select anno_finanziario
+from fin_t_dati_generali
+where (nvl(attivo,'N') = 'S'
+and anno_finanziario = to_char(sysdate,'yyyy'))
+or (ruolo_operazioni_ragioneria is not null and anno_finanziario >= to_char(sysdate,'yyyy') - 1) 
+UNION 
+SELECT ANNO_ESERCIZIO_ATTIVO1
+FROM FIN_T_DATI_GENERALI2
+UNION 
+SELECT ANNO_ESERCIZIO_ATTIVO2
+FROM FIN_T_DATI_GENERALI2
+UNION 
+SELECT ANNO_ESERCIZIO_ATTIVO3
+FROM FIN_T_DATI_GENERALI2)
+where anno_finanziario = decode(nvl(wanno,1900),1900,anno_finanziario,wanno);
+
+
+--da utilizzarsi se si vuole eseguire l'allineamento per un solo anno
+/*
+cursor anni is
+select anno_finanziario
+from fin_t_dati_generali
+where anno_finanziario in (2018);
+*/
+
+
+cursor bilancio_u is
+select 
+anno,
+eu||articolo capitolo,
+previsto_attuale,
+cassa,
+variazione_competenza_piu,
+variazione_competenza_meno,
+variazione_cassa_piu,
+variazione_cassa_meno,
+assestamento_competenza_piu,
+assestamento_competenza_meno,
+assestamento_cassa_piu,
+assestamento_cassa_meno,
+pre_impegni,
+impegni_accertamenti_compe impegni,
+mandati_reversali_compe mandati_compe,
+mandati_reversali_res mandati_res,
+nvl(liquidato,0) liquidato,
+nvl(cassa_bloccata,0) cassa_bloccata,
+nvl(competenza_bloccata,0) competenza_bloccata,
+residuo_consuntivo,
+variazioni
+from fin_t_bilancio
+where anno = p_anno
+and eu = 'U';
+--and articolo = '08100';
+--and articolo in ('24140','24141','35360','35361');
+
+cursor bilancio_e is
+select 
+anno,
+eu||articolo capitolo,
+cassa,
+previsto_attuale,
+variazione_competenza_piu,
+variazione_competenza_meno,
+variazione_cassa_piu,
+variazione_cassa_meno,
+assestamento_competenza_piu,
+assestamento_competenza_meno,
+assestamento_cassa_piu,
+assestamento_cassa_meno,
+pre_impegni,
+impegni_accertamenti_compe accertamenti,
+mandati_reversali_compe rev_compe,
+mandati_reversali_res rev_res,
+nvl(liquidato,0) liquidato,
+residuo_consuntivo
+from fin_t_bilancio
+where anno = p_anno
+and eu = 'E';
+--and articolo='99999';
+
+--loop su tutti gli anni attivi e/o in corso di consuntivo
+begin
+
+
+delete tmp_risposte_procedure where funzione='Allinea Bilancio' and utente = nvl(wutente,'TRACCIA');
+commit;
+
+ for a in anni loop
+ p_anno := a.anno_finanziario;
+
+ risposte_procedure ('Allinea Bilancio',nvl(wutente,'TRACCIA'),'Inizio Anno '||p_anno||' - Elaborazione Uscite');
+
+-- allineamo le USCITE
+begin
+ for b in bilancio_u loop
+ -- !!!!!!!!!!!!!OKKIO a regime va verificato la visibilità dell'ASSESTAMENTO!!!!!!!!!!!!!!!!!
+ -- allineo le fonti di finanziamento dai movimenti di variazione
+ aggiorna_composizione_bilancio(b.anno,b.capitolo);
+ -- FINE aggiornamento fonti finanziamento
+
+ -- verifico il PREVISTO_ATTUALE
+  if (nvl(previsione_iniziale_att(b.anno,b.capitolo),0)+nvl(previsione_iniziale_prec(b.anno,b.capitolo),0)) &lt;> nvl(b.previsto_attuale,0)
+    then 
+    insert into tmp_allinea_bilancio values (b.anno,
+      b.capitolo,
+      b.variazione_competenza_piu,
+      b.variazione_competenza_meno,
+      b.variazione_cassa_piu,
+      b.variazione_cassa_meno,
+      b.assestamento_competenza_piu,
+      b.assestamento_competenza_meno,
+      b.assestamento_cassa_piu,
+      b.assestamento_cassa_meno,
+      b.pre_impegni,
+      b.impegni,
+      b.mandati_compe,
+      b.mandati_res,
+      sysdate,
+      b.liquidato
+      ,b.cassa_bloccata
+      ,b.competenza_bloccata
+      ,b.previsto_attuale
+      ,b.cassa);
+      commit; 
+       update fin_t_bilancio set previsto_attuale = (nvl(previsione_iniziale_att(b.anno,b.capitolo),0)+nvl(previsione_iniziale_prec(b.anno,b.capitolo),0)) where anno = b.anno and eu||articolo = b.capitolo;
+       commit;
+    end if;
+ -- **** Fine PREVISTO_ATTUALE
+
+ -- **** verifico la CASSA INIZIALE *****
+
+ if cassa_iniziale_att(b.anno,b.capitolo) &lt;> nvl(b.cassa,0)
+  then
+    insert into tmp_allinea_bilancio values (b.anno,
+      b.capitolo,
+      b.variazione_competenza_piu,
+      b.variazione_competenza_meno,
+      b.variazione_cassa_piu,
+      b.variazione_cassa_meno,
+      b.assestamento_competenza_piu,
+      b.assestamento_competenza_meno,
+      b.assestamento_cassa_piu,
+      b.assestamento_cassa_meno,
+      b.pre_impegni,
+      b.impegni,
+      b.mandati_compe,
+      b.mandati_res,
+      sysdate,
+      b.liquidato
+      ,b.cassa_bloccata
+      ,b.competenza_bloccata
+      ,b.previsto_attuale
+      ,b.cassa);
+      commit; 
+       update fin_t_bilancio set cassa = cassa_iniziale_att(b.anno,b.capitolo) where anno = b.anno and eu||articolo = b.capitolo;
+       commit;
+    end if;
+
+ -- verifico la situazione delle V_COM_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_com_p
+ from fin_t_documenti
+ where doc_type = 'V_COM_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_com_p:=0;
+ end;
+
+  -- verifico la situazione delle V_PL1_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_pl1_p
+ from fin_t_documenti
+ where doc_type = 'V_PL1_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl1_p:=0;
+ end;
+ -- verifico la situazione delle V_PL2_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_pl2_p
+ from fin_t_documenti
+ where doc_type = 'V_PL2_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl2_p:=0;
+ end;
+
+
+ if nvl(v_com_p,0)+nvl(v_pl1_p,0)+nvl(v_pl2_p,0) &lt;> nvl(b.variazione_competenza_piu,0)
+ then insert into tmp_allinea_bilancio values (b.anno,
+b.capitolo,
+b.variazione_competenza_piu,
+b.variazione_competenza_meno,
+b.variazione_cassa_piu,
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit; 
+ update fin_t_bilancio set variazione_competenza_piu = (nvl(v_com_p,0)+nvl(v_pl1_p,0)+nvl(v_pl2_p,0)) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione delle V_COM_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_com_n
+ from fin_t_documenti
+ where doc_type = 'V_COM_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_com_n:=0;
+ end;
+ -- verifico la situazione delle V_PL1_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_pl1_n
+ from fin_t_documenti
+ where doc_type = 'V_PL1_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl1_n:=0;
+ end;
+  -- verifico la situazione delle V_PL2_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_pl2_n
+ from fin_t_documenti
+ where doc_type = 'V_PL2_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl2_n:=0;
+ end;
+
+ if nvl(v_com_n,0)+nvl(v_pl1_n,0)+nvl(v_pl2_n,0) &lt;> nvl(b.variazione_competenza_meno,0)
+    then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+b.variazione_competenza_meno,
+b.variazione_cassa_piu,
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+    update fin_t_bilancio set variazione_competenza_meno = (nvl(v_com_n,0)+nvl(v_pl1_n,0)+nvl(v_pl2_n,0)) where anno = b.anno and eu||articolo = b.capitolo;
+    commit;
+ end if;
+
+ -- verifico la situazione delle  V_CAS_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_cas_p
+ from fin_t_documenti
+ where doc_type = 'V_CAS_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_cas_p:=0;
+ end;
+ if nvl(v_cas_p,0) &lt;> nvl(b.variazione_cassa_piu,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+b.variazione_cassa_piu,
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set variazione_cassa_piu = nvl(v_cas_p,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione delle V_CAS_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_cas_n
+ from fin_t_documenti
+ where doc_type = 'V_CAS_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_cas_n:=0;
+ end;
+ if nvl(v_cas_n,0) &lt;> nvl(b.variazione_cassa_meno,0)
+ then insert into tmp_allinea_bilancio values
+(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set variazione_cassa_meno = nvl(v_cas_n,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+  -- verifico la situazione delle A_COM_POS
+ begin
+ select sum(nvl(document_amount,0)) into a_com_p
+ from fin_t_documenti
+ where doc_type = 'A_COM_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_com_p:=0;
+ end;
+
+-- verifico la situazione delle A_PL1_POS
+ begin
+ select sum(nvl(document_amount,0)) into a_pl1_p
+ from fin_t_documenti
+ where doc_type = 'A_PL1_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl1_p:=0;
+ begin
+ end;
+
+-- verifico la situazione delle A_PL2_POS
+ select sum(nvl(document_amount,0)) into a_pl2_p
+ from fin_t_documenti
+ where doc_type = 'A_PL2_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl2_p:=0;
+ end;
+
+ if nvl(a_com_p,0)+nvl(a_pl1_p,0)+nvl(a_pl2_p,0) &lt;> nvl(b.assestamento_competenza_piu,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_competenza_piu = (nvl(a_com_p,0)+nvl(a_pl1_p,0)+nvl(a_pl2_p,0)) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+  -- verifico la situazione delle A_COM_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_com_n
+ from fin_t_documenti
+ where doc_type = 'A_COM_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_com_n:=0;
+ end;
+
+ -- verifico la situazione delle A_PL1_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_pl1_n
+ from fin_t_documenti
+ where doc_type = 'A_PL1_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl1_n:=0;
+ end;
+
+ -- verifico la situazione delle A_PL2_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_pl2_n
+ from fin_t_documenti
+ where doc_type = 'A_PL2_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl2_n:=0;
+ end;
+
+ if nvl(a_com_n,0)+nvl(a_pl1_n,0)+nvl(a_pl2_n,0) &lt;> nvl(b.assestamento_competenza_meno,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_competenza_meno = (nvl(a_com_n,0)+nvl(a_pl1_n,0)+nvl(a_pl2_n,0)) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+
+-- verifico la situazione delle A_CAS_POS
+ begin
+ select sum(nvl(document_amount,0)) into a_cas_p
+ from fin_t_documenti
+ where doc_type = 'A_CAS_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_cas_p:=0;
+ end;
+ if nvl(a_cas_p,0) &lt;> nvl(b.assestamento_cassa_piu,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_cassa_piu = nvl(a_cas_p,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+  -- verifico la situazione delle A_CAS_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_cas_n
+ from fin_t_documenti
+ where doc_type = 'A_CAS_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ end;
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_cas_n:=0;
+ if nvl(a_cas_n,0) &lt;> nvl(b.assestamento_cassa_meno,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_cas_p,0),
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_cassa_meno = nvl(a_cas_n,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+  -- verifico la situazione dei BLOCCHI CASSA
+ begin
+ select sum(nvl(document_amount,0)) into blocco_cas
+ from fin_t_documenti
+ where doc_type = 'BLOCCO_CASSA'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then blocco_cas := 0;
+ end;
+ begin
+ select sum(nvl(document_amount,0)) into sblocco_cas
+ from fin_t_documenti
+ where doc_type = 'SBLOCCO_CASSA'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then sblocco_cas := 0;
+ end;
+ if (nvl(blocco_cas,0) - nvl(sblocco_cas,0)) &lt;> nvl(b.cassa_bloccata,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_cas_p,0),
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set cassa_bloccata = (nvl(blocco_cas,0) - nvl(sblocco_cas,0)) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+  -- verifico la situazione dei BLOCCHI COMPE
+ begin
+ select sum(nvl(document_amount,0)) into blocco_com
+ from fin_t_documenti
+ where doc_type = 'BLOCCO_COMPE'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then blocco_com := 0;
+ end;
+ begin
+ select sum(nvl(document_amount,0)) into sblocco_com
+ from fin_t_documenti
+ where doc_type = 'SBLOCCO_COMPE'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then sblocco_com := 0;
+ end;
+ if (nvl(blocco_com,0) - nvl(sblocco_com,0)) &lt;> nvl(b.competenza_bloccata,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_cas_p,0),
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+b.pre_impegni,
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set competenza_bloccata = (nvl(blocco_com,0) - nvl(sblocco_com,0)) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+
+ -- verifico la situazione dei PRE-IMP
+ begin
+ select sum(nvl(open_balance_proposed,0)) into pre_imp_documenti
+ from fin_t_documenti
+ where doc_type = 'PRE-IMP'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then pre_imp_documenti:=0;
+ end;
+ if nvl(pre_imp_documenti,0) &lt;> nvl(b.pre_impegni,0)
+   then insert into tmp_allinea_bilancio values(b.anno,
+        b.capitolo,
+        nvl(v_com_p,0),
+        nvl(v_com_n,0),
+        nvl(v_cas_p,0),
+        nvl(v_cas_n,0),
+        nvl(a_com_p,0),
+        nvl(a_com_n,0),
+        nvl(a_cas_p,0),
+        nvl(a_cas_n,0),
+        b.pre_impegni,
+        b.impegni,
+        b.mandati_compe,
+        b.mandati_res,
+        sysdate,
+        b.liquidato
+        ,b.cassa_bloccata
+        ,b.competenza_bloccata
+        ,b.previsto_attuale
+        ,b.cassa);
+        commit;
+   update fin_t_bilancio set pre_impegni = nvl(pre_imp_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+   commit;
+ end if;
+
+ -- verifico la situazione degli IMP
+ begin
+ select sum(nvl(document_amount,0)) into imp_documenti
+ from fin_t_documenti
+ where doc_type in ('IMP','IMP-PER','IMP-DEF')
+  and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ end;
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then imp_documenti:=0;
+ if nvl(imp_documenti,0) &lt;> nvl(b.impegni,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+nvl(a_cas_n,0),
+nvl(pre_imp_documenti,0),
+b.impegni,
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set impegni_accertamenti_compe = nvl(imp_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione dei MAND_COMPE
+ begin
+ select sum(nvl(d.open_balance_proposed,0)) into mand_compe_documenti
+ from fin_t_documenti d,
+ fin_t_documenti d1
+ where d.doc_type = 'MAND'
+  and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+ and d.segment8 = b.anno 
+ and d.segment2 = b.capitolo
+ and d.doc_id_capo_filiera = d1.doc_id
+ and d1.segment8 = b.anno;
+ exception when no_data_found then mand_compe_documenti:=0;
+ end;
+ if nvl(mand_compe_documenti,0) &lt;> nvl(b.mandati_compe,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+nvl(a_cas_n,0),
+nvl(pre_imp_documenti,0),
+nvl(imp_documenti,0),
+b.mandati_compe,
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set mandati_reversali_compe = nvl(mand_compe_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione dei MAND_RES
+ begin
+ select sum(nvl(d.open_balance_proposed,0)) into mand_res_documenti
+ from fin_t_documenti d,
+ fin_t_documenti d1
+ where d.doc_type = 'MAND'
+  and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+ and d.segment8 = b.anno 
+ and d.segment2 = b.capitolo
+ and d.doc_id_capo_filiera = d1.doc_id
+ and d1.segment8 &lt; b.anno;
+ exception when no_data_found then mand_res_documenti:=0;
+ end;
+ if nvl(mand_res_documenti,0) &lt;> nvl(b.mandati_res,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+nvl(a_cas_n,0),
+nvl(pre_imp_documenti,0),
+nvl(imp_documenti,0),
+nvl(mand_compe_documenti,0),
+b.mandati_res,
+sysdate,
+b.liquidato
+,b.cassa_bloccata
+,b.competenza_bloccata
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set mandati_reversali_res = nvl(mand_res_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+
+ -- ******** calcolo RESIDUI INIZIALI a CONSUNTIVO **************
+
+        select nvl(sum(nvl(r.RESIDUO_INIZIALE,0)),0) into residui_iniziali
+        from fin_t_impegni_residui r
+        where r.ANNO_FINANZIARIO = b.anno
+        and nvl(r.RESIDUO_INIZIALE,0) > 0
+        and nvl(r.perenzione,'N') = 'N'
+        and r.capitolo_spesa_corrente = b.capitolo;
+
+        select nvl(sum(residuo_imp_data(d.doc_id,to_date('3112'||(b.anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)),0) into residui_iniziali_per1
+        from fin_t_impegni_residui r
+        ,fin_t_documenti d
+        where r.ANNO_FINANZIARIO = b.anno
+        and nvl(r.perenzione,'N') = 'S'
+        and r.capitolo_spesa_corrente = b.capitolo
+        and d.doc_id = r.DOC_ID_IMPEGNO
+        and (residuo_imp_data(d.doc_id,to_date('3112'||(b.anno - 1),'ddmmyyyy')) - nvl(d.closed_amount_proposed,0)) > 0;
+
+    if (residui_iniziali + residui_iniziali_per1) &lt;> nvl(b.residuo_consuntivo,0)
+    then
+      update fin_t_bilancio set residuo_consuntivo = residui_iniziali +  residui_iniziali_per1 where anno = b.anno and eu||articolo = b.capitolo;
+      commit;
+      residui_iniziali := 0;
+      residui_iniziali_per1 := 0;
+    end if;
+
+
+  -- ****************************************
+
+
+  -- *** VARIAZIONI RESIDUI *****
+ /*
+      select nvl(sum(nvl(d.document_amount,0)),0) into variazioni_residui
+      from fin_t_documenti d
+      ,fin_t_documenti i
+      where d.doc_type in ('ECO','DIS')
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.segment8 = b.anno
+      and d.segment2 = b.capitolo
+      and i.doc_id = d.previous_doc_id
+      and to_char(nvl(i.data_perenzione,to_date('3112'||b.anno+1,'ddmmyyyy')),'yyyy') > p_anno;
+      update fin_t_bilancio set variazioni = variazioni_residui where anno = b.anno and eu||articolo = b.capitolo;
+
+    if variazioni_residui > 0 and variazioni_residui &lt;> b.variazioni
+    then
+      commit;
+      variazioni_residui := 0;
+    end if;
+
+   */ 
+ -- ****************************************
+
+ -- ****** calcolo l'FPV a RENDICONTO
+ /*
+    fpv_rendiconto := calcola_fpv(b.anno, b.capitolo); 
+
+    if fpv_rendiconto > 0
+    then
+      update fin_t_bilancio set liquidato = fpv_rendiconto where anno = b.anno and eu||articolo = b.capitolo;
+      commit;
+      fpv_rendiconto := 0;
+    end if;
+
+ */
+ -- *****************************************
+
+
+-- verifico la situazione del Liquidato
+ /*begin
+  select sum(nvl(jugd1.document_amount,0)) into Liquidato_doc
+  FROM
+  fina_documenti jugd1
+  ,fina_documenti jugd2
+  WHERE
+  upper(jugd1.doc_type) = 'LIQ' and
+  upper(nvl(jugd1.proposal_status_flag,'Z'))||upper(nvl(jugd1.auditing_status_flag,'Z')) ='PI' and
+  upper(nvl(jugd1.deletion_status_flag,'N')) &lt;> 'Y' and
+  to_number(to_char(jugd1.date_created,'yyyy')) =b.anno and
+  jugd1.segment2 = b.capitolo and
+  jugd2.doc_id = jugd1.previous_doc_id and
+  jugd2.segment8 = b.anno;
+  exception when no_data_found then Liquidato_doc := 0;
+ end;
+  if nvl(Liquidato_doc,0) &lt;> nvl(b.liquidato,0)
+   then insert into tmp_allinea_bilancio values(b.anno,
+  b.capitolo,
+  nvl(v_com_p,0),
+  nvl(v_com_n,0),
+  nvl(v_cas_p,0),
+  nvl(v_cas_n,0),
+  nvl(a_com_p,0),
+  nvl(a_com_n,0),
+  nvl(a_cas_p,0),
+  nvl(a_cas_n,0),
+  nvl(pre_imp_documenti,0),
+  nvl(imp_documenti,0),
+  nvl(mand_compe_documenti,0),
+  nvl(mand_res_documenti,0),
+  sysdate,
+  nvl(b.liquidato,0));
+  commit;
+   update fin_t_bilancio set liquidato = nvl(Liquidato_doc,0) where anno = b.anno and eu||articolo = b.capitolo;
+   commit;
+   end if;*/
+ end loop;
+-- allineamo le ENTRATE
+
+risposte_procedure ('Allinea Bilancio',nvl(wutente,'TRACCIA'),'Fine Elaborazione Uscite - Inizio Elaborazione Entrate '||p_anno);  
+
+ for b in bilancio_e loop
+
+  -- verifico il PREVISTO_ATTUALE
+  if (nvl(previsione_iniziale_att(b.anno,b.capitolo),0)+nvl(previsione_iniziale_prec(b.anno,b.capitolo),0)) &lt;> nvl(b.previsto_attuale,0)
+    then 
+    insert into tmp_allinea_bilancio values (b.anno,
+      b.capitolo,
+      b.variazione_competenza_piu,
+      b.variazione_competenza_meno,
+      b.variazione_cassa_piu,
+      b.variazione_cassa_meno,
+      b.assestamento_competenza_piu,
+      b.assestamento_competenza_meno,
+      b.assestamento_cassa_piu,
+      b.assestamento_cassa_meno,
+      0,
+      b.accertamenti,
+      b.rev_compe,
+      b.rev_res,
+      sysdate,
+      b.liquidato
+      ,0
+      ,0
+      ,b.previsto_attuale
+      ,b.cassa);
+      commit; 
+       update fin_t_bilancio set previsto_attuale = (nvl(previsione_iniziale_att(b.anno,b.capitolo),0)+nvl(previsione_iniziale_prec(b.anno,b.capitolo),0)) where anno = b.anno and eu||articolo = b.capitolo;
+       commit;
+    end if;
+ -- **** Fine PREVISTO_ATTUALE
+
+ -- verifico la situazione delle V_COM_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_com_p
+ from fin_t_documenti
+ where doc_type = 'V_COM_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_com_p:=0;
+ end;
+  -- verifico la situazione delle V_PL1_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_pl1_p
+ from fin_t_documenti
+ where doc_type = 'V_PL1_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl1_p:=0;
+ end;
+ -- verifico la situazione delle V_PL2_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_pl2_p
+ from fin_t_documenti
+ where doc_type = 'V_PL2_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl2_p:=0;
+ end;
+
+
+ if nvl(v_com_p,0)+nvl(v_pl1_p,0)+nvl(v_pl2_p,0) &lt;> nvl(b.variazione_competenza_piu,0)
+  then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+b.variazione_competenza_piu,
+b.variazione_competenza_meno,
+b.variazione_cassa_piu,
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+ commit;
+,b.cassa);
+commit; 
+ update fin_t_bilancio set variazione_competenza_piu = nvl(v_com_p,0)+nvl(v_pl1_p,0)+nvl(v_pl2_p,0) where anno = b.anno and eu||articolo = b.capitolo;
+ end if;
+
+ -- verifico la situazione delle V_COM_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_com_n
+ from fin_t_documenti
+ where doc_type = 'V_COM_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_com_n:=0;
+ end;
+  -- verifico la situazione delle V_PL1_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_pl1_n
+ from fin_t_documenti
+ where doc_type = 'V_PL1_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl1_n:=0;
+ end;
+  -- verifico la situazione delle V_PL2_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_pl2_n
+ from fin_t_documenti
+ where doc_type = 'V_PL2_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_pl2_n:=0;
+ end;
+
+ if nvl(v_com_n,0)+nvl(v_pl1_n,0)+nvl(v_pl2_n,0) &lt;> nvl(b.variazione_competenza_meno,0)
+    then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+b.variazione_competenza_meno,
+b.variazione_cassa_piu,
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+    update fin_t_bilancio set variazione_competenza_meno = nvl(v_com_n,0)+nvl(v_pl1_n,0)+nvl(v_pl2_n,0) where anno = b.anno and eu||articolo = b.capitolo;
+    commit;
+ end if;
+
+-- verifico la CASSA INIZIALE 
+if cassa_iniziale_att(b.anno,b.capitolo) &lt;> nvl(b.cassa,0)
+  then
+    insert into tmp_allinea_bilancio values (b.anno,
+        b.capitolo,
+        nvl(v_com_p,0),
+        nvl(v_com_n,0),
+        b.variazione_cassa_piu,
+        b.variazione_cassa_meno,
+        b.assestamento_competenza_piu,
+        b.assestamento_competenza_meno,
+        b.assestamento_cassa_piu,
+        b.assestamento_cassa_meno,
+        0,
+        b.accertamenti,
+        b.rev_compe,
+        b.rev_res,
+        sysdate,
+        b.liquidato
+        ,0
+        ,0
+        ,b.previsto_attuale
+        ,b.cassa);
+      commit; 
+       update fin_t_bilancio set cassa = cassa_iniziale_att(b.anno,b.capitolo) where anno = b.anno and eu||articolo = b.capitolo;
+       commit;
+    end if;
+
+ -- verifico la situazione delle  V_CAS_POS
+ begin
+ select sum(nvl(document_amount,0)) into v_cas_p
+ from fin_t_documenti
+ where doc_type = 'V_CAS_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_cas_p:=0;
+ end;
+ if nvl(v_cas_p,0) &lt;> nvl(b.variazione_cassa_piu,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+b.variazione_cassa_piu,
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set variazione_cassa_piu = nvl(v_cas_p,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione delle V_CAS_NEG
+ begin
+ select sum(nvl(document_amount,0)) into v_cas_n
+ from fin_t_documenti
+ where doc_type = 'V_CAS_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then v_cas_n:=0;
+ end;
+ if nvl(v_cas_n,0) &lt;> nvl(b.variazione_cassa_meno,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+b.variazione_cassa_meno,
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+
+ update fin_t_bilancio set variazione_cassa_meno = nvl(v_cas_n,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+  -- verifico la situazione delle A_COM_POS
+ begin
+ select sum(nvl(document_amount,0)) into a_com_p
+ from fin_t_documenti
+ where doc_type = 'A_COM_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_com_p:=0;
+ end;
+
+ -- verifico la situazione delle A_PL1_POS
+ begin
+ select sum(nvl(document_amount,0)) into a_pl1_p
+ from fin_t_documenti
+ where doc_type = 'A_PL1_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl1_p:=0;
+ end;
+
+-- verifico la situazione delle A_PL2_POS
+ begin
+ select sum(nvl(document_amount,0)) into a_pl2_p
+ from fin_t_documenti
+ where doc_type = 'A_PL2_POS'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl2_p:=0;
+ end;
+
+ if nvl(a_com_p,0)+nvl(a_pl1_p,0)+nvl(a_pl2_p,0) &lt;> nvl(b.assestamento_competenza_piu,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+b.assestamento_competenza_piu,
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_competenza_piu = nvl(a_com_p,0)+nvl(a_pl1_p,0)+nvl(a_pl2_p,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+  -- verifico la situazione delle A_COM_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_com_n
+ from fin_t_documenti
+ where doc_type = 'A_COM_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_com_n:=0;
+ end;
+  -- verifico la situazione delle A_PL1_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_pl1_n
+ from fin_t_documenti
+ where doc_type = 'A_PL1_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl1_n:=0;
+ end;
+
+ -- verifico la situazione delle A_PL2_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_pl2_n
+ from fin_t_documenti
+ where doc_type = 'A_PL2_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_pl2_n:=0;
+ end;
+
+ if nvl(a_com_n,0)+nvl(a_pl1_n,0)+nvl(a_pl2_n,0) &lt;> nvl(b.assestamento_competenza_meno,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+b.assestamento_competenza_meno,
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_competenza_meno =  nvl(a_com_n,0)+nvl(a_pl1_n,0)+nvl(a_pl2_n,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+ -- verifico la situazione delle A_CAS_POS
+ begin
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ select sum(nvl(document_amount,0)) into a_cas_p
+ from fin_t_documenti
+ where doc_type = 'A_CAS_POS'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_cas_p:=0;
+ end;
+ if nvl(a_cas_p,0) &lt;> nvl(b.assestamento_cassa_piu,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+b.assestamento_cassa_piu,
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_cassa_piu = nvl(a_cas_p,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+  -- verifico la situazione delle A_CAS_NEG
+ begin
+ select sum(nvl(document_amount,0)) into a_cas_n
+ from fin_t_documenti
+ where doc_type = 'A_CAS_NEG'
+ and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then a_cas_n:=0;
+ end;
+ if nvl(a_cas_n,0) &lt;> nvl(b.assestamento_cassa_meno,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+b.assestamento_cassa_meno,
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set assestamento_cassa_meno = nvl(a_cas_n,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+ -- verifico la situazione degli ACC
+ begin
+ select sum(nvl(document_amount,0)) into acc_documenti
+ from fin_t_documenti
+ where doc_type = 'ACC'
+  and nvl(deletion_status_flag,'X') &lt;> 'Y'
+ and segment8 = b.anno 
+ and segment2 = b.capitolo;
+ exception when no_data_found then acc_documenti:=0;
+ end;
+ if nvl(acc_documenti,0) &lt;> nvl(b.accertamenti,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+nvl(a_cas_n,0),
+0,
+b.accertamenti,
+b.rev_compe,
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set impegni_accertamenti_compe = nvl(acc_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione delle REV_COMPE
+ begin
+ select sum(nvl(d.open_balance_proposed,0)) into rev_compe_documenti
+ from fin_t_documenti d,
+ fin_t_documenti d1
+ where d.doc_type = 'REV'
+  and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+ and d.segment8 = b.anno 
+ and d.segment2 = b.capitolo
+ and d.doc_id_capo_filiera = d1.doc_id
+ and d1.segment8 = b.anno;
+ exception when no_data_found then rev_compe_documenti:=0;
+ end;
+ if nvl(rev_compe_documenti,0) &lt;> nvl(b.rev_compe,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+nvl(a_cas_n,0),
+0,
+nvl(acc_documenti,0),
+b.rev_compe,
+b.rev_res,
+sysdate,
+,b.previsto_attuale
+b.liquidato
+,0
+,0
+,b.cassa);
+commit;
+ update fin_t_bilancio set mandati_reversali_compe = nvl(rev_compe_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- verifico la situazione delle REV_RES
+ begin
+ select sum(nvl(d.open_balance_proposed,0)) into rev_res_documenti
+ from fin_t_documenti d,
+ fin_t_documenti d1
+ where d.doc_type = 'REV'
+  and nvl(d.deletion_status_flag,'X') &lt;> 'Y'
+ and d.segment8 = b.anno 
+ and d.segment2 = b.capitolo
+ and d.doc_id_capo_filiera = d1.doc_id
+ and d1.segment8 &lt; b.anno;
+ exception when no_data_found then rev_res_documenti:=0;
+ end;
+ if nvl(rev_res_documenti,0) &lt;> nvl(b.rev_res,0)
+ then insert into tmp_allinea_bilancio values(b.anno,
+b.capitolo,
+nvl(v_com_p,0),
+nvl(v_com_n,0),
+nvl(v_cas_p,0),
+nvl(v_cas_n,0),
+nvl(a_com_p,0),
+nvl(a_com_n,0),
+nvl(a_cas_p,0),
+nvl(a_cas_n,0),
+0,
+nvl(acc_documenti,0),
+nvl(rev_compe_documenti,0),
+b.rev_res,
+sysdate,
+b.liquidato
+,0
+,0
+,b.previsto_attuale
+,b.cassa);
+commit;
+ update fin_t_bilancio set mandati_reversali_res = nvl(rev_res_documenti,0) where anno = b.anno and eu||articolo = b.capitolo;
+ commit;
+ end if;
+
+ -- ******** calcolo RESIDUI ATTIVI INIZIALI a CONSUNTIVO **************
+
+        select nvl(sum(nvl(r.RESIDUO_INIZIALE,0)),0) into residui_iniziali
+        from fin_t_accertamenti_residui r
+        where r.ANNO_FINANZIARIO = b.anno
+        and nvl(r.RESIDUO_INIZIALE,0) > 0
+        and r.capitolo_spesa_corrente = b.capitolo;
+
+    if residui_iniziali &lt;> nvl(b.residuo_consuntivo,0)
+    then
+      update fin_t_bilancio set residuo_consuntivo = residui_iniziali  where anno = b.anno and eu||articolo = b.capitolo;
+      commit;
+      residui_iniziali := 0;
+    end if;
+
+
+  -- ****************************************
+ end loop;
+end;
+
+risposte_procedure ('Allinea Bilancio',nvl(wutente,'TRACCIA'),'Fine Elaborazione Entrate - Termine Elaborazione '||p_anno);
+
+end loop; -- fine loop su anni
+ risposte_procedure ('Allinea Bilancio',nvl(wutente,'TRACCIA'),'Fine Procedura');
+
+end;</pre>	</td></tr>
+</table></div>

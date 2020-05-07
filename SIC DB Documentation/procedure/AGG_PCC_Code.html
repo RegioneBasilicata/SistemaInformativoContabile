@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGG_PCC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGG_PCC.html">Details</a></div></div>
+<div class="tab"><div><a href="AGG_PCC_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGG_PCC_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGG_PCC_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGG_PCC_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure agg_pcc is
+ a_progr  number;
+ a_titolo number;
+ a_impegno number;
+begin
+for pcc in (
+select 'M', m.doc_id,f.ID_DOCUMENTO, f.ID_FATTURA, f.ID_ANA, abs(f.IMPORTO_LIQUIDATO) IMPORTO_LIQUIDATO, f.NUMERO_FATTURA, 
+       f.DATA_FATTURA, f.IMPORTO_FATTURA , f.IVA_SP, m.ATTRIBUTE12, m.SEGMENT2 capitolo, m.doc_id_capo_filiera,
+       m.doc_sequence_value num_mand, m.date_created data_mand,c.cig,c.cup,m.EXPEDIENT_ID
+from fin_t_mandati_fatture f, fin_t_documenti m, fin_distinte_mand_dettaglio d, pcc_doc_cigcup c
+where f.ID_FATTURA is not null and
+m.doc_id=f.id_documento and
+d.numero_mandato=m.doc_sequence_value and
+d.tipo_mandato='V' and
+--d.data_quietanza is not null and
+0=(select count(*) from pcc_azioni_fatt where doc_id=m.doc_id) and
+c.chiave(+)=f.id_fattura and
+c.progr(+)=1
+union
+--storni
+select 'S',s.doc_id,f.ID_DOCUMENTO, f.ID_FATTURA, f.ID_ANA, f.IMPORTO_LIQUIDATO*-1, f.NUMERO_FATTURA, 
+       f.DATA_FATTURA, f.IMPORTO_FATTURA, f.IVA_SP, s.ATTRIBUTE12, s.SEGMENT2 capitolo, m.doc_id_capo_filiera,
+       s.doc_sequence_value num_mand, s.date_created data_mand, c.cig, c.cup, s.EXPEDIENT_ID
+from fin_t_mandati_fatture f, fin_t_documenti m, fin_distinte_mand_dettaglio d, fin_t_documenti s, pcc_doc_cigcup c
+where f.ID_FATTURA is not null and
+m.doc_id=f.id_documento and
+d.numero_mandato_stornato=m.doc_sequence_value and
+d.tipo_mandato='A' and
+s.doc_type='ST-MAND' and
+s.doc_sequence_value=d.numero_mandato and
+0=(select count(*) from pcc_azioni_fatt where doc_id=s.doc_id) and
+c.chiave(+)=f.id_fattura and
+c.progr(+)=1
+order by 2) loop
+select nvl(max(progr),0)+1
+ into a_progr
+ from pcc_azioni_fatt
+ where chiave=pcc.id_fattura;
+select nvl(max(nb_titolo),1)
+ into a_titolo
+ from fin_t_articoli
+ where eu||codice=pcc.capitolo and
+       anno=to_char(pcc.data_mand,'yyyy');
+select max(doc_sequence_value) 
+ into a_impegno
+ from fin_t_documenti
+ where doc_type like 'IMP%' and
+       doc_id_capo_filiera=pcc.doc_id_capo_filiera;
+insert into pcc_azioni_fatt
+ (CHIAVE,PROGR,AZIONE,CP_IMP_PAG,CP_NATURA,CP_CAPITOLI,CP_IMPEGNO,CP_MAND_NUM,CP_MAND_DATA,CP_CIG,CP_CUP,
+  CREATO_DA,CREATO_IL,DOC_ID)
+values
+ (pcc.ID_FATTURA, a_progr, 'CP', pcc.importo_liquidato, decode(a_titolo,1,'CO','CA'), pcc.capitolo, a_impegno,
+  pcc.num_mand, pcc.data_mand, pcc.cig, pcc.cup,1000,sysdate,pcc.doc_id);
+end loop;
+commit;
+end;</pre>	</td></tr>
+</table></div>

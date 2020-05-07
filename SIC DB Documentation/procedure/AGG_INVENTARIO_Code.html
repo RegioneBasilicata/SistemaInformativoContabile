@@ -1,0 +1,221 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGG_INVENTARIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGG_INVENTARIO.html">Details</a></div></div>
+<div class="tab"><div><a href="AGG_INVENTARIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGG_INVENTARIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGG_INVENTARIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGG_INVENTARIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure AGG_INVENTARIO (a_matricola in number,a_des_categoria in varchar2,a_des_produttore in varchar2,
+a_des_modello in varchar2,a_edificio in varchar2,a_piano in varchar2,a_stanza in varchar2,a_quantita in number,
+a_data_assegnazione in date,a_numero_inventario in varchar2,a_numero_serie in varchar2,a_nome_apparecchiatura in varchar2,
+a_nome_pdl in varchar2,a_f_richiesto_numero_serie in number,a_f_hardware in number,a_f_software in number,a_tipo_spostamento in varchar2,
+a_numero_rfid in varchar2,a_errore in out number,a_descr_errore in out varchar2) is
+ a_cod_inv varchar2(50);
+ a_cat number;
+ a_scat number;
+ a_dett number;
+ a_crea varchar2(1);
+ a_progr_inv number;
+ a_ctr_es number;
+ a_fat_progr number;
+ a_fat_qta number;
+ a_cognome varchar2(500);
+ a_nome varchar2(500);
+ a_ufficio varchar2(5);
+ a_stanza_progr number;
+ a_old_matricola number(8);
+ a_old_cesp_stanza varchar2(50);
+ a_old_stanza_progr number;
+ a_old_num_inventario varchar2(50);
+ a_old_rfid varchar2(50);
+ a_old_pdl varchar2(50);
+ a_old_nome_computer varchar2(50);
+ a_edificio_num number(6);
+ a1_stanza varchar2(100);
+ a1_piano varchar2(100);
+begin
+
+-- non aggiorna beni che non sono cespiti
+
+if a_f_richiesto_numero_serie=0 then
+   return;
+end if;
+  
+-- controlla matricola
+begin
+select cognome,nome,ufficio
+ into a_cognome,a_nome,a_ufficio
+ from ap_utenti
+ where matricola=a_matricola;
+exception
+ when no_data_found then
+   a_errore:=1;
+   a_descr_errore:='Matricola inesistente';
+   return;
+ when others then
+   a_errore:=1;
+   a_descr_errore:='Errore in controllo matricola';
+   return;
+end;
+
+begin
+select cod_inv,nvl(id_pdl,'-'),nvl(rfid,'-'),nvl(nome_computer,'-'),nvl(num_inv,'-')
+ into a_cod_inv,a_old_pdl,a_old_rfid,a_old_nome_computer,a_old_num_inventario
+ from tb_beni_mobili
+-- where rfid=a_numero_rfid;
+ where num_serie=a_numero_serie;
+exception
+ when no_data_found then
+   a_errore:=1;
+   a_descr_errore:='Cespite inesistente';
+   return;
+ when too_many_rows then
+   a_errore:=1;
+--   a_descr_errore:='Rfid presente varie volte in anagrafica cespiti';
+   a_descr_errore:='Numero serie presente varie volte in anagrafica cespiti';
+   return;
+ when others then
+   a_errore:=1;
+   a_descr_errore:='Errore in lettura bene';
+   return;
+end;
+
+-- aggiorna numero inventario, pdl nome computer ed rfid (fino a che si lega con numero serie poi sara' l'opposto)
+if a_numero_inventario is not null and 
+   a_numero_inventario&lt;>a_old_num_inventario then
+   update tb_beni_mobili
+    set num_inv=a_numero_inventario
+    where num_serie=a_numero_serie;
+end if;
+    
+if a_numero_rfid is not null and 
+   a_numero_rfid&lt;>a_old_rfid then
+   update tb_beni_mobili
+    set rfid=a_numero_rfid
+    where num_serie=a_numero_serie;
+end if;
+
+if a_nome_pdl is not null and 
+   a_nome_pdl&lt;>a_old_pdl then
+   update tb_beni_mobili
+    set id_pdl=a_nome_pdl
+    where num_serie=a_numero_serie;
+end if;
+   
+if a_nome_apparecchiatura is not null and 
+   a_nome_apparecchiatura&lt;>a_old_nome_computer then
+   update tb_beni_mobili
+    set nome_computer=a_nome_apparecchiatura
+    where num_serie=a_numero_serie;
+end if;
+  
+
+commit;
+
+a_edificio_num:=to_number(a_edificio);
+a1_stanza:=ltrim(a_stanza);
+a1_stanza:=rtrim(a1_stanza);
+a1_piano:=ltrim(a_piano);
+a1_piano:=rtrim(a1_piano);
+
+if a_edificio is not null then
+  begin
+   select id 
+    into a_stanza_progr
+    from tb_stanze
+    where cod_cesp=a_edificio_num and
+          num_stanza=a1_stanza and
+          piano=a1_piano;
+  exception
+   when no_data_found then
+       a_errore:=1;
+       a_descr_errore:='Stanza inesistente';
+       return;
+   when too_many_rows then
+       a_errore:=1;
+       a_descr_errore:='Codice stanza non univoco';
+       return;
+   when others then
+       a_errore:=1;
+       a_descr_errore:='Errore in lettura stanza';
+       return;
+  end;
+else
+  a_edificio_num:=null;
+  a_stanza_progr:=null;
+end if;
+
+begin
+ select ass_matricola,stanza_bene_imm,stanza_progr
+  into a_old_matricola,a_old_cesp_stanza,a_old_stanza_progr
+  from tb_beni_ass
+  where tipo='C' and 
+        codice=a_cod_inv and
+        data_fine_ass is null;
+ if a_old_matricola&lt;>a_matricola or
+    nvl(a_old_cesp_stanza,'00000')&lt;>nvl(a_edificio_num,'00000') or
+    nvl(a_old_stanza_progr,'0000')&lt;>nvl(a_stanza_progr,'0000') then
+    update tb_beni_ass set
+	    data_fine_ass=a_data_assegnazione
+    where tipo='C' and 
+          codice=a_cod_inv and
+          data_fine_ass is null;
+ end if;
+exception
+   when no_data_found then
+        null;
+   when others then
+       a_errore:=1;
+       a_descr_errore:='Errore in lettura beni assegnati';
+       return;
+end;
+if a_old_matricola&lt;>a_matricola or
+    nvl(a_old_cesp_stanza,'00000')&lt;>nvl(a_edificio_num,'00000') or
+    nvl(a_old_stanza_progr,'0000')&lt;>nvl(a_stanza_progr,'0000') then
+   select nvl(max(progr),0)+1
+     into a_ctr_es
+     from tb_beni_ass
+     where tipo='C' and 
+           codice=a_cod_inv and
+           data_ass=a_data_assegnazione;
+begin
+	    
+   insert into
+     tb_beni_ass
+     (tipo,codice,data_ass,progr,ass_int_est,ass_matricola,ass_cognome,ass_nome,ass_ufficio,
+      stanza_bene_imm,stanza_progr,qta)
+      values
+     ('C',a_cod_inv,a_data_assegnazione,a_ctr_es,'I',
+      a_matricola,a_cognome,a_nome,a_ufficio,a_edificio_num,a_stanza_progr,1);
+exception
+   when no_data_found then
+        null;
+   when others then
+       a_errore:=1;
+       a_descr_errore:='Errore in scrittura assegnazione';
+       return;
+end;
+end if;
+
+
+
+a_errore:=0;
+a_descr_errore:=null;
+commit;
+
+end;</pre>	</td></tr>
+</table></div>

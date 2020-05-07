@@ -1,0 +1,591 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_ARTICOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="FIN_T_ARTICOLI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_ARTICOLI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ANNO</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EU</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TITOLO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CATEGORIA</td>
+<td>VARCHAR2(4 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLO</td>
+<td>VARCHAR2(7 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>No</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE</td>
+<td>VARCHAR2(1000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_NUM</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_MECCANOGRAFICO</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TITOLO_SETTORE_RUBRICA</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_STATISTICO</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PRECEDENTE</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PRECEDENTE2</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PRECEDENTE3</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PRECEDENTE4</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_PRECEDENTE5</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_MUTUO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESA_OBBLIGATORIA</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_AVANZO_VINCOLATO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_CORRENTI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_INVESTIMENTO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_ANNUALITA</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_SPESE_RIMBORSO_PRESTITI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_ASSEGNAZIONE_STATO_UE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIPARTIMENTO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NATURA_SPESA</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NATURA_ENTRATA</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FONTE_FINANZIAMENTO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LEGGE_ISTITUTIVA</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PROVVEDIMENTO</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PIANO_DEI_CONTI</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>'C0502GAB' </td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PIANO_DEI_CONTI2</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PIANO_DEI_CONTI3</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PIANO_DEI_CONTI4</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>utilizzato per SP"000" sanità</td>
+	</tr>
+	<tr>
+<td>PIANO_DEI_CONTI5</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>utilizzato per SP"000" sanità</td>
+	</tr>
+	<tr>
+<td>FLAG_ASSESTAMENTO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TABELLA</td>
+<td>VARCHAR2(240 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ANNO_ISTITUZIONE</td>
+<td>VARCHAR2(4 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ABILITATO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MODIFICATO_NUOVO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FLAG_PERENTI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ANNO_TERMINALE_TABELLA</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_BILANCIO_SIOPE</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_GESTIONALE_SIOPE</td>
+<td>VARCHAR2(4 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>44</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SANITA_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>45</td>
+<td>se = 'S' il capitolo è relativo alla Gestione Sanitaria</td>
+	</tr>
+	<tr>
+<td>NOTE_SANITA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>46</td>
+<td>note relativi ai capitoli inerenti la Gestione Sanitaria</td>
+	</tr>
+	<tr>
+<td>NB_PIANO_CONTI_FINA</td>
+<td>VARCHAR2(16 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>47</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_PIANO_CONTI_ECON</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>48</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_PIANO_CONTI_PATR</td>
+<td>VARCHAR2(11 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>49</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_CODICE_TRANSAZIONE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>50</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_ENTRATA_RICORRENTE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>51</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_TITOLO</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>52</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_MACROAGGREGATO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>53</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_COFOG_II_LIVELLO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>54</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_ID_PADRE</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>55</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_PRU</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>56</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONTO_SANITA</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>57</td>
+<td>codice del conto Dare per gli Accertamenti e del conto Avere per gli Imp</td>
+	</tr>
+	<tr>
+<td>NB_FPV</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>58</td>
+<td>Fondo Pluriennale Vincolato. Se impostato a S il capitolo non può essere utilizzato per Movimenti di Ragioneria</td>
+	</tr>
+	<tr>
+<td>NB_CAPITOLO_FPV</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>59</td>
+<td>Indicare il Capitolo collegato ed utilizzato come Fondo Pluriennale Vincolato</td>
+	</tr>
+	<tr>
+<td>FONDO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>60</td>
+<td>se = 'S' il capitolo è un Fondo sul quale non possono essere emessi documenti contabili</td>
+	</tr>
+	<tr>
+<td>VOCE_PSI_IMP</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>61</td>
+<td>rappresenta la voce del prospetto del Patto di Stabilità Interno sezione Impegni per l'anno considerato</td>
+	</tr>
+	<tr>
+<td>VOCE_PSI_PAG</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>62</td>
+<td>rappresenta la voce del prospetto del Patto di Stabilità Interno sezione Pagamenti gruppo Impegni eurocompatibili per l'anno considerato</td>
+	</tr>
+	<tr>
+<td>VOCE_PSI_PAG2</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>63</td>
+<td>rappresenta la voce del prospetto del Patto di Stabilità Interno sezione Pagamenti gruppo Pagamenti eurocompatibili per l'anno considerato</td>
+	</tr>
+	<tr>
+<td>CONTO_SANITA2</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>64</td>
+<td>codice del conto Avere per gli Accertamenti e del conto Dare per gli Imp</td>
+	</tr>
+	<tr>
+<td>NB_USCITA_RICORRENTE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>65</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CHIAVE_CONTABILE</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>66</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_CONTO_EVIDENZA</td>
+<td>VARCHAR2(25 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>67</td>
+<td>O.I. Si tratta di CODICI conto indicati dalla Tesoreria all'Ente. Servono per valorizzare il tag conto_evidenza sia per i mandati che per le reversali</td>
+	</tr>
+	<tr>
+<td>TIPO_ENTRATA</td>
+<td>VARCHAR2(12 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>68</td>
+<td>O.I. SOLO PER CAP. 'E'. Serve a valorizzare il tag tipo_entrata per il versante della reversale. Proposto in creazione terza parte reversale, dova sarà modificabile</td>
+	</tr>
+	<tr>
+<td>TIPO_CONTABILITA_ENTE_RICEV</td>
+<td>VARCHAR2(12 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>69</td>
+<td>O.I. SOLO PER CAP. 'U' Serve a valorizzare il tag tipo_contabilita_ente_ricevente per il beneficiaro del mandato. Proposto in creazione terza parte mandato, dova sarà modificabile</td>
+	</tr>
+	<tr>
+<td>DESTINAZIONE</td>
+<td>VARCHAR2(9 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>70</td>
+<td>O.I. Per cap. sia 'E' che 'U'. Serve a valorizzare il tag destinazione per terze parti mandati e reversali. Proposto in creazione beneficiario o versante del documento, dove sarà modificabile</td>
+	</tr>
+</table></div>

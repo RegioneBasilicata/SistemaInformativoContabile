@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_DOCUMENTI_ESTERNI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_DOCUMENTI_ESTERNI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_ESTERNI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_ESTERNI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_DOCUMENTI_ESTERNI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_DOCUMENTI_ESTERNI_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_DOCUMENTI_ESTERNI</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>2001</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select 'CONTRATTI' tipo,c.descrizione,to_number(c.documento) puntatore,f.nome_file
+from bi_doc_gest c,fina_file_esterni f
+where f.id(+)=to_number(c.documento)
+union
+select 'FATTURE',d.descrizione,d.documento,f.nome_file
+from tb_fatture_allegati d,fina_file_esterni f
+where f.id(+)=d.documento
+UNION
+select 'MANUTENZIONI',d.descrizione,d.documento,f.nome_file
+from tb_manutenzione_documenti d,fina_file_esterni f
+where f.id(+)=d.documento
+union
+select 'BENI IMMOBILI',d.descrizione,d.documento,f.nome_file
+from bi_doc_est d,fina_file_esterni f
+where f.id(+)=d.documento
+union
+select 'BENI MOBILI',c.descrizione,to_number(c.documento),f.nome_file
+from tb_doc_cesp c,fina_file_esterni f
+where f.id(+)=to_number(c.documento)
+UNION 
+select 'ARTICOLI',a.descrizione,a.punt_immagine,f.nome_file
+from ec_articoli a,fina_file_esterni F
+where a.punt_immagine is not null and
+f.id(+)= a.punt_immagine
+union
+select 'ATTI',d.descrizione,d.puntatore,f.nome_file
+from at_puntatori_allegati d,fina_file_esterni f
+where f.id(+)=d.puntatore
+UNION 
+select 'LAV_PREST',a.descrizione,a.punt_immagine,f.nome_file
+from tb_lav_prest a,fina_file_esterni F
+where a.punt_immagine is not null and
+f.id(+)= a.punt_immagine
+UNION 
+select 'MISSIONI',a.descrizione,a.id_doc,f.nome_file
+from ap_missioni_doc a,fina_file_esterni F
+where a.id_doc is not null and
+f.id(+)= a.id_doc
+UNION 
+select 'PIGNORAMENTI',a.descrizione,a.id_doc,f.nome_file
+from bi_pign_doc a,fina_file_esterni F
+where a.id_doc is not null and
+f.id(+)= a.id_doc
+UNION 
+select 'DOC_GARE',a.descrizione,a.id_doc,f.nome_file
+from af_documenti_gare a,fina_file_esterni F
+where a.id_doc is not null and
+f.id(+)= a.id_doc
+UNION 
+select 'DOC_GARE_FORNITORI',a.descrizione,a.id_doc,f.nome_file
+from af_documenti_gare_fornitori a,fina_file_esterni F
+where a.id_doc is not null and
+f.id(+)= a.id_doc
+UNION 
+select 'DOC_ISCRIZIONE_ALBO',a.descrizione,a.id_doc,f.nome_file
+from af_documenti_iscrizione_forn a,fina_file_esterni F
+where a.id_doc is not null and
+f.id(+)= a.id_doc</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

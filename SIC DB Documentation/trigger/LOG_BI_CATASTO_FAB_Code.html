@@ -1,0 +1,57 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LOG_BI_CATASTO_FAB</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LOG_BI_CATASTO_FAB.html">Details</a></div></div>
+<div class="tab"><div><a href="LOG_BI_CATASTO_FAB_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LOG_BI_CATASTO_FAB_References.html">References</a></div></div>
+<div class="tab"><div><a href="LOG_BI_CATASTO_FAB_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LOG_BI_CATASTO_FAB_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2".LOG_BI_CATASTO_FAB
+AFTER DELETE OR UPDATE
+ON BI_CATASTO_FAB
+FOR EACH ROW
+
+declare
+tipo_aggiornamento varchar2(1);
+begin
+if updating
+   then tipo_aggiornamento := 'U';
+   else tipo_aggiornamento := 'D';
+end if;
+insert into BI_LOG_CATASTO_FAB values
+( :OLD.COD_CESP      ,
+  :OLD.SITUAZIONE_AL ,
+  :OLD.COMUNE,
+  :OLD.FOGLIO        ,
+  :OLD.ZONA_CENS     ,
+  :OLD.MICRO_ZONA    ,
+  :OLD.CLASSE        ,
+  :OLD.SUP_CATAST    ,
+  :OLD.CONSISTENZA   ,
+  :OLD.CATEGORIA     ,
+  :OLD.TIPO_PROPR,
+  :OLD.QUOTA_POSS,
+  :OLD.NOTE,
+  :OLD.REND_CAT      ,
+  :OLD.REND_FISC     ,
+  :OLD.CREATO_DA     ,
+  :OLD.CREATO_IL     ,
+  :OLD.MODIFICATO_DA ,
+  SYSDATE ,
+  tipo_aggiornamento);
+end;
+</pre>	</td></tr>
+</table></div>

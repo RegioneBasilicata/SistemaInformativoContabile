@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_FIN_T_MENU_WEB</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_FIN_T_MENU_WEB.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FIN_T_MENU_WEB_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FIN_T_MENU_WEB_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FIN_T_MENU_WEB_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_FIN_T_MENU_WEB_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER aggiorna_fin_t_menu_web
+    AFTER INSERT OR DELETE OR UPDATE ON GAT2.FIN_T_MENU_WEB     FOR EACH ROW
+DECLARE
+
+    wcodice NUMBER;
+    wcodice_padre NUMBER;
+    wtitolo VARCHAR2(100);
+    wpagina NUMBER;
+    wdescrizione VARCHAR2(2000);
+    whelp_voce VARCHAR2(4000);
+    wordinamento NUMBER(5,0);
+
+    BEGIN
+
+        IF INSERTING OR UPDATING THEN
+
+            wcodice := :new.codice;
+            wcodice_padre := :new.codice_padre;
+            wtitolo := :new.titolo;
+            wpagina := :new.pagina;
+            wdescrizione := :new.descrizione;
+            whelp_voce := :new.help_voce;
+            wordinamento := :new.ordinamento;
+
+            IF UPDATING THEN
+
+                BEGIN
+
+          update SIC_ALSIA.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_APT.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_ARBEA.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_ARDSU.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_ARPAB.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_CONSIGLIO.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_PARCOGALLIPOLI.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_PARCOMURGIA.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_LAB.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          update SIC_PARCOVULTURE.fin_t_menu_web set CODICE_PADRE = wcodice_padre, TITOLO = wtitolo, PAGINA = wpagina, DESCRIZIONE = wdescrizione, HELP_VOCE = whelp_voce, ORDINAMENTO = wordinamento where CODICE = wcodice;
+          
+          /*delete from SIC_ALSIA.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_APT.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_ARBEA.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_ARDSU.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_ARPAB.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_CONSIGLIO.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_PARCOGALLIPOLI.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_PARCOMURGIA.fin_t_menu_web where codice = wcodice;*/
+
+                END;
+
+            ELSE
+
+            BEGIN
+
+                insert into SIC_ALSIA.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_APT.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_ARBEA.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_ARDSU.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_ARPAB.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_CONSIGLIO.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_PARCOGALLIPOLI.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_PARCOMURGIA.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_LAB.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+                insert into SIC_PARCOVULTURE.fin_t_menu_web (codice, codice_padre, titolo, pagina, descrizione, help_voce, ordinamento) values (wcodice, wcodice_padre, wtitolo, wpagina, wdescrizione, whelp_voce, wordinamento);
+
+            END;
+      
+      END IF;
+
+        ELSE
+
+            wcodice := :old.codice;
+
+            BEGIN
+
+                    delete from SIC_ALSIA.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_APT.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_ARBEA.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_ARDSU.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_ARPAB.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_CONSIGLIO.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_PARCOGALLIPOLI.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_PARCOMURGIA.fin_t_menu_web where codice = wcodice;
+                    delete from SIC_LAB.fin_t_menu_web where codice = wcodice;
+
+            END;
+
+        END IF;
+
+    END aggiorna_fin_t_menu_web;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,143 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>E_MOVIMENTI_MAGG_INC_DETT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="E_MOVIMENTI_MAGG_INC_DETT.html">Details</a></div></div>
+<div class="tab"><div><a href="E_MOVIMENTI_MAGG_INC_DETT_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="E_MOVIMENTI_MAGG_INC_DETT_References.html">References</a></div></div>
+<div class="tab"><div><a href="E_MOVIMENTI_MAGG_INC_DETT_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="E_MOVIMENTI_MAGG_INC_DETT_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE E_MOVIMENTI_MAGG_INC_DETT (
+w_anno in out number, 
+w_capitolo in out varchar, 
+w_data_creazione in out date) is
+
+
+doc_id_accertamento number;
+doc_id_storno_accertamento number;
+doc_id_reversale number;
+maggiori_incassi number(15,2);
+
+totale_storno_reversale number(15,2);
+w_man_rev_residui number(15,2) := 0;
+w_variazioni_residui number(15,2) := 0;
+
+cursor accertamenti is
+select     
+substr(bi.ind_cap,1,6) capitolo_accertamento,
+nvl(jugd.document_amount,0)importo_accertamento,
+to_number(to_char(jugd.date_created,'yyyy')) anno_accertamento,
+jugd.doc_id doc_id_accertamento
+from
+fina_documenti     jugd,                                                               
+bas_ind                 bi
+where                                                                                                                              
+jugd.doc_type = 'RES-ATT'                  and                                                
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y'          and                        
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z'))='PI' and
+jugd.gl_date is not null                  and
+jugd.period_name is not null                  and        
+jugd.date_created is not null                  and        
+bi.doc_id = jugd.doc_id      and
+bi.ind_anno = w_anno          and
+bi.ind_cap  = substr(w_capitolo,1,6)      and 
+jugd.date_created &lt;= w_data_creazione and
+jugd.segment8 &lt;= w_anno;
+
+cursor MAG_INC is
+select     
+substr(jugd.segment2,1,6)                                         capitolo_mag_inc,
+nvl(jugd.document_amount,0)                                  importo_mag_inc,
+to_number(to_char(jugd.date_created,'yyyy')) anno_mag_inc,
+jugd.doc_id                                                                  doc_id_mag_inc
+from
+fina_documenti     jugd
+where                                                                                                                              
+jugd.doc_type = 'MAG-INC'                  and                                                
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y'          and                        
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z'))='PI' and
+jugd.gl_date is not null                  and
+jugd.period_name is not null                  and        
+jugd.date_created is not null                  and        
+jugd.segment2  = substr(w_capitolo,1,6)      and   
+jugd.date_created &lt;= w_data_creazione and
+jugd.segment8 = w_anno;
+
+
+cursor reversali is
+select     
+nvl(jugd1.document_amount,0)                                         importo_reversale,
+jugd1.doc_id                                                                        doc_id_reversale,
+to_number(to_char(jugd1.date_created,'yyyy'))      anno_reversale,
+jugd1.previous_doc_id                                                        previous_doc_id_reversale
+from    
+fina_documenti         jugd1
+where     
+jugd1.doc_type = 'REV' and
+jugd1.date_created is not null and
+upper(nvl(jugd1.proposal_status_flag,'Z'))||upper(nvl(jugd1.auditing_status_flag,'Z'))='PI' and
+upper(nvl(jugd1.deletion_status_flag,'N')) &lt;> 'Y' and
+jugd1.segment8 = w_anno and
+jugd1.previous_doc_id    = doc_id_accertamento;
+
+cursor storno_reversali is
+select    
+nvl(jugd1.document_amount,0)                                     importo_storno_reversale,
+jugd1.previous_doc_id                                                 previous_doc_id_storno_rev
+from    
+fina_documenti         jugd1
+where    
+jugd1.doc_type = 'ST-REV' and
+upper(nvl(jugd1.proposal_status_flag,'Z'))||upper(nvl(jugd1.auditing_status_flag,'Z'))='PI' and
+upper(nvl(jugd1.deletion_status_flag,'N')) &lt;> 'Y' and
+jugd1.date_created &lt;= w_data_creazione and
+jugd1.segment8 = w_anno and
+jugd1.previous_doc_id = doc_id_reversale;
+
+BEGIN
+
+for a in accertamenti loop
+ doc_id_accertamento := a.doc_id_accertamento;
+ maggiori_incassi := 0;
+ 
+-- calcolo reversali 
+ for r in reversali loop
+
+  totale_storno_reversale := 0;
+     doc_id_reversale := r.doc_id_reversale;
+  for sr in storno_reversali loop
+   totale_storno_reversale := totale_storno_reversale + nvl(sr.importo_storno_reversale,0);    
+  end loop;
+  maggiori_incassi := maggiori_incassi + (nvl(r.importo_reversale,0) - nvl(totale_storno_reversale,0));
+ end loop;
+-- fine calcolo reversali
+
+-- fine calcolo storno accertamenti
+ w_man_rev_residui := w_man_rev_residui + nvl(maggiori_incassi,0);
+
+-- inizio calcolo MAG-INC
+ for mi in MAG_INC loop
+      maggiori_incassi := maggiori_incassi + nvl(mi.importo_mag_inc,0);
+ end loop;
+-- fine calcolo MAG-INC
+
+
+
+ w_variazioni_residui := w_variazioni_residui + nvl(maggiori_incassi,0);
+
+end loop;
+
+END;</pre>	</td></tr>
+</table></div>

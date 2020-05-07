@@ -1,0 +1,199 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ANZIANITA_RESIDUI_ENTRATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_ENTRATE.html">Details</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_ENTRATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_ENTRATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="ANZIANITA_RESIDUI_ENTRATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ANZIANITA_RESIDUI_ENTRATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure anzianita_residui_entrate (p_anno in number) is
+ 
+
+	begin
+    	delete tmp_anzianita_residui_dett where anno = p_anno and substr(capitolo,1,1) = 'E';
+    	commit;
+-- ############### RESIDUI ATTIVI #################################
+	-- **** scrivo prima i residui Attivi anni precenti
+	insert into tmp_anzianita_residui_dett (
+			ANNO
+			,CAPITOLO
+			,TIPO_DOC
+			,NUMERO_DOC
+			,OGGETTO_DOC
+			,OGGETTO_CAPITOLO
+      ,DIPARTIMENTO
+			,UFFICIO
+			,TIPO_ATTO
+			,NUMERO_ATTO
+			,DATA_ATTO
+			,NB_TITOLO
+			,NB_TITOLO_DESC
+			,NB_PCF
+			,NB_PCF_DESC
+			,RES_ANNO1
+			,RES_ANNO2
+			,RES_ANNO3
+			,RES_ANNO4
+			,RES_ANNO5
+			,RES_ANNO6
+			,RES_ANNO7
+			,RIMANENZA)
+		select p_anno
+			,r.capitolo_spesa_corrente
+			,d.doc_type
+			,r.numero_accertamento
+			,r.oggetto_accertamento
+			,a.desc_capitolo
+      ,substr(d.segment3,1,2)
+			,d.segment3
+			,d.attribute13
+			,d.attribute14
+			,d.data_atto_autorizzativo
+			,a.liv1
+			,a.desc_liv1
+			,d.attribute16
+			,p.descrizione
+			,decode(sign((p_anno - d.segment8) - 7), 1,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 6), 0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 5), 0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 4), 0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 3), 0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 2), 0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,decode(sign((p_anno - d.segment8) - 1), 0,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')),0)
+			,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy'))
+		from fin_t_accertamenti_residui r
+		,fin_t_documenti d
+		,vw_nb_articoli a
+		,nb_pcf_05 p
+    where r.ANNO_FINANZIARIO = p_anno
+    and nvl(r.RESIDUO_INIZIALE,0) > 0
+    and d.doc_id = r.DOC_ID_ACCERTAMENTO
+    and d.doc_type = 'ACC'
+    and a.anno = r.ANNO_FINANZIARIO
+    and a.eu||a.codice = r.CAPITOLO_SPESA_CORRENTE
+    and p.ANNO(+) = p_anno
+    and p.CODICE_FINALE(+) = d.attribute16
+    and residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) > 0;
+    commit;
+
+-- *** scrivo i residui attivi dell'anno p_anno ****
+		insert into tmp_anzianita_residui_dett (
+			ANNO
+			,CAPITOLO
+			,TIPO_DOC
+			,NUMERO_DOC
+			,OGGETTO_DOC
+			,OGGETTO_CAPITOLO
+      ,DIPARTIMENTO
+			,UFFICIO
+			,TIPO_ATTO
+			,NUMERO_ATTO
+			,DATA_ATTO
+			,NB_TITOLO
+			,NB_TITOLO_DESC
+			,NB_PCF
+			,NB_PCF_DESC
+			,RES_CORRENTI)
+		select p_anno
+			,d.segment2
+			,d.doc_type
+			,d.DOC_SEQUENCE_VALUE
+			,d.description
+			,a.desc_capitolo
+      ,substr(d.segment3,1,2)
+			,d.segment3
+			,d.attribute13
+			,d.attribute14
+			,d.data_atto_autorizzativo
+			,a.liv1
+			,a.desc_liv1
+			,d.attribute16
+			,p.descrizione
+			,residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy'))
+		from fin_t_documenti d
+		,vw_nb_articoli a
+		,nb_pcf_05 p
+	    where d.segment8 = p_anno
+	    and d.doc_type = 'ACC'
+	    and nvl(d.deletion_status_flag,'N') = 'N'
+	    and a.anno = d.segment8
+	    and a.eu||a.codice = d.segment2
+	    and p.ANNO = d.segment8
+	    and p.CODICE_FINALE = d.attribute16
+	    and residuo_acc_data(d.doc_id,to_date('3112'||p_anno,'ddmmyyyy')) > 0;
+	    commit;
+
+	-- ****** UPDATE per DIPARTIMENTI ***************
+	 /*update tmp_anzianita_residui_dett r set r.dipartimento = 
+		(select nvl(p.dipartimento_principale,substr(r.ufficio,1,2)) from fin_t_capitoli_dipartimenti p where p.anno = r.anno and p.capitolo = r.capitolo)
+		where r.anno = p_anno and substr(r.capitolo,1,1) = 'E';
+    commit;*/
+	-- ***********  
+
+	-- ***** UPDATE incassi su residui p_anno + 1 *****
+	update tmp_anzianita_residui_dett r set r.inc_pag_residui = 
+		(select nvl(sum(nvl(d.open_balance_proposed,0)),0) 
+		 from fin_t_documenti d
+		 ,fin_t_documenti i 
+		 where d.segment8 = p_anno + 1
+		 and d.segment2 = r.capitolo
+		 and d.doc_type = 'REV'
+		 and nvl(d.open_balance_proposed,0) > 0
+		 and d.previous_doc_id = i.doc_id 
+     	 and i.doc_sequence_value = r.numero_doc
+		)
+		where r.anno = p_anno and substr(r.capitolo,1,1) = 'E';
+    commit;
+	-- ********
+    
+    -- ***** UPDATE INSUS su residui p_anno + 1 *****
+	update tmp_anzianita_residui_dett r set r.eco_ins_residui = 
+		(select nvl(sum(nvl(d.open_balance_proposed,0)),0) 
+		 from fin_t_documenti d
+		 ,fin_t_documenti i 
+		 where d.segment8 = p_anno + 1
+		 and d.segment2 = r.capitolo
+		 and d.doc_type = 'INSUS'
+		 and nvl(d.deletion_status_flag,'N') = 'N'
+		 and d.previous_doc_id = i.doc_id 
+     	 and i.doc_sequence_value = r.numero_doc
+		)
+		where r.anno = p_anno and substr(r.capitolo,1,1) = 'E';
+    commit;
+	-- ********
+    
+    -- ***** UPDATE per Vincoli *****
+	update tmp_anzianita_residui_dett r set r.CAPITOLI_VINCOLATI = 
+		(SELECT LISTAGG(capitolo_uscita, ' - ') WITHIN GROUP (ORDER BY capitolo_uscita)
+        FROM VW_VINCOLI_DEFINITIVI
+        where anno = p_anno
+        and 'E'||capitolo_entrata = r.capitolo)
+        where r.anno = p_anno and substr(r.capitolo,1,1) = 'E';
+    commit;
+		
+	-- ********
+    
+    -- ******** UPDATE per residui senza Ufficio ***********
+    update tmp_anzianita_residui_dett t set (t.DIPARTIMENTO,t.UFFICIO) = 
+    (select c.dipartimento_principale,substr(c.uffici,1,4) from fin_t_capitoli_dipartimenti c where c.anno = p_anno and c.capitolo = t.capitolo)
+    where t.anno = p_anno
+    and t.dipartimento is null
+    and t.ufficio is null;
+
+
+-- ############### FINE RESIDUI ATTIVI #################################
+End;</pre>	</td></tr>
+</table></div>

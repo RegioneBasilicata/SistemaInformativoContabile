@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LOG_ANAGRAFICA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LOG_ANAGRAFICA.html">Details</a></div></div>
+<div class="tab"><div><a href="LOG_ANAGRAFICA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LOG_ANAGRAFICA_References.html">References</a></div></div>
+<div class="tab"><div><a href="LOG_ANAGRAFICA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LOG_ANAGRAFICA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER LOG_ANAGRAFICA 
+AFTER DELETE OR UPDATE ON FIN_T_ANAGRAFICA 
+REFERENCING NEW AS NEW OLD AS OLD
+FOR EACH ROW
+declare
+tipo_aggiornamento varchar2(1);
+begin
+if updating
+   then tipo_aggiornamento := 'U';
+   else tipo_aggiornamento := 'D';
+end if;
+insert into fin_t_log_anagrafica(ID
+,TIPO_ANAGRAFICA
+,PARTITA_IVA
+,DENOMINAZIONE
+,COGNOME_LR
+,NOME_LR
+,SESSO_LR
+,ID_COMUNE_NS_LR
+,DATA_NS_LR
+,INDIRIZZO_LR
+,ID_COMUNE_RES_LR
+,CAP_RES_LR
+,CF_LR
+,CODICE_FISCALE
+,COGNOME
+,NOME
+,ALTRI_NOMI
+,SESSO
+,DATA_NS
+,ID_COMUNE_NS
+,INATTIVO_DAL
+,OLD_CODICE
+,OLD_PARTITA_IVA
+,ID_OA
+,COMUNE_NS_LR_OA
+,COMUNE_NS_OA
+,PIGNORAMENTO
+,NOTA_PIGNORAMENTO
+,UTENTE_CREAZIONE
+,UTENTE_AGGIORNAMENTO
+,DATA_AGGIORNAMENTO
+,DATA_CREAZIONE
+,ESTERO
+,COMMISSIONI
+,ENTE_LOCALE
+,POPOLAZIONE
+,TIPO_AGGIORNAMENTO
+,DATA_MODIFICA) values
+(:OLD.ID
+,:OLD.TIPO_ANAGRAFICA
+,:OLD.PARTITA_IVA
+,:OLD.DENOMINAZIONE
+,:OLD.COGNOME_LR
+,:OLD.NOME_LR
+,:OLD.SESSO_LR
+,:OLD.ID_COMUNE_NS_LR
+,:OLD.DATA_NS_LR
+,:OLD.INDIRIZZO_LR
+,:OLD.ID_COMUNE_RES_LR
+,:OLD.CAP_RES_LR
+,:OLD.CF_LR
+,:OLD.CODICE_FISCALE
+,:OLD.COGNOME
+,:OLD.NOME
+,:OLD.ALTRI_NOMI
+,:OLD.SESSO
+,:OLD.DATA_NS
+,:OLD.ID_COMUNE_NS
+,:OLD.INATTIVO_DAL
+,:OLD.OLD_CODICE
+,:OLD.OLD_PARTITA_IVA
+,:OLD.ID_OA
+,:OLD.COMUNE_NS_LR_OA
+,:OLD.COMUNE_NS_OA
+,:OLD.PIGNORAMENTO
+,:OLD.NOTA_PIGNORAMENTO
+,:OLD.UTENTE_CREAZIONE
+,:OLD.UTENTE_AGGIORNAMENTO
+,:OLD.DATA_AGGIORNAMENTO
+,:OLD.DATA_CREAZIONE
+,:OLD.ESTERO
+,:OLD.COMMISSIONI
+,:OLD.ENTE_LOCALE
+,:OLD.POPOLAZIONE
+,tipo_aggiornamento
+,sysdate);
+end;</pre>	</td></tr>
+</table></div>

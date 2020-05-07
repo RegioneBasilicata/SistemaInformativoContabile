@@ -1,0 +1,123 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP_BILCEE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP_BILCEE.html">Details</a></div></div>
+<div class="tab"><div><a href="SP_BILCEE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP_BILCEE_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP_BILCEE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP_BILCEE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure sp_bilcee(p_anno in number, p_utente in number) authid definer as
+--p_anno number := 2012;
+p_tipo_bilcee varchar2(1);
+p_codice_bilcee varchar2(10);
+p_conto varchar2(10);
+p_importo_conto number := 0;
+p_importo_netto number := 0;
+--p_utente number:= 1000;
+
+cursor stato_patrimoniale is
+SELECT
+  TIPO,
+  CODICE,
+  tipo_ord
+FROM
+  SA_BILCEE 
+where
+ TIPO in ('A','P')
+ order by 1,3;
+ 
+ cursor bilcee_conti is
+ SELECT
+  CONTO,
+  TIPO_BILCEE,
+  CODICE_BILCEE
+FROM
+  SA_BILCEE_CONTI 
+where TIPO_BILCEE = p_tipo_bilcee
+and CODICE_BILCEE = p_codice_bilcee;
+
+cursor prima_nota is
+SELECT
+  p.ID_CONTO,
+  p.D_A,
+  c.att_pass,
+  sum(p.IMPORTO) importo
+FROM
+  SA_PRIMA_NOTA_CORPO p
+  ,sa_piano_dei_conti c
+ -- ,sa_prima_nota_testa t
+where to_char(p.t_data,'yyyy')=p_anno
+and c.codice = p.id_conto
+and c.codice = p_conto
+--and t.num_reg = p.t_num_reg
+--and t.data = p.t_data
+--and nvl(t.sa_cc_id,999999) not in (900,901)
+group by p.ID_CONTO,p.D_A, c.att_pass
+order by 1,2 desc;
+
+begin
+ delete sa_bilcee_importi where anno = p_anno and utente = p_utente;
+  for sp in stato_patrimoniale loop
+  p_tipo_bilcee := sp.tipo;
+  p_codice_bilcee := sp.codice;
+   
+   for bc in bilcee_conti loop
+   p_conto := bc.conto;
+    
+   
+    p_importo_netto := 0; 
+    for pn in prima_nota loop
+    if pn.att_pass = 'A'
+      then 
+        if pn.d_a = 'D'
+        then p_importo_conto := nvl(pn.importo,0);
+        else p_importo_conto := -nvl(pn.importo,0);
+        end if;
+      else
+        if pn.d_a = 'D'
+        then p_importo_conto := -nvl(pn.importo,0);
+        else p_importo_conto := nvl(pn.importo,0);
+        end if;
+     end if;
+      
+      p_importo_netto := p_importo_netto + p_importo_conto;
+      p_importo_conto := 0;
+    end loop;
+    
+      INSERT INTO SA_BILCEE_IMPORTI
+      (
+        ANNO,
+        TIPO_BILCEE,
+        CODICE_BILCEE,
+        CONTO,
+        IMPORTO,
+        UTENTE
+      )
+      VALUES
+      (
+        p_anno,
+        p_tipo_bilcee,
+        p_codice_bilcee,
+        p_conto,
+        p_importo_netto,
+        p_utente
+      );
+      commit;
+  end loop;
+  end loop;
+
+END;</pre>	</td></tr>
+</table></div>

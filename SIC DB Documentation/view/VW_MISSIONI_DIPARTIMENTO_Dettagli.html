@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_MISSIONI_DIPARTIMENTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_MISSIONI_DIPARTIMENTO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_MISSIONI_DIPARTIMENTO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_MISSIONI_DIPARTIMENTO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_MISSIONI_DIPARTIMENTO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_MISSIONI_DIPARTIMENTO_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-10-31</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_MISSIONI_DIPARTIMENTO</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1314</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+    vp.dipartimento codice ,
+    at.cognome||' '||at.nome nominativo_autista,
+    REPLACE(fd.descrizione,'DIPARTIMENTO') dipartimento ,
+    aa.descrizione autoparco ,
+    am.periodo data ,
+    ROUND(SUM(NVL(am.km,0)     *vp.perc/100),2) km ,
+    ROUND(SUM((NVL(am.vitto,0) + NVL(am.rimb_forf_vitto,0))*vp.perc/100),2)
+    vitto ,
+    ROUND(SUM(NVL(am.pernottamento,0)       *vp.perc/100),2) pernottamento ,
+    ROUND(SUM((NVL(am.indennita_missione,0) + NVL(ind_miss_ridotta,0) + NVL(
+    am.pedaggio_park,0)                     + NVL(am.rimb_mezzi_ord,0) + NVL(
+    am.altre_spese,0))                      *vp.perc/100),2) altri_rimborsi
+  FROM
+    fin_t_dipartimenti fd ,
+    VW_PERC_PASS_VIAGGIO vp ,
+    ap_missioni am ,
+    ap_autoparco aa ,
+    ap_viaggi av,
+    ap_missioni_testa at
+  WHERE
+    vp.dipartimento        = fd.codice
+  AND fd.anno              = to_number(TO_CHAR(am.periodo,'yyyy'))
+  AND fd.data_assestamento = to_date('01011900','ddmmyyyy')
+  AND vp.codice_viaggio    = am.num_foglio
+  AND am.num_foglio        = av.codice
+  AND av.autoparco         = aa.codice
+  AND am.num_foglio       IS NOT NULL
+   and am.matricola = at.matricola
+  and am.periodo = at.periodo
+  GROUP BY vp.dipartimento, at.cognome||' '||at.nome, REPLACE(fd.descrizione,'DIPARTIMENTO'), aa.descrizione, am.periodo</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

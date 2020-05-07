@@ -1,0 +1,275 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_V_BILANCIO_COMPLETO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_V_BILANCIO_COMPLETO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_V_BILANCIO_COMPLETO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_V_BILANCIO_COMPLETO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_V_BILANCIO_COMPLETO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_V_BILANCIO_COMPLETO_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_V_BILANCIO_COMPLETO</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>7354</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+    b.anno,
+    b.eu,
+    nvl(a.liv1,'Da Def.') Missione
+    ,a.desc_liv1 Desc_Missione
+    ,nvl(a.liv2,'Da Def.') Programma
+    ,a.desc_liv2 Desc_Programma
+    ,a.NB_TITOLO
+    ,a.desc_nb_titolo nb_desc_titolo,
+    b.titolo,
+    b.categoria,
+    b.capitolo,
+    b.articolo,
+    a.desc_capitolo descrizione,
+    NVL(b.ENTRATE,0) ENTRATE, --previsione_iniziale(a.anno,a.eu||a.codice)--
+    NVL(b.MUTUI,0) MUTUI,
+    NVL(b.ALIENAZIONE_BENI_IMMOBILI,0) ALIENAZIONE_BENI_IMMOBILI,
+    NVL(b.STATO,0) STATO,
+    NVL(b.UNIONE_EUROPEA,0) UNIONE_EUROPEA,
+    NVL(b.avanzi,0) AVANZI,
+    NVL(b.AIUTI,0) AIUTI,
+    NVL(b.regione,0) REGIONE,
+    NVL(b.altri_soggetti,0) ALTRI_SOGGETTI,
+    NVL(asv.quota_avanzo,0) quota_avanzo_ASV,
+    NVL(na.quota_avanzo,0) quota_avanzo_libero,
+    NVL(reg.quota_avanzo,0) quota_avanzo_regionale,
+    NVL(b.previsto_attuale,0) competenza,
+    NVL(b.variazione_competenza_piu,0)- NVL(b.variazione_competenza_meno,0)
+    variazione_competenza,
+    SUM(NVL((DECODE(tv.tipo,'MUTUI',(tv.a_com_pos - tv.a_com_neg),0) + DECODE(
+    tv.tipo,'MUTUIN',(tv.a_com_pos                - tv.a_com_neg),0) + DECODE(
+    tv.tipo,'OBBLIG',(tv.a_com_pos                - tv.a_com_neg),0)),0))
+    assestamento_compe_MUTUI,
+    SUM(NVL(DECODE(tv.tipo,'UE',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_UE,
+    SUM(NVL(DECODE(tv.tipo,'ALTRI VIN',(tv.a_com_pos - tv.a_com_neg),0),0))
+    asstamento_compe_ALTRI_VIN,
+    SUM(NVL(DECODE(tv.tipo,'STATO',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_STATO,
+    SUM(NVL(DECODE(tv.tipo,'REG VIN',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_REG_VIN,
+    SUM(NVL(DECODE(tv.tipo,'NA',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_NA,
+    SUM(NVL(DECODE(tv.tipo,'AVANZO',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_AVANZO,
+    SUM(NVL(DECODE(tv.tipo,'AV_REG',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_AV_REG,
+    SUM(NVL(DECODE(tv.tipo,'ALIEN',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_ALIENAZIONI,
+    SUM(NVL(DECODE(tv.tipo,'REGIONE',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_REGIONE,
+    SUM(NVL(DECODE(tv.tipo,'AIUTI',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_AIUTI,
+    SUM(NVL(DECODE(tv.tipo,'FPV',(tv.a_com_pos - tv.a_com_neg),'FPV_REG',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_FPV,
+    SUM(NVL(DECODE(tv.tipo,'DISAV',(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_DISAV,
+    SUM(NVL(DECODE(tv.tipo,NULL,(tv.a_com_pos - tv.a_com_neg),0),0))
+    assestamento_compe_LIBERO,
+    NVL(b.previsto_attuale,0)             + NVL(b.variazione_competenza_piu,0) + NVL(
+    b.assestamento_competenza_piu,0)      - NVL(b.variazione_competenza_meno,0) -
+    NVL(b.assestamento_competenza_meno,0) - NVL(b.competenza_bloccata,0) - NVL(
+    b.pre_impegni,0)                      - NVL(b.impegni_accertamenti_compe,0)
+    disponibilita_competenza,
+    NVL(b.cassa,0) cassa,
+    NVL(b.variazione_cassa_piu,0)-NVL(b.variazione_cassa_meno,0)
+    variazione_cassa,
+    (NVL(b.assestamento_cassa_piu,0) - NVL(b.assestamento_cassa_meno,0))
+    assestamento_cassa,
+    (NVL(b.cassa,0)              + NVL(b.variazione_cassa_piu,0) + NVL(
+    b.assestamento_cassa_piu,0)  - NVL(b.variazione_cassa_meno,0) - NVL(
+    b.assestamento_cassa_meno,0) - NVL(b.cassa_bloccata,0) - NVL(
+    b.mandati_reversali_compe,0) - NVL(b.mandati_reversali_res,0))
+    disponibilita_cassa,
+    NVL(b.pre_impegni,0) pre_impegni,
+    NVL(b.impegni_accertamenti_compe,0) impegni_accertamenti,
+    NVL(b.variazioni,0) variazioni,
+    NVL(b.mandati_reversali_compe,0) mandati_reversali_competenza,
+    NVL(b.mandati_reversali_res,0) mandati_reversali_residui,
+    NVL(b.competenza_bloccata,0) competenza_bloccata,
+    NVL(b.cassa_bloccata,0) cassa_bloccata,
+    a.CODICE_MECCANOGRAFICO,
+    a.TITOLO_SETTORE_RUBRICA,
+    a.CODICE_STATISTICO,
+    a.CODICE_PRECEDENTE,
+    a.DIPARTIMENTO,
+    a.NATURA_SPESA,
+    a.NATURA_ENTRATA,
+    a.FONTE_FINANZIAMENTO,
+    a.LEGGE_ISTITUTIVA,
+    a.PROVVEDIMENTO,
+    a.PIANO_DEI_CONTI,
+    a.ANNO_ISTITUZIONE,
+    a.ABILITATO,
+    a.MODIFICATO_NUOVO,
+    a.FLAG_PERENTI,
+    a.ANNO_TERMINALE_TABELLA,
+    a.CODICE_BILANCIO_SIOPE,
+    a.CODICE_GESTIONALE_SIOPE
+  FROM
+    fin_t_bilancio b,
+    vw_nb_articoli a,
+    fin_v_avanzi_asv asv,
+    fin_v_avanzi_liberi na,
+    fin_v_avanzi_regionali reg,
+    wv_vincoli v,
+    fin_v_tipo_variazioni tv
+  WHERE a.anno = 2016
+  AND  a.anno                   = b.anno
+  AND a.eu = 'U'
+  AND a.eu                   = b.eu
+  AND a.codice               = b.articolo
+  AND asv.anno(+)            = b.anno
+  AND asv.eu(+)              = b.eu
+  AND asv.capitolo_uscita(+) = b.articolo
+  AND na.anno(+)             = b.anno
+  AND na.eu(+)               = b.eu
+  AND na.capitolo_uscita(+)  = b.articolo
+  AND reg.anno(+)            = b.anno
+  AND reg.eu(+)              = b.eu
+  AND reg.capitolo_uscita(+) = b.articolo
+  AND v.anno(+)              = b.anno
+  AND v.capitolo_uscita(+)   = b.eu
+    ||b.articolo
+  AND tv.anno(+)            = b.anno
+  AND tv.capitolo_uscita(+) = b.eu
+    ||b.articolo
+  AND a.anno > 2002
+ GROUP BY
+    b.anno,
+    b.eu,
+    a.liv1,
+    a.desc_liv1,
+    a.liv2,
+    a.desc_liv2,
+    a.NB_TITOLO,
+    a.desc_nb_titolo,
+    b.titolo,
+    b.categoria,
+    b.capitolo,
+    b.articolo,
+    a.desc_capitolo,
+    a.CODICE_MECCANOGRAFICO,
+    a.TITOLO_SETTORE_RUBRICA,
+    a.CODICE_STATISTICO,
+    a.CODICE_PRECEDENTE,
+    a.DIPARTIMENTO,
+    a.NATURA_SPESA,
+    a.NATURA_ENTRATA,
+    a.FONTE_FINANZIAMENTO,
+    a.LEGGE_ISTITUTIVA,
+    a.PROVVEDIMENTO,
+    a.PIANO_DEI_CONTI,
+    a.ANNO_ISTITUZIONE,
+    a.ABILITATO,
+    a.MODIFICATO_NUOVO,
+    a.FLAG_PERENTI,
+    a.ANNO_TERMINALE_TABELLA,
+    a.CODICE_BILANCIO_SIOPE,
+    a.CODICE_GESTIONALE_SIOPE,
+    NVL(b.ENTRATE,0),
+    NVL(b.MUTUI,0),
+    NVL(b.ALIENAZIONE_BENI_IMMOBILI,0),
+    NVL(b.STATO,0),
+    NVL(b.UNIONE_EUROPEA,0),
+    NVL(b.avanzi,0),
+    NVL(b.AIUTI,0),
+    NVL(b.regione,0),
+    NVL(b.altri_soggetti,0),
+    NVL(asv.quota_avanzo,0),
+    NVL(na.quota_avanzo,0) ,
+    NVL(reg.quota_avanzo,0),
+    NVL(b.previsto_attuale,0),
+    NVL(b.variazione_competenza_piu,0)   - NVL(b.variazione_competenza_meno,0),
+    NVL(b.previsto_attuale,0)            + NVL(b.variazione_competenza_piu,0) +
+    NVL(b.assestamento_competenza_piu,0) - NVL(b.variazione_competenza_meno,0)
+                                         - NVL(b.assestamento_competenza_meno,0
+    )                                    - NVL(b.competenza_bloccata,0) - NVL(
+    b.pre_impegni,0)                     - NVL(b.impegni_accertamenti_compe,0),
+    NVL(b.cassa,0),
+    NVL(b.variazione_cassa_piu,0)    -NVL(b.variazione_cassa_meno,0),
+    (NVL(b.assestamento_cassa_piu,0) - NVL(b.assestamento_cassa_meno,0)),
+    (NVL(b.cassa,0)                  + NVL(b.variazione_cassa_piu,0) + NVL(
+    b.assestamento_cassa_piu,0)      - NVL(b.variazione_cassa_meno,0) - NVL(
+    b.assestamento_cassa_meno,0)     - NVL(b.cassa_bloccata,0) - NVL(
+    b.mandati_reversali_compe,0)     - NVL(b.mandati_reversali_res,0)),
+    NVL(b.pre_impegni,0),
+    NVL(b.impegni_accertamenti_compe,0),
+    NVL(b.variazioni,0),
+    NVL(b.mandati_reversali_compe,0),
+    NVL(b.mandati_reversali_res,0),
+    NVL(b.competenza_bloccata,0),
+    NVL(b.cassa_bloccata,0)
+  ORDER BY 1,2,3,5,12,7</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

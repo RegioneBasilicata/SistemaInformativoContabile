@@ -1,0 +1,1344 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TRASPARENZA_PREVISIONE_U</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TRASPARENZA_PREVISIONE_U.html">Details</a></div></div>
+<div class="tab"><div><a href="TRASPARENZA_PREVISIONE_U_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TRASPARENZA_PREVISIONE_U_References.html">References</a></div></div>
+<div class="tab"><div><a href="TRASPARENZA_PREVISIONE_U_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TRASPARENZA_PREVISIONE_U_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure               TRASPARENZA_PREVISIONE_U(p_anno in number,p_anno_c in number,p_id number) is
+
+cod_mis varchar2(10);
+trova_macro number := 0;
+pl_sql varchar2(4000);
+i number := 0;
+x number := 0;
+tot1 number := 0;
+tot2 number := 0;
+tot3 number := 0;
+tot4 number := 0;
+tot5 number := 0;
+totF number := 0;
+
+cambio_titolo varchar2(1):='0';
+
+CURSOR MACRO IS
+select
+ a.titolo_uscite titolo
+,a.desc_titolo_uscite desc_titolo
+,a.macroaggregato
+,a.desc_macroaggregato
+,a.etitolo_umissione missione
+,a.desc_titolo_missione desc_missione
+,b.codice_campo
+,nvl(sum(decode(p_anno_c,a.anno,nvl(a.competenza_anno0,0),a.anno+1,(nvl(a.competenza_anno1,0)),a.anno+2,(nvl(a.competenza_anno2,0)))),0) Competenza
+,nvl(sum(decode(p_anno_c,a.anno,nvl(a.cassa_anno0,0),a.anno+1,'0,00',a.anno+2,'0,00')),0) Cassa
+,nvl(sum(decode(p_anno_c,a.anno,nvl(a.DICUI_FPV_ANNO0,0),a.anno+1,nvl(a.DICUI_FPV_ANNO1,0),a.anno+2,nvl(a.DICUI_FPV_ANNO2,0))),0) FPV
+from fin_T_previsione a
+     ,nb_titoli_missioni_struttura b
+where a.anno = p_anno
+and a.etitolo_umissione=b.codice_missione
+and a.utente='PREV'||anno
+and a.eu='U'
+and nvl(a.titolo_uscite,99)&lt;>99
+and a.macroaggregato is not null
+group by  
+a.titolo_uscite 
+,a.desc_titolo_uscite 
+,a.macroaggregato
+,a.desc_macroaggregato
+,a.etitolo_umissione 
+,a.desc_titolo_missione 
+,b.codice_campo
+order by 1 ,3;
+
+
+CURSOR TITOLI IS
+select
+id titolo
+,descrizione
+from nb_titoli_uscite
+where anno = p_anno
+and id>0;
+
+CURSOR MISSIONI IS
+select 
+CODICE_CAMPO
+,DESCRIZIONE
+,CODICE_MISSIONE
+from nb_titoli_missioni_Struttura
+order by 1;
+
+
+begin
+
+delete tmp_tabulati3 ;--where upper(car01) = 'MISSIONI TITOLI' and UPPER(utente)='PREV'||p_anno; 
+ commit;
+i:=0;
+
+ insert into tmp_tabulati3(car87,UTENTE
+ ,NUM_ORD_RIGA
+ ,CAR01
+ ,CAR02
+ ,CAR03
+ ,CAR88
+ ,CAR89
+ ,CAR90)
+ values
+ (to_char(p_id)
+ ,'PREV'||p_anno
+ ,i
+ ,'MISSIONI TITOLI'
+ ,'CODICE TITOLO'
+ ,'TITOLI E MACROAGGREGATI DI SPESA'
+ ,'C' -- colonna
+ ,'CODICE MACROAGGREGATO'
+ ,'DESCRIZIONE MACROAGGREGATO');
+
+
+ -- inserisco Disavanzo
+i:=i+1;
+insert into tmp_tabulati3(car87,UTENTE, NUM_ORD_RIGA, CAR01, CAR02 
+,CAR03
+,CAR90
+,CAR88
+,NUM04
+,NUM05
+,NUM06
+,NUM07
+,NUM08
+,NUM09
+,NUM10
+,NUM11
+,NUM12
+,NUM13
+,NUM14
+,NUM15
+,NUM16
+,NUM17
+,NUM18
+,NUM19
+,NUM20
+,NUM21
+,NUM22
+,NUM23
+,NUM24
+,NUM25
+,NUM26
+,NUM27
+,NUM28) 
+select distinct
+to_char(p_id)
+,'PREV'||p_anno
+,i
+,'MISSIONI TITOLI'
+,p.etitolo_umissione
+,p.desc_titolo_missione
+,'RIPIANO DISAVANZO NELL''ESERCIZIO'
+,'T'
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,null
+,nvl(p.competenza_anno0,0)
+,null
+from fin_t_previsione p
+where p.anno = p_anno
+  and p.utente='PREV'||p_anno
+  and p.eu = 'U'
+  and p.etitolo_umissione='0'; -- discriminante per il disavanzo
+
+i:=10;
+
+-- inizio loop missioni
+ for m in missioni loop
+  cod_mis := m.codice_missione;
+
+  update tmp_tabulati3 
+  set
+  CAR04 = case when m.codice_campo = 'num01' then m.descrizione else CAR04 end,
+  CAR05 = case when m.codice_campo = 'num02' then m.descrizione else CAR05 end,
+  CAR06 = case when m.codice_campo = 'num03' then m.descrizione else CAR06 end,
+  CAR07 = case when m.codice_campo = 'num04' then m.descrizione else CAR07 end,
+  CAR08 = case when m.codice_campo = 'num05' then m.descrizione else CAR08 end,
+  CAR09 = case when m.codice_campo = 'num06' then m.descrizione else CAR09 end,
+  CAR10 = case when m.codice_campo = 'num07' then m.descrizione else CAR10 end,
+  CAR11 = case when m.codice_campo = 'num08' then m.descrizione else CAR11 end,
+  CAR12 = case when m.codice_campo = 'num09' then m.descrizione else CAR12 end,
+  CAR13 = case when m.codice_campo = 'num10' then m.descrizione else CAR13 end,
+  CAR14 = case when m.codice_campo = 'num11' then m.descrizione else CAR14 end,
+  CAR15 = case when m.codice_campo = 'num12' then m.descrizione else CAR15 end,
+  CAR16 = case when m.codice_campo = 'num13' then m.descrizione else CAR16 end,
+  CAR17 = case when m.codice_campo = 'num14' then m.descrizione else CAR17 end,
+  CAR18 = case when m.codice_campo = 'num15' then m.descrizione else CAR18 end,
+  CAR19 = case when m.codice_campo = 'num16' then m.descrizione else CAR19 end,
+  CAR20 = case when m.codice_campo = 'num17' then m.descrizione else CAR20 end,
+  CAR21 = case when m.codice_campo = 'num18' then m.descrizione else CAR21 end,
+  CAR22 = case when m.codice_campo = 'num19' then m.descrizione else CAR22 end,
+  CAR23 = case when m.codice_campo = 'num20' then m.descrizione else CAR23 end,
+  CAR24 = case when m.codice_campo = 'num21' then m.descrizione else CAR24 end,
+  CAR25 = case when m.codice_campo = 'num22' then m.descrizione else CAR25 end,
+  CAR26 = case when m.codice_campo = 'num23' then m.descrizione else CAR26 end,
+  CAR27 = case when m.codice_campo = 'num24' then m.descrizione else CAR27 end,
+  CAR28 = case when m.codice_campo = 'num25' then m.descrizione else CAR28 end
+  where UTENTE = 'PREV'||p_anno
+  and num_ord_riga = 0;
+  commit;
+ end loop missioni;
+
+
+--Macroaggregati
+for p in macro loop
+
+   select nvl(count(*),0) into trova_macro
+   from tmp_tabulati3
+   where utente = 'PREV'||p_anno
+   and upper(car01) = 'MISSIONI TITOLI'
+   and nvl(car02,'00') = to_char(p.titolo)
+   and nvl(car89,'00') = to_char(p.macroaggregato);--contiene il codice macroaggretato
+
+    if cambio_titolo &lt;> to_char(p.titolo)
+      then 
+      i:=i+10;
+      insert into tmp_tabulati3(CAR87,UTENTE, NUM_ORD_RIGA,car01,car88, car89,car90)
+      values(to_char(p_id),'PREV'||p_anno,i,'MISSIONI TITOLI','E',null,'TITOLO '||p.titolo||' - '||p.desc_titolo);
+      commit;
+      cambio_titolo := to_char(p.titolo);
+    end if;
+
+
+    if trova_macro = 0
+    then 
+    i:=i+10;
+    insert into tmp_tabulati3(CAR87,UTENTE, NUM_ORD_RIGA, CAR01, CAR02, CAR03,CAR88,CAR89,CAR90
+    ,CAR04
+    ,CAR05
+    ,CAR06
+    ,CAR07
+    ,CAR08
+    ,CAR09
+    ,CAR10
+    ,CAR11
+    ,CAR12
+    ,CAR13
+    ,CAR14
+    ,CAR15
+    ,CAR16
+    ,CAR17
+    ,CAR18
+    ,CAR19
+    ,CAR20
+    ,CAR21
+    ,CAR22
+    ,CAR23
+    ,CAR24
+    ,CAR25
+    ,CAR26
+    ,CAR27
+    ,CAR28
+	,CAR32
+    ,CAR33
+    ,CAR34
+    ,CAR35
+    ,CAR36
+    ,CAR37
+    ,CAR38
+    ,CAR39
+    ,CAR40
+    ,CAR41
+    ,CAR42
+    ,CAR43
+    ,CAR44
+    ,CAR45
+    ,CAR46
+    ,CAR47
+    ,CAR48
+    ,CAR49
+    ,CAR50
+    ,CAR51
+    ,CAR52
+    ,CAR53
+    ,CAR54
+    ,CAR55
+    ,CAR56
+	,CAR59
+    ,CAR60
+    ,CAR61
+    ,CAR62
+    ,CAR63
+    ,CAR64
+    ,CAR65
+    ,CAR66
+    ,CAR67
+    ,CAR68
+    ,CAR69
+    ,CAR70
+    ,CAR71
+    ,CAR72
+    ,CAR73
+    ,CAR74
+    ,CAR75
+    ,CAR76
+    ,CAR77
+    ,CAR78
+    ,CAR79
+    ,CAR80
+    ,CAR81
+    ,CAR82
+    ,CAR83
+    ,NUM04
+    ,NUM05
+    ,NUM06
+    ,NUM07
+    ,NUM08
+    ,NUM09
+    ,NUM10
+    ,NUM11
+    ,NUM12
+    ,NUM13
+    ,NUM14
+    ,NUM15
+    ,NUM16
+    ,NUM17
+    ,NUM18
+    ,NUM19
+    ,NUM20
+    ,NUM21
+    ,NUM22
+    ,NUM23
+    ,NUM24
+    ,NUM25
+    ,NUM26
+    ,NUM27
+    ,NUM28
+	,NUM32
+    ,NUM33
+    ,NUM34
+    ,NUM35
+    ,NUM36
+    ,NUM37
+    ,NUM38
+    ,NUM39
+    ,NUM40
+    ,NUM41
+    ,NUM42
+    ,NUM43
+    ,NUM44
+    ,NUM45
+    ,NUM46
+    ,NUM47
+    ,NUM48
+    ,NUM49
+    ,NUM50
+    ,NUM51
+    ,NUM52
+    ,NUM53
+    ,NUM54
+    ,NUM55
+    ,NUM56
+	,NUM59
+    ,NUM60
+    ,NUM61
+    ,NUM62
+    ,NUM63
+    ,NUM64
+    ,NUM65
+    ,NUM66
+    ,NUM67
+    ,NUM68
+    ,NUM69
+    ,NUM70
+    ,NUM71
+    ,NUM72
+    ,NUM73
+    ,NUM74
+    ,NUM75
+    ,NUM76
+    ,NUM77
+    ,NUM78
+    ,NUM79
+    ,NUM80
+    ,NUM81
+    ,NUM82
+    ,NUM83) 
+    values
+    (to_char(p_id)
+    ,'PREV'||p_anno
+    ,i
+    ,'MISSIONI TITOLI'
+    ,p.titolo
+    ,p.desc_titolo
+    ,'D'
+	,p.macroaggregato
+	,p.desc_macroaggregato
+    ,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS1_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS2_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS3_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS4_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS5_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS6_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS7_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS8_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS9_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS10_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS11_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS12_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS13_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS14_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS15_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS16_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS17_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS18_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS19_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS20_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS50_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS66_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS99_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_Ripiano Disavanzo'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_Totale generale delle Spese_COMP'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS1_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS2_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS3_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS4_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS5_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS6_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS7_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS8_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS9_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS10_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS11_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS12_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS13_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS14_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS15_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS16_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS17_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS18_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS19_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS20_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS50_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS66_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS99_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_Ripiano Disavanzo'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_Totale generale delle Spese_FPV'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS1_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS2_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS3_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS4_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS5_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS6_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS7_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS8_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS9_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS10_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS11_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS12_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS13_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS14_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS15_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS16_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS17_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS18_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS19_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS20_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS50_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS66_Cassa'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_MISS99_Cassa'
+    case when p.codice_campo = 'num02' then p.Competenza else 0 end,
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_Ripiano Disavanzo'
+	,'MISSTIT_TIT_MACRO'||p.titolo||'_'||p.macroaggregato||'_Totale generale delle Spese_Cassa',
+	case when p.codice_campo = 'num01' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num03' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num04' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num05' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num06' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num07' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num08' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num09' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num10' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num11' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num12' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num13' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num14' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num15' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num16' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num17' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num18' then p.Competenza else 0 end, 
+    case when p.codice_campo = 'num19' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num20' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num21' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num22' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num23' then p.Competenza else 0 end,
+    case when p.codice_campo = 'num24' then p.Competenza else null end, --ripiano disavanzo
+    case when p.codice_campo = 'num25' then 0 else 0 end,	---totale
+	case when p.codice_campo = 'num01' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num02' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num03' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num04' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num05' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num06' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num07' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num08' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num09' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num10' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num11' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num12' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num13' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num14' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num15' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num16' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num17' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num18' then p.Fpv else 0 end, 
+    case when p.codice_campo = 'num19' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num20' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num21' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num22' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num23' then p.Fpv else 0 end,
+    case when p.codice_campo = 'num24' then p.Fpv else 0 end, --ripiano disavanzo
+    case when p.codice_campo = 'num25' then 0 else 0 end,
+	case when p.codice_campo = 'num01' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num02' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num03' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num04' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num05' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num06' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num07' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num08' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num09' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num10' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num11' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num12' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num13' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num14' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num15' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num16' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num17' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num18' then p.Cassa else 0 end, 
+    case when p.codice_campo = 'num19' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num20' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num21' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num22' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num23' then p.Cassa else 0 end,
+    case when p.codice_campo = 'num24' then p.Cassa else 0 end, --ripiano disavanzo
+    case when p.codice_campo = 'num25' then 0 else 0 end);
+	else
+    update tmp_tabulati3 set 
+    num04 = case when p.codice_campo = 'num01' then p.Competenza else num04 end,
+    num05 = case when p.codice_campo = 'num02' then p.Competenza else num05 end,
+    num06 = case when p.codice_campo = 'num03' then p.Competenza else num06 end,
+    num10 = case when p.codice_campo = 'num07' then p.Competenza else num10 end,
+    num07 = case when p.codice_campo = 'num04' then p.Competenza else num07 end,
+    num08 = case when p.codice_campo = 'num05' then p.Competenza else num08 end,
+    num09 = case when p.codice_campo = 'num06' then p.Competenza else num09 end,
+    num11 = case when p.codice_campo = 'num08' then p.Competenza else num11 end,
+    num12 = case when p.codice_campo = 'num09' then p.Competenza else num12 end,
+    num13 = case when p.codice_campo = 'num10' then p.Competenza else num13 end,
+    num14 = case when p.codice_campo = 'num11' then p.Competenza else num14 end,
+    num15 = case when p.codice_campo = 'num12' then p.Competenza else num15 end,
+    num16 = case when p.codice_campo = 'num13' then p.Competenza else num16 end,
+    num17 = case when p.codice_campo = 'num14' then p.Competenza else num17 end,
+    num18 = case when p.codice_campo = 'num15' then p.Competenza else num18 end,
+	num19 = case when p.codice_campo = 'num16' then p.Competenza else num19 end,
+    num20 = case when p.codice_campo = 'num17' then p.Competenza else num20 end,
+    num21 = case when p.codice_campo = 'num18' then p.Competenza else num21 end,
+    num22 = case when p.codice_campo = 'num19' then p.Competenza else num22 end,
+    num23 = case when p.codice_campo = 'num20' then p.Competenza else num23 end,
+    num24 = case when p.codice_campo = 'num21' then p.Competenza else num24 end,
+    num25 = case when p.codice_campo = 'num22' then p.Competenza else num25 end,
+    num26 = case when p.codice_campo = 'num23' then p.Competenza else num26 end,
+    num27 = case when p.codice_campo = 'num24' then p.Competenza else num27 end,
+    num28 = case when p.codice_campo = 'num25' then (nvl(num04,0)+nvl(num05,0)+nvl(num06,0)+nvl(num07,0)+nvl(num08,0)+nvl(num09,0)+nvl(num10,0)+nvl(num11,0)+nvl(num12,0)
+                                                     +nvl(num13,0)+nvl(num14,0)+nvl(num15,0)+nvl(num16,0)+nvl(num17,0)+nvl(num18,0)+nvl(num19,0)+nvl(num20,0)+nvl(num21,0)
+                                                     +nvl(num22,0)+nvl(num23,0)+nvl(num24,0)+nvl(num25,0)+nvl(num26,0)) else num28 end,
+	num32 = case when p.codice_campo = 'num01' then p.Fpv else num32 end,
+    num33 = case when p.codice_campo = 'num02' then p.Fpv else num33 end,
+    num34 = case when p.codice_campo = 'num03' then p.Fpv else num34 end,
+    num35 = case when p.codice_campo = 'num04' then p.Fpv else num35 end,
+    num36 = case when p.codice_campo = 'num05' then p.Fpv else num36 end,
+    num37 = case when p.codice_campo = 'num06' then p.Fpv else num37 end,
+    num38 = case when p.codice_campo = 'num07' then p.Fpv else num38 end,
+    num39 = case when p.codice_campo = 'num08' then p.Fpv else num39 end,
+    num40 = case when p.codice_campo = 'num09' then p.Fpv else num40 end,
+    num41 = case when p.codice_campo = 'num10' then p.Fpv else num41 end,
+    num42 = case when p.codice_campo = 'num11' then p.Fpv else num42 end,
+    num43 = case when p.codice_campo = 'num12' then p.Fpv else num43 end,
+    num44 = case when p.codice_campo = 'num13' then p.Fpv else num44 end,
+    num45 = case when p.codice_campo = 'num14' then p.Fpv else num45 end,
+    num46 = case when p.codice_campo = 'num15' then p.Fpv else num46 end,
+	num47 = case when p.codice_campo = 'num16' then p.Fpv else num47 end,
+    num48 = case when p.codice_campo = 'num17' then p.Fpv else num48 end,
+    num49 = case when p.codice_campo = 'num18' then p.Fpv else num49 end,
+    num50 = case when p.codice_campo = 'num19' then p.Fpv else num50 end,
+    num51 = case when p.codice_campo = 'num20' then p.Fpv else num51 end,
+    num52 = case when p.codice_campo = 'num21' then p.Fpv else num52 end,
+    num53 = case when p.codice_campo = 'num22' then p.Fpv else num53 end,
+    num54 = case when p.codice_campo = 'num23' then p.Fpv else num54 end,
+    num55 = case when p.codice_campo = 'num24' then p.Fpv else num55 end,
+	num56 = case when p.codice_campo = 'num25' then (nvl(num32,0)+nvl(num33,0)+nvl(num34,0)+nvl(num35,0)+nvl(num36,0)+nvl(num37,0)+nvl(num38,0)+nvl(num39,0)+nvl(num40,0)
+                                                     +nvl(num41,0)+nvl(num42,0)+nvl(num43,0)+nvl(num44,0)+nvl(num45,0)+nvl(num46,0)+nvl(num47,0)+nvl(num48,0)+nvl(num49,0)
+                                                     +nvl(num50,0)+nvl(num51,0)+nvl(num52,0)+nvl(num53,0)+nvl(num54,0)) else num56 end,
+	NUM59 = case when p.codice_campo = 'num01' then p.Cassa else NUM59 end,
+    NUM60 = case when p.codice_campo = 'num02' then p.Cassa else NUM60 end,
+    NUM61 = case when p.codice_campo = 'num03' then p.Cassa else NUM61 end,
+    NUM62 = case when p.codice_campo = 'num04' then p.Cassa else NUM62 end,
+    NUM63 = case when p.codice_campo = 'num05' then p.Cassa else NUM63 end,
+    NUM64 = case when p.codice_campo = 'num06' then p.Cassa else NUM64 end,
+    NUM65 = case when p.codice_campo = 'num07' then p.Cassa else NUM65 end,
+    NUM66 = case when p.codice_campo = 'num08' then p.Cassa else NUM66 end,
+    NUM67 = case when p.codice_campo = 'num09' then p.Cassa else NUM67 end,
+    NUM68 = case when p.codice_campo = 'num10' then p.Cassa else NUM68 end,
+    NUM69 = case when p.codice_campo = 'num11' then p.Cassa else NUM69 end,
+    NUM70 = case when p.codice_campo = 'num12' then p.Cassa else NUM70 end,
+    NUM71 = case when p.codice_campo = 'num13' then p.Cassa else NUM71 end,
+    NUM72 = case when p.codice_campo = 'num14' then p.Cassa else NUM72 end,
+    NUM73 = case when p.codice_campo = 'num15' then p.Cassa else NUM73 end,
+	NUM74 = case when p.codice_campo = 'num16' then p.Cassa else NUM74 end,
+    NUM75 = case when p.codice_campo = 'num17' then p.Cassa else NUM75 end,
+    NUM76 = case when p.codice_campo = 'num18' then p.Cassa else NUM76 end,
+    NUM77 = case when p.codice_campo = 'num19' then p.Cassa else NUM77 end,
+    NUM81 = case when p.codice_campo = 'num23' then p.Cassa else NUM81 end,
+    NUM78 = case when p.codice_campo = 'num20' then p.Cassa else NUM78 end,
+    NUM79 = case when p.codice_campo = 'num21' then p.Cassa else NUM79 end,
+    NUM80 = case when p.codice_campo = 'num22' then p.Cassa else NUM80 end,
+    NUM82 = case when p.codice_campo = 'num24' then p.Cassa else NUM82 end,
+	NUM83 = case when p.codice_campo = 'num25' then (nvl(num59,0)+nvl(num60,0)+nvl(num61,0)+nvl(num62,0)+nvl(num63,0)+nvl(num64,0)+nvl(num65,0)+nvl(num66,0)+nvl(num67,0)
+                                                     +nvl(num68,0)+nvl(num69,0)+nvl(num70,0)+nvl(num71,0)+nvl(num72,0)+nvl(num73,0)+nvl(num74,0)+nvl(num75,0)+nvl(num76,0)
+                                                     +nvl(num77,0)+nvl(num78,0)+nvl(num79,0)+nvl(num80,0)+nvl(num81,0)) else num83 end
+
+	where UTENTE = 'PREV'||p_anno
+    and upper(car01) = 'MISSIONI TITOLI'
+    and car02 = p.titolo
+    and car03 = p.desc_titolo
+	and car89 = p.macroaggregato
+	and car90 = p.desc_macroaggregato;
+    end if;
+  end loop;
+
+
+update tmp_tabulati3
+ set  
+ num28 = (nvl(num04,0)+nvl(num05,0)+nvl(num06,0)+nvl(num07,0)+nvl(num08,0)+nvl(num09,0)+nvl(num10,0)+nvl(num11,0)+nvl(num12,0)
+                                                     +nvl(num13,0)+nvl(num14,0)+nvl(num15,0)+nvl(num16,0)+nvl(num17,0)+nvl(num18,0)+nvl(num19,0)+nvl(num20,0)+nvl(num21,0)
+                                                     +nvl(num22,0)+nvl(num23,0)+nvl(num24,0)+nvl(num25,0)+nvl(num26,0))
+ where num_ord_riga > 1 and nvl(car89,'00')&lt;>'00';
+
+update tmp_tabulati3
+ set  
+ num56 = (nvl(num32,0)+nvl(num33,0)+nvl(num34,0)+nvl(num35,0)+nvl(num36,0)+nvl(num37,0)+nvl(num38,0)+nvl(num39,0)+nvl(num40,0)
+                                                     +nvl(num41,0)+nvl(num42,0)+nvl(num43,0)+nvl(num44,0)+nvl(num45,0)+nvl(num46,0)+nvl(num47,0)+nvl(num48,0)+nvl(num49,0)
+                                                     +nvl(num50,0)+nvl(num51,0)+nvl(num52,0)+nvl(num53,0)+nvl(num54,0))
+
+ where num_ord_riga > 1 and nvl(car89,'00')&lt;>'00';												 
+
+update tmp_tabulati3
+ set  
+ num83 = (nvl(num59,0)+nvl(num60,0)+nvl(num61,0)+nvl(num62,0)+nvl(num63,0)+nvl(num64,0)+nvl(num65,0)+nvl(num66,0)+nvl(num67,0)
+                                                     +nvl(num68,0)+nvl(num69,0)+nvl(num70,0)+nvl(num71,0)+nvl(num72,0)+nvl(num73,0)+nvl(num74,0)+nvl(num75,0)+nvl(num76,0)
+                                                     +nvl(num77,0)+nvl(num78,0)+nvl(num79,0)+nvl(num80,0)+nvl(num81,0)) 
+
+ where num_ord_riga > 1 and nvl(car89,'00')&lt;>'00';
+
+
+ -- Inserimento totale titoli
+ for t in titoli loop
+   select max(num_ord_riga) + 1 into x
+   from tmp_tabulati3
+   where upper(car01) = 'MISSIONI TITOLI'
+   and nvl(car02,'00') = to_char(t.titolo); 
+i:=x;
+insert into tmp_tabulati3
+    (car87
+    ,UTENTE
+    ,NUM_ORD_RIGA
+    ,CAR01
+	,CAR02
+    ,CAR03
+    ,CAR04
+    ,CAR05
+    ,CAR06
+    ,CAR07
+    ,CAR08
+    ,CAR09
+    ,CAR10
+    ,CAR11
+    ,CAR12
+    ,CAR13
+    ,CAR14
+    ,CAR15
+    ,CAR16
+    ,CAR17
+    ,CAR18
+    ,CAR19
+    ,CAR20
+    ,CAR21
+    ,CAR22
+    ,CAR23
+    ,CAR24
+    ,CAR25
+    ,CAR26
+    ,CAR27
+    ,CAR28
+	,CAR32
+    ,CAR33
+    ,CAR34
+    ,CAR35
+    ,CAR36
+    ,CAR37
+    ,CAR38
+    ,CAR39
+    ,CAR40
+    ,CAR41
+    ,CAR42
+    ,CAR43
+    ,CAR44
+    ,CAR45
+    ,CAR46
+    ,CAR47
+    ,CAR48
+    ,CAR49
+    ,CAR50
+    ,CAR51
+    ,CAR52
+    ,CAR53
+    ,CAR54
+    ,CAR55
+    ,CAR56
+	,CAR59
+    ,CAR60
+    ,CAR61
+    ,CAR62
+    ,CAR63
+    ,CAR64
+    ,CAR65
+    ,CAR66
+    ,CAR67
+    ,CAR68
+    ,CAR69
+    ,CAR70
+    ,CAR71
+    ,CAR72
+    ,CAR73
+    ,CAR74
+    ,CAR75
+    ,CAR76
+    ,CAR77
+    ,CAR78
+    ,CAR79
+    ,CAR80
+    ,CAR81
+    ,CAR82
+    ,CAR83
+    ,NUM04
+    ,NUM05
+    ,NUM06
+    ,NUM07
+    ,NUM08
+    ,NUM09
+    ,NUM10
+    ,NUM11
+    ,NUM12
+    ,NUM13
+    ,NUM14
+    ,NUM15
+    ,NUM16
+    ,NUM17
+    ,NUM18
+    ,NUM19
+    ,NUM20
+    ,NUM21
+    ,NUM22
+    ,NUM23
+    ,NUM24
+    ,NUM25
+    ,NUM26
+    ,NUM27
+    ,NUM28
+	,NUM32
+    ,NUM33
+    ,NUM34
+    ,NUM35
+    ,NUM36
+    ,NUM37
+    ,NUM38
+    ,NUM39
+    ,NUM40
+    ,NUM41
+    ,NUM42
+    ,NUM43
+    ,NUM44
+    ,NUM45
+    ,NUM46
+    ,NUM47
+    ,NUM48
+    ,NUM49
+    ,NUM50
+    ,NUM51
+    ,NUM52
+    ,NUM53
+    ,NUM54
+    ,NUM60
+    ,NUM55
+    ,NUM56
+	,NUM59
+    ,NUM61
+    ,NUM62
+    ,NUM63
+    ,NUM64
+    ,NUM65
+    ,NUM66
+    ,NUM67
+    ,NUM68
+    ,NUM69
+    ,NUM70
+    ,NUM71
+    ,NUM72
+    ,NUM73
+    ,NUM74
+    ,NUM75
+    ,NUM76
+    ,NUM77
+    ,NUM78
+    ,NUM79
+    ,NUM80
+    ,NUM81
+    ,NUM82
+    ,NUM83
+    ,CAR88
+    ,CAR89
+    ,CAR90)
+    (select 
+    to_char(p_id)
+    ,'PREV'||p_anno
+    ,x
+    ,'MISSIONI TITOLI'
+    ,t.titolo
+    ,t.descrizione
+    ,'MISSTIT_TIT'||t.titolo||'_MISS1_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS2_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS3_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS4_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS5_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS6_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS7_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS8_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS9_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS10_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS11_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS12_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS13_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS14_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS15_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS16_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS17_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS18_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS19_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS20_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS50_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS66_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS99_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_Ripiano Disavanzo'
+	,'MISSTIT_TIT'||t.titolo||'_Totale generale delle Spese_COMP'
+	,'MISSTIT_TIT'||t.titolo||'_MISS1_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS2_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS3_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS4_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS5_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS6_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS7_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS8_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS9_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS10_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS11_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS12_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS13_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS14_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS15_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS16_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS17_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS18_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS19_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS20_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS50_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS66_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS99_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_Ripiano Disavanzo'
+	,'MISSTIT_TIT'||t.titolo||'_Totale generale delle Spese_FPV'
+	,'MISSTIT_TIT'||t.titolo||'_MISS1_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS2_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS3_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS4_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS5_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS6_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS7_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS8_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS9_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS10_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS11_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS12_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS13_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS14_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS15_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS16_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS17_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS18_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS19_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS20_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS50_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS66_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_MISS99_Cassa'
+	,'MISSTIT_TIT'||t.titolo||'_Ripiano Disavanzo'
+	,'MISSTIT_TIT'||t.titolo||'_Totale generale delle Spese_Cassa'
+    ,sum(nvl(NUM04,0))
+    ,sum(nvl(NUM05,0))
+    ,sum(nvl(NUM06,0))
+    ,sum(nvl(NUM07,0))
+    ,sum(nvl(NUM08,0))
+    ,sum(nvl(NUM09,0))
+    ,sum(nvl(NUM10,0))
+    ,sum(nvl(NUM11,0))
+    ,sum(nvl(NUM12,0))
+    ,sum(nvl(NUM13,0))
+    ,sum(nvl(NUM14,0))
+    ,sum(nvl(NUM15,0))
+    ,sum(nvl(NUM16,0))
+    ,sum(nvl(NUM17,0))
+    ,sum(nvl(NUM18,0))
+    ,sum(nvl(NUM19,0))
+    ,sum(nvl(NUM20,0))
+    ,sum(nvl(NUM21,0))
+    ,sum(nvl(NUM22,0))
+    ,sum(nvl(NUM23,0))
+    ,sum(nvl(NUM24,0))
+    ,sum(nvl(NUM25,0))
+    ,sum(nvl(NUM26,0))
+    ,null--sum(nvl(NUM27,0))
+    ,sum(nvl(NUM28,0))
+	,sum(nvl(NUM32,0))
+    ,sum(nvl(NUM33,0))
+    ,sum(nvl(NUM34,0))
+    ,sum(nvl(NUM35,0))
+    ,sum(nvl(NUM36,0))
+    ,sum(nvl(NUM37,0))
+    ,sum(nvl(NUM38,0))
+    ,sum(nvl(NUM39,0))
+    ,sum(nvl(NUM40,0))
+    ,sum(nvl(NUM41,0))
+    ,sum(nvl(NUM42,0))
+    ,sum(nvl(NUM43,0))
+    ,sum(nvl(NUM44,0))
+    ,sum(nvl(NUM48,0))
+    ,sum(nvl(NUM45,0))
+    ,sum(nvl(NUM46,0))
+    ,sum(nvl(NUM47,0))
+    ,sum(nvl(NUM49,0))
+    ,sum(nvl(NUM50,0))
+    ,sum(nvl(NUM51,0))
+    ,sum(nvl(NUM52,0))
+    ,sum(nvl(NUM53,0))
+    ,sum(nvl(NUM54,0))
+    ,sum(nvl(NUM55,0))
+    ,sum(nvl(NUM56,0))
+	,sum(nvl(NUM59,0))
+    ,sum(nvl(NUM60,0))
+    ,sum(nvl(NUM61,0))
+    ,sum(nvl(NUM62,0))
+    ,sum(nvl(NUM63,0))
+    ,sum(nvl(NUM64,0))
+    ,sum(nvl(NUM65,0))
+    ,sum(nvl(NUM66,0))
+    ,sum(nvl(NUM67,0))
+    ,sum(nvl(NUM68,0))
+    ,sum(nvl(NUM69,0))
+    ,sum(nvl(NUM70,0))
+    ,sum(nvl(NUM71,0))
+    ,sum(nvl(NUM72,0))
+    ,sum(nvl(NUM73,0))
+    ,sum(nvl(NUM74,0))
+    ,sum(nvl(NUM75,0))
+    ,sum(nvl(NUM76,0))
+    ,sum(nvl(NUM77,0))
+    ,sum(nvl(NUM78,0))
+    ,sum(nvl(NUM79,0))
+    ,sum(nvl(NUM80,0))
+    ,sum(nvl(NUM81,0))
+    ,sum(nvl(NUM82,0))
+    ,sum(nvl(NUM83,0))
+    ,'T'
+    ,t.titolo||'00'
+    ,'Totale TITOLO '||t.titolo   
+    from tmp_tabulati3
+    where num_ord_riga > 1
+	and nvl(car02,'00') = to_Char(t.titolo)
+    and utente = 'PREV'||p_anno
+    group by  'PREV'||p_anno
+    ,i
+    ,'MISSIONI TITOLI'
+    ,t.titolo
+    ,t.descrizione
+    );
+  end loop;
+  commit;
+
+--INSERIMENTO TOTALI GENERALI
+
+ insert into tmp_tabulati3
+    (car87
+    ,UTENTE
+    ,NUM_ORD_RIGA
+    ,CAR01
+    ,CAR03
+    ,CAR04
+    ,CAR05
+    ,CAR06
+    ,CAR07
+    ,CAR08
+    ,CAR09
+    ,CAR10
+    ,CAR11
+    ,CAR12
+    ,CAR13
+    ,CAR14
+    ,CAR15
+    ,CAR16
+    ,CAR17
+    ,CAR18
+    ,CAR19
+    ,CAR20
+    ,CAR21
+    ,CAR22
+    ,CAR23
+    ,CAR24
+    ,CAR25
+    ,CAR26
+    ,CAR27
+    ,CAR28
+	,CAR32
+    ,CAR33
+    ,CAR34
+    ,CAR35
+    ,CAR36
+    ,CAR37
+    ,CAR38
+    ,CAR39
+    ,CAR40
+    ,CAR41
+    ,CAR42
+    ,CAR43
+    ,CAR44
+    ,CAR45
+    ,CAR46
+    ,CAR47
+    ,CAR48
+    ,CAR49
+    ,CAR50
+    ,CAR51
+    ,CAR52
+    ,CAR53
+    ,CAR54
+    ,CAR55
+    ,CAR56
+	,CAR59
+    ,CAR60
+    ,CAR61
+    ,CAR62
+    ,CAR63
+    ,CAR64
+    ,CAR65
+    ,CAR66
+    ,CAR67
+    ,CAR68
+    ,CAR69
+    ,CAR70
+    ,CAR71
+    ,CAR72
+    ,CAR73
+    ,CAR74
+    ,CAR75
+    ,CAR76
+    ,CAR77
+    ,CAR78
+    ,CAR79
+    ,CAR80
+    ,CAR81
+    ,CAR82
+    ,CAR83
+    ,NUM04
+    ,NUM05
+    ,NUM06
+    ,NUM07
+    ,NUM08
+    ,NUM09
+    ,NUM10
+    ,NUM11
+    ,NUM12
+    ,NUM13
+    ,NUM14
+    ,NUM15
+    ,NUM16
+    ,NUM17
+    ,NUM18
+    ,NUM19
+    ,NUM20
+    ,NUM21
+    ,NUM22
+    ,NUM23
+    ,NUM24
+    ,NUM25
+    ,NUM26
+    ,NUM27
+    ,NUM28
+	,NUM32
+    ,NUM33
+    ,NUM34
+    ,NUM35
+    ,NUM36
+    ,NUM37
+    ,NUM38
+    ,NUM39
+    ,NUM40
+    ,NUM41
+    ,NUM42
+    ,NUM43
+    ,NUM44
+    ,NUM45
+    ,NUM46
+    ,NUM47
+    ,NUM48
+    ,NUM49
+    ,NUM50
+    ,NUM51
+    ,NUM52
+    ,NUM53
+    ,NUM54
+    ,NUM55
+    ,NUM56
+	,NUM59
+    ,NUM60
+    ,NUM61
+    ,NUM62
+    ,NUM63
+    ,NUM64
+    ,NUM65
+    ,NUM66
+    ,NUM67
+    ,NUM68
+    ,NUM69
+    ,NUM70
+    ,NUM71
+    ,NUM72
+    ,NUM73
+    ,NUM74
+    ,NUM75
+    ,NUM76
+    ,NUM77
+    ,NUM78
+    ,NUM79
+    ,NUM80
+    ,NUM81
+    ,NUM82
+    ,NUM83
+    ,CAR88
+    ,CAR90)
+    (select 
+    to_char(p_id)
+    ,utente
+    ,1000
+    ,car01
+    ,'TOTALE GENERALE'
+    ,'MISSTIT_TOT_MISS1_COMP'
+    ,'MISSTIT_TOT_MISS2_COMP'
+    ,'MISSTIT_TOT_MISS3_COMP'
+    ,'MISSTIT_TOT_MISS4_COMP'
+    ,'MISSTIT_TOT_MISS5_COMP'
+    ,'MISSTIT_TOT_MISS6_COMP'
+    ,'MISSTIT_TOT_MISS7_COMP'
+    ,'MISSTIT_TOT_MISS11_COMP'
+    ,'MISSTIT_TOT_MISS8_COMP'
+    ,'MISSTIT_TOT_MISS9_COMP'
+    ,'MISSTIT_TOT_MISS10_COMP'
+    ,'MISSTIT_TOT_MISS12_COMP'
+    ,'MISSTIT_TOT_MISS13_COMP'
+    ,'MISSTIT_TOT_MISS14_COMP'
+    ,'MISSTIT_TOT_MISS15_COMP'
+    ,'MISSTIT_TOT_MISS16_COMP'
+    ,'MISSTIT_TOT_MISS17_COMP'
+    ,'MISSTIT_TOT_MISS18_COMP'
+    ,'MISSTIT_TOT_MISS19_COMP'
+    ,'MISSTIT_TOT_MISS20_COMP'
+    ,'MISSTIT_TOT_MISS50_COMP'
+    ,'MISSTIT_TOT_MISS66_COMP'
+    ,'MISSTIT_TOT_MISS99_COMP'
+    ,'MISSTIT_TOT_Ripiano Disavanzo'
+    ,'MISSTIT_TOT_Totale generale delle Spese_COMP'
+	,'MISSTIT_TOT_MISS1_FPV'
+    ,'MISSTIT_TOT_MISS2_FPV'
+    ,'MISSTIT_TOT_MISS3_FPV'
+    ,'MISSTIT_TOT_MISS4_FPV'
+    ,'MISSTIT_TOT_MISS5_FPV'
+    ,'MISSTIT_TOT_MISS6_FPV'
+    ,'MISSTIT_TOT_MISS7_FPV'
+    ,'MISSTIT_TOT_MISS8_FPV'
+    ,'MISSTIT_TOT_MISS9_FPV'
+    ,'MISSTIT_TOT_MISS10_FPV'
+    ,'MISSTIT_TOT_MISS11_FPV'
+    ,'MISSTIT_TOT_MISS12_FPV'
+    ,'MISSTIT_TOT_MISS13_FPV'
+    ,'MISSTIT_TOT_MISS14_FPV'
+    ,'MISSTIT_TOT_MISS15_FPV'
+    ,'MISSTIT_TOT_MISS16_FPV'
+    ,'MISSTIT_TOT_MISS17_FPV'
+    ,'MISSTIT_TOT_MISS18_FPV'
+    ,'MISSTIT_TOT_MISS19_FPV'
+    ,'MISSTIT_TOT_MISS20_FPV'
+    ,'MISSTIT_TOT_MISS50_FPV'
+    ,'MISSTIT_TOT_MISS66_FPV'
+    ,'MISSTIT_TOT_MISS99_FPV'
+    ,'MISSTIT_TOT_Ripiano Disavanzo'
+    ,'MISSTIT_TOT_Totale generale delle Spese_FPV'
+	,'MISSTIT_TOT_MISS1_Cassa'
+    ,'MISSTIT_TOT_MISS2_Cassa'
+    ,'MISSTIT_TOT_MISS3_Cassa'
+    ,'MISSTIT_TOT_MISS4_Cassa'
+    ,'MISSTIT_TOT_MISS5_Cassa'
+    ,'MISSTIT_TOT_MISS6_Cassa'
+    ,'MISSTIT_TOT_MISS7_Cassa'
+    ,'MISSTIT_TOT_MISS8_Cassa'
+    ,'MISSTIT_TOT_MISS9_Cassa'
+    ,'MISSTIT_TOT_MISS10_Cassa'
+    ,'MISSTIT_TOT_MISS11_Cassa'
+    ,'MISSTIT_TOT_MISS12_Cassa'
+    ,'MISSTIT_TOT_MISS13_Cassa'
+    ,'MISSTIT_TOT_MISS14_Cassa'
+    ,'MISSTIT_TOT_MISS15_Cassa'
+    ,'MISSTIT_TOT_MISS16_Cassa'
+    ,'MISSTIT_TOT_MISS17_Cassa'
+    ,'MISSTIT_TOT_MISS18_Cassa'
+    ,'MISSTIT_TOT_MISS19_Cassa'
+    ,'MISSTIT_TOT_MISS20_Cassa'
+    ,'MISSTIT_TOT_MISS50_Cassa'
+    ,'MISSTIT_TOT_MISS66_Cassa'
+    ,'MISSTIT_TOT_MISS99_Cassa'
+    ,'MISSTIT_TOT_Ripiano Disavanzo'
+    ,'MISSTIT_TOT_Totale generale delle Spese_Cassa'
+    ,sum(nvl(NUM04,0))
+    ,sum(nvl(NUM05,0))
+    ,sum(nvl(NUM06,0))
+    ,sum(nvl(NUM07,0))
+    ,sum(nvl(NUM08,0))
+    ,sum(nvl(NUM09,0))
+    ,sum(nvl(NUM10,0))
+    ,sum(nvl(NUM11,0))
+    ,sum(nvl(NUM12,0))
+    ,sum(nvl(NUM13,0))
+    ,sum(nvl(NUM14,0))
+    ,sum(nvl(NUM15,0))
+    ,sum(nvl(NUM16,0))
+    ,sum(nvl(NUM17,0))
+    ,sum(nvl(NUM18,0))
+    ,sum(nvl(NUM19,0))
+    ,sum(nvl(NUM20,0))
+    ,sum(nvl(NUM21,0))
+    ,sum(nvl(NUM22,0))
+    ,sum(nvl(NUM23,0))
+    ,sum(nvl(NUM24,0))
+    ,sum(nvl(NUM25,0))
+    ,sum(nvl(NUM26,0))
+    ,sum(nvl(NUM27,0))
+    ,sum(nvl(NUM28,0))
+	,sum(nvl(NUM32,0))
+    ,sum(nvl(NUM33,0))
+    ,sum(nvl(NUM34,0))
+    ,sum(nvl(NUM35,0))
+    ,sum(nvl(NUM36,0))
+    ,sum(nvl(NUM37,0))
+    ,sum(nvl(NUM38,0))
+    ,sum(nvl(NUM39,0))
+    ,sum(nvl(NUM40,0))
+    ,sum(nvl(NUM41,0))
+    ,sum(nvl(NUM42,0))
+    ,sum(nvl(NUM43,0))
+    ,sum(nvl(NUM44,0))
+    ,sum(nvl(NUM45,0))
+    ,sum(nvl(NUM46,0))
+    ,sum(nvl(NUM47,0))
+    ,sum(nvl(NUM48,0))
+    ,sum(nvl(NUM49,0))
+    ,sum(nvl(NUM50,0))
+    ,sum(nvl(NUM51,0))
+    ,sum(nvl(NUM52,0))
+    ,sum(nvl(NUM53,0))
+    ,sum(nvl(NUM54,0))
+    ,sum(nvl(NUM55,0))
+    ,sum(nvl(NUM56,0))
+	,sum(nvl(NUM59,0))
+    ,sum(nvl(NUM60,0))
+    ,sum(nvl(NUM64,0))
+    ,sum(nvl(NUM61,0))
+    ,sum(nvl(NUM62,0))
+    ,sum(nvl(NUM63,0))
+    ,sum(nvl(NUM65,0))
+    ,sum(nvl(NUM66,0))
+    ,sum(nvl(NUM67,0))
+    ,sum(nvl(NUM68,0))
+    ,sum(nvl(NUM69,0))
+    ,sum(nvl(NUM70,0))
+    ,sum(nvl(NUM71,0))
+    ,sum(nvl(NUM72,0))
+    ,sum(nvl(NUM73,0))
+    ,sum(nvl(NUM74,0))
+    ,sum(nvl(NUM75,0))
+    ,sum(nvl(NUM76,0))
+    ,sum(nvl(NUM77,0))
+    ,sum(nvl(NUM78,0))
+    ,sum(nvl(NUM79,0))
+    ,sum(nvl(NUM80,0))
+    ,sum(nvl(NUM81,0))
+    ,sum(nvl(NUM82,0))
+    ,sum(nvl(NUM83,0))
+    ,'TG'
+    ,'TOTALE MISSIONI - TOTALE_GENERALE DELLE SPESE'
+    from tmp_tabulati3
+    where num_ord_riga >= 1
+    and utente = 'PREV'||p_anno
+	and nvl(car02,'00')&lt;>'00'
+	and nvl(car88,'Z')='T'
+    group by utente
+    ,1000
+    ,car01
+    ,'TOTALE GENERALE'
+    );
+  commit;  
+end;</pre>	</td></tr>
+</table></div>

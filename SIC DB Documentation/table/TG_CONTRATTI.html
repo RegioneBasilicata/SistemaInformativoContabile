@@ -1,0 +1,335 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TG_CONTRATTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="TG_CONTRATTI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="TG_CONTRATTI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>TIPO_CONTRATTO</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PROGRESSIVO</td>
+<td>NUMBER</td>
+<td>No</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ULT_DESCR</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_CONTRATTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_CONTRATTO</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_REP_EFF</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>'S'</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TIPO_APP</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SETTORE</td>
+<td>VARCHAR2(2 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CUP</td>
+<td>VARCHAR2(15 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CIG</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VALIDO_DAL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VALIDO_AL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>IMPORTO_FISSO</td>
+<td>NUMBER(12,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RESPONSABILE</td>
+<td>NUMBER(6,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UFFICIO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_REGISTR</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_REGISTR</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LUOGO_REGISTR</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ARCHIVIAZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LUOGO_STIPULA</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ROGANTE</td>
+<td>VARCHAR2(200 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ATTO_APPROVAZIONE</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONTRAENTE_DITTA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONTRAENTE_AMM</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MOD_RINNOVO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MOD_DISDETTA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODA_RT</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_DISDETTA</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MOTIVO_DISDETTA</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MESI_GARANZIA</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LISTINO_ATTIVO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>Indica se il listino del contratto ha prevalenza sul costo inserito nell'anagrafica articolo</td>
+	</tr>
+	<tr>
+<td>NOTE</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CHIUSO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_FINE_CONTRATTO</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATO_DA</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CREATO_IL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MODIFICATO_DA</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MODIFICATO_IL</td>
+<td>DATE</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+</table></div>

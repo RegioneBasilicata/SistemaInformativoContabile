@@ -1,0 +1,916 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PAREGGIO_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PAREGGIO_BILANCIO.html">Details</a></div></div>
+<div class="tab"><div><a href="PAREGGIO_BILANCIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PAREGGIO_BILANCIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="PAREGGIO_BILANCIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PAREGGIO_BILANCIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure PAREGGIO_BILANCIO(p_anno in number,p_utente in varchar2,p_id_report in number, p_data in date) as
+ 
+ riga number :=0;
+ c1 VARCHAR2(1000); --descrizione voce
+ c2 VARCHAR2(100); -- desc 1 colonna importi
+ c3 VARCHAR2(100); -- desc 2 colonna importi
+ c4 VARCHAR2(100); -- desc 3 colonna importi
+
+ n1 NUMBER := 0; -- per colonna "Previsioni"
+ n2 NUMBER := 0; -- per colonna "Accertamenti/Impegni"
+ n3 NUMBER := 0; -- per colonna "Reversali/Mandati"
+
+ a1_1 NUMBER := 0; -- utilizzato come appoggio
+ a1_2 NUMBER := 0; -- utilizzato come appoggio
+
+ a2_1 NUMBER := 0; -- utilizzato come appoggio
+ a2_2 NUMBER := 0; -- utilizzato come appoggio
+ a3_1 NUMBER := 0; -- utilizzato come appoggio
+ a3_2 NUMBER := 0; -- utilizzato come appoggio
+ a4_1 NUMBER := 0; -- utilizzato come appoggio
+ a4_2 NUMBER := 0; -- utilizzato come appoggio
+
+ somma_piu1 NUMBER := 0; -- utilizzato come appoggio
+ somma_piu2 NUMBER := 0; -- utilizzato come appoggio
+ somma_piu3 NUMBER := 0; -- utilizzato come appoggio
+ somma_meno1 NUMBER := 0; -- utilizzato come appoggio
+ somma_meno2 NUMBER := 0; -- utilizzato come appoggio
+ somma_meno3 NUMBER := 0; -- utilizzato come appoggio
+
+ fpv_u_corrente number := 0; --utilizzato per inserire la quota di FPV uscite di parte corrente
+ fpv_cap_escluso1 number := 0; --utilizzato per inserire la quota di FPV capitale escluso anno n-1
+ fpv_cap_escluso2 number := 0; --utilizzato per inserire la quota di FPV capitale escluso anno n
+
+ vdata_elaborazione date;
+ p_anno1 number(4);
+ p_anno2 number(4);
+
+-- Vale a partire dal rendiconto 2016.
+
+BEGIN
+
+ DELETE tmp_tabulati 
+ WHERE utente = p_utente;
+ COMMIT;
+
+ --consuntivo_entrate(p_anno,null,p_data,p_utente);
+ --consuntivo_uscite(p_anno,null,p_data,p_utente);
+
+ -- riga 1 intestazione principale 
+
+ riga := 1;
+ c1 := 'SEZIONE 1: VERIFICA EQUILIBRIO ENTRATE FINALI - SPESE FINALI (art. 1, comma 466 Legge di stabilità 2017)';
+ c2 := 'Dati gestionali COMPETENZA a tutto il 31 dicembre '||(p_anno -1)||' (stanziamenti FPV/accertamenti e impegni)';
+ c3 := 'Dati gestionali COMPETENZA a tutto il 31 dicembre'||p_anno||' (stanziamenti FPV/accertamenti e impegni)';
+ c4 := 'Dati gestionali CASSA a tutto il 31 dicembre'||p_anno||' (facoltativo)';
+
+
+  INSERT INTO tmp_tabulati (car01,car02,car03,car04,utente,num_ord_riga) 
+  VALUES (c1,c2,c3,c4,p_utente,riga);  
+
+-- riga 2 FPV E spese correnti
+ riga := 2;
+ c1 := 'A1) Fondo pluriennale vincolato di entrata per spese correnti';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+
+      select nvl(sum(nvl(FPV_FONTE,0)),0)
+      into a1_1
+      from fin_t_consuntivo_excel
+      where ANNO_CONSUNTIVO = p_anno-1 
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = 'CONS'||(p_anno-1)
+      and NB_TITOLO &lt;> '2';
+
+      select nvl(sum(nvl(FPV_FONTE,0)),0)
+      into a1_2
+      from fin_t_consuntivo_excel
+      where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO &lt;> '2';
+
+      n1 := a1_1;
+      n2 := a1_2;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,p_utente,riga);   
+
+-- riga 3 FPV E capitale
+ riga := 3;
+ c1 := 'A2) Fondo pluriennale vincolato di entrata in conto capitale  al netto delle quote finanziate da debito';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+
+      select nvl(sum(nvl(FPV_FONTE,0)),0)
+      into a2_1
+      from fin_t_consuntivo_excel
+      where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = 'CONS'||(p_anno-1)
+      and NB_TITOLO = '2';
+        
+        select sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) into fpv_cap_escluso1
+        from fin_t_documenti d 
+        where 
+        d.segment8 = p_anno-1
+        and upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y' 		 
+        and nvl(d.segment9,'X') in ('FPV','FPV_REG') 
+        and nvl(d.segment11,'X') in (select eu||codice from vw_nb_articoli where anno = p_anno-1
+                and eu = 'E'
+        and liv1 = '6000000')
+        having sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) > 0;
+
+      select nvl(sum(nvl(FPV_FONTE,0)),0)
+      into a2_2
+      from fin_t_consuntivo_excel
+      where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+     
+      select sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) into fpv_cap_escluso2
+        from fin_t_documenti d 
+        where 
+        d.segment8 = p_anno
+        and upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y' 		 
+        and nvl(d.segment9,'X') in ('FPV','FPV_REG') 
+        and nvl(d.segment11,'X') in (select eu||codice from vw_nb_articoli where anno = p_anno
+                and eu = 'E'
+        and liv1 = '6000000')
+        having sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)) > 0;
+        
+      a2_1 := a2_1 - fpv_cap_escluso1;
+      a2_2 := a2_2 - fpv_cap_escluso2;
+      
+      n1 := a2_1;
+      n2 := a2_2;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,p_utente,riga); 
+
+-- riga 4 FPV E finanziarie
+ riga := 4;
+ c1 := 'A3) Fondo pluriennale vincolato di entrata per partite finanziarie ';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+
+
+      select nvl(sum(nvl(FPV_FONTE,0)),0)
+      into a3_1
+      from fin_t_consuntivo_excel
+      where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = 'CONS'||(p_anno-1)
+      and NB_TITOLO = '3';
+
+      select nvl(sum(nvl(FPV_FONTE,0)),0)
+      into a3_2
+      from fin_t_consuntivo_excel
+      where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+    n1 := a3_1;
+    n2 := a3_2;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,p_utente,riga); 
+
+-- riga 5 FPV E cancellati
+ riga := 5;
+ c1 := 'A4) Fondo pluriennale vincolato di entrata che finanzia gli impegni cancellati definitivamente dopo l''approvazione del rendiconto '||(p_anno-1);
+ c2 := '(-)';
+ n1 := 0;
+ n2 := 0;
+
+    begin
+      select nvl(importo,0)
+      into a4_1
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno-1
+      and id_report = p_id_report
+      and nome_campo_report = 'A4';
+    exception when no_data_found then a4_1 := 0;
+    end;
+
+
+     begin
+      select nvl(importo,0)
+      into a4_2
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'A4';
+    exception when no_data_found then a4_2 := 0;
+    end;
+
+    n1 := a4_1;
+    n2 := a4_2;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,p_utente,riga); 
+
+-- riga 6 FPV E totale
+ riga := 6;
+ c1 := 'A) Fondo pluriennale vincolato di entrata (A1 + A2 + A3 - A4)';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+
+    n1 := nvl(a1_1,0) + nvl(a2_1,0) + nvl(a3_1,0) - nvl(a4_1,0);
+    n2 := nvl(a1_2,0) + nvl(a2_2,0) + nvl(a3_2,0) - nvl(a4_2,0);
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,p_utente,riga); 
+
+-- riga 7 Titolo1 Entrate correnti
+ riga := 7;
+ c1 := 'B) Titolo 1 - Entrate correnti di natura tributaria, contributiva e perequativa';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+     select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '1';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '1';
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+
+-- riga 8 Titolo2 Trasferimenti correnti
+ riga := 8;
+ c1 := 'C) Titolo 2 - Trasferimenti correnti  validi ai fini dei saldi finanza pubblica';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+     select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '2';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '2';
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+
+-- riga 9 Titolo 3 - Entrate extratributarie
+ riga := 9;
+ c1 := 'D) Titolo 3 - Entrate extratributarie';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+     select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '3';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '3';
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+-- riga 10 Titolo 4 - Entrate in c/capitale
+ riga := 10;
+ c1 := 'E) Titolo 4 - Entrate in c/capitale';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+     select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '4';
+
+    select 
+    from fin_t_consuntivo_excel
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '4';
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+-- riga11 F) Titolo 5 - Entrate da riduzione di attività finanziarie
+ riga := 11;
+ c1 := 'F) Titolo 5 - Entrate da riduzione di attività finanziarie';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+   select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno-1
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '5';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'E'
+      and UTENTE = p_utente
+      and substr(NB_LIVELLO1,1,1) = '5';
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+-- riga 12 G)  TOTALE SPAZI FINANZIARI ACQUISITI (1 + 2 + 3 + 4 + 5 ) 
+ riga := 12;
+ c1 := 'G)  TOTALE SPAZI FINANZIARI ACQUISITI (1 + 2 + 3 + 4 + 5 )';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+ 
+ begin
+      select nvl(importo,0)
+      into n2
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'G';
+    exception when no_data_found then n2 := 0;
+ end;
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+
+-- riga 13 H1) Titolo 1 - Spese correnti al netto del fondo pluriennale vincolato
+ riga := 13;
+ c1 := 'H1) Titolo 1 - Spese correnti al netto del fondo pluriennale vincolato';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '1';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '1';
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit; 
+
+
+-- riga 14 H2)  Fondo pluriennale vincolato di parte corrente 
+ riga := 14;
+ c1 := 'H2) Fondo pluriennale vincolato di parte corrente ';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+   select 
+     NVL(SUM(nvl(fpv,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '1';
+
+    select 
+     NVL(SUM(nvl(fpv,0)),0)
+    into n2
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '1';
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+-- riga 15 H) Titolo 1 - Spese correnti valide ai fini dei saldi di finanza pubblica (H=H1+H2)
+ riga := 15;
+ c1 := 'H) Titolo 1 - Spese correnti valide ai fini dei saldi di finanza pubblica (H=H1+H2)';
+ c2 := '(-)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+  select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)+nvl(fpv,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '1';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)+nvl(fpv,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '1';
+
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+ -- riga 16 I1) Titolo 2 - Spese in c/ capitale al netto del fondo pluriennale vincolato 
+ riga := 16;
+ c1 := 'I1) Titolo 2 - Spese in c/ capitale al netto del fondo pluriennale vincolato ';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+ -- riga 17 I2) Fondo pluriennale vincolato in c/capitale al netto delle quote finanziate da debito 
+ riga := 17;
+ c1 := 'I2) Fondo pluriennale vincolato in c/capitale al netto delle quote finanziate da debito ';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+select 
+     NVL(SUM(nvl(fpv,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+
+    select 
+     NVL(SUM(nvl(fpv,0)),0)
+    into n2
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+ -- riga 18 I) Titolo 2 - Spese in c/capitale valide ai fini dei saldi di finanza pubblica  (I=I1+I2)
+ riga := 18;
+ c1 := 'I) Titolo 2 - Spese in c/capitale valide ai fini dei saldi di finanza pubblica  (I=I1+I2)';
+ c2 := '(-)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+ select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)+nvl(fpv,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)+nvl(fpv,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '2';
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+
+-- riga 19 L1) Titolo 3 - Spese per incremento di attività finanziarie al netto del fondo pluriennale vincolato
+ riga := 19;
+ c1 := 'L1) Titolo 3 - Spese per incremento di attività finanziarie al netto del fondo pluriennale vincolato';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+ -- riga 20 L2) Fondo pluriennale vincolato per partite finanziarie 
+ riga := 20;
+ c1 := 'L2) Fondo pluriennale vincolato per partite finanziarie';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+    select 
+     NVL(SUM(nvl(fpv,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+    select 
+     NVL(SUM(nvl(fpv,0)),0)
+    into n2
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+-- riga 21 L) Titolo 3 - Spese per incremento di attività finanziaria valide ai fini dei saldi di finanza pubblica (L=L1 + L2)
+ riga := 21;
+ c1 := 'L) Titolo 3 - Spese per incremento di attività finanziaria valide ai fini dei saldi di finanza pubblica (L=L1 + L2)';
+ c2 := '(-)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)+nvl(fpv,0)),0)
+    into n1
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+    select 
+     NVL(SUM(nvl(ACCERTAMENTI_IMPEGNI_COMPE,0)+nvl(fpv,0)),0)
+    ,NVL(SUM(nvl(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0)
+    into n2,n3
+    from fin_t_consuntivo_excel
+    where ANNO_CONSUNTIVO = p_anno
+      and TIPO_CAPITOLO = 'U'
+      and UTENTE = p_utente
+      and NB_TITOLO = '3';
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit;
+
+
+ -- riga 22 J) Saldo anticipazione finanziamento sanità ( anticip. sanità concessa -  le relative regolazioni contabili per i rimborsi anticipazione sanità effettuate nell'anno) (solo ai fini saldo di cassa)
+ riga := 22;
+ c1 := 'J) Saldo anticipazione finanziamento sanità ( anticip. sanità concessa -  le relative regolazioni contabili per i rimborsi anticipazione sanità effettuate nell''anno) (solo ai fini saldo di cassa)';
+ c2 := '(+)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+ 
+  begin
+      select nvl(importo,0)
+      into n3
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'J3';
+    exception when no_data_found then n3 := 0;
+    end;
+
+
+ INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit; 
+
+-- riga 23 M) TOTALE SPAZI FINANZIARI CEDUTI(1)
+ riga := 23;
+ c1 := 'M) TOTALE SPAZI FINANZIARI CEDUTI';
+ c2 := '(-)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+  begin
+      select nvl(importo,0)
+      into n1
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno-1
+      and id_report = p_id_report
+      and nome_campo_report = 'M';
+    exception when no_data_found then n1 := 0;
+    end;
+
+
+     begin
+      select nvl(importo,0)
+      into n2
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'M';
+    exception when no_data_found then n2 := 0;
+    end;
+
+INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+ commit; 
+
+
+-- riga 24 N) SPAZI ACQUISITI NON UTILIZZATI ( N=1f+1g+2c+3d+4c+5d) 
+ riga := 24;
+ c1 := 'N) SPAZI ACQUISITI NON UTILIZZATI ( N=1f+1g+2c+3d+4c+5d) ';
+ c2 := '(-)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+  begin
+      select nvl(importo,0)
+      into n1
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno-1
+      and id_report = p_id_report
+      and nome_campo_report = 'N';
+    exception when no_data_found then n1 := 0;
+    end;
+
+
+     begin
+      select nvl(importo,0)
+      into n2
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'N';
+    exception when no_data_found then n2 := 0;
+    end;
+
+
+INSERT INTO tmp_tabulati (car01,car02,num01,num02,num03,utente,num_ord_riga) 
+VALUES (c1,c2,n1,n2,n3,p_utente,riga); 
+commit;
+
+-- riga 25 O) SALDO TRA ENTRATE E SPESE FINALI VALIDE AI FINI DEI SALDI DI FINANZA PUBBLICA 
+ riga := 25;
+ c1 := 'O) SALDO TRA ENTRATE E SPESE FINALI VALIDE AI FINI DEI SALDI DI FINANZA PUBBLICA (O=A+B+C+D+E+F+G-H-I-L+J-M-N)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+  select nvl(sum(nvl(num01,0)),0) into somma_piu1
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (6,7,8,9,10,11,12,22);
+
+  select nvl(sum(nvl(num01,0)),0) into somma_meno1
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (15,18,21,23,24);
+
+  n1 := somma_piu1 - somma_meno1;
+
+  select nvl(sum(nvl(num02,0)),0) into somma_piu2
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (6,7,8,9,10,11,12,22);
+
+  select nvl(sum(nvl(num02,0)),0) into somma_meno2
+  from tmp_tabulati
+  n2 := somma_piu2 - somma_meno2;
+  where utente = p_utente
+  and num_ord_riga in (15,18,21,23,24);
+
+
+  select nvl(sum(nvl(num03,0)),0) into somma_piu3
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (6,7,8,9,10,11,12,22);
+
+  select nvl(sum(nvl(num03,0)),0) into somma_meno3
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (15,18,21,23,24);
+
+  n3 := somma_piu3 - somma_meno3;
+
+
+ INSERT INTO tmp_tabulati (car01,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,n1,n2,n3,p_utente,riga); 
+ commit;
+
+-- riga 26 P) OBIETTIVO DI SALDO
+ riga := 26;
+ c1 := 'P) OBIETTIVO DI SALDO';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+    begin
+      select nvl(importo,0)
+      into n1
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno-1
+      and id_report = p_id_report
+      and nome_campo_report = 'P1';
+    exception when no_data_found then n1 := 0;
+    end;
+
+
+     begin
+      select nvl(importo,0)
+      into n2
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'P2';
+    exception when no_data_found then n2 := 0;
+    end;
+
+     begin
+      select nvl(importo,0)
+      into n3
+      from fnd_reports_importi_man
+      where valore_parametro_anno = p_anno
+      and id_report = p_id_report
+      and nome_campo_report = 'P3';
+    exception when no_data_found then n3:= 0;
+    end;
+
+
+INSERT INTO tmp_tabulati (car01,num01,num02,num03,utente,num_ord_riga) 
+VALUES (c1,n1,n2,n3,p_utente,riga); 
+commit;
+
+-- riga 27 Q) DIFFERENZA TRA IL SALDO TRA ENTRATE E SPESE FINALI NETTO E OBIETTIVO (Q=O-P)
+ riga := 27;
+ c1 := 'Q) DIFFERENZA TRA IL SALDO TRA ENTRATE E SPESE FINALI NETTO E OBIETTIVO (Q=O-P)';
+ n1 := 0;
+ n2 := 0;
+ n3 := 0;
+
+  select nvl(sum(decode(num_ord_riga,25,nvl(num01,0),-nvl(num01,0))),0) into n1
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (25,26);
+
+  select nvl(sum(decode(num_ord_riga,25,nvl(num02,0),-nvl(num02,0))),0) into n2
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (25,26);
+
+   select nvl(sum(decode(num_ord_riga,25,nvl(num03,0),-nvl(num03,0))),0) into n3
+  from tmp_tabulati
+  where utente = p_utente
+  and num_ord_riga in (25,26);
+
+ INSERT INTO tmp_tabulati (car01,num01,num02,num03,utente,num_ord_riga) 
+ VALUES (c1,n1,n2,n3,p_utente,riga); 
+ commit;
+
+
+ END;</pre>	</td></tr>
+</table></div>

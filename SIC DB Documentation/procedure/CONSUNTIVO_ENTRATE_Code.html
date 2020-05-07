@@ -1,0 +1,821 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CONSUNTIVO_ENTRATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CONSUNTIVO_ENTRATE.html">Details</a></div></div>
+<div class="tab"><div><a href="CONSUNTIVO_ENTRATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CONSUNTIVO_ENTRATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="CONSUNTIVO_ENTRATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CONSUNTIVO_ENTRATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE consuntivo_entrate(p_anno in number,p_capitolo in varchar2,p_data_stampa in date,p_utente in varchar2) as
+-- vedi PP000017.docx
+
+
+
+wcapitoli_totali number := 0;
+wid number := 0;
+
+-- riporterà il valore della partita iva o codice fiscale dell'ente ai fini del consolidato per distinguere i movimenti.
+pi_ente varchar2(16);
+
+CM3 VARCHAR2(3);
+c1 number (15,2) := 0;
+c2 number (15,2) := 0;
+c3 number (15,2) := 0;
+c4 number (15,2) := 0;
+c5 number (15,2) := 0;
+c6 number (15,2) := 0;
+c7 number (15,2) := 0;
+c8 number (15,2) := 0;
+c9 number (15,2) := 0;
+c10 number (15,2) := 0;
+c10_1 number (15,2) := 0; -- importo rettifiche in aumento dei residui attivi (residui incassati per un importo maggiore)
+c11 number (15,2) := 0;
+c12 number (15,2) := 0;
+c13 number (15,2) := 0;
+wcapitolo varchar2(6);
+data_generazione date := trunc(nvl(p_data_stampa,to_date('3112'||p_anno,'ddmmyyyy')),'dd');
+anno_corr number := p_anno;
+c_avanzo_amministrazione number(15,2) := 0;
+c_variazione_avanzo_delibera number(15,2) := 0;
+c_variazione_avanzo_piu number(15,2) := 0;
+c_variazione_avanzo_meno number(15,2) := 0;
+c_cassa number(15,2) := 0;
+c_desc_capitolo varchar2(2000);
+c_variazione_cassa_piu number(15,2) := 0;
+c_variazione_cassa_meno number(15,2) := 0;
+
+c_fpv_corrente number(15,2) := 0;
+c_fpv_capitale number(15,2) := 0;
+c_variazione_fpv_corrente number(15,2) := 0;
+c_variazione_fpv_capitale number(15,2) := 0;
+
+vcap_avanzo_amm VARCHAR2(5);
+vdesc_cap_avanzo_amm VARCHAR2(1000);
+vcap_fpv_corrente VARCHAR2(5);
+vdesc_cap_fpv_corrente VARCHAR2(1000);
+vcap_fpv_capitale VARCHAR2(5);
+vdesc_cap_fpv_capitale VARCHAR2(1000);
+vcap_fondo_cassa VARCHAR2(5);
+vdesc_cap_fondo_cassa VARCHAR2(1000);
+capitoli_vincolati varchar2(4000);
+
+--colonna_corr varchar2(10);
+c1_corr number (15,2) := 0;
+c2_corr number (15,2) := 0;
+c3_corr number (15,2) := 0;
+c4_corr number (15,2) := 0;
+c5_corr number (15,2) := 0;
+c6_corr number (15,2) := 0;
+c7_corr number (15,2) := 0;
+c8_corr number (15,2) := 0;
+c9_corr number (15,2) := 0;
+c10_corr number (15,2) := 0;
+c11_corr number (15,2) := 0;
+c12_corr number (15,2) := 0;
+c13_corr number (15,2) := 0;
+
+
+-- per tenere conto dei correttivi
+cursor correttivi is
+select importo_operazione*(decode(segno_operazione,'piu',1,'meno',-1,0)) correttivo
+,colonna_consuntivo colonna_corr
+from t_appoggio_consuntivo
+where anno = p_anno
+and cap = wcapitolo;
+-- FINE correttivi
+
+
+-- 12/09/2012 Nuove variabili introdotte da Simone Bruno per calcolo percentuale avanzamento processo
+    rindex    BINARY_INTEGER;
+    w_context VARCHAR(200);
+    slno      BINARY_INTEGER;
+    w_conteggio NUMBER;
+    w_count NUMBER;
+-- fine introduzione variabili Simone Bruno
+
+begin
+
+
+/* Modifica 15/04/2014 Nicola Radogna
+   Utilizzo tabella TMP_CONSUNTIVI per mostare stato avanzamento generazione consuntivi
+   1- Lettura numero totale capitoli da processare
+   2- Lettura nuovo id istanza genero consuntivo
+   3- Inserimento in TMP_CONSUNTIVI */
+
+    select count(*)
+      into    wcapitoli_totali
+    from    fin_t_bilancio ftb,
+                vw_nb_articoli bc,
+                fin_v_bilancio_determine bd,
+                fin_t_siope siope        
+    where    
+    ftb.eu= 'E' and
+    ftb.anno = p_anno and
+    bc.anno = ftb.anno and
+    bc.eu||bc.codice =ftb.eu||ftb.articolo and
+    bc.eu||bc.codice = nvl(p_capitolo,bc.eu||bc.codice) and
+    bc.liv1 &lt;> '0000000' and
+    nvl(bc.abilitato,'S') = 'S' and
+    bd.anno = ftb.anno and
+    bd.EU = ftb.eu and 
+    bd.capitolo = ftb.articolo       
+    and siope.eu(+)= bc.eu
+    and siope.codice_bilancio(+) = bc.codice_bilancio_siope
+    and siope.codice_gestionale(+) = bc.codice_gestionale_siope;
+
+
+begin
+ select nvl(max(id),0)+1
+  into wid
+  from tmp_consuntivi;
+exception when no_data_found then wid := 0;
+end;
+
+begin
+    insert into tmp_consuntivi (id, data, operazione, sessione, capitoli_processati, capitoli_totali, username) 
+    values (wid, sysdate, 'CONSUNTIVO_ENTRATE_'||UPPER(p_utente||to_char(p_data_stampa,'ddmmyyyy')), to_char(v('APP_SESSION')), 0, wcapitoli_totali, p_utente);
+    commit;
+end;
+/* 15/04/2014 Fine modifica Nicola Radogna TMP_CONSUNTIVI */ 
+ -- ***** Elimino righe relativo a stesso Utente e stesso anno
+
+   delete fin_t_consuntivo_excel where anno_consuntivo = p_anno and utente = p_utente and tipo_capitolo = 'E' ;
+   commit;
+
+ -- *******
+ 
+ begin 
+  select 
+  nvl(avanzo_amministrazione,0),
+  nvl(variazione_avanzo_delibera,0),
+  nvl(variazione_avanzo_piu,0),
+  nvl(variazione_avanzo_meno,0),
+  nvl(cassa,0),
+  nvl(variazione_cassa_piu,0),
+  nvl(variazione_cassa_meno,0),
+  nvl(variazione_fpv_capitale,0),
+  nvl(variazione_fpv_corrente,0),
+  cap_avanzo_amm, desc_cap_avanzo_amm,
+  cap_fpv_corrente, desc_cap_fpv_corrente,
+  cap_fpv_capitale, desc_cap_fpv_capitale,
+  cap_fondo_cassa, desc_cap_fondo_cassa,
+  partita_iva
+  into c_avanzo_amministrazione,
+      c_variazione_avanzo_delibera,
+      c_variazione_avanzo_piu,
+      c_variazione_avanzo_meno,
+      c_cassa,
+      c_variazione_cassa_piu,
+      c_variazione_cassa_meno,
+      c_variazione_fpv_capitale,
+      c_variazione_fpv_corrente,
+      vcap_avanzo_amm, vdesc_cap_avanzo_amm,
+      vcap_fpv_corrente, vdesc_cap_fpv_corrente,
+      vcap_fpv_capitale, vdesc_cap_fpv_capitale,
+      vcap_fondo_cassa, vdesc_cap_fondo_cassa,
+      pi_ente
+  from fin_t_dati_generali
+  where anno_finanziario = p_anno;
+end;
+
+ -- **** Inserisco sulla Fin_t_consuntivo_excel le righe di base relative a tutti i capitoli dell'anno
+
+         INSERT INTO FIN_T_CONSUNTIVO_EXCEL
+          (
+            TIPO_capitolo,
+            ANNO_CONSUNTIVO,
+            CODICE_REGIONALE,
+            TITOLO,
+            DESC_TITOLO,
+            CATEGORIA_MACROFO,
+            DESC_CATEGORIA_MACROFO,
+            FUNZIONE_OBIETTIVO,
+            DESC_FUNZ_OBIETTIVO,
+            UPB,
+            DESC_UPB,
+            capitolo,
+            DESC_capitolo,
+            CM_GENERE_FUNZIONE,
+            CM_TIPO_FUNZIONE,
+            CM_TITOLO_CATEG_VOCEECONOMICA,
+            CM_CODICE_AGGREGATI_ECONOMICI,
+            CM_SEZIONE,
+            CM_SETTORE,
+            DATA_GENERAZIONE,
+            UTENTE,
+            CODICE_BILANCIO_SIOPE,
+            CODICE_GESTIONALE_SIOPE,
+            SANITA_SN,
+            NOTE_SANITA,
+            NB_PIANO_CONTI_FINA,
+            NB_CODICE_TRANSAZIONE,
+            NB_ENTRATA_RICORRENTE,
+            NB_MACROAGGREGATO,
+            NB_COFOG_II_LIVELLO,
+            NB_ID_PADRE,
+            NB_PRU,
+            CONTO_SANITA,
+            NB_FPV,
+            NB_capitolo_FPV,
+            FONDO,
+            VAR_COM_POS,
+            VAR_COM_NEG,
+            VAR_CAS_POS,
+            VAR_CAS_NEG,
+            ASS_COM_POS,
+            ASS_COM_NEG,
+            ASS_CAS_POS,
+            ASS_CAS_NEG,
+            NB_LIVELLO1,
+            DESC_NB_LIVELLO1,
+            NB_LIVELLO2,
+            DESC_NB_LIVELLO2,
+            NB_LIVELLO3,
+            DESC_NB_LIVELLO3,
+            DESCR_SIOPE,
+            DESCR_PCF,
+            DESCR_MACRO_AGG,
+            CF_PI_ENTE,
+            RESIDUI_INIZIALI,
+            PREVISIONI_DEFINITIVE_COMPE,
+            PREVISIONI_DEFINITIVE_CASSA,
+            ACCERTAMENTI_IMPEGNI_COMPE,
+            RISCOSSIONI_PAGAMENTI_COMPE,
+            RISCOSSIONI_PAGAMENTI_RES,
+            RISCOSSIONI_PAGAMENTI_TOTALE,
+            DIFFERENZA_PREVCOMPE_ACCERT,
+            DIFFERENZA_PREVCOMPE_IMPEGNI,
+            VARIAZIONE_RESIDUI,
+            RIMANENZE_RESIDUI,
+            RESIDUI_COMPETENZA,
+            RESIDUI_FINALI,
+            PREVISIONI_INIZIALI_RES
+            )
+        select 
+            ftb.eu tipo_capitolo,
+            p_anno anno_consuntivo,
+            17 codice_regionale,
+            bd.titolo                 titolo,
+            bd.DESCRIZIONE_titolo            desc_titolo,
+            bd.macro_fo                macro_fo,
+            bd.descrizione_macro_fo            desc_macro_fo,
+            bd.categoria                 fo,
+            bd.descrizione_categoria            desc_fo,
+            bd.upb    upb,
+            bd.DESCRIZIONE_upb               desc_upb,
+            bc.CODICE                 codice_capitolo,
+            bc.DESC_capitolo                     desc_capitolo,
+            SUBSTR(nvl(bc.CODICE_MECCANOGRAFICO,''),1,1) CM_GENERE_FUNZIONE,
+            SUBSTR(nvl(bc.CODICE_MECCANOGRAFICO,''),2,1) CM_TIPO_FUNZIONE,
+            SUBSTR(nvl(bc.CODICE_MECCANOGRAFICO,''),3,3) CM_TITOLO_CATEG_VOCEECONOMICA, 
+            SUBSTR(nvl(bc.CODICE_MECCANOGRAFICO,''),6,1) CM_CODICE_AGGREGATI_ECONOMICI,
+            SUBSTR(nvl(bc.CODICE_MECCANOGRAFICO,''),7,2) CM_SEZIONE,
+            SUBSTR(nvl(bc.CODICE_MECCANOGRAFICO,''),9,2) CM_SETTORE,
+            data_generazione,
+            p_utente,
+            bc.CODICE_BILANCIO_SIOPE                   siope_bil,
+            bc.CODICE_GESTIONALE_SIOPE               siope_gest,
+            bc.SANITA_SN,
+            null NOTE_SANITA,
+            bc.pcf NB_PIANO_CONTI_FINA,
+            bc.NB_CODICE_TRANSAZIONE,
+            bc.NB_ENTRATA_RICORRENTE,
+            bc.macro_agg nb_macroaggregato,
+            bc.NB_COFOG_II_LIVELLO,
+            bc.NB_ID_PADRE,
+            bc.NB_PRU,
+            bc.CONTO_SANITA,
+            bc.NB_FPV,
+            bc.NB_capitolo_FPV,
+            bc.FONDO,
+            nvl(ftb.VARIAZIONE_COMPETENZA_PIU,0) vcompos,
+            nvl(ftb.VARIAZIONE_COMPETENZA_MENO,0) vcomneg,
+            nvl(ftb.VARIAZIONE_CASSA_PIU,0) vcaspos,
+            nvl(ftb.VARIAZIONE_CASSA_MENO,0) vcasneg,
+            nvl(ftb.ASSESTAMENTO_COMPETENZA_PIU,0) acompos,
+            nvl(ftb.ASSESTAMENTO_COMPETENZA_MENO,0) acomneg,
+            nvl(ftb.ASSESTAMENTO_CASSA_PIU,0) acaspos,
+            nvl(ftb.ASSESTAMENTO_CASSA_MENO,0) acasneg,
+            nvl(bc.liv1,'Da Def.') TITOLO,
+            bc.desc_liv1 DESC_TITOLO,
+            nvl(bc.liv2,'Da Def.') TIPOLOGIA,
+            bc.desc_liv2 Desc_Tipologia,
+            nvl(bc.liv3,'Da Def.') CATEGORIA,
+            bc.desc_liv3 DESC_CATEGORIA,
+            siope.descrizione descr_siope,
+            bc.desc_pcf descr_pcf,
+            bc.desc_macro_agg DESCR_MACRO_AGG,
+            pi_ente,
+            ftb.residuo_consuntivo,
+            nvl(previsione_definitiva(p_anno,ftb.eu||ftb.articolo),0),
+            nvl(cassa_definitiva(p_anno,ftb.eu||ftb.articolo),0),
+            ftb.impegni_accertamenti_compe,
+            ftb.mandati_reversali_compe,
+            ftb.mandati_reversali_res,
+            ftb.mandati_reversali_compe + ftb.mandati_reversali_res,
+            ftb.impegni_accertamenti_compe - nvl(previsione_definitiva(p_anno,ftb.eu||ftb.articolo),0),
+            0,
+            ftb.variazioni,
+            decode(sign(ftb.residuo_consuntivo - ftb.mandati_reversali_res - ftb.variazioni),-1,0,(ftb.residuo_consuntivo - ftb.mandati_reversali_res - ftb.variazioni)),
+            ftb.impegni_accertamenti_compe - ftb.mandati_reversali_compe,
+            decode(sign(ftb.residuo_consuntivo - ftb.mandati_reversali_res - ftb.variazioni),-1,0,ftb.residuo_consuntivo - ftb.mandati_reversali_res - ftb.variazioni) + (ftb.impegni_accertamenti_compe - ftb.mandati_reversali_compe),
+            nvl(residuo_iniziale(p_anno,ftb.eu||ftb.articolo),0)
+        from    fin_t_bilancio ftb,
+                vw_nb_articoli bc,
+                fin_v_bilancio_determine bd,
+                fin_t_siope siope        
+        where    
+          ftb.eu= 'E' and
+          ftb.anno = p_anno and
+          bc.anno = ftb.anno and
+          bc.eu||bc.codice =ftb.eu||ftb.articolo and
+          bc.eu||bc.codice = nvl(p_capitolo,bc.eu||bc.codice) and
+          bc.liv1 &lt;> '0000000' and
+          nvl(bc.abilitato,'S') = 'S' and
+          bd.anno = ftb.anno and
+          bd.EU = ftb.eu and 
+          bd.capitolo = ftb.articolo       
+                and siope.eu(+)= bc.eu
+                and siope.codice_bilancio(+) = bc.codice_bilancio_siope
+                and siope.codice_gestionale(+) = bc.codice_gestionale_siope
+                order by     bc.eu||bc.codice;
+
+
+      commit;
+
+
+
+ -- ********** FINE INSERT
+
+
+
+-- 12/09/2012 mod Simone Bruno per inizializzazione variabili utilizzate per calcolo percentuale
+   rindex := dbms_application_info.set_session_longops_nohint;
+   w_context := to_char(v('APP_SESSION'));
+   w_count := 0;
+
+
+-- fine mod simone bruno
+
+
+-- inserisco i record relativi all'AVANZO, al Fondo Cassa, ed al Fondo Pluriennale Vincolato
+if (nvl(c_avanzo_amministrazione,0) + nvl(c_variazione_avanzo_delibera,0) + nvl(c_variazione_avanzo_piu,0) - nvl(c_variazione_avanzo_meno,0)) > 0
+  then
+    insert into fin_t_consuntivo_excel(
+    TIPO_CAPITOLO
+    ,ANNO_CONSUNTIVO
+    ,CODICE_REGIONALE
+    ,TITOLO
+    ,FUNZIONE_OBIETTIVO
+    ,UPB
+    ,CAPITOLO
+    ,DESC_CAPITOLO
+    ,PREVISIONI_DEFINITIVE_COMPE
+    ,DIFFERENZA_PREVCOMPE_ACCERT
+    ,DATA_GENERAZIONE
+    ,COD_MECC_UTILIZZATO
+    ,NB_LIVELLO1
+    ,DESC_NB_LIVELLO1
+    ,NB_LIVELLO2
+    ,DESC_NB_LIVELLO2
+    ,NB_LIVELLO3
+    ,DESC_NB_LIVELLO3
+    ,UTENTE
+    ,CF_PI_ENTE)
+    values
+    ('E'
+    ,p_anno
+    ,'17'
+    ,'0'
+    ,'01'
+    ,'0.01.01'
+    ,vcap_avanzo_amm /* '00001' */
+    ,vdesc_cap_avanzo_amm
+    ,'XXX'
+    ,(nvl(c_avanzo_amministrazione,0) + nvl(c_variazione_avanzo_delibera,0) + nvl(c_variazione_avanzo_piu,0) - nvl(c_variazione_avanzo_meno,0))
+    ,(nvl(c_avanzo_amministrazione,0) + nvl(c_variazione_avanzo_delibera,0) + nvl(c_variazione_avanzo_piu,0) - nvl(c_variazione_avanzo_meno,0))
+    ,p_data_stampa
+    ,'0'
+    ,'Avanzo di Amministrazione'
+    ,'0'
+    ,'Avanzo di Amministrazione'
+    ,'0'
+    ,'Avanzo di Amministrazione'
+    ,p_utente
+    ,pi_ente);
+    commit;
+  end if;
+
+-- Modifica richiesta da Sarli il 13/06/2017: il Fondo Cassa non viene più indicato nei nuovi prospetti Arconet
+/*if (nvl(c_cassa,0) + nvl(c_variazione_cassa_piu,0) - nvl(c_variazione_cassa_meno,0)) > 0
+    then 
+    insert into fin_t_consuntivo_excel(
+    TIPO_CAPITOLO
+    ,ANNO_CONSUNTIVO
+    ,CODICE_REGIONALE
+    ,TITOLO
+    ,FUNZIONE_OBIETTIVO
+    ,UPB
+    ,CAPITOLO
+    ,DESC_CAPITOLO
+    ,PREVISIONI_DEFINITIVE_CASSA
+    ,DATA_GENERAZIONE
+    ,COD_MECC_UTILIZZATO
+    ,NB_LIVELLO1
+    ,DESC_NB_LIVELLO1
+    ,NB_LIVELLO2
+    ,DESC_NB_LIVELLO2
+    ,NB_LIVELLO3
+    ,DESC_NB_LIVELLO3
+    ,UTENTE
+    ,CF_PI_ENTE)
+    values
+    ('E'
+    ,p_anno
+    ,'17'
+    ,'0'
+    ,'01'
+    ,'0.01.01'
+    ,'00003' -- f.coretti. qui andrebbe vcap_fondo_cassa, su suggerimento di a.lobefaro per ora lascio così (com'era sia in gat2 che in sic_consiglio), per non modificare i report del consuntivo
+    ,vdesc_cap_fondo_cassa
+    ,(nvl(c_cassa,0) + nvl(c_variazione_cassa_piu,0) - nvl(c_variazione_cassa_meno,0))
+    ,p_data_stampa
+    ,'XXX'
+    ,'0'
+    ,'Fondo Cassa'
+    ,'0'
+    ,'Fondo Cassa'
+    ,'0'
+    ,'Fondo Cassa'
+    ,p_utente
+    ,pi_ente);
+    commit;
+  end if;
+ */
+ 
+   select nvl(sum(nvl(b.aiuti,0)),0) into c_fpv_corrente
+    from fin_t_bilancio b
+    ,fin_t_articoli a 
+    where b.anno = p_anno
+    and b.eu = 'U'
+    and nvl(b.aiuti,0)> 0
+    and a.anno = b.anno
+    and a.eu||a.codice = b.eu||b.articolo
+    and a.nb_titolo &lt;> 2;
+
+
+if nvl(c_fpv_corrente,0) > 0
+    then 
+    insert into fin_t_consuntivo_excel(
+    TIPO_CAPITOLO
+    ,ANNO_CONSUNTIVO
+    ,CODICE_REGIONALE
+    ,TITOLO
+    ,FUNZIONE_OBIETTIVO
+    ,UPB
+    ,CAPITOLO
+    ,DESC_CAPITOLO
+    ,PREVISIONI_DEFINITIVE_COMPE
+    ,DIFFERENZA_PREVCOMPE_ACCERT
+    ,DATA_GENERAZIONE
+    ,COD_MECC_UTILIZZATO
+    ,NB_LIVELLO1
+    ,DESC_NB_LIVELLO1
+    ,NB_LIVELLO2
+    ,DESC_NB_LIVELLO2
+    ,NB_LIVELLO3
+    ,DESC_NB_LIVELLO3
+    ,UTENTE
+    ,CF_PI_ENTE)
+    values
+    ('E'
+    ,p_anno
+    ,'17'
+    ,'0'
+    ,'01'
+    ,'0.01.01'
+    ,vcap_fpv_corrente /*'00004'*/
+    ,vdesc_cap_fpv_corrente 
+    ,nvl(c_fpv_corrente,0)
+    ,0
+    ,p_data_stampa
+    ,'XXX'
+    ,'0'
+    ,'Fondo Pluriennale Vincolato Corrente'
+    ,'0'
+    ,'Fondo Pluriennale Vincolato Corrente'
+    ,'0'
+    ,'Fondo Pluriennale Vincolato Corrente'
+    ,p_utente
+    ,pi_ente);
+    commit;
+  end if;
+
+   select nvl(sum(nvl(b.aiuti,0)),0) into c_fpv_capitale
+    from fin_t_bilancio b
+    ,fin_t_articoli a 
+    where b.anno = p_anno
+    and b.eu = 'U'
+    and nvl(b.aiuti,0)> 0
+    and a.anno = b.anno
+    and a.eu||a.codice = b.eu||b.articolo
+    and a.nb_titolo = 2;
+
+if nvl(c_fpv_capitale,0)  > 0
+    then 
+    insert into fin_t_consuntivo_excel(
+    TIPO_CAPITOLO
+    ,ANNO_CONSUNTIVO
+    ,CODICE_REGIONALE
+    ,TITOLO
+    ,FUNZIONE_OBIETTIVO
+    ,UPB
+    ,CAPITOLO
+    ,DESC_CAPITOLO
+    ,PREVISIONI_DEFINITIVE_COMPE
+    ,DIFFERENZA_PREVCOMPE_ACCERT
+    ,DATA_GENERAZIONE
+    ,COD_MECC_UTILIZZATO
+    ,NB_LIVELLO1
+    ,DESC_NB_LIVELLO1
+    ,NB_LIVELLO2
+    ,DESC_NB_LIVELLO2
+    ,NB_LIVELLO3
+    ,DESC_NB_LIVELLO3
+    ,UTENTE
+    ,CF_PI_ENTE)
+    values
+    ('E'
+    ,p_anno
+    ,'17'
+    ,'0'
+    ,'01'
+    ,'0.01.01'
+    ,vcap_fpv_capitale /* '00005' */
+    ,vdesc_cap_fpv_capitale
+    ,nvl(c_fpv_capitale,0)
+    ,0
+    ,p_data_stampa
+    ,'XXX'
+    ,'0'
+    ,'Fondo Pluriennale Vincolato Capitale'
+    ,'0'
+    ,'Fondo Pluriennale Vincolato Capitale'
+    ,'0'
+    ,'Fondo Pluriennale Vincolato Capitale'
+    ,p_utente
+    ,PI_ENTE);
+    commit;
+  end if;
+
+
+
+-- FINE avanzo e fondo cassa
+
+
+      capitoli_vincolati := '';
+  FOR c IN (select capitolo from fin_t_consuntivo_excel where ANNO_CONSUNTIVO = p_anno and TIPO_CAPITOLO = 'E' and UTENTE = p_utente and substr(nb_livello1,1,1) &lt;> '0') loop 
+
+      wcapitolo := 'E'||c.capitolo;
+      
+      update tmp_consuntivi set capitoli_processati = capitoli_processati + 1 where id = wid;
+      commit;
+
+ --     for v in (select capitolo_uscita from vw_bilancio_spu10 where anno = p_anno and codice_capitolo_e = wcapitolo) loop
+  --      capitoli_vincolati := capitoli_vincolati||v.capitolo_uscita||'-';
+   --   end loop;
+   
+  /* for v in (select v.capitolo_uscita||' euro '||to_char(nvl(v.QUOTA_VINCOLATA,0),'999G999G990D00') vincolati from VW_VINCOLI_DEFINITIVI v where v.anno = p_anno
+        and 'E'||v.capitolo_entrata = wcapitolo) loop
+   capitoli_vincolati := capitoli_vincolati||v.vincolati||' - ';
+   end loop;
+      
+  capitoli_vincolati := trim(trailing ' - ' from capitoli_vincolati);
+  */
+     
+     SELECT LISTAGG(v.capitolo_uscita||chr(10)||' euro'||to_char(nvl(v.QUOTA_VINCOLATA,0),'999G999G990D00'), chr(10)) 
+      WITHIN GROUP (ORDER BY v.capitolo_uscita||chr(10)||' euro'||to_char(nvl(v.QUOTA_VINCOLATA,0),'999G999G990D00')) into capitoli_vincolati
+        FROM VW_VINCOLI_DEFINITIVI v
+        where v.anno = p_anno
+        and 'E'||v.capitolo_entrata = wcapitolo;
+
+   --  
+
+
+for corr in correttivi loop
+   if corr.colonna_corr = 'c1' 
+    then c1_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c2' 
+    then c2_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c3' 
+    then c3_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c4' 
+    then c4_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c5' 
+    then c5_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c6' 
+    then c6_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c7' 
+    then c7_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c8' 
+    then c8_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c9' 
+    then c9_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c10' 
+    then c10_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c11' 
+    then c11_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c12' 
+    then c12_corr := nvl(corr.correttivo,0);
+    elsif corr.colonna_corr = 'c13' 
+    then c13_corr := nvl(corr.correttivo,0);
+  end if; 
+end loop;
+
+ -- ******** RESIDUI INIZIALI **************
+
+     select nvl(residuo_consuntivo,0) into c1
+     from fin_t_bilancio
+     where anno = p_anno
+     and eu||articolo = wcapitolo;
+
+-- ****************************************
+      c1 := c1 + nvl(c1_corr,0);
+
+-- ***** PRE_DEF COMPE e PRE_DEF CASSA *****
+     -- già calcolate nella INSERT dalla Fin_t_bilancio
+      begin
+       select nvl(PREVISIONI_DEFINITIVE_COMPE,0)
+              ,nvl(PREVISIONI_DEFINITIVE_CASSA,0)
+       into c2,c3
+       from fin_t_consuntivo_excel
+       where anno_consuntivo = p_anno
+       and tipo_capitolo||capitolo = wcapitolo
+       and utente = p_utente;
+      exception when no_data_found then c2 := 0; c3 := 0;
+      end;
+
+
+-- ******************************************
+
+-- ***** ACCERTMENTI COMPE ****************
+
+      select nvl(sum(nvl(document_amount,0)),0) into c7
+      from FIN_T_DOCUMENTI
+      where doc_type = 'ACC'
+      and nvl(deletion_status_flag,'N') = 'N'
+      and segment8 = p_anno
+      and segment2 = wcapitolo
+      and date_created &lt;= data_generazione;
+
+      c7 := c7 + nvl(c7_corr,0);
+-- ************************************
+
+
+-- **** RISCOSSIONI COMPE *******
+
+      select nvl(sum(nvl(m.open_balance_proposed,0)),0) into c5
+      from fin_t_documenti m
+      ,fin_t_documenti i
+      where m.doc_type = 'REV'
+      and nvl(m.open_balance_proposed,0) > 0
+      and m.segment8 = p_anno
+      and m.segment2 = wcapitolo
+      and m.date_created &lt;= data_generazione
+      and i.doc_id = m.previous_doc_id
+      and i.segment8 = m.segment8;
+
+      c5 := c5 + nvl(c5_corr,0);
+-- ****************************
+
+-- **** RISCOSSIONI RES *******
+
+      select nvl(sum(nvl(m.open_balance_proposed,0)),0) into c4
+      from fin_t_documenti m
+      ,fin_t_documenti i
+      where m.doc_type = 'REV'
+      and nvl(m.open_balance_proposed,0) > 0
+      and m.segment8 = p_anno
+      and m.segment2 = wcapitolo
+      and m.date_created &lt;= data_generazione
+      and i.doc_id = m.previous_doc_id
+      and i.segment8 &lt; m.segment8;
+
+      c4 := c4 + nvl(c5_corr,0);
+-- ****************************
+
+    c6 := c4 + c5 + nvl(c6_corr,0);
+
+    c8 := c7 - c2 + nvl(c8_corr,0);
+    c9 := c6 - c3  + nvl(c9_corr,0);
+
+      select nvl(sum(nvl(-d.document_amount,0)),0) into c10
+
+-- *** VARIAZIONI RESIDUI *****
+
+      from fin_t_documenti d
+    --  ,fin_t_documenti i
+      where d.doc_type = 'INSUS'
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.segment8 = p_anno
+      and d.segment2 = wcapitolo
+      and d.date_created &lt;= data_generazione
+      ;--and i.doc_id = d.previous_doc_id;
+      
+   select -nvl(sum(residuo_acc_data(d.doc_id_accertamento,data_generazione)),0) into c10_1
+   from fin_t_accertamenti_residui d
+   where d.ANNO_FINANZIARIO = p_anno
+   and d.CAPITOLO_SPESA_CORRENTE = wcapitolo
+   and nvl(d.RESIDUO_INIZIALE,0) > 0
+   and residuo_acc_data(d.doc_id_accertamento,data_generazione) &lt; 0;
+
+      c10 := c10 + c10_1 + nvl(c10_corr,0);
+-- ****************************
+
+
+-- ** calcolo la rimanenza residui ---
+
+   select nvl(sum(residuo_acc_data(d.doc_id_accertamento,data_generazione)),0) into c11
+   from fin_t_accertamenti_residui d
+   where d.ANNO_FINANZIARIO = p_anno
+   and d.CAPITOLO_SPESA_CORRENTE = wcapitolo
+   and nvl(d.RESIDUO_INIZIALE,0) > 0
+   and residuo_acc_data(d.doc_id_accertamento,data_generazione) > 0;
+  
+  if c11 &lt; 0
+  then c11 := 0;
+  end if;
+-- ************************
+
+-- *** calcolo i residui di competenza
+  
+    select nvl(sum(residuo_acc_data(d.doc_id,data_generazione)),0) into c12
+    from fin_t_documenti d
+    where d.doc_type = 'ACC'
+    and nvl(d.deletion_status_flag,'N') = 'N'
+    and d.segment8 = p_anno
+    and d.date_created &lt;= data_generazione
+    and d.segment2 = wcapitolo
+    and residuo_acc_data(d.doc_id,data_generazione) > 0;
+
+
+-- ************************************
+
+--c11 := c1 - c4 - c10 + nvl(c11_corr,0);
+--c12 := c7 - c5 + nvl(c12_corr,0);
+
+    
+c13 := c11 + c12 + nvl(c13_corr,0);
+
+      UPDATE fin_t_consuntivo_excel c
+           SET 
+                  c.RESIDUI_INIZIALI = c1,
+                  c.PREVISIONI_DEFINITIVE_COMPE = c2,
+                  c.PREVISIONI_DEFINITIVE_CASSA = c3,
+                  c.ACCERTAMENTI_IMPEGNI_COMPE = c7,
+                  c.RISCOSSIONI_PAGAMENTI_COMPE = c5,
+                  c.RISCOSSIONI_PAGAMENTI_RES = c4,
+                  c.RISCOSSIONI_PAGAMENTI_TOTALE = c6,
+                  c.DIFFERENZA_PREVCOMPE_ACCERT = c8,
+                  c.VARIAZIONE_RESIDUI = c10,
+                  c.RIMANENZE_RESIDUI = c11,
+                  c.RESIDUI_COMPETENZA = c12,
+                  c.RESIDUI_FINALI = c13,
+                  c.PREVISIONI_INIZIALI_COMPE  = nvl(previsione_iniziale(p_anno,wcapitolo),0),
+                  c.PREVISIONI_INIZIALI_CASSA = nvl(cassa_iniziale(p_anno,wcapitolo),0),
+                  c.PREVISIONI_INIZIALI_RES = nvl(residuo_iniziale(p_anno,wcapitolo),0),
+                  c.note_sanita = capitoli_vincolati
+          WHERE c.tipo_capitolo||c.capitolo = wcapitolo
+          AND c.anno_consuntivo = p_anno
+          AND c.UTENTE = p_utente;
+          commit;
+-- ******* per controllo loop
+  --  insert into tmp_procedure(anno,residuo_consuntivo,man_rev_residui,variazioni_residui) values (p_anno,c7,c4,c5);
+  --  commit;
+-- ***************************
+
+-- 12/09/2012 mod Simone Bruno per calcolare percentuale avanzamento
+    w_count := w_count + 1;
+
+    dbms_application_info.set_session_longops(rindex, slno,'CONSUNTIVO_ENTRATE_' || UPPER(nvl(v('APP_USER'),USER)), NULL, 0, w_count, w_conteggio, w_context, 'Avanzamento Rigenerazione Consuntivo Entrate');
+    commit;
+-- fine mod Simone Bruno
+
+
+
+end loop;
+end;</pre>	</td></tr>
+</table></div>

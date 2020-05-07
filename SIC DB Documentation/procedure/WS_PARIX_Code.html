@@ -1,0 +1,165 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>WS_PARIX</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="WS_PARIX.html">Details</a></div></div>
+<div class="tab"><div><a href="WS_PARIX_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="WS_PARIX_References.html">References</a></div></div>
+<div class="tab"><div><a href="WS_PARIX_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="WS_PARIX_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure ws_parix (cod_fisc in varchar2,risposta out clob) is
+  Sec_Id          Number;
+	l_envelope CLOB;
+	l_risultato xmltype;
+	l_ris_string CLOB; --varchar2(4000);
+	l_res VARCHAR2(4000);
+  l_ns           varchar2(2000);
+  l_cod_fisc_tr  varchar2(16);
+  l_vers_appl    varchar2(10);
+  l_cod_err      varchar2(50);
+  l_descr_err    varchar2(2000);
+  l_n_rea        varchar2(20);
+  l_prov_ccia    varchar2(4);
+  doc xmldom.DOMDocument;
+  src_clob    BFILE;
+  dst_offset  number := 1 ;
+  src_offset  number := 1 ;
+  lang_ctx    number := DBMS_LOB.DEFAULT_LANG_CTX;
+  warning     number;
+begin
+Select Apex_Util.Find_Security_Group_Id (P_Workspace => 'SIC') 
+  Into   Sec_Id
+  From   Dual;
+Apex_Util.Set_Security_Group_Id(P_Security_Group_Id => Sec_Id);
+l_ns:='xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns1="http://ws.icr.ic.it" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"';
+
+l_cod_fisc_tr:='80002950766';
+l_vers_appl:= '1.0';
+-- ricerca dati rea da codice fiscale
+l_envelope := '&lt;soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.icr.ic.it">
+   &lt;soapenv:Header/>
+   &lt;soapenv:Body>
+      &lt;ws:RicercaImpresePerCodiceFiscale soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         &lt;codice_fiscale xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">00317370773&lt;/codice_fiscale>
+         &lt;switch_control xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">no&lt;/switch_control>
+         &lt;user xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">WSParixSRA&lt;/user>
+         &lt;password xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">JPnGAPk6&lt;/password>
+      &lt;/ws:RicercaImpresePerCodiceFiscale>
+   &lt;/soapenv:Body>
+&lt;/soapenv:Envelope>';
+l_risultato:=apex_web_service.make_request(
+              p_url => 'http://sirb.regione.basilicata.it:8080/parixgate/services/gate', 
+              p_action => 'RicercaImpresePerCodiceFiscale',
+              p_envelope => l_envelope);
+
+--salvo il risultato in un file in modo da poterlo leggere in un clob e trattarlo leggendo solotanto la &lt;RISPOSTA>
+select XMLSERIALIZE(CONTENT (l_risultato)) 
+into l_ris_string from dual;
+l_ris_string:=replace(l_ris_string,'&lt;','&lt;');
+l_ris_string:=replace(l_ris_string,'&gt;','>');
+l_ris_string:=replace(l_ris_string,'&quot;','"');
+l_ris_string:=substr(l_ris_string,instr(l_ris_string,'&lt;RISPOSTA>'),instr(l_ris_string,'&lt;/RISPOSTA>')-instr(l_ris_string,'&lt;RISPOSTA>')+11);
+l_risultato:=xmltype(l_ris_string);
+l_res := APEX_WEB_SERVICE.PARSE_XML(
+         p_xml => l_risultato,
+         p_xpath => '//RISPOSTA/HEADER/ESITO/text()');
+
+--risposta:=l_risultato.getclobval(); --l_res; -- canc         
+
+if l_res='OK' then
+  l_n_rea:= APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//RISPOSTA/DATI/LISTA_IMPRESE/ESTREMI_IMPRESA/DATI_ISCRIZIONE_REA/NREA/text()');
+  l_prov_ccia := APEX_WEB_SERVICE.PARSE_XML(
+            p_xml => l_risultato,
+            p_xpath => '//RISPOSTA/DATI/LISTA_IMPRESE/ESTREMI_IMPRESA/DATI_ISCRIZIONE_REA/CCIAA/text()');
+-- Letura dati impresa            
+  l_envelope := '&lt;soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.icr.ic.it">
+     &lt;soapenv:Header/>
+     &lt;soapenv:Body>
+         &lt;ws:DettaglioCompletoImpresa soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+           &lt;sgl_prv_sede xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">'||l_prov_ccia||'&lt;/sgl_prv_sede>
+           &lt;n_rea_sede xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">'||l_n_rea||'&lt;/n_rea_sede>
+           &lt;switch_control xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">&lt;/switch_control>
+           &lt;abilitaSoci xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">si&lt;/abilitaSoci>
+           &lt;user xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">WSParixSRA&lt;/user>
+           &lt;password xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">JPnGAPk6&lt;/password>
+        &lt;/ws:DettaglioCompletoImpresa>
+     &lt;/soapenv:Body>
+  &lt;/soapenv:Envelope>';
+  l_risultato:=apex_web_service.make_request(
+                p_url => 'http://sirb.regione.basilicata.it:8080/parixgate/services/gate', 
+                p_action => 'DettaglioCompletoImpresa',
+                p_envelope => l_envelope);
+
+  doc := xmldom.newDOMDocument(l_risultato);
+  xmldom.writeToFile(doc, 'DIR_PROVVEDIMENTI/parix'||l_n_rea||'.xml');
+  xmldom.freeDocument(doc);
+  
+  src_clob := BFILENAME('DIR_PROVVEDIMENTI', 'parix'||l_n_rea||'.xml');
+  DBMS_LOB.fileopen(src_clob, DBMS_LOB.file_readonly);
+  dbms_lob.createtemporary(l_ris_string, true);
+
+  DBMS_LOB.LoadCLOBFromFile(
+          DEST_LOB     => l_ris_string
+        , SRC_BFILE    => src_clob
+        , AMOUNT       => DBMS_LOB.GETLENGTH(src_clob)
+        , DEST_OFFSET  => dst_offset
+        , SRC_OFFSET   => src_offset
+        , BFILE_CSID   => DBMS_LOB.DEFAULT_CSID
+        , LANG_CONTEXT => lang_ctx
+        , WARNING      => warning
+    );
+
+  DBMS_LOB.CLOSE(src_clob);
+
+  l_ris_string:=replace(l_ris_string,'&lt;','&lt;');
+  l_ris_string:=replace(l_ris_string,'&gt;','>');
+  l_ris_string:=replace(l_ris_string,'&quot;','"');
+  l_ris_string:=substr(l_ris_string,instr(l_ris_string,'&lt;RISPOSTA>'),instr(l_ris_string,'&lt;/RISPOSTA>')-instr(l_ris_string,'&lt;RISPOSTA>')+11);
+  doc := xmldom.newDOMDocument(l_ris_string);
+  xmldom.writeToFile(doc, 'DIR_PROVVEDIMENTI/parix'||l_n_rea||'.xml');
+  xmldom.freeDocument(doc);
+  DBMS_LOB.FREETEMPORARY(l_ris_string);  
+  risposta:=l_res;
+
+/*
+l_res := APEX_WEB_SERVICE.PARSE_XML(
+           p_xml => l_risultato,
+           p_xpath => '//RISPOSTA/HEADER/ESITO/text()');
+  if l_res='OK' then
+    risposta:=l_ris_string;
+/* esempio ritorno multiplo 
+    SELECT XMLQUERY('count(//Step)' passing l_xml returning content) 
+    INTO l_count_step_xml 
+    FROM dual;
+    l_count_step:= l_count_step_xml.getnumberval;
+
+    FOR k in 1..l_count_step LOOP
+      l_cod_uff := apex_web_service.parse_xml(p_xml => l_xml, p_xpath => '//Step['||k||']/CodiceUfficio/text()');
+      l_descr_uff := apex_web_service.parse_xml(p_xml => l_xml, p_xpath => '//Step['||k||']/DescrizioneUfficio/text()');
+      l_giorni := apex_web_service.parse_xml(p_xml => l_xml, p_xpath => '//Step['||k||']/Giorni/text()');
+      l_data_arr := apex_web_service.parse_xml(p_xml => l_xml, p_xpath => '//Step['||k||']/DataArrivo/text()');
+      l_data_usc := apex_web_service.parse_xml(p_xml => l_xml, p_xpath => '//Step['||k||']/DataUscita/text()');
+    END LOOP;
+*/
+/*  else
+    risposta:=l_res;
+  end if;
+--risposta:=l_risultato.getclobval();*/
+end if;
+risposta:=l_res;
+end;</pre>	</td></tr>
+</table></div>

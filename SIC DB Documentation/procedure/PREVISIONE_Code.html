@@ -1,0 +1,957 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PREVISIONE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PREVISIONE.html">Details</a></div></div>
+<div class="tab"><div><a href="PREVISIONE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PREVISIONE_References.html">References</a></div></div>
+<div class="tab"><div><a href="PREVISIONE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PREVISIONE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure PREVISIONE(p_anno in number,p_data_stampa in date,p_utente in varchar2,p_eu in varchar2) as
+
+c_avanzo_amministrazione     number(15,2);
+c_cassa                      number(15,2);
+c_fpv_capitale               number(15,2);
+c_fpv_corrente               number(15,2);
+c_fpv_capitale1              number(15,2);
+c_fpv_corrente1              number(15,2);
+c_fpv_capitale2              number(15,2);
+c_fpv_corrente2              number(15,2);
+c_avanzo_prec                number(15,2);
+c_cassa_prec                 number(15,2);
+c_fpv_capitale_prec          number(15,2);
+c_fpv_corrente_prec          number(15,2);
+
+c_avanzo_util_prec           number(15,2);
+c_avanzo_util                number(15,2);
+
+c_utilizzo_fondi_prec        number(15,2);
+c_utilizzo_fondi             number(15,2);
+c_utilizzo_fondi1            number(15,2);
+c_utilizzo_fondi2            number(15,2);
+c_utilizzo_fondi_desc        varchar2(2000);
+
+c_disavanzo_amministrazione  number(15,2);
+c_disavanzo_regionale        number(15,2);
+c_disavanzo_eff_anni_prec    number(15,2);
+c_disavanzo_debito_au        number(15,2);
+cp_disavanzo_amministrazione number(15,2);
+
+c_dicui_impegnato_prec       number(15,2);
+c_dicui_impegnato0           number(15,2);
+c_dicui_impegnato1           number(15,2);
+c_dicui_impegnato2           number(15,2);
+
+
+c_riga                       number;
+c_capitolo                   varchar2(6);
+c_desc_capitolo              varchar2(2000);
+
+tipo_bilancio varchar2(15) := 'PREVISIONE';
+
+cursor capitoli is 
+SELECT  
+ trunc(p_data_stampa,'dd') data_generazione
+,p_utente utente
+,b.eu eu
+,p_anno anno 
+,b.eu||b.codice capitolo
+,b.descrizione desc_capitolo
+,decode(b.eu,'E',nvl(nb1.codice,'Da Def.'),nvl(nb11.codice,'Da Def.')) etit_umis
+,decode(b.eu,'E',nb1.descrizione,nb11.descrizione) desc_tit_mis
+,decode(b.eu,'E',nvl(nb2.codice,'Da Def.'),nvl(nb12.codice,'Da Def.')) etip_uprog
+,decode(b.eu,'E',nb2.descrizione,nb12.descrizione) desc_tip_prog
+,decode(b.eu,'E',nvl(nb3.codice,'Da Def.'),null) ecat
+,decode(b.eu,'E',nb3.descrizione,null) desc_cat
+,b.nb_piano_conti_fina pcf
+,nbpcf.descrizione desc_pcf
+,b.nb_titolo titolo_uscite
+,nbtu.descrizione desc_titolo_uscite
+,b.nb_macroaggregato macroaggregato
+,nbma.descrizione desc_macroaggregato
+,b.nb_cofog_ii_livello cofog_ii_livello
+,nbcg.descrizione desc_cofog
+,b.nb_fpv fpv
+,b.nb_capitolo_fpv capitolo_fpv
+,b.tabella
+,tlf.descrizione tabella_desc
+,b.FLAG_MUTUO 
+,b.FLAG_SPESA_OBBLIGATORIA
+,b.FLAG_AVANZO_VINCOLATO
+,b.FLAG_SPESE_CORRENTI
+,b.FLAG_SPESE_INVESTIMENTO
+,b.FLAG_SPESE_ANNUALITA
+,b.FLAG_SPESE_RIMBORSO_PRESTITI
+,b.FLAG_ASSEGNAZIONE_STATO_UE
+,nvl(decode(b.eu,'E',b.nb_entrata_ricorrente,b.nb_uscita_ricorrente),'N') ricorrente
+,nvl(b.sanita_sn,'N') sanita
+FROM fin_t_articoli b
+     ,nb_livello1 nb1
+     ,nb_livello2 nb2
+     ,nb_livello3 nb3
+     ,nb_livello1 nb11
+     ,nb_livello2 nb12
+     ,nb_pcf_04 nbpcf
+     ,nb_titoli_uscite nbtu
+     ,nb_macroaggregati nbma
+     ,nb_cofog_gruppo nbcg
+     ,fin_t_tabelle_legge_finanz tlf
+WHERE b.anno = p_anno
+and b.eu = p_eu
+and b.titolo &lt;> '0'
+and nvl(b.abilitato,'S') = 'S'
+and nb3.id(+) = b.nb_id_padre 
+and nb2.id(+) = nb3.id_livello2
+and nb1.id(+) = nb2.id_livello1
+and nb12.id(+) = b.nb_id_padre 
+and nb11.id(+) = nb12.id_livello1
+and b.anno = nbpcf.anno(+)
+and b.nb_piano_conti_fina = nbpcf.codice_finale(+)
+and b.anno = nbtu.anno(+)
+and b.nb_titolo = nbtu.id(+)
+and b.anno = nbma.anno(+)
+and b.nb_macroaggregato = nbma.codice(+) 
+and b.anno = nbcg.anno(+)
+and b.nb_cofog_ii_livello = nbcg.codice(+)
+and b.tabella =tlf.codice(+)
+and b.anno = tlf.anno(+)
+order by 7,9,11,5;
+
+begin
+
+delete fin_t_previsione where utente=p_utente and anno = p_anno and eu = nvl(p_eu,eu);
+
+
+  if p_eu = 'U'
+  then 
+  begin 
+  select 
+   nvl(disavanzo_amministrazione,0),
+   nvl(disavanzo_regionale,0),
+   nvl(disavanzo_effettivo_anni_prec,0),
+   nvl(disavanzo_debito_au,0)
+   into 
+   c_disavanzo_amministrazione,
+   c_disavanzo_regionale,
+   c_disavanzo_eff_anni_prec,
+   c_disavanzo_debito_au
+  from fin_t_dati_generali
+  where anno_finanziario = p_anno;
+  exception when no_data_found 
+   then c_disavanzo_amministrazione := 0;
+        c_disavanzo_regionale := 0;
+        c_disavanzo_eff_anni_prec := 0;
+        c_disavanzo_debito_au := 0;
+  end;
+  
+ begin --10.12.2019 G.ZACCARO modifica su richiesta di Pierro inserisco il disavanzo dell'anno n-1 completo di eventuali variazioni
+  select 
+   nvl(disavanzo_amministrazione,0)+nvl(variazione_disavanzo_piu,0)-nvl(variazione_disavanzo_meno,0)
+     into 
+   cp_disavanzo_amministrazione
+  from fin_t_dati_generali
+  where anno_finanziario = p_anno-1;
+  exception when no_data_found 
+   then cp_disavanzo_amministrazione := 0;
+                
+  end;
+   begin
+    select 
+    'U'||cap_disavanzo_amm2
+    ,desc_cap_disavanzo_amm2
+    into 
+    c_capitolo
+    ,c_desc_capitolo
+    from fin_t_dati_generali
+    where anno_finanziario = p_anno;
+   end;
+
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma 
+   ,titolo_uscite    
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,1
+   ,'U'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'N'
+   ,nvl(cp_disavanzo_amministrazione,0)--10.12.2019 G.ZACCARO modifica su richiesta di Pierro
+   ,nvl(c_disavanzo_amministrazione,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'0'
+   );
+  commit;  
+  end;
+-- modifica del 20.11.2019
+   begin
+    select 
+    'U'||cap_disavanzo_au
+    ,desc_cap_disavanzo_au
+    into 
+    c_capitolo
+    ,c_desc_capitolo
+    from fin_t_dati_generali
+    where anno_finanziario = p_anno;
+   end;
+
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma 
+   ,titolo_uscite    
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,2
+   ,'U'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'N'
+   ,0
+   ,nvl(c_disavanzo_debito_au,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'0'
+   );
+  commit;  
+  end;
+-- fine modifica 20.11.2019
+
+   c_riga := 2;
+
+   for c in capitoli loop
+
+    c_riga:= c_riga+1;
+
+   begin
+    select nvl(b.impegni_accertamenti_compe,0)
+    into c_dicui_impegnato_prec
+    from fin_t_bilancio b
+    where b.anno=(p_anno - 1)
+    and b.eu||b.articolo =c.capitolo;
+    exception when no_data_found then c_dicui_impegnato_prec := 0;
+   end;
+
+   begin
+    select nvl(sum(document_amount),0)
+    into c_dicui_impegnato0
+    from fin_t_documenti
+    where 
+    doc_type='IMP-DEF' 
+    and segment2=c.capitolo
+    and segment8=p_anno 
+    and to_char(date_created,'ddmmyyyy')='0101'||p_anno
+    and nvl(deletion_status_flag,'N')&lt;>'Y'; 
+   end;
+
+
+   begin
+    select nvl(sum(document_amount),0)
+    into c_dicui_impegnato1
+    from fin_t_documenti
+    where 
+    doc_type='IMP-DEF' 
+    and segment2=c.capitolo
+    and segment8=(p_anno +1)
+    and to_char(date_created,'ddmmyyyy')='0101'||(p_anno +1)
+    and to_number(substr(attribute38,1,4)) &lt; p_anno
+    and nvl(deletion_status_flag,'N')&lt;>'Y'; 
+   end;
+
+   begin
+    select nvl(sum(document_amount),0)
+    into c_dicui_impegnato2
+    from fin_t_documenti
+    where 
+    doc_type='IMP-DEF' 
+    and segment2=c.capitolo
+    and segment8=(p_anno +2)
+    and to_char(date_created,'ddmmyyyy')='0101'||(p_anno +2)
+    and to_number(substr(attribute38,1,4)) &lt; p_anno
+    and nvl(deletion_status_flag,'N')&lt;>'Y'; 
+   end;
+
+
+    begin 
+    insert into FIN_T_PREVISIONE
+    (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,di_cui
+   ,residuo
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,competenza_anno1
+   ,competenza_anno2
+   ,cassa_anno_prec
+   ,cassa_anno0
+   ,dicui_impegnato_anno_prec
+   ,dicui_impegnato_anno0
+   ,dicui_impegnato_anno1
+   ,dicui_impegnato_anno2
+   ,dicui_fpv_anno_prec
+   ,dicui_fpv_anno0
+   ,dicui_fpv_anno1
+   ,dicui_fpv_anno2
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   ,piano_conti_fina             
+   ,desc_piano_conti_fina         
+   ,titolo_uscite                 
+   ,desc_titolo_uscite             
+   ,macroaggregato                 
+   ,desc_macroaggregato         
+   ,cofog_ii_livello             
+   ,descr_cofog                 
+   ,nb_fpv                         
+   ,nb_capitolo_fpv             
+   ,tabella_legge_finanziaria     
+   ,tlf_descrizione             
+   ,flag_mutuo                     
+   ,flag_spesa_obbligatoria     
+   ,flag_avanzo_vincolato         
+   ,flag_spese_correnti         
+   ,flag_spese_investimento     
+   ,flag_spese_annualita         
+   ,flag_spese_rimborso_prestiti
+   ,flag_assegnazione_stato_ue     
+   ,ricorrente                     
+   ,sanita                         
+    )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,c_riga
+   ,'U'
+   ,p_anno
+   ,c.capitolo
+   ,c.desc_capitolo
+   ,nvl(c.fpv,'N')
+   ,residuo_iniziale(p_anno,c.capitolo)
+   ,previsione_definitiva(p_anno-1,c.capitolo)
+   ,previsione_iniziale(p_anno,c.capitolo)
+   ,pluriennale1_iniziale(p_anno+1,c.capitolo)
+   ,pluriennale2_iniziale(p_anno+2,c.capitolo)
+   ,cassa_definitiva(p_anno-1,c.capitolo)
+   ,cassa_iniziale(p_anno,c.capitolo)
+   ,c_dicui_impegnato_prec
+   ,c_dicui_impegnato0
+   ,c_dicui_impegnato1
+   ,c_dicui_impegnato2
+   ,previsione_definitiva(p_anno-1,c.capitolo_fpv)
+   ,previsione_iniziale(p_anno,c.capitolo_fpv)
+   ,pluriennale1_iniziale(p_anno+1,c.capitolo_fpv)
+   ,pluriennale2_iniziale(p_anno+2,c.capitolo_fpv)
+   ,c.etit_umis
+   ,c.desc_tit_mis
+   ,c.etip_uprog
+   ,c.desc_tip_prog
+   ,c.ecat
+   ,c.desc_cat
+   ,c.pcf
+   ,c.desc_pcf
+   ,c.titolo_uscite
+   ,c.desc_titolo_uscite
+   ,c.macroaggregato
+   ,c.desc_macroaggregato
+   ,c.cofog_ii_livello
+   ,c.desc_cofog
+   ,c.fpv
+   ,c.capitolo_fpv
+   ,c.tabella
+   ,c.tabella_desc
+   ,c.flag_mutuo 
+   ,c.flag_spesa_obbligatoria
+   ,c.flag_avanzo_vincolato
+   ,c.flag_spese_correnti
+   ,c.flag_spese_investimento
+   ,c.flag_spese_annualita
+   ,c.flag_spese_rimborso_prestiti
+   ,c.flag_assegnazione_stato_ue
+   ,c.ricorrente
+   ,c.sanita 
+   );
+  commit;  
+  end;
+ end loop;
+
+ end if;
+
+ if nvl(p_eu,'E') = 'E'
+  then 
+
+  begin 
+  select 
+     nvl(dg0.avanzo_amministrazione,0) 
+    + nvl(dg0.avanzo_regionale,0) avanzo_amm
+    ,nvl(dg0.cassa,0) cassa
+    ,nvl(dg0.fpv_capitale,0) fpv_cap
+    ,nvl(dg0.fpv_corrente,0) fpv_cor
+    ,nvl(dg2.fpv_corrente,0) fpv_cor2
+    ,nvl(dg1.fpv_capitale,0) fpv_cap1
+    ,nvl(dg1.fpv_corrente,0) fpv_cor1
+    ,nvl(dg2.fpv_capitale,0) fpv_cap2
+    , nvl(dgprec.avanzo_amministrazione,0)
+    + nvl(dgprec.variazione_avanzo_delibera,0)
+    + nvl(dgprec.variazione_avanzo_piu,0)
+    - nvl(dgprec.variazione_avanzo_meno,0) avanzo_prec
+    , nvl(dgprec.cassa,0)
+    + nvl(dgprec.variazione_cassa_piu,0)
+    - nvl(dgprec.variazione_cassa_meno,0) cassa_prec
+    , nvl(dgprec.fpv_capitale,0)
+    + nvl(dgprec.variazione_fpv_capitale,0) fpv_cap_prec
+    , nvl(dgprec.fpv_corrente,0)
+    + nvl(dgprec.variazione_fpv_corrente,0) fpv_cor_prec
+   into 
+     c_avanzo_amministrazione
+    ,c_cassa
+    ,c_fpv_capitale
+    ,c_fpv_corrente
+    ,c_fpv_capitale1
+    ,c_fpv_corrente1
+    ,c_fpv_capitale2
+    ,c_fpv_corrente2
+    ,c_avanzo_prec
+    ,c_cassa_prec
+    ,c_fpv_capitale_prec
+    ,c_fpv_corrente_prec
+   from 
+    fin_t_dati_generali dg0
+   ,fin_t_dati_generali dg1
+   ,fin_t_dati_generali dg2
+   ,fin_t_dati_generali dgprec
+   where dg0.anno_finanziario = p_anno
+   and   dg1.anno_finanziario = (p_anno +1) 
+   and   dg2.anno_finanziario = (p_anno +2)
+   and   dgprec.anno_finanziario = (p_anno -1);
+ end;
+
+-- Fondo Pluriennale Vincolato CORRENTE
+   begin
+      select 
+       'E'||cap_fpv_corrente
+      ,desc_cap_fpv_corrente
+      into 
+       c_capitolo
+      ,c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+   end;
+
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,competenza_anno1
+   ,competenza_anno2
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,1
+   ,'E'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'N'
+   ,nvl(c_fpv_corrente_prec,0)
+   ,nvl(c_fpv_corrente,0)
+   ,nvl(c_fpv_corrente1,0)
+   ,nvl(c_fpv_corrente2,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,'E00001'
+   ,c_desc_capitolo
+   ,'E00001'
+   ,c_desc_capitolo
+   );
+  commit;  
+  end;
+
+-- Fondo Pluriennale Vincolato CAPITALE
+   begin
+      select 
+       'E'||cap_fpv_capitale
+      ,desc_cap_fpv_capitale
+      into 
+       c_capitolo
+      ,c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita 
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,competenza_anno1
+   ,competenza_anno2
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,2
+   ,'E'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'N'
+   ,nvl(c_fpv_capitale_prec,0)
+   ,nvl(c_fpv_capitale,0)
+   ,nvl(c_fpv_capitale1,0)
+   ,nvl(c_fpv_capitale2,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,'E00002'
+   ,c_desc_capitolo
+   ,'E00002'
+   ,c_desc_capitolo
+   );
+  commit;  
+  end;
+
+
+-- Avanzo 
+   begin
+      select 
+       'E'||cap_avanzo_amm
+      ,desc_cap_avanzo_amm
+      into 
+       c_capitolo
+      ,c_desc_capitolo
+      from fin_t_dati_generali
+      where anno_finanziario = p_anno;
+    end;
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,desc_categoria                 
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,3
+   ,'E'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'N'
+   ,nvl(c_avanzo_prec,0)
+   ,nvl(c_avanzo_amministrazione,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,'E00003'
+   ,c_desc_capitolo
+   ,'E00003'
+   ,c_desc_capitolo
+   );
+  commit;  
+  end;
+
+-- Utilizzo Avanzo
+  begin
+   select nvl(sum(nvl(quota_avanzo,0)),0)
+   into c_avanzo_util
+   from fin_t_avanzi
+   where anno= p_anno 
+   and utilizzo_anticipato='S';  
+   exception when no_data_found then c_avanzo_util := 0;
+  end;
+  begin
+   select nvl(sum(nvl(quota_avanzo,0)),0)
+   into c_avanzo_util_prec
+   from fin_t_avanzi
+   where anno=( p_anno -1)
+   and utilizzo_anticipato='S';  
+   exception when no_data_found then c_avanzo_util_prec := 0;
+  end;
+  c_desc_capitolo := '- di cui avanzo utilizzato anticipatamente';
+
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,4
+   ,'E'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'S'
+   ,nvl(c_avanzo_util_prec,0)
+   ,nvl(c_avanzo_util,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,'E00004'
+   ,c_desc_capitolo
+   ,'E00004'
+   ,c_desc_capitolo
+   );
+  commit;  
+  end;
+
+  begin
+   select nvl(importo,0)
+   into c_utilizzo_fondi_prec
+   from fnd_reports_importi_man
+   where valore_parametro_anno = (p_anno -1)
+   and nome_campo_report='UFADL_ENTRATE_ANNO';
+   exception when no_data_found then c_utilizzo_fondi_prec := 0;
+  end;
+  begin
+   select 
+    nvl(importo,0)
+   ,descrizione_campo_report
+   into 
+    c_utilizzo_fondi
+   ,c_desc_capitolo
+   from fnd_reports_importi_man
+   where valore_parametro_anno = p_anno
+   and nome_campo_report='UFADL_ENTRATE_ANNO';
+   exception when no_data_found then c_utilizzo_fondi := 0;
+  end;
+  begin
+   select nvl(importo,0)
+   into c_utilizzo_fondi1
+   from fnd_reports_importi_man
+   where valore_parametro_anno = p_anno
+   and nome_campo_report='UFADL_ENTRATE_ANNO1';
+   exception when no_data_found then c_utilizzo_fondi1 := 0;
+  end;
+  begin
+   select nvl(importo,0)
+   into c_utilizzo_fondi2
+   from fnd_reports_importi_man
+   where valore_parametro_anno = p_anno
+   and nome_campo_report='UFADL_ENTRATE_ANNO2';
+   exception when no_data_found then c_utilizzo_fondi2 := 0;
+  end;
+
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,competenza_anno1
+   ,competenza_anno2
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,5
+   ,'E'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'S'
+   ,nvl(c_utilizzo_fondi_prec,0)
+   ,nvl(c_utilizzo_fondi,0)
+   ,nvl(c_utilizzo_fondi1,0)
+   ,nvl(c_utilizzo_fondi2,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,'E00005'
+   ,c_desc_capitolo
+   ,'E00005'
+   ,c_desc_capitolo
+   );
+  commit;  
+  end;
+
+  begin
+   select 
+    'E'||cap_fondo_cassa
+   ,desc_cap_fondo_cassa
+   into 
+    c_capitolo
+   ,c_desc_capitolo
+   from fin_t_dati_generali
+   where anno_finanziario = p_anno;
+  end;
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,cassa_anno_prec
+   ,desc_capitolo
+   ,sanita
+   ,di_cui
+   ,cassa_anno0
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,6
+   ,'E'
+   ,p_anno
+   ,c_capitolo
+   ,c_desc_capitolo
+   ,'N'
+   ,'N'
+   ,nvl(c_cassa_prec,0)
+   ,nvl(c_cassa,0)
+   ,'0'
+   ,c_desc_capitolo
+   ,'E00006'
+   ,c_desc_capitolo
+   ,'E00006'
+   ,c_desc_capitolo
+   );
+  commit;  
+  end;
+
+ c_riga:=6;
+
+ for c in capitoli loop
+
+ c_riga:= c_riga+1;
+
+  begin 
+  insert into FIN_T_PREVISIONE
+   (data_generazione
+   ,utente
+   ,riga
+   ,eu
+   ,anno
+   ,capitolo
+   ,desc_capitolo
+   ,di_cui
+   ,residuo
+   ,competenza_anno_prec
+   ,competenza_anno0
+   ,competenza_anno1
+   ,competenza_anno2
+   ,cassa_anno_prec
+   ,cassa_anno0
+   ,etitolo_umissione
+   ,desc_titolo_missione         
+   ,etipologia_uprogramma         
+   ,desc_tipologia_programma     
+   ,ecategoria                     
+   ,desc_categoria                 
+   ,piano_conti_fina             
+     ,desc_piano_conti_fina         
+     ,titolo_uscite                 
+     ,desc_titolo_uscite             
+     ,macroaggregato                 
+     ,desc_macroaggregato         
+     ,cofog_ii_livello             
+     ,descr_cofog                 
+     ,nb_fpv                         
+     ,nb_capitolo_fpv             
+     ,tabella_legge_finanziaria     
+     ,tlf_descrizione             
+     ,flag_mutuo                     
+     ,flag_spesa_obbligatoria     
+     ,flag_avanzo_vincolato         
+     ,flag_spese_correnti         
+     ,flag_spese_investimento     
+     ,flag_spese_annualita         
+     ,flag_spese_rimborso_prestiti
+     ,flag_assegnazione_stato_ue     
+     ,ricorrente                     
+     ,sanita                         
+   )
+   values
+   (trunc(p_data_stampa,'dd')
+   ,p_utente
+   ,c_riga
+   ,'E'
+   ,p_anno
+   ,c.capitolo
+   ,c.desc_capitolo
+   ,nvl(c.fpv,'N')
+   ,residuo_iniziale(p_anno,c.capitolo)
+   ,previsione_definitiva(p_anno-1,c.capitolo)
+   ,previsione_iniziale(p_anno,c.capitolo)
+   ,pluriennale1_iniziale(p_anno+1,c.capitolo)
+   ,pluriennale2_iniziale(p_anno+2,c.capitolo)
+   ,cassa_definitiva(p_anno-1,c.capitolo)
+   ,cassa_iniziale(p_anno,c.capitolo)
+   ,c.etit_umis
+   ,c.desc_tit_mis
+   ,c.etip_uprog
+   ,c.desc_tip_prog
+   ,c.ecat
+   ,c.desc_cat
+   ,c.pcf
+   ,c.desc_pcf
+   ,c.titolo_uscite
+   ,c.desc_titolo_uscite
+   ,c.macroaggregato
+   ,c.desc_macroaggregato
+   ,c.cofog_ii_livello
+   ,c.desc_cofog
+   ,c.fpv
+   ,c.capitolo_fpv
+   ,c.tabella
+   ,c.tabella_desc
+   ,c.flag_mutuo 
+   ,c.flag_spesa_obbligatoria
+   ,c.flag_avanzo_vincolato
+   ,c.flag_spese_correnti
+   ,c.flag_spese_investimento
+   ,c.flag_spese_annualita
+   ,c.flag_spese_rimborso_prestiti
+   ,c.flag_assegnazione_stato_ue
+   ,c.ricorrente
+   ,c.sanita 
+   );
+  commit;  
+  end;
+ end loop;
+ end if;
+end;</pre>	</td></tr>
+</table></div>

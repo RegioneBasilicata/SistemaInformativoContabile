@@ -1,0 +1,168 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PCF_DOC_FIGLIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PCF_DOC_FIGLIO.html">Details</a></div></div>
+<div class="tab"><div><a href="PCF_DOC_FIGLIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PCF_DOC_FIGLIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="PCF_DOC_FIGLIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PCF_DOC_FIGLIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure PCF_DOC_FIGLIO (p_anno in number) is
+
+ pcf_mand varchar2(30);
+ pcf_rev varchar2(30);
+ pcf_imp varchar2(30);
+
+cursor doc_u is
+select d.doc_id id_doc
+,d.doc_type
+,d.doc_sequence_value
+,d.segment2 
+,d.attribute16 PCF_doc
+,a.nb_piano_conti_fina PCF_cap
+,d.doc_id_capo_filiera
+from fin_t_documenti d
+,fin_t_articoli a
+where d.segment8 = p_anno
+and nvl(d.deletion_status_flag,'N') = 'N'
+and d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+and d.attribute16 is not null
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2
+and a.nb_piano_conti_fina &lt;> substr(d.attribute16,1,13)||'000';
+
+cursor doc_e is
+select d.doc_id id_doc
+,d.doc_type
+,d.doc_sequence_value
+,d.segment2 
+,d.attribute16 PCF_doc
+,a.nb_piano_conti_fina PCF_cap
+,d.doc_id_capo_filiera
+from fin_t_documenti d
+,fin_t_articoli a
+where d.segment8 = p_anno
+and nvl(d.deletion_status_flag,'N') = 'N'
+and d.doc_type = 'ACC'
+and d.attribute16 is not null
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2
+and a.nb_piano_conti_fina &lt;> substr(d.attribute16,1,13)||'000';
+
+cursor eco is
+select d.doc_id id_doc
+,d.doc_type
+,d.doc_sequence_value
+,d.segment2 
+,d.attribute16 PCF_doc
+,a.nb_piano_conti_fina PCF_cap
+,d.doc_id_capo_filiera
+from fin_t_documenti d
+,fin_t_articoli a
+where d.segment8 = p_anno
+and nvl(d.deletion_status_flag,'N') = 'N'
+and d.doc_type = 'ECO'
+and d.attribute16 is not null
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2
+and a.nb_piano_conti_fina &lt;> substr(d.attribute16,1,13)||'000';
+
+
+begin
+ for d in doc_u loop
+
+  begin
+   select nvl(attribute16,'0') into pcf_mand
+   from fin_t_documenti
+   where doc_id_capo_filiera = d.doc_id_capo_filiera
+   and doc_type = 'MAND'
+   and nvl(open_balance_proposed,0) > 0
+   and attribute16 &lt;> d.pcf_doc
+   and substr(attribute16,1,13)||'000' = d.pcf_cap
+   and doc_id = (select max(doc_id) from fin_t_documenti
+   where doc_id_capo_filiera = d.doc_id_capo_filiera
+   and doc_type = 'MAND'
+   and nvl(open_balance_proposed,0) > 0
+   and attribute16 &lt;> d.pcf_doc
+   and substr(attribute16,1,13)||'000' = d.pcf_cap);
+   exception when no_data_found then pcf_mand := '0';
+  end;
+
+ 	if pcf_mand &lt;> '0' 
+ 	then
+ 	update fin_t_documenti x set x.attribute16 = pcf_mand
+ 		where x.doc_id_capo_filiera = d.doc_id_capo_filiera
+ 		and x.attribute16 &lt;> pcf_mand;
+ 	commit;
+ 	end if;
+
+
+ end loop;
+
+ for d in doc_e loop
+
+  begin
+   select nvl(attribute16,'0') into pcf_rev
+   from fin_t_documenti
+   where doc_id_capo_filiera = d.doc_id_capo_filiera
+   and doc_type = 'REV'
+   and nvl(open_balance_proposed,0) > 0
+   and attribute16 &lt;> d.pcf_doc
+   and substr(attribute16,1,13)||'000' = d.pcf_cap
+   and doc_id = (select max(doc_id) from fin_t_documenti
+   where doc_id_capo_filiera = d.doc_id_capo_filiera
+   and doc_type = 'REV'
+   and nvl(open_balance_proposed,0) > 0
+   and attribute16 &lt;> d.pcf_doc
+   and substr(attribute16,1,13)||'000' = d.pcf_cap);
+   exception when no_data_found then pcf_rev := '0';
+  end;
+
+ 	if pcf_rev &lt;> '0' 
+ 	then
+ 	update fin_t_documenti x set x.attribute16 = pcf_rev
+ 		where x.doc_id_capo_filiera = d.doc_id_capo_filiera
+ 		and x.attribute16 &lt;> pcf_rev;
+ 	commit;
+ 	end if;
+
+
+ end loop;
+ 
+ for e in eco loop
+
+  begin
+   select nvl(attribute16,'0') into pcf_imp
+   from fin_t_documenti
+   where doc_id = e.doc_id_capo_filiera
+   and doc_type like 'IMP%'
+   and nvl(deletion_status_flag,'N') = 'N'
+   and attribute16 &lt;> e.pcf_doc;
+  exception when no_data_found then pcf_imp := '0';
+  end;
+
+ 	if pcf_imp &lt;> '0' 
+ 	then
+ 	update fin_t_documenti x set x.attribute16 = pcf_imp
+ 		where x.doc_id = e.id_doc
+ 		and x.attribute16 &lt;> pcf_imp;
+ 	commit;
+ 	end if;
+
+
+ end loop;
+
+end;</pre>	</td></tr>
+</table></div>

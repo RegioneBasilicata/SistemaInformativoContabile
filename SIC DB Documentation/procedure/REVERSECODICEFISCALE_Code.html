@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>REVERSECODICEFISCALE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="REVERSECODICEFISCALE.html">Details</a></div></div>
+<div class="tab"><div><a href="REVERSECODICEFISCALE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="REVERSECODICEFISCALE_References.html">References</a></div></div>
+<div class="tab"><div><a href="REVERSECODICEFISCALE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="REVERSECODICEFISCALE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE reverseCodiceFiscale
+  (p_cf IN varchar2
+   ,p_annoNascita OUT number
+   ,p_meseNascita OUT number
+   ,p_giornoNascita OUT number
+   ,p_luogoNascita OUT varchar2
+   ,p_sesso OUT varchar2
+   ,p_esito OUT varchar2
+  ) IS
+
+  w_errore varchar2(1);
+
+BEGIN
+	
+	w_errore := 'N';
+	p_esito := 1;
+
+	-- Controllo prima l'esattezza del codice fiscale con la procedura
+	CTRL_FORM_CF (p_cf, w_errore);
+
+	if w_errore = 'N' then
+
+		p_annoNascita := substr(p_cf, 7, 2);
+		p_giornoNascita := substr(p_cf, 10, 2);
+
+		if p_giornoNascita > 40 then
+			p_sesso := 'F';
+			p_giornoNascita := p_giornoNascita - 40;
+		else
+			p_sesso := 'M';
+		end if;
+
+		BEGIN
+			select decode(substr(p_cf, 9, 1), 'A', 1, 'B', 2, 'C', 3, 'D', 4, 'E', 5, 'H', 6, 'L', 7, 'M', 8, 'P', 9, 'R', 10, 'S', 11, 'T', 12, null)
+			into p_meseNascita
+			from dual;
+		end;
+
+		BEGIN
+			select
+      descrizione
+      into p_luogoNascita
+			from fin_t_comuni
+			where codice_bel_fiore = substr(p_cf, 12, 4);
+      exception when TOO_MANY_ROWS then 
+          select
+          max(nazione)
+          into p_luogoNascita
+          from fin_t_comuni
+          where codice_bel_fiore = substr(p_cf, 12, 4);
+		END;
+
+	else
+		p_esito := 0;
+	end if;
+
+END;</pre>	</td></tr>
+</table></div>

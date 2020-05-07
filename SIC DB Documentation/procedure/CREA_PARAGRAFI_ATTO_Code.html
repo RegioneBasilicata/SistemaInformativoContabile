@@ -1,0 +1,859 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CREA_PARAGRAFI_ATTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CREA_PARAGRAFI_ATTO.html">Details</a></div></div>
+<div class="tab"><div><a href="CREA_PARAGRAFI_ATTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CREA_PARAGRAFI_ATTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="CREA_PARAGRAFI_ATTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CREA_PARAGRAFI_ATTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE crea_paragrafi_atto (p_atto in number) IS
+descr_app varchar2(4000);
+descr_app2 varchar2(4000);
+pos  number;
+beneficiari varchar2(4000);
+tot_importo number;
+tot_imponibile number;
+tot_iva number;
+concatenamento varchar2(1);
+riga_app varchar2(4000);
+inizio_conc number(4);
+fine_conc number(4);
+f_iban varchar2(27);
+a_rup  varchar2(2000);
+a_tipo_atto number;
+a_sottotipo_atto number;
+a_tipo_contratto number;
+a_progr_contratto number;
+progr_rigo  number;
+a_utente    number;
+a_data_atto date;
+BEGIN
+ 
+select tipo_atto,sottotipo_atto,cod_contratto,progr_contratto,data_atto
+  into a_tipo_atto,a_sottotipo_atto,a_tipo_contratto,a_progr_contratto, a_data_atto
+  from at_atti_testa
+  where id_atto=p_atto;
+ 
+select user_id
+  into a_utente
+  from fnd_user
+  where user_name=nvl(v('APP_USER'),user);
+--a_utente:=1000;
+delete at_atti_corpo
+ where id_atto=p_atto;
+progr_rigo:=1;
+-- SUPPONGO CHE I PARAMETRI CODICE E TIPO CONTRATTO ABBIANO SEMPRE UN VALORE
+for p in (select descr1,descrizione
+              from at_paragrafi
+              where tipo_atto = a_tipo_atto AND
+                    sottotipo_atto = a_sottotipo_atto
+              order by ordine) loop
+ 
+ descr_app:=nvl(p.descrizione,'  ');
+ descr_app:=replace(descr_app,'&DATA_SISTEMA&',to_char(sysdate,'dd/mm/yyyy'));
+ select sum(decode(t.segno,'P',tot_doc,tot_doc*-1)),sum(decode(t.segno,'P',tot_impon,tot_impon*-1)),
+        sum(decode(t.segno,'P',tot_iva,tot_iva*-1))
+        into tot_importo,tot_imponibile,tot_iva
+        from bi_app_atti f,
+             tb_tot_doc td,
+             tb_doc_iva di,
+             tb_tipi_doc t
+        where f.utente=a_utente and
+              td.tbdi_chiave= f.chiave_fattura and
+              di.chiave=f.chiave_fattura and
+              t.sigla= di.tbtd_sigla;              
+ descr_app:=replace(descr_app,'&IMP_PAGAMENTO&',ltrim(to_char(tot_importo,'999G999G999D00')));
+ descr_app:=replace(descr_app,'&TOT_IMPONIBILE&',ltrim(to_char(tot_imponibile,'999G999G999D00')));
+ descr_app:=replace(descr_app,'&TOT_IVA&',ltrim(to_char(tot_iva,'999G999G999D00')));
+ 
+ if instr(descr_app,'&DATA_CONTRATTO&')>0 or
+       instr(descr_app,'&NUMERO_REPERTORIO&')>0 or
+       instr(descr_app,'&DESCR_TIPO_CONTRATTO&')>0 or
+       instr(descr_app,'&DESCR_CONTRATTO&')>0 or
+       instr(descr_app,'&IMPORTO_CONTRATTO&')>0 or
+       instr(descr_app,'&DATA_REGISTRAZIONE&')>0 or
+       instr(descr_app,'&NUMERO_REGISTRAZIONE&')>0 or
+       instr(descr_app,'&LUOGO_REGISTRAZIONE&')>0 or
+       instr(descr_app,'&LUOGO_STIPULA&')>0 or
+       instr(descr_app,'&UFFICIALE_ROGANTE&')>0 or
+       instr(descr_app,'&RESPONSABILE_CONTRATTO&')>0 or 
+       instr(descr_app,'&DATA_PROROGA&')>0 or
+       instr(descr_app,'&DESCRIZIONE_PROROGA&')>0 or
+       instr(descr_app,'&VALIDO_DAL&')>0 or
+       instr(descr_app,'&VALIDO_AL&')>0 or
+       instr(descr_app,'&NOTE_CONTRATTO&')>0 or
+       instr(descr_app,'&ATTO_APPROVAZIONE&')>0 or
+       instr(descr_app,'&IMPORTO_PROROGA&')>0 or
+       instr(descr_app,'&CODICE_CUP&')>0 or
+       instr(descr_app,'&CIG&')>0 or
+       instr(descr_app,'&CPV/CPC&')>0 or 
+       instr(descr_app,'&RUP&')>0  then
+    for c in 
+      (select btg.descrizione descr_tipo,bgg.ult_descr descr_contratto,bgg.num_contratto num_repertorio,
+                bgg.importo_fisso,bgg.data_contratto,bgg.data_registr,bgg.num_registr,bgg.luogo_registr,bgg.luogo_stipula,
+                bgg.rogante,bgg.responsabile,bpr.data data_proroga, bpr.descrizione descr_proroga, bpr.importo importo_proroga,
+                bgg.valido_dal,bgg.valido_al,bgg.note,bgg.atto_approvazione,bgg.codice_cup,cig--,cpv
+          from bi_generale_gest bgg,
+               bi_tabelle_gest btg,
+               bi_gest_proroga bpr
+          where bgg.progr = a_progr_contratto and
+                bgg.tab_codice = a_tipo_contratto and
+                bgg.tab_codice = btg.codice and
+                bpr.tab_codice(+)=bgg.tab_codice and
+                bpr.gen_progr(+)=bgg.progr and
+                bpr.data_fine(+) is null
+      ) loop
+     descr_app:=replace(descr_app,'&DATA_CONTRATTO&',to_char(c.data_contratto,'dd/mm/yyyy'));
+     descr_app:=replace(descr_app,'&NUMERO_REPERTORIO&',c.num_repertorio);
+     descr_app:=replace(descr_app,'&DESCR_TIPO_CONTRATTO&',c.descr_tipo);
+     descr_app:=replace(descr_app,'&DESCR_CONTRATTO&',c.descr_contratto);
+     descr_app:=replace(descr_app,'&IMPORTO_CONTRATTO&',ltrim(to_char(c.importo_fisso,'999G999G999D00')));
+     descr_app:=replace(descr_app,'&DATA_REGISTRAZIONE&',to_char(c.data_registr,'dd/mm/yyyy'));
+     descr_app:=replace(descr_app,'&NUMERO_REGISTRAZIONE&',c.num_registr);
+     descr_app:=replace(descr_app,'&LUOGO_REGISTRAZIONE&',c.luogo_registr);
+     descr_app:=replace(descr_app,'&LUOGO_STIPULA&',c.luogo_stipula);
+     descr_app:=replace(descr_app,'&UFFICIALE_ROGANTE&',c.rogante);
+     descr_app:=replace(descr_app,'&RESPONSABILE_CONTRATTO&',c.responsabile);
+     descr_app:=replace(descr_app,'&DATA_PROROGA&',to_char(c.data_proroga,'dd/mm/yyyy'));
+     descr_app:=replace(descr_app,'&VALIDO_DAL&',to_char(c.valido_dal,'dd/mm/yyyy'));
+     descr_app:=replace(descr_app,'&VALIDO_AL&',to_char(c.valido_al,'dd/mm/yyyy'));
+     descr_app:=replace(descr_app,'&DESCRIZIONE_PROROGA&',c.descr_proroga);
+     descr_app:=replace(descr_app,'&NOTE_CONTRATTO&',c.note);
+     descr_app:=replace(descr_app,'&ATTO_APPROVAZIONE&',c.atto_approvazione);
+     descr_app:=replace(descr_app,'&IMPORTO_PROROGA&',ltrim(to_char(c.importo_proroga,'999G999G999D00')));
+     descr_app:=replace(descr_app,'&CODICE_CUP&',c.codice_cup);
+     descr_app:=replace(descr_app,'&CIG&',c.cig);
+     --descr_app:=replace(descr_app,'&CPV/CPC&',c.cpv);
+     select max(rp.rup)
+       into a_rup
+       from  bi_rup rp 
+       where rp.tab_codice = a_tipo_contratto AND 
+             rp.gen_progr = a_progr_contratto AND 
+             rp.data =(select max(data)
+                        from bi_rup rp2
+                        WHERE rp2.tab_codice = rp.tab_codice AND 
+                              rp2.gen_progr = rp.gen_progr);
+     descr_app:=replace(descr_app,'&RUP&',a_rup);
+   end loop;
+ end if;
+--- sostituzione variabili cassa economale (singoli) 
+ if instr(descr_app,'&CASSA_EC&')>0 or
+       instr(descr_app,'&DA_DATA_REND&')>0 or
+       instr(descr_app,'&A_DATA_REND&')>0 or
+       instr(descr_app,'&IMP_REND_CASSA&')>0 or
+       instr(descr_app,'&IBAN_CASSA&')>0 or
+       instr(descr_app,'&IMPTOT_GIA_CASSA&')>0 or
+       instr(descr_app,'&IMPTOT_RIM_CASSA&')>0 then
+    for c in 
+      (select e.DESCRIZIONE desc_cassa, e.DISPONIBILITA_INIZIALE disp_ini, e.iban , e.economo, sum(m.importo) imp_tot_rimb,
+         (select min(d.data_reg) from tg_casseec_mov d where d.id_atto=p_atto) data_min,
+         (select sum(l.importo) from at_determ_liquid l where l.id_atto=p_atto) imp_rend
+         from tg_casse_economali e,tg_casseec_mov m
+         where e.TIPO_CONTRATTO = a_tipo_contratto and
+               e.PROGRESSIVO = a_progr_contratto and
+               m.cassa_ec(+) = e.id and
+               m.tipo_mov(+) = 'RIM' and
+               to_char(m.data_reg,'yyyy')=to_char(a_data_atto,'yyyy')
+        group by e.DESCRIZIONE , e.DISPONIBILITA_INIZIALE , e.iban, e.economo ) loop
+     descr_app:=replace(descr_app,'&CASSA_EC&',c.desc_cassa);
+     descr_app:=replace(descr_app,'&ECONOMO&',c.economo);
+     descr_app:=replace(descr_app,'&IMP_REND_CASSA&',ltrim(to_char(c.imp_rend,'999G999G999D00')));
+     descr_app:=replace(descr_app,'&IMPTOT_GIA_CASSA&',ltrim(to_char(c.disp_ini,'999G999G999D00')));
+     descr_app:=replace(descr_app,'&IMPTOT_RIM_CASSA&',ltrim(to_char(c.imp_tot_rimb,'999G999G999D00')));
+     descr_app:=replace(descr_app,'&IBAN_CASSA&',c.iban);
+     if to_char(c.data_min,'MM') in (1,2,3) then
+        descr_app:=replace(descr_app,'&DA_DATA_REND&','01/01/'||to_char(c.data_min,'YYYY'));
+        descr_app:=replace(descr_app,'&A_DATA_REND&','31/03/'||to_char(c.data_min,'YYYY'));
+     elsif to_char(c.data_min,'MM') in (4,5,6) then
+        descr_app:=replace(descr_app,'&DA_DATA_REND&','01/04/'||to_char(c.data_min,'YYYY'));
+        descr_app:=replace(descr_app,'&A_DATA_REND&','30/06/'||to_char(c.data_min,'YYYY'));
+     elsif to_char(c.data_min,'MM') in (7,8,9) then
+        descr_app:=replace(descr_app,'&DA_DATA_REND&','01/07/'||to_char(c.data_min,'YYYY'));
+        descr_app:=replace(descr_app,'&A_DATA_REND&','30/09/'||to_char(c.data_min,'YYYY'));
+     else
+        descr_app:=replace(descr_app,'&DA_DATA_REND&','01/10/'||to_char(c.data_min,'YYYY'));
+        descr_app:=replace(descr_app,'&A_DATA_REND&','31/12/'||to_char(c.data_min,'YYYY'));
+     end if;   
+        
+    
+    end loop;
+ end if; 
+-- dopo aver sostituito le variabili del contratto ci sono 3 gruppi di variabili che possono produrre piu' righi
+-- Variabili appartenenti a gruppi differenti non verranno sostituite quindi un paragrafo avra' o solo variabili di fatture
+-- o di impegni usati per il pagamento o di pignoramenti
+ 
+concatenamento:='N';
+riga_app:=descr_app;
+inizio_conc:=instr(descr_app,'!!');
+fine_conc:=instr(descr_app,'!!',1,2);
+if fine_conc=0 then
+     inizio_conc:=0;
+else
+     concatenamento:='S';
+   descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+end if;
+while concatenamento in ('S','N') loop
+ if instr(descr_app,'&RAG_SOC_DITTA&')>0 or
+       instr(descr_app,'&INDIR_DITTA&')>0 or
+       instr(descr_app,'&CITTA_DITTA&')>0 or
+       instr(descr_app,'&INPS_DITTA&')>0 or
+       instr(descr_app,'&PIVA_DITTA&')>0 or
+       instr(descr_app,'&TIPO_DOCUMENTO&')>0 or
+       instr(descr_app,'&NUMERO_FATTURA&')>0 or
+       instr(descr_app,'&DATA_FATTURA&')>0 or
+       instr(descr_app,'&IMPORTO_FATTURA&')>0 or
+       instr(descr_app,'&IMPONIBILE_FATTURA&')>0 or
+       instr(descr_app,'&IVA_FATTURA&')>0 or
+       instr(descr_app,'&TIPO_PAGAMENTO_FATTURA&')>0 or
+       instr(descr_app,'&NOTE_FATTURA&')>0 or
+       instr(descr_app,'&IBAN_FATTURA&')>0 then
+    descr_app2:=descr_app;
+    for f in 
+      (select SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) denominazione,a.PARTITA_IVA,
+       a.CODICE_FISCALE,s.INDIRIZZO,c.cap||' '||c.descrizione||' ('||c.provincia||')' comune,fc.matr_inps, 
+       d.data_doc,d.num_doc, t.tot_doc,t.tot_impon,t.tot_iva,pa.descrizione tipo_pagamento,nvl(t.iban_pag,t.iban) iban,td.descr_x_atto,t.note
+       from bi_app_atti f, 
+            tb_tot_doc t, 
+            tb_doc_iva d,
+            fin_t_anagrafica a,
+            fin_t_comuni c,
+            fin_t_ana_sedi s,
+            bi_fornitori_contratti fc, 
+            fin_t_tipo_pagamenti pa,
+            tb_tipi_doc td
+       where f.utente=a_utente and
+             t.tbdi_chiave= f.chiave_fattura and
+             d.chiave= f.chiave_fattura and
+             a.id=d.finta_id and
+             td.sigla=d.tbtd_sigla and
+             s.id_ana(+)=a.id and
+             s.id_sede(+)=1 and
+             s.id_comune_sede = c.id(+) and
+             fc.tab_codice(+)=a_tipo_contratto and
+             fc.gen_progr(+)=a_progr_contratto and
+             fc.fornitore(+)= d.finta_id and
+             pa.id(+)= t.tbp_id) loop
+      descr_app:=replace(descr_app,'&RAG_SOC_DITTA&',f.denominazione);
+      descr_app:=replace(descr_app,'&INDIR_DITTA&',f.indirizzo);
+      descr_app:=replace(descr_app,'&CITTA_DITTA&',f.comune);
+      descr_app:=replace(descr_app,'&INPS_DITTA&',f.matr_inps);
+      descr_app:=replace(descr_app,'&PIVA_DITTA&',f.partita_iva);
+      descr_app:=replace(descr_app,'&TIPO_DOCUMENTO&',f.descr_x_atto);
+      descr_app:=replace(descr_app,'&NUMERO_FATTURA&',f.num_doc);
+      descr_app:=replace(descr_app,'&DATA_FATTURA&',to_char(f.data_doc,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&IMPORTO_FATTURA&',ltrim(to_char(f.tot_doc,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&IMPONIBILE_FATTURA&',ltrim(to_char(f.tot_impon,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&IVA_FATTURA&',ltrim(to_char(f.tot_iva,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&TIPO_PAGAMENTO_FATTURA&',f.tipo_pagamento);
+      descr_app:=replace(descr_app,'&IBAN_FATTURA&',f.iban);
+      descr_app:=replace(descr_app,'&NOTE_FATTURA&',f.note);
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ elsif instr(descr_app,'&DEF_RAG_SOC_DITTA&')>0 or
+          instr(descr_app,'&DEF_INDIR_DITTA&')>0 or
+          instr(descr_app,'&DEF_CITTA_DITTA&')>0 or
+          instr(descr_app,'&DEF_INPS_DITTA&')>0 or
+          instr(descr_app,'&DEF_PIVA_DITTA&')>0 or
+          instr(descr_app,'&DEF_PEC_DITTA&')>0 or
+          instr(descr_app,'&DEF_IBAN_DITTA&')>0 then
+       descr_app2:=descr_app;
+       for fc in
+        (select SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) denominazione,a.PARTITA_IVA,
+                a.CODICE_FISCALE,s.INDIRIZZO,c.cap||' '||c.descrizione||' ('||c.provincia||')' comune,fc.matr_inps,
+                fc.iban iban_def,fc.fornitore,a.pec
+          from bi_fornitori_contratti fc, 
+               fin_t_anagrafica a,
+               fin_t_comuni c,
+               fin_t_ana_sedi s
+          where fc.tab_codice=a_tipo_contratto and
+                fc.gen_progr=a_progr_contratto and
+                a.id=fc.fornitore and
+                s.id_ana(+)=a.id and
+                s.id_sede(+)=1 and
+                s.id_comune_sede =c.id(+)) loop 
+      descr_app:=replace(descr_app,'&DEF_RAG_SOC_DITTA&',fc.denominazione);
+      descr_app:=replace(descr_app,'&DEF_INDIR_DITTA&',fc.indirizzo);
+      descr_app:=replace(descr_app,'&DEF_CITTA_DITTA&',fc.comune);
+      descr_app:=replace(descr_app,'&DEF_INPS_DITTA&',fc.matr_inps);
+      descr_app:=replace(descr_app,'&DEF_PIVA_DITTA&',fc.partita_iva);
+      descr_app:=replace(descr_app,'&DEF_PEC_DITTA&',fc.pec);
+      if fc.iban_def is null then
+          select min(cb.iban) 
+          into f_iban
+          from fin_t_ana_conti_bancari cb 
+          where cb.id_ana= fc.fornitore;
+      else
+          f_iban:=fc.iban_def;
+      end if;
+      descr_app:=replace(descr_app,'&DEF_IBAN_DITTA&',f_iban);
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       end if;
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+    end if;
+ elsif instr(descr_app,'&NUMERO_IMPEGNO&')>0 or
+          instr(descr_app,'&DATA_IMPEGNO&')>0 or
+          instr(descr_app,'&DATA_ATTO_IMPEGNO&')>0 or
+          instr(descr_app,'&TIPO_ATTO_IMPEGNO&')>0 or
+          instr(descr_app,'&NUMERO_ATTO_IMPEGNO&')>0 or
+          instr(descr_app,'&ANNO_BILANCIO&')>0 or
+          instr(descr_app,'&CAPITOLO&')>0 or
+          instr(descr_app,'&DESCR_CAPITOLO&')>0 or
+          instr(descr_app,'&UPB&')>0 or
+          instr(descr_app,'&OBIETTIVO&')>0 or
+          instr(descr_app,'&IMP_IMPEGNO&')>0 or
+          instr(descr_app,'&NUMERO_MANDATO&')>0 or
+          instr(descr_app,'&DATA_MANDATO&')>0 or 
+          -- 30/09/2013
+          instr(descr_app,'&MISSIONE&')>0 or 
+          instr(descr_app,'&PROGRAMMA&')>0 or 
+          instr(descr_app,'&PDCF&')>0 then 
+       descr_app2:=descr_app;
+          for i in
+          (SELECT DISTINCT bixr.numero_impegno,bixr.data_imp,bixr.anno_capitolo esercizio,bixr.num_mandato,bixr.data_mandato,
+          bixr.upb upb,bixr.capitolo capitolo,nvl(bixr.importo,0) importo_impegno,fta.descrizione descr_capitolo,
+          bixr.ob_gest_asp||bixr.ob_gest_dir||bixr.ob_gest_ris||bixr.ob_gest_p1||bixr.ob_gest_p2||bixr.ob_gest_p3 cod_obiettivo,
+          FTOG.DESCRIZIONE descr_obiettivo,ftd.attribute13 tipo_atto_imp,ftd.attribute14 num_atto_imp,ftd.data_atto_autorizzativo data_atto_imp,
+          -- 30/09/2013
+          bixr.piano_conti_fina,
+          nvl(nb1.codice,'Da Def.') missione,
+          nb1.descrizione desc_missione,
+          nvl(nb2.codice,'Da Def.') programma,
+          nb2.descrizione desc_programma
+          FROM bi_app_atti baa, 
+               bi_rate_gest brg,
+               bi_impegni_x_rate bixr,
+               fin_t_documenti ftd,
+               FIN_T_OBIETTIVI_GESTIONALI FTOG,
+               FIN_T_ARTICOLI FTA,
+               nb_livello1 nb1,
+               nb_livello2 nb2
+         WHERE baa.utente=a_utente and
+               brg.chiave_fattura= baa.chiave_fattura and
+               brg.tab_codice = bixr.tab_codice AND 
+               brg.gen_progr = bixr.gen_progr AND 
+               brg.PROGR_RATA = bixr.PROGR_RATA and
+               bixr.doc_id_impegno = ftd.doc_id(+) and
+               FTOG.FIN_T_ASP_CODICE(+)=bixr.ob_gest_asp AND
+               FTOG.FIN_T_DIRETTRICE_CODICE(+)=bixr.ob_gest_dir AND
+               FTOG.FIN_T_RISULTATI_CODICE(+)=bixr.ob_gest_ris AND
+               FTOG.CODICE_PARTE1(+)=bixr.ob_gest_p1 AND
+               FTOG.CODICE_PARTE2(+)=bixr.ob_gest_p2 AND
+               FTOG.CODICE_PARTE3(+)=bixr.ob_gest_p3 AND
+               FTOG.DATA_ASSESTAMENTO(+)=TO_DATE('01011900','ddmmyyyy') AND
+               ftog.anno(+)=bixr.anno_capitolo and
+               fta.anno(+)=bixr.anno_capitolo AND 
+               fta.abilitato(+)='S' and
+               fta.codice(+)=bixr.capitolo AND
+               fta.eu = 'U' AND
+               nb1.id(+) = nb2.id_livello1 AND
+               fta.nb_id_padre = nb2.id(+) AND
+               nb1.anno(+) = nb2.anno AND
+               nb2.anno(+) = fta.anno
+               ) loop
+      descr_app:=replace(descr_app,'&NUMERO_IMPEGNO&',i.numero_impegno);
+      descr_app:=replace(descr_app,'&DATA_IMPEGNO&',to_char(i.data_imp,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&DATA_ATTO_IMPEGNO&',to_char(i.data_atto_imp,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&TIPO_ATTO_IMPEGNO&',i.tipo_atto_imp);
+      descr_app:=replace(descr_app,'&NUMERO_ATTO_IMPEGNO&',i.num_atto_imp);
+      descr_app:=replace(descr_app,'&IMP_IMPEGNO&',ltrim(to_char(i.importo_impegno,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&ANNO_BILANCIO&',i.esercizio);
+      descr_app:=replace(descr_app,'&CAPITOLO&',i.capitolo);
+      descr_app:=replace(descr_app,'&DESCR_CAPITOLO&',i.descr_capitolo);
+      descr_app:=replace(descr_app,'&UPB&',i.upb);
+      descr_app:=replace(descr_app,'&OBIETTIVO&',i.descr_obiettivo);
+      descr_app:=replace(descr_app,'&NUMERO_MANDATO&',i.num_mandato);
+      descr_app:=replace(descr_app,'&DATA_MANDATO&',to_char(i.data_mandato,'dd/mm/yyyy'));
+      descr_app := REPLACE(descr_app,'&PDCF&',i.piano_conti_fina);
+      descr_app := REPLACE(descr_app,'&MISSIONE&',i.missione||'-'||i.desc_missione);
+      descr_app := REPLACE(descr_app,'&PROGRAMMA&',i.programma||'-'||i.desc_programma);
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+    end if;
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+ elsif instr(descr_app,'&DEF_ANNO_BILANCIO&')>0 or
+          instr(descr_app,'&DEF_CAPITOLO&')>0 or
+          instr(descr_app,'&DEF_DESCR_CAPITOLO&')>0 or
+          instr(descr_app,'&DEF_UPB&')>0 or
+          instr(descr_app,'&DEF_OBIETTIVO&')>0 or
+          -- 30/09/2013
+          instr(descr_app,'&DEF_MISSIONE&')>0 or 
+          instr(descr_app,'&DEF_PROGRAMMA&')>0 or 
+          instr(descr_app,'&DEF_PDCF&')>0 then 
+       descr_app2:=descr_app;
+          for cf in
+        (SELECT DISTINCT de.anno,de.upb,de.capitolo,fta.descrizione descr_capitolo,
+          de.ob_gest_asp||de.ob_gest_dir||de.ob_gest_ris||de.ob_gest_p1||de.ob_gest_p2||de.ob_gest_p3 cod_obiettivo,
+          de.ob_gest_p1||de.ob_gest_p2||de.ob_gest_p3||' '||FTOG.DESCRIZIONE descr_obiettivo,
+          de.piano_conti_fina,nvl(nb1.codice,'Da Def.') missione,nb1.descrizione desc_missione,
+          nvl(nb2.codice,'Da Def.') programma,nb2.descrizione desc_programma
+          FROM bi_dati_economici de,
+               FIN_T_OBIETTIVI_GESTIONALI FTOG,
+               FIN_T_ARTICOLI FTA,
+               nb_livello1 nb1,
+               nb_livello2 nb2
+         WHERE de.tab_codice = a_tipo_contratto AND 
+               de.gen_progr = a_progr_contratto AND 
+               de.data = 
+               (select max(data)
+                 from bi_dati_economici
+                 WHERE tab_codice = a_tipo_contratto AND 
+                       gen_progr = a_progr_contratto) and
+               FTOG.FIN_T_ASP_CODICE(+)=de.ob_gest_asp AND
+               FTOG.FIN_T_DIRETTRICE_CODICE(+)=de.ob_gest_dir AND
+               FTOG.FIN_T_RISULTATI_CODICE(+)=de.ob_gest_ris AND
+               FTOG.CODICE_PARTE1(+)=de.ob_gest_p1 AND
+               FTOG.CODICE_PARTE2(+)=de.ob_gest_p2 AND
+               FTOG.CODICE_PARTE3(+)=de.ob_gest_p3 AND
+               FTOG.DATA_ASSESTAMENTO(+)=TO_DATE('01011900','ddmmyyyy') AND
+               ftog.anno(+)=de.anno and
+               fta.anno(+)=de.anno AND 
+               fta.abilitato(+)='S' and
+               fta.codice(+)=de.capitolo AND
+               fta.eu = 'U' AND
+               nb1.id(+) = nb2.id_livello1 AND
+               fta.nb_id_padre = nb2.id(+) AND
+               nb1.anno(+) = nb2.anno AND
+               nb2.anno(+) = fta.anno) loop
+      descr_app:=replace(descr_app,'&DEF_ANNO_BILANCIO&',cf.anno);
+      descr_app:=replace(descr_app,'&DEF_CAPITOLO&',cf.capitolo);
+      descr_app:=replace(descr_app,'&DEF_DESCR_CAPITOLO&',cf.descr_capitolo);
+      descr_app:=replace(descr_app,'&DEF_UPB&',cf.upb);
+      descr_app:=replace(descr_app,'&DEF_OBIETTIVO&',cf.descr_obiettivo);
+      descr_app := REPLACE(descr_app,'&DEF_PDCF&',cf.piano_conti_fina);
+      descr_app := REPLACE(descr_app,'&DEF_MISSIONE&',cf.missione||'-'||cf.desc_missione);
+      descr_app := REPLACE(descr_app,'&DEF_PROGRAMMA&',cf.programma||'-'||cf.desc_programma);
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ elsif instr(descr_app,'&NUM_ATTO_PIGN&')>0 or
+          instr(descr_app,'&DATA_ATTO_PIGN&')>0 or
+          instr(descr_app,'&DATA_NOTIFICA_PIGN&')>0 or
+          instr(descr_app,'&DESCR_PIGNORAMENTO&')>0 or
+          instr(descr_app,'&UFF_GIUDIZIARIO&')>0 or
+          instr(descr_app,'&DATA_I_UDIENZA_PIGN&')>0 or
+          instr(descr_app,'&DITTA_PIGN&')>0 or
+          instr(descr_app,'&BENEFICIARI_PIGN&')>0 or
+          instr(descr_app,'&IMPORTO_PIGN&')>0 or
+          instr(descr_app,'&MAGGIORAZIONE_PIGN&')>0 or
+          instr(descr_app,'&AVV_DICH_PIGN&')>0 or
+          instr(descr_app,'&DICH_AVV_DATA_PIGN&')>0 or
+          instr(descr_app,'&DICH_AVV_NUM_PIGN&')>0 or
+          instr(descr_app,'&BANCA_DICH_PIGN&')>0 or
+          instr(descr_app,'&DICH_BANCA_DATA_PIGN&')>0 or
+          instr(descr_app,'&DICH_BANCA_NUM_PIGN&')>0 then
+       descr_app2:=descr_app;
+          for pi in
+        (select distinct ap.id,ap.num_atto ,ap.data_atto ,SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) ditta_pign,
+                ap.data , ap.descrizione ,ap.uff_giud , ap.data_prima_udienza ,ap.importo,
+                ap.perc_aum , ap.avvocato_beneficiari ,ap.avv_data_comun ,
+                ap.avv_nprot_comunic ,ap.banca ,ap.banca_data_comunic ,ap.banca_nprot_comunic  
+               fin_t_anagrafica a
+          from bi_app_atti f,
+               bi_pignoramenti fp,
+               bi_atti_pignoramenti ap,
+          where f.utente=a_utente and
+                fp.chiave_fatt= f.chiave_fattura and
+                ap.id=fp.id_atto_pignoramento and
+                a.id=ap.fornitore) loop
+      descr_app:=replace(descr_app,'&NUM_ATTO_PIGN&',pi.num_atto);
+      descr_app:=replace(descr_app,'&DATA_ATTO_PIGN&',to_char(pi.data_atto,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&DATA_NOTIFICA_PIGN&',to_char(pi.data,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&DESCR_PIGNORAMENTO&',pi.descrizione);
+      descr_app:=replace(descr_app,'&UFF_GIUDIZIARIO&',pi.uff_giud);
+      descr_app:=replace(descr_app,'&DATA_I_UDIENZA_PIGN&',to_char(pi.data_prima_udienza,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&DITTA_PIGN&',pi.ditta_pign);
+      descr_app:=replace(descr_app,'&IMPORTO_PIGN&',ltrim(to_char(pi.importo,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&MAGGIORAZIONE_PIGN&',pi.perc_aum);
+      descr_app:=replace(descr_app,'&AVV_DICH_PIGN&',pi.avvocato_beneficiari);
+      descr_app:=replace(descr_app,'&DICH_AVV_DATA_PIGN&',to_char(pi.avv_data_comun,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&DICH_AVV_NUM_PIGN&',pi.avv_nprot_comunic);
+      descr_app:=replace(descr_app,'&BANCA_DICH_PIGN&',pi.banca);
+      descr_app:=replace(descr_app,'&DICH_BANCA_DATA_PIGN&',to_char(pi.banca_data_comunic,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&DICH_BANCA_NUM_PIGN&',pi.banca_nprot_comunic);
+        beneficiari:=null;
+         for ben in (select beneficiario from BI_ATTI_PIGN_BENEFICIARI where id_atto=pi.id) loop
+          beneficiari:=beneficiari||ben.beneficiario||' - ';
+         end loop;
+      descr_app:=replace(descr_app,'&BENEFICIARI_PIGN&',beneficiari);
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ elsif instr(descr_app,'&DITTA_FATT_PIGN&')>0 or
+          instr(descr_app,'&NUM_FATT_PIGN&')>0 or
+          instr(descr_app,'&DATA_FATT_PIGN&')>0 or
+          instr(descr_app,'&IMP_FATT_PIGN&')>0 or
+          instr(descr_app,'&IMP_PIGN_PIGN&')>0 then
+       descr_app2:=descr_app;
+          for fp in
+         (select SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) denominazione,
+                 d.data_doc,d.num_doc,fp.importo_base,fp.importo_pignorato
+            from bi_app_atti f,
+                 bi_pignoramenti fp,
+                 tb_doc_iva d,
+                 fin_t_anagrafica a
+            where f.utente=a_utente and
+                  fp.chiave_fatt = f.chiave_fattura and
+                  d.chiave= f.chiave_fattura and
+                  a.id=d.finta_id) loop
+      descr_app:=replace(descr_app,'&DITTA_FATT_PIGN&',fp.denominazione);
+      descr_app:=replace(descr_app,'&NUM_FATT_PIGN&',fp.num_doc);
+      descr_app:=replace(descr_app,'&DATA_FATT_PIGN&',to_char(fp.data_doc,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&IMP_FATT_PIGN&',ltrim(to_char(fp.importo_base,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&IMP_PIGN_PIGN&',ltrim(to_char(fp.importo_pignorato,'999G999G999D00')));
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ elsif instr(descr_app,'&DATA_GIA_CASSA&')>0 or
+          instr(descr_app,'&NUM_GIA_CASSA&')>0 or
+          instr(descr_app,'&IMP_GIA_CASSA&')>0 or
+       descr_app2:=descr_app;
+       instr(descr_app,'&DATA_RIM_CASSA&')>0 or
+          instr(descr_app,'&NUM_RIM_CASSA&')>0 or
+          instr(descr_app,'&IMP_RIM_CASSA&')>0 then
+          for gia in
+         (select m.RIF_DOC_DATA,m.RIF_DOC_NUM,m.IMPORTO
+         from tg_casse_economali e,tg_casseec_mov m
+         where e.TIPO_CONTRATTO = a_tipo_contratto and
+               e.PROGRESSIVO = a_progr_contratto and
+               m.cassa_ec(+) = e.id and
+               m.tipo_mov(+) = 'GIA' and
+               m.RIF_DOC_TIPO(+) = 5 and           
+               (instr(descr_app,'&DATA_GIA_CASSA&')>0 or instr(descr_app,'&NUM_GIA_CASSA&')>0 or instr(descr_app,'&IMP_GIA_CASSA&')>0) and
+               to_char(m.data_reg,'yyyy')=(select max(to_char(d.data_reg,'yyyy')) from tg_casseec_mov d where d.id_atto=p_atto)
+         union 
+         select m.RIF_DOC_DATA,m.RIF_DOC_NUM,m.IMPORTO
+         from tg_casse_economali e,tg_casseec_mov m
+         where e.TIPO_CONTRATTO = a_tipo_contratto and
+               e.PROGRESSIVO = a_progr_contratto and
+               m.cassa_ec(+) = e.id and
+               m.tipo_mov(+) = 'RIM' and
+               (instr(descr_app,'&DATA_RIM_CASSA&')>0 or instr(descr_app,'&NUM_RIM_CASSA&')>0 or instr(descr_app,'&IMP_RIM_CASSA&')>0) and
+               to_char(m.data_reg,'yyyy')=(select max(to_char(d.data_reg,'yyyy')) from tg_casseec_mov d where d.id_atto=p_atto)
+        order by 1) loop
+      descr_app:=replace(descr_app,'&DATA_GIA_CASSA&',to_char(gia.RIF_DOC_DATA,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&NUM_GIA_CASSA&',gia.RIF_DOC_NUM);
+      descr_app:=replace(descr_app,'&IMP_GIA_CASSA&',ltrim(to_char(gia.importo,'999G999G999D00')));
+      descr_app:=replace(descr_app,'&DATA_RIM_CASSA&',to_char(gia.RIF_DOC_DATA,'dd/mm/yyyy'));
+      descr_app:=replace(descr_app,'&NUM_RIM_CASSA&',gia.RIF_DOC_NUM);
+      descr_app:=replace(descr_app,'&IMP_RIM_CASSA&',ltrim(to_char(gia.importo,'999G999G999D00')));
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ elsif instr(descr_app,'&CAP_CASSA&')>0 or
+          instr(descr_app,'&MISSIONE_CASSA&')>0 or
+          instr(descr_app,'&PROGRAMMA_CASSA&')>0 or
+       instr(descr_app,'&IMP_CAP_CASSA&')>0 then
+       descr_app2:=descr_app;
+          for cap in
+         (select capitolo,missione,programma,sum(importo) importo
+           from at_determ_impegni
+           where id_atto=p_atto
+           group by capitolo,missione,programma ) loop
+      descr_app:=replace(descr_app,'&CAP_CASSA&',cap.capitolo);
+      descr_app:=replace(descr_app,'&MISSIONE_CASSA&',cap.missione);
+      descr_app:=replace(descr_app,'&PROGRAMMA_CASSA&',cap.programma);
+      descr_app:=replace(descr_app,'&IMP_CAP_CASSA&',ltrim(to_char(cap.importo,'999G999G999D00')));
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ elsif instr(descr_app,'&IL_CAP_CASSA&')>0 or
+          instr(descr_app,'&IL_MISSIONE_CASSA&')>0 or
+          instr(descr_app,'&IL_PROGRAMMA_CASSA&')>0 or 
+          instr(descr_app,'&IL_PRE_IMP_CASSA&')>0 or 
+       instr(descr_app,'&IL_IMP_CAP_CASSA&')>0 then 
+       descr_app2:=descr_app;
+          for cap in
+         (select to_number(to_char(sysdate,'yyyy')) esercizio,FTIA.capitolo upb,a.capitolo capitolo,l1.codice missione, l2.codice programma,
+                 ftpi.CODICE_ASP||ftpi.CODICE_DIRETTRICE||ftpi.CODICE_RISULTATI||ftpi.CODICE_OG_PARTE1||ftpi.CODICE_OG_PARTE2||ftpi.CODICE_OG_PARTE3 cod_ob_gest, 
+                 ftpi.doc_sequence_value numero_preimp, ftpi.attribute13 tipo_atto_preimp,
+                 a.importo importo_imp, a.importo importo_liq, null doc_id_imp,
+                 a.doc_id doc_id_preimp, a.pdcf pdcf, null SIOPE,
+                 null tipo_atto_imp, null num_atto_imp, null data_atto_imp,
+                 ftpi.attribute14 num_atto_preimp, ftpi.data_atto_autorizzativo data_atto_preimp                 
+          from 
+               (select 'U'||mc.capitolo capitolo,mc.doc_id,mc.piano_conti_fina pdcf,sum(mc.importo) importo
+                  from tg_casseec_mov_cap mc,tg_casseec_mov m
+                       where m.id_atto=p_atto and
+                       mc.id_mov=m.id and
+                       mc.doc_id is not null
+                  group by mc.capitolo,mc.doc_id,mc.piano_conti_fina) a, 
+                  fin_t_documenti ftpi, FIN_T_ARTICOLI FTIA,nb_livello1 l1,nb_livello2 l2
+          where ftpi.doc_id(+)=a.doc_id and
+                FTIA.ANNO=to_number(to_char(sysdate,'yyyy')) and
+                FTIA.ABILITATO='S' and
+                FTIA.EU||FTIA.CODICE=a.capitolo and
+                l2.id(+) = FTIA.nb_id_padre AND
+                l1.id(+) = l2.id_livello1) loop
+      descr_app:=replace(descr_app,'&IL_CAP_CASSA&',cap.capitolo);
+      descr_app:=replace(descr_app,'&IL_MISSIONE_CASSA&',cap.missione);
+      descr_app:=replace(descr_app,'&IL_PROGRAMMA_CASSA&',cap.programma);
+      descr_app:=replace(descr_app,'&IL_PRE_IMP_CASSA&',cap.numero_preimp);
+      descr_app:=replace(descr_app,'&IL_IMP_CAP_CASSA&',ltrim(to_char(cap.importo_imp,'999G999G999D00')));
+      if inizio_conc=0 then
+         insert into at_atti_corpo
+           (ID_ATTO,PROGR,DESCR1,DESCR2)
+           values
+           (p_atto,progr_rigo,p.descr1,descr_app);
+         progr_rigo:=progr_rigo+1;
+         descr_app:=descr_app2;
+         concatenamento:='X';
+      else
+         descr_app:=descr_app||descr_app2;
+      end if;    
+    end loop; 
+    if inizio_conc=0 then
+       concatenamento:='X';
+    else
+       descr_app:=replace(descr_app,descr_app2,'');
+       riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+       descr_app:=riga_app;
+       inizio_conc:=instr(descr_app,'!!');
+       fine_conc:=instr(descr_app,'!!',1,2);
+       if fine_conc=0 then
+            inizio_conc:=0;
+            concatenamento:='N';
+       else
+          descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+          concatenamento:='S';
+       end if;
+    end if;
+ else       
+   if inizio_conc=0 then
+      insert into at_atti_corpo
+       (ID_ATTO,PROGR,DESCR1,DESCR2)
+        values
+       (p_atto,progr_rigo,p.descr1,descr_app);
+      progr_rigo:=progr_rigo+1;
+      concatenamento:='X';
+   else
+      descr_app:=replace(descr_app,descr_app2,'');
+      riga_app:=substr(riga_app,1,inizio_conc-1)||descr_app||substr(riga_app,fine_conc+2,length(riga_app)-inizio_conc-1);
+      descr_app:=riga_app;
+      inizio_conc:=instr(descr_app,'!!');
+      fine_conc:=instr(descr_app,'!!',1,2);
+      if fine_conc=0 then
+           inizio_conc:=0;
+           concatenamento:='N';
+      else
+         descr_app:=substr(descr_app,inizio_conc+2,fine_conc-inizio_conc-2);
+         concatenamento:='S';
+      end if;
+   end if;
+ end if;
+end loop; -- fine sostituzione e/o concatenamento 
+end loop; -- fine lettura righi paragrafi
+commit;
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,244 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>INDICATORI_BIL_PRE_ENTRATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_ENTRATE.html">Details</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_ENTRATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_ENTRATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_ENTRATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="INDICATORI_BIL_PRE_ENTRATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure indicatori_bil_pre_Entrate (p_anno in number) is 
+
+ -- *** per evitare di lavorare su bil previsione non fissato l'utente lo impostiamo di fisso
+    p_utente varchar2 (20) := 'PREV'||p_anno;
+
+	type vettore_6 is varray(6) of number;
+	p_titolo varchar2(2); -- codice Titolo per il cursore
+	tot_prev_compe number := 0;  -- contiene il totale delle previsioni di competenza p_anno
+	tot_prev_compea1 number := 0;  -- contiene il totale delle previsioni di competenza p_anno + 1
+	tot_prev_compea2 number := 0;  -- contiene il totale delle previsioni di competenza p_anno + 2
+	tot_res_compe number := 0;  -- contiene il totale delle previsioni di competenza p_anno
+
+	p_ord number := 0 ; -- indice per numero riga
+
+	media_acc_prec number := 0; -- media accertamenti 3 esercizi precedenti della specifica tipologia
+	tot_acc_prec number := 0; -- media totale accertamenti 3 esercizi precedenti
+	media_risc_prec number := 0; -- media riscossioni 3 esercizi precedenti della specifica tipologia
+
+	i_tipologia vettore_6 := vettore_6(0,0,0,0,0,0);
+	i_titolo vettore_6 := vettore_6(0,0,0,0,0,0);
+	i_totale_entrate vettore_6 := vettore_6(0,0,0,0,0,0);
+
+	pcf varchar2(30); -- inserisco nel campo Definizione della tabella il codice PCF per la trasmissione BDAP
+
+
+
+	
+	cursor titoli is
+	select 'Titolo'||' '||substr(l.codice,1,1)||':' codice
+    ,l.descrizione
+    ,substr(l.codice,1,5) cod_singolo
+    from nb_livello1 l
+    where anno = p_anno
+    and eu = 'E'
+	order by 1; 
+
+	cursor tipologia is 
+	select codice
+    ,descrizione
+    ,sum(compe_anno0) compe_anno0
+    ,sum(compe_anno1) compe_anno1
+    ,sum(compe_anno2) compe_anno2
+    ,sum(CASSA_ANNO0) cassa_anno0
+    from(
+    select substr(ETIPOLOGIA_UPROGRAMMA,1,5) codice
+	,'TIPOLOGIA '||substr(ETIPOLOGIA_UPROGRAMMA,1,3)||': '||DESC_TIPOLOGIA_PROGRAMMA descrizione
+	,sum(nvl(COMPETENZA_ANNO0,0)) compe_anno0
+	,sum(nvl(COMPETENZA_ANNO1,0)) compe_anno1
+	,sum(nvl(COMPETENZA_ANNO2,0)) compe_anno2
+	,sum(nvl(CASSA_ANNO0,0)) cassa_anno0
+	from fin_t_previsione
+	where anno = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+	and substr(ETITOLO_UMISSIONE,1,1) = p_titolo
+	group by ETIPOLOGIA_UPROGRAMMA,DESC_TIPOLOGIA_PROGRAMMA
+    UNION
+    select substr(l.codice,1,5) codice
+	,'TIPOLOGIA '||substr(l.codice,1,3)||': '||l.descrizione descrizione
+    ,0 compe_anno0
+	,0 compe_anno1
+	,0 compe_anno2
+	,0 cassa_anno0
+    from nb_livello2 l
+    where l.anno = p_anno
+    and l.eu ='E'
+    and substr(l.codice,1,1) = p_titolo
+	)
+    group by codice
+    ,descrizione
+    order by 1;
+    
+	begin
+
+	-- pulisco la FIN_T_INDICATORI_BILANCIO per l'anno, l'utente e la tipologia di indicatore considerato
+	delete FIN_T_INDICATORI_BILANCIO where anno = p_anno and utente = p_utente and TIPO_BILANCIO = 'P' and TIPO_INDICATORE = 'E';
+		commit;
+	-- ********************************************
+
+	-- calcolo il totale della competenza
+	select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0),nvl(sum(nvl(residuo,0)),0)
+	into tot_prev_compe,tot_prev_compea1,tot_prev_compea2,tot_res_compe
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+	and substr(ETIPOLOGIA_UPROGRAMMA,1,1) &lt;> 'E';
+
+	-- calcolo il totale accertamenti dei 3 esercizi prec
+	select round(sum(nvl(d.document_amount,0))/3,2) into tot_acc_prec
+	from fin_t_documenti d
+	where d.doc_type = 'ACC'
+	and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+	and d.segment8 between (p_anno-4) and (p_anno - 2);
+
+		for t in titoli loop
+
+			i_titolo := vettore_6(0,0,0,0,0,0); --inizializzo l'array che contiene i totali per titolo ad ogni loop
+
+			p_titolo := substr(t.cod_singolo,1,1);
+
+			p_ord := p_ord + 1;
+
+			insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+	    	values
+	    	(p_anno,p_utente,p_ord,'P','E',t.codice,t.descrizione);
+	    	commit;
+
+	    	for p in tipologia loop
+
+	    	 select round(nvl(sum(nvl(d.document_amount,0)),0)/3,2) into media_acc_prec
+			 from fin_t_documenti d
+			 ,vw_nb_articoli a
+			 where d.doc_type = 'ACC'
+			 and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+			 and d.segment8 between (p_anno-4) and (p_anno - 2)
+			 and a.anno = d.segment8
+			 and a.eu||a.codice = d.segment2
+			 and substr(a.liv2,1,5) = p.codice;
+
+			 select round(nvl(sum(nvl(d.document_amount,0)),0)/3,2) into media_risc_prec
+			 from fin_t_documenti d
+			 ,vw_nb_articoli a
+			 where d.doc_type = 'REV'
+			 and nvl(d.OPEN_BALANCE_PROPOSED,0) > 0
+			 and d.segment8 between (p_anno-4) and (p_anno - 2)
+			 and a.anno = d.segment8
+			 and a.eu||a.codice = d.segment2
+			 and substr(a.liv2,1,5) = p.codice;
+
+             if tot_prev_compe > 0
+             then
+	    	 i_tipologia(1) := round(p.compe_anno0/tot_prev_compe * 100,2);
+             end if;
+             
+             if tot_prev_compea1 > 0
+             then
+	    	 i_tipologia(2) := round(p.compe_anno1/tot_prev_compea1 * 100,2);
+             end if;
+             
+             if tot_prev_compea2 > 0
+             then
+	    	 i_tipologia(3) := round(p.compe_anno2/tot_prev_compea2 * 100,2);
+             end if;
+
+             if tot_acc_prec > 0
+             then
+			 i_tipologia(4) := round(media_acc_prec/tot_acc_prec * 100,2);
+             end if;
+             
+             if (tot_prev_compe+tot_res_compe) > 0
+             then
+			 i_tipologia(5) := round(p.cassa_anno0/(tot_prev_compe+tot_res_compe) * 100,2);
+             end if;
+             
+             if tot_acc_prec > 0
+             then
+			 i_tipologia(6) := round(media_risc_prec/tot_acc_prec * 100,2);
+             end if;
+
+			 pcf := 'E.'||substr(p.codice,1,1)||'.'||substr(p.codice,2,2)||'.'||substr(p.codice,4,2)||'.00.000';
+
+	    	 p_ord := p_ord + 1;
+
+    		insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,PREVCOMPE_SU_TOT1,PREVCOMPE_SU_TOT2,PREVCOMPE_SU_TOT3
+    			,MACC_SU_MTOT
+				,PREVCASSA_SU_TOT1
+				,MRISC_SU_MACC
+				,Definizione)
+	    	values
+	    	(p_anno,p_utente,p_ord,'P','E',p.codice,p.descrizione
+	    	,i_tipologia(1),i_tipologia(2),i_tipologia(3),i_tipologia(4),i_tipologia(5),i_tipologia(6),pcf);
+	    	commit;
+
+	    	i_titolo(1) := i_titolo(1) + i_tipologia(1);
+	    	i_titolo(2) := i_titolo(2) + i_tipologia(2);
+	    	i_titolo(3) := i_titolo(3) + i_tipologia(3);
+	    	i_titolo(4) := i_titolo(4) + i_tipologia(4);
+	    	i_titolo(5) := i_titolo(5) + i_tipologia(5);
+	    	i_titolo(6) := i_titolo(6) + i_tipologia(6);
+
+	    	pcf := '';
+
+	    	end loop;
+
+	    	 pcf := 'E.'||substr(t.cod_singolo,1,1)||'.00.00.00.000';
+
+	    	p_ord := p_ord + 1;
+
+	    	insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,PREVCOMPE_SU_TOT1,PREVCOMPE_SU_TOT2,PREVCOMPE_SU_TOT3
+    			,MACC_SU_MTOT
+				,PREVCASSA_SU_TOT1
+				,MRISC_SU_MACC
+				,Definizione)
+	    	values
+	    	(p_anno,p_utente,p_ord,'P','E',t.cod_singolo,'Totale '||t.codice||' '||t.descrizione,
+	    	i_titolo(1),i_titolo(2),i_titolo(3),i_titolo(4),i_titolo(5),i_titolo(6),pcf);
+	    	commit;
+
+	    	i_totale_entrate(1) := i_totale_entrate(1) + i_titolo(1);
+	    	i_totale_entrate(2) := i_totale_entrate(2) + i_titolo(2);
+	    	i_totale_entrate(3) := i_totale_entrate(3) + i_titolo(3);
+	    	i_totale_entrate(4) := i_totale_entrate(4) + i_titolo(4);
+	    	i_totale_entrate(5) := i_totale_entrate(5) + i_titolo(5);
+	    	i_totale_entrate(6) := i_totale_entrate(6) + i_titolo(6);
+
+	    	pcf := '';
+
+		end loop;
+
+		p_ord := p_ord + 1;
+
+	    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,DESC_COD1,PREVCOMPE_SU_TOT1,PREVCOMPE_SU_TOT2,PREVCOMPE_SU_TOT3
+    			,MACC_SU_MTOT
+				,PREVCASSA_SU_TOT1
+				,MRISC_SU_MACC)
+	    values
+	    	(p_anno,p_utente,p_ord,'P','E','TOTALE ENTRATE',
+	    	round(i_totale_entrate(1)),round(i_totale_entrate(2)),round(i_totale_entrate(3)),round(i_totale_entrate(4)),i_totale_entrate(5),i_totale_entrate(6));
+	    	commit;
+
+	end;</pre>	</td></tr>
+</table></div>

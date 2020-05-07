@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PDP2_VW_DIR_OB_INDIVID</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PDP2_VW_DIR_OB_INDIVID.html">Colonne</a></div></div>
+<div class="tab"><div><a href="PDP2_VW_DIR_OB_INDIVID_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="PDP2_VW_DIR_OB_INDIVID_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="PDP2_VW_DIR_OB_INDIVID_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="PDP2_VW_DIR_OB_INDIVID_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2019-05-17</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-11-15</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>PDP2_VW_DIR_OB_INDIVID</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>604</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT P_UFFICIO,
+       OBSTRAT,
+       RISULTATO,
+       ANNO,
+       OBOPER,
+       DESC_OBOP,
+       RA_PERC,
+       PUNTEGGIO_ATTRIBUITO
+FROM PDP2017_B2_RIS_OBOP_ANN   /* contiene solo l'anno 2016 */	   
+UNION
+SELECT P_UFFICIO,
+       OBSTRAT,
+       RISULTATO,
+       ANNO,
+       OBOPER,
+       DESC_OBOP,
+       RA_PERC,
+       PUNTEGGIO_ATTRIBUITO
+FROM RisSu2017_b2_ris_obop_ann   /* contiene solo l'anno 2017 */	   
+UNION
+SELECT P_UFFICIO,
+       OBSTRAT,
+       RISULTATO,
+       ANNO,
+       OBOPER,
+       DESC_OBOP,
+       RA_PERC,
+       PUNTEGGIO_ATTRIBUITO
+FROM RisSu2018_b2_ris_obop_ann</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

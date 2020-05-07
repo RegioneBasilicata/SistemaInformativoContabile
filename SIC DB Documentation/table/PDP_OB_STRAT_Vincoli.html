@@ -1,0 +1,283 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PDP_OB_STRAT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PDP_OB_STRAT.html">Colonne</a></div></div>
+<div class="tab" id="current"><div><a href="PDP_OB_STRAT_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="PDP_OB_STRAT_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Vincoli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>CONSTRAINT_NAME</th>
+	<th>CONSTRAINT_TYPE</th>
+	<th>SEARCH_CONDITION</th>
+	<th>R_OWNER</th>
+	<th>R_TABLE_NAME</th>
+	<th>R_CONSTRAINT_NAME</th>
+	<th>DELETE_RULE</th>
+	<th>STATUS</th>
+	<th>DEFERRABLE</th>
+	<th>VALIDATED</th>
+	<th>GENERATED</th>
+	<th>BAD</th>
+	<th>RELY</th>
+	<th>LAST_CHANGE</th>
+	<th>INDEX_OWNER</th>
+	<th>INDEX_NAME</th>
+	<th>INVALID</th>
+	<th>VIEW_RELATED</th>
+</tr>
+	<tr>
+<td>PDP_OB_STRAT_CHKDATE</td>
+<td>Check</td>
+<td>data_dal >= p_data_dal AND data_al &lt;= p_data_al AND data_al > data_dal</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-12-29</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PDP_OB_STRAT_CHKFLORD</td>
+<td>Check</td>
+<td>NVL(fl_attivita_ordinarie ,'N') IN ('S','N')</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PDP_OB_STRAT_CHKPESO</td>
+<td>Check</td>
+<td>peso BETWEEN 0 AND 100</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PDP_OB_STRAT_FK1</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>PDP_PIANI_PERF</td>
+<td>PDP_PIANI_PERF_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PDP_OB_STRAT_FK2</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>PDP_PERIODIPDP_SET_LINEE</td>
+<td>PDP_PERIODIPDP_SET_LINEE_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-12-29</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PDP_OB_STRAT_FK3</td>
+<td>Foreign_Key</td>
+<td>null</td>
+<td>GAT2</td>
+<td>PDP_PRIORITA</td>
+<td>PDP_PRIORITA_PK</td>
+<td>NO ACTION</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PDP_OB_STRAT_PK</td>
+<td>Primary_Key</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>USER NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>GAT2</td>
+<td>PDP_OB_STRAT_PK</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C00244201</td>
+<td>Check</td>
+<td>"SET_LINEE" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C00244202</td>
+<td>Check</td>
+<td>"LINEA" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C00244203</td>
+<td>Check</td>
+<td>"PRIORITA" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C00244205</td>
+<td>Check</td>
+<td>"DATA_DAL" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SYS_C00244206</td>
+<td>Check</td>
+<td>"DATA_AL" IS NOT NULL</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>ENABLED</td>
+<td>NOT DEFERRABLE</td>
+<td>VALIDATED</td>
+<td>GENERATED NAME</td>
+<td>null</td>
+<td>null</td>
+<td>2015-06-20</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+	</tr>
+</table></div>

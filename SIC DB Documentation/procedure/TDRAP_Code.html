@@ -1,0 +1,474 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TDRAP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TDRAP.html">Details</a></div></div>
+<div class="tab"><div><a href="TDRAP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TDRAP_References.html">References</a></div></div>
+<div class="tab"><div><a href="TDRAP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TDRAP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure tdrap(p_anno in number,p_utente in varchar2,p_id_report in number ) as
+-- Tabella Dimostrativa del Risultato di Amministrazione 
+-- utilizzato per la bdap e report nb02111
+-- 2017  Creazione
+-- 10.05.2018 - aggiornamento riga 110 , riga 60,65,70
+-- 21.11.2019 - inserita riga 332
+
+ v_resatt_tot NUMBER;
+ v_respass_tot NUMBER;
+ v_fpv_contocorr NUMBER;
+ v_fpv_contocapit  NUMBER;
+ v_utente_a_prec VARCHAR2(100);
+ v_fondo_cassa number(15,2);
+ v_disavanzo_au number(15,2);
+
+vtipo_riga varchar2(1); 
+vattributo_riga varchar2(1);
+
+ cp_campoman01 number(15,2);
+ cp_campoman02 number(15,2);
+ cp_campoman03 number(15,2);
+ cp_campoman04 number(15,2);
+ cp_campoman05 number(15,2);
+ cp_campoman06 number(15,2);
+ cp_campoman07 number(15,2);
+ cp_campoman08 number(15,2);
+ cp_campoman06_1 number(15,2);
+ cp_campoman07_1 number(15,2);
+ cp_campoman08_1 number(15,2);
+ cp_campoman09 number(15,2);
+ cp_campoman10 number(15,2);
+ cp_campoman11 number(15,2);
+ cp_campoman12 number(15,2);
+ cp_campoman13 number(15,2);
+ cp_campoman14 number(15,2);
+ cp_campoman15 number(15,2);
+ cp_campoman16 number(15,2);
+ cp_campoman17 number(15,2);
+ cp_campoman18 number(15,2);
+ cp_campoman19 number(15,2);
+ cp_campoman20 number(15,2);
+
+ CP_risamm_p_prec            number(15,2);
+ CP_risamm_bipre_anno         number(15,2);
+ CP_tot_parte_accant        number(15,2);
+ CP_tot_parte_vincolata        number(15,2);
+ CP_tot_parte_disponibile    number(15,2);
+ CP_fpv_i_prec                number(15,2);
+ CP_risamm_i_prec            number(15,2);
+ CP_e_acc_prec                number(15,2);
+ CP_u_imp_prec                 number(15,2);
+ CP_e_var_res_prec            number(15,2);
+ CP_u_var_res_prec            number(15,2);
+ acc_pre                      number(15,2);
+ corr_acc_pre                 number(15,2);
+ imp_pre                      number(15,2);
+ corr_imp_pre                 number(15,2);
+ var_acc_pre                  number(15,2);
+ corr_var_acc_pre             number(15,2);
+ var_imp_pre                  number(15,2);
+ corr_var_imp_pre             number(15,2);
+
+ flag_e_var_res varchar2(1);
+
+ val_campo1 varchar2(10);
+ p_anno_prec number(4);
+
+ riga number;
+
+ CURSOR importi_manuali IS
+   SELECT nome_campo_report,
+          descrizione_campo_report,
+          NVL(importo,0) importo
+   FROM fnd_reports_importi_man
+   WHERE valore_parametro_anno = P_anno AND
+         id_report = TO_NUMBER(P_id_report);
+
+BEGIN
+ -- vedi PP00025.docx sul motivo per cui occorre creare una copia di dati fin_t_consuntivo_excel
+/*
+ IF UPPER(NVL(:P_fl_crea_vers_cons,'N')) = 'S'
+   THEN
+    DELETE fin_t_consuntivo_excel
+    WHERE anno_consuntivo = :P_anno_prec AND 
+          utente = 'nb00111.rdf';
+    UPDATE fin_t_consuntivo_excel
+    SET utente = 'nb00111.rdf'
+    WHERE anno_consuntivo = :P_anno_prec AND 
+          utente = :P_utente;
+    COMMIT;
+ END IF;
+*/
+ --IF UPPER(NVL(:P_fl_cons_attuale_stat,'A')) = 'S' /* Statico */
+ -- THEN
+ --  v_utente_a_prec := 'nb00111.rdf';
+ -- ELSE
+ --  v_utente_a_prec := :P_utente; 
+ --END IF;
+
+ v_utente_a_prec := p_utente;
+ p_anno_prec := p_anno -1;
+
+ delete fin_t_previsione_tdrap where utente=v_utente_a_prec and anno=p_anno;
+
+
+ FOR r in importi_manuali LOOP
+
+  val_campo1 := null;
+
+  IF r.nome_campo_report = 'EPARPEN-1'  
+     THEN riga :=90; CP_campoman01 := r.importo; val_campo1:= '(+)';
+  ELSIF r.nome_campo_report = 'SPIRPEN-1' 
+     THEN riga := 100; CP_campoman02 := r.importo; val_campo1:= '(-)';
+  ELSIF r.nome_campo_report = 'VRAPREN-1'
+     THEN riga := 110; CP_campoman03 := r.importo; val_campo1:= '+/-'; 
+  ELSIF r.nome_campo_report = 'VRPPREN-1'
+     THEN riga := 120; CP_campoman04 := r.importo; val_campo1:= '(+)';
+  ELSIF r.nome_campo_report = 'FPVFPEN-1'
+     THEN riga := 130; CP_campoman05 := r.importo; val_campo1:= '(-)';
+  ELSIF r.nome_campo_report = 'FCDEN-1'
+     THEN riga := 170; CP_campoman06 := r.importo;
+  ELSIF r.nome_campo_report = 'FGEN_AN-1'
+     THEN riga := 180; CP_campoman07 := r.importo;
+  ELSIF r.nome_campo_report = 'FGEN_BN-1'
+     THEN riga := 190; CP_campoman08 := r.importo;
+  ELSIF r.nome_campo_report = 'FGEN_CN-1'
+     THEN riga := 200; CP_campoman06_1 := r.importo;
+  ELSIF r.nome_campo_report = 'FGEN_DN-1'
+     THEN riga := 210; CP_campoman07_1 := r.importo;
+  ELSIF r.nome_campo_report = 'FGEN_EN-1'
+     THEN riga := 220; CP_campoman08_1 := r.importo;
+  ELSIF r.nome_campo_report = 'VDLPC'
+     THEN riga := 250; CP_campoman09 := r.importo;
+  ELSIF r.nome_campo_report = 'VDT'
+     THEN riga := 260; CP_campoman10 := r.importo;
+  ELSIF r.nome_campo_report = 'VDCM'
+     THEN riga := 270; CP_campoman11 := r.importo;
+  ELSIF r.nome_campo_report = 'VFAE'
+     THEN riga := 280; CP_campoman12 := r.importo;
+  ELSIF r.nome_campo_report = 'AVS'
+     THEN riga := 290; CP_campoman13 := r.importo;
+  ELSIF r.nome_campo_report = 'TDI'
+     THEN riga := 320; CP_campoman14 := r.importo;
+  ELSIF r.nome_campo_report = 'UVDLPC' 
+     THEN riga := 360; CP_campoman15 := r.importo;
+  ELSIF r.nome_campo_report = 'UVDT' 
+     THEN riga := 370; CP_campoman16 := r.importo;
+  ELSIF r.nome_campo_report = 'UVDCM'
+     THEN riga := 380; CP_campoman17 := r.importo;
+  ELSIF r.nome_campo_report ='UVFAE'
+     THEN riga := 390; CP_campoman18 := r.importo;
+  ELSIF r.nome_campo_report = 'UAVS'
+     THEN riga := 400; CP_campoman19 := r.importo;
+--  ELSIF r.nome_campo_report = 'TUAAP'  --- viene totalizzato alla fine no manuale.
+--     THEN riga := 410; CP_campoman20 := r.importo;
+  END IF;
+
+  if riga=320 
+     then vattributo_riga := 'B';
+          vtipo_riga := 'D';
+     else vattributo_riga := null;
+          vtipo_riga := null;
+  end if;
+
+  if riga=110
+    then 
+      if r.importo &lt;0 
+         then flag_e_var_res :='N';
+         else flag_e_var_res :='P';
+      end if;
+      insert into fin_t_previsione_tdrap 
+      (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+      values
+      (p_utente,p_anno,110,vtipo_riga,vattributo_riga,'(-)','Riduzione dei residui attivi, presunta per il restante periodo dell''esercizio'|| to_char(p_anno-1),decode(flag_e_var_res,'N',abs(r.importo),0),null);
+      insert into fin_t_previsione_tdrap 
+      (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+      values
+      (p_utente,p_anno,115,vtipo_riga,vattributo_riga,'(+)','Incremento dei residui attivi, presunto per il restante periodo dell''esercizio'|| to_char(p_anno-1),decode(flag_e_var_res,'P',abs(r.importo),0),null);
+    else    
+      insert into fin_t_previsione_tdrap 
+      (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+      values
+      (p_utente,p_anno,riga,vtipo_riga,vattributo_riga,val_campo1,r.descrizione_campo_report,r.importo,null);
+  end if;
+ END LOOP; 
+
+--modifica calcolo residui 16/10/2019 Gerry
+ /*SELECT NVL(SUM(NVL(residui_iniziali,0)),0) 
+ INTO v_resatt_tot
+ FROM fin_t_consuntivo_excel 
+ WHERE anno_consuntivo = P_anno_prec AND 
+       tipo_capitolo = 'E' AND 
+       utente = v_utente_a_prec;
+
+ SELECT NVL(SUM(NVL(residui_iniziali,0)),0)
+ INTO v_respass_tot
+ FROM fin_t_consuntivo_excel 
+ WHERE anno_consuntivo = P_anno_prec AND 
+       tipo_capitolo = 'U' AND 
+       utente = v_utente_a_prec;*/
+
+ select nvl(sum(nvl(residuo_iniziale,0)),0)
+ into v_resatt_tot
+ from fin_T_accertamenti_residui
+ where anno_finanziario=p_anno_prec;
+
+ select nvl(sum(nvl(residuo_iniziale,0)),0)
+ into v_respass_tot
+ from fin_T_impegni_residui
+ where anno_finanziario=p_anno_prec;
+
+
+
+ begin       
+    select 
+     nvl((abs(dg.cassa) + nvl(dg.variazione_cassa_piu,0) - nvl(dg.variazione_cassa_meno,0)),0) fondo_cassa_finale
+     ,nvl(dg.fpv_corrente,0) + nvl(dg.variazione_fpv_corrente,0)
+     ,nvl(dg.fpv_capitale,0) + nvl(dg.variazione_fpv_capitale,0)
+     into
+     v_fondo_cassa
+     ,v_fpv_contocorr
+     ,v_fpv_contocapit
+    from  fina_dati_generali dg
+    where dg.anno_finanziario = p_anno_prec;
+    exception when no_data_found 
+      then  v_fondo_cassa := 0;
+  end;
+
+
+ CP_risamm_i_prec := v_fondo_cassa
+                    +  v_resatt_tot 
+                    -  v_respass_tot 
+                    - v_fpv_contocapit 
+                    - v_fpv_contocorr;
+
+ riga:=10;
+
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'T','B',null,'1) Determinazione del risultato di amministrazione presunto al 31/12/'||P_anno_prec,null,null);
+
+ riga:=20;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,'B','(+)','Risultato di amministrazione iniziale dell''esercizio '||P_anno_prec,CP_risamm_i_prec,null);
+
+ CP_fpv_i_prec := v_fpv_contocapit + v_fpv_contocorr;
+
+ riga:=30;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,'B','(+)','Fondo pluriennale vincolato iniziale dell''esercizio '||P_anno_prec,CP_fpv_i_prec,null);
+
+
+
+-- modfica calcolo accertamenti anno precedente e variazioni 16/10/2019 Gerry
+/* SELECT NVL(SUM(NVL(accertamenti_impegni_compe,0)),0),
+        NVL(SUM(NVL(variazione_residui,0)),0)
+ INTO CP_e_acc_prec,
+      CP_e_var_res_prec
+ FROM fin_t_consuntivo_excel 
+ WHERE anno_consuntivo = P_anno_prec AND 
+       tipo_capitolo = 'E' AND 
+       utente = v_utente_a_prec;*/
+
+ select nvl(sum(nvl(document_amount,0)),0) 
+ into acc_pre
+ from FIN_T_DOCUMENTI
+ where doc_type = 'ACC'
+ and nvl(deletion_status_flag,'N') = 'N'
+ and segment8 = p_anno_prec;
+
+ select nvl(sum(nvl(importo_operazione*(decode(segno_operazione,'piu',1,'meno',-1,0)),0)),0)
+ into corr_acc_pre
+ from t_appoggio_consuntivo
+ where anno = p_anno_prec
+ and colonna_consuntivo='c7'
+ and substr(cap,1,1)='E'; 
+
+
+ CP_e_acc_prec := acc_pre + corr_acc_pre;
+
+
+ select nvl(sum(nvl(-d.document_amount,0)),0)
+ into var_acc_pre
+ from fin_t_documenti d
+ where d.doc_type = 'INSUS'
+ and nvl(d.deletion_status_flag,'N') = 'N'
+ and d.segment8 = p_anno_prec;
+
+ select nvl(sum(nvl(importo_operazione*(decode(segno_operazione,'piu',1,'meno',-1,0)),0)),0) 
+ into corr_var_acc_pre
+ from t_appoggio_consuntivo
+ where anno = p_anno_prec
+ and colonna_consuntivo='c10'
+ and substr(cap,1,1)='E';
+
+
+ CP_e_var_res_prec := var_acc_pre + corr_var_acc_pre;
+
+riga:=40;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,null,'(+)','Entrate già accertate nell''esercizio '||P_anno_prec,CP_e_acc_prec,null);
+
+ if cp_e_var_res_prec &lt;0
+    then flag_e_var_res := 'N'; -- negativo
+    else flag_e_var_res := 'P'; -- positivo
+ end if;
+
+ riga:=60;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,null,'(-)','Riduzione dei residui attivi già verificatesi nell''esercizio '||P_anno_prec,decode(flag_e_var_res,'N',abs(CP_e_var_res_prec),0),null);
+
+ riga:=65;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,null,'(+)','Incremento dei residui attivi già verificatesi nell''esercizio '||P_anno_prec,decode(flag_e_var_res,'P',CP_e_var_res_prec,0),null);
+
+
+ SELECT NVL(SUM(NVL(accertamenti_impegni_compe,0)),0),
+        NVL(SUM(NVL(variazione_residui,0)),0)
+ INTO CP_u_imp_prec,
+      CP_u_var_res_prec
+ FROM fin_t_consuntivo_excel 
+ WHERE anno_consuntivo = P_anno_prec AND 
+       tipo_capitolo = 'U' AND 
+       utente = v_utente_a_prec;
+riga:=50;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,null,'(-)','Uscita già impegnate nell''esercizio '||P_anno_prec,CP_u_imp_prec,null);
+
+ riga:=70;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,null,'(+)','Riduzione dei residui passivi già verificatesi nell''esercizio '||P_anno_prec,CP_u_var_res_prec,null);
+
+ CP_risamm_bipre_anno := cp_risamm_i_prec + cp_fpv_i_prec + cp_e_acc_prec - cp_u_imp_prec - abs(cp_e_var_res_prec) + cp_u_var_res_prec;
+ -- ho inserito ABS alle variazioni residui passivi in quanto essendo già negativo il valore (e non potrà mai essere positivo) andando ad applicare la formula di RGS avevamo un raddoppio del valore.
+ --pierro 28/07/2015
+ riga:=80;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,'B','(=)','Risultato di amministrazione dell''esercizio '||P_anno_prec||' alla data di redazione del bilancio di previsione dell''anno '||P_anno,CP_risamm_bipre_anno,null);
+
+
+ CP_risamm_p_prec := cp_risamm_bipre_anno + (cp_campoman01 - cp_campoman02) + (cp_campoman03 - cp_campoman04) - cp_campoman05;
+ riga:=140;
+ insert into fin_t_previsione_tdrap 
+
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'D','B','(=)','Risultato di amministrazione presunto al 31/12/'||P_anno_prec,CP_risamm_p_prec,null);
+ riga:=150;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'T','B',null,'2) Composizione del risultato di amministrazione presunto al 31/12/'||P_anno_prec,null,null);
+
+ riga:=160;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'T','B',null,'Parte Accantonata',null,null);
+
+ CP_tot_parte_accant := cp_campoman06 + cp_campoman07 + cp_campoman08 + cp_campoman06_1 + cp_campoman07_1 + cp_campoman08_1;
+ riga:=230;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'D','B',null,'B)Totale Parte Accantonata',CP_tot_parte_accant,null);
+
+ riga:=240;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'T','B',null,'Parte Vincolata',null,null);
+
+
+ CP_tot_parte_vincolata :=  cp_campoman09 + cp_campoman10 + cp_campoman11 + cp_campoman12 + cp_campoman13;
+ riga:=300;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'D','B',null,'C)Parte Vincolata',CP_tot_parte_vincolata,null);
+
+ riga:=310;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'T','B',null,'Parte Destinata agli Investimenti',null,null);
+
+
+ CP_tot_parte_disponibile := cp_risamm_p_prec - cp_tot_parte_accant - cp_tot_parte_vincolata - cp_campoman14;
+ riga:=330;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'D','B',null,'E) Totale parte disponibile (E=A-B-C-D)',CP_tot_parte_disponibile,null);
+
+  riga:=332; --21.11.2019 G.ZACCARO
+
+ SELECT NVL(dg.disavanzo_debito_au,0)
+ INTO v_disavanzo_au
+ FROM fin_T_dati_generali dg
+ WHERE dg.anno_finanziario = p_anno;
+
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'D','B',null,'F) di cui Disavanzo da debito autorizzato e non contratto',v_disavanzo_au,null);
+
+
+ riga:=340;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,'T','B',null,'3) Utilizzo quote vincolate del risultato di amministrazione presunto al 31/12/'||P_anno_prec,null,null);
+
+ riga:=350;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,'B',null,'Utilizzo Quota Vincolata',null,null);
+
+ CP_campoman20 := cp_campoman15 + cp_campoman16 +cp_campoman17 +cp_campoman18 +cp_campoman19 ;
+ riga:=410;
+ insert into fin_t_previsione_tdrap 
+ (utente,anno,riga,tipo_riga,attributo_riga,campo1,campo2,valore,tag_bdap)
+ values
+ (p_utente,p_anno,riga,null,'B',null,'Totale utilizzo avanzo di amministrazione presunto',CP_campoman20,null);
+
+ commit; 
+
+ begin
+  update fin_t_previsione_tdrap a set a.tag_bdap= (select b.tag_bdap from fin_t_previsione_tdrap b where b.utente='PREV2000' and b.anno=2000 and a.riga=b.riga)
+  where a.utente=p_utente and a.anno=p_anno;
+  commit;
+ end;
+
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,455 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TMP_LAVORO_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="TMP_LAVORO_BILANCIO.html">Colonne</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="TMP_LAVORO_BILANCIO_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ANNO</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EU</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TITOLO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FO_CATEGORIA</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UPB</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DIPARTIMENTI</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LIVELLO_GER1</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_LIVELLO1</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LIVELLO_GER2</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_LIVELLO2</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>LIVELLO_GER3</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_LIVELLO3</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NB_TITOLO</td>
+<td>VARCHAR2(5 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_NB_TITOLO</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MACROAGGREGATO</td>
+<td>VARCHAR2(10 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PCF</td>
+<td>VARCHAR2(20 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE_PCF</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SANITA_SN</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CODICE_TRANSAZIONE</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLO</td>
+<td>VARCHAR2(6 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESCRIZIONE</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>STANZIAMENTO_DEFINITIVO_ANNO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DISPONIB_COMP_ANNO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ENTRATE_REGIONALI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MUTUI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>STATO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>REGIONE_VINC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ALTRI_SOGGETTI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>AVANZO_VINCOLATO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>QUOTA_AVANZO_REG</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FPV_RIACC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FPV</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VARIAZIONE_COMP</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMPE_DEF_ANNO_SUCC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAPITOLI_VINC</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>IMPEGNI_ANNO_SUCC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>STANZIAMENTO_DEF_ANNO_PREC</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DISPONIB_COMPE_ANNO_PREC</td>
+<td>NUMBER(15,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_ENTRATE_REG</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_FPV</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_STATO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_UE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_REGIONE_VINC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>44</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_ALTRI_SOGGETTI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>45</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_AVANZO_VINC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>46</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_ENTRATE_REG</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>47</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_FPV</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>48</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_STATO</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>49</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_UE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>50</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_REGIONE_VINC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>51</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_ALTRI_SOGGETTI</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>52</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ASS_AVANZO_VINC</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>53</td>
+<td>null</td>
+	</tr>
+</table></div>

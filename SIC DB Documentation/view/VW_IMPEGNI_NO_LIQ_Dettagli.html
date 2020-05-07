@@ -1,0 +1,142 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_IMPEGNI_NO_LIQ</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_IMPEGNI_NO_LIQ.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_IMPEGNI_NO_LIQ_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_IMPEGNI_NO_LIQ_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_IMPEGNI_NO_LIQ_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_IMPEGNI_NO_LIQ_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2012-11-29</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_IMPEGNI_NO_LIQ</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1590</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT
+    d.DOC_SEQUENCE_VALUE,
+    d.CREATED_BY,
+    d.DOC_TYPE,
+    d.ATTRIBUTE13,
+    d.DATE_CREATED,
+    d.ATTRIBUTE14,
+    d.LAST_UPDATED_BY,
+    d.description,
+    d.DOCUMENT_AMOUNT importo,
+    d.AUDITING_STATUS_FLAG,
+    d.ATTRIBUTE16,
+    d.CREATION_DATE,
+    d.DELETION_STATUS_FLAG,
+    d.DOC_ID,
+    d.OPEN_BALANCE_PROPOSED residuo,
+    d.SEGMENT2 capitolo,
+    d.PREVIOUS_DOC_ID,
+    d.LAST_UPDATE_DATE,
+    d.SEGMENT4,
+    d.SEGMENT8 anno,
+    d.SEGMENT3 ufficio,
+    NVL(d.ATTRIBUTE39,SUBSTR(d.segment3,1,2)) dipartimento,
+    d.DATA_ATTO_AUTORIZZATIVO,
+    d.CODICE_ASP,
+    d.CODICE_DIRETTRICE,
+    d.CODICE_RISULTATI,
+    d.CODICE_OG_PARTE1,
+    d.CODICE_OG_PARTE2,
+    d.CODICE_OG_PARTE3,
+    d.DOC_ID_CAPO_FILIERA,
+    d.CODICE_GESTIONALE_SIOPE,
+    a.fonte_finanziamento,
+    NVL(b.previsto_attuale,0) compe_anno_succ,
+    a.NB_TITOLO nb_titolo,
+    ntu.descrizione nb_titolo_desc,
+    a.NB_PIANO_CONTI_FINA nb_pcf,
+    pcf04.descrizione nb_pcf_desc
+  FROM
+    FIN_T_DOCUMENTI d,
+    fin_t_articoli a,
+    fin_t_bilancio b,
+    nb_titoli_uscite ntu,
+    nb_pcf_04 pcf04
+  WHERE
+    d.doc_type LIKE 'IMP%'
+  AND NVL(d.deletion_status_flag,'N') = 'N'
+  AND NVL(d.auditing_status_flag,'X') = 'I'
+  AND NVL(d.open_balance_proposed,0)  > 0
+  AND a.anno                          = d.segment8
+  AND a.eu
+    ||a.codice  = d.segment2
+  AND b.anno(+) = (a.anno + 1)
+  AND b.eu(+)
+    ||b.articolo(+) = a.eu
+    ||a.codice
+  AND ntu.anno(+) = a.anno
+and ntu.id(+) = a.nb_titolo 
+and pcf04.anno(+) = a.anno
+and pcf04.eu(+) = a.eu
+and pcf04.codice_finale(+) = a.NB_PIANO_CONTI_FINA</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

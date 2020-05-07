@@ -1,0 +1,38 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>BI_DEMO_USERS</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="BI_DEMO_USERS.html">Details</a></div></div>
+<div class="tab"><div><a href="BI_DEMO_USERS_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="BI_DEMO_USERS_References.html">References</a></div></div>
+<div class="tab"><div><a href="BI_DEMO_USERS_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="BI_DEMO_USERS_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2"."BI_DEMO_USERS"
+BEFORE
+insert on "DEMO_USERS"
+for each row
+begin
+begin
+  for c1 in (
+    select DEMO_USERS_SEQ.nextval next_val
+    from dual
+  ) loop
+    :new.USER_ID :=  c1.next_val;
+    :new.admin_user := 'N';
+    :new.created_on := sysdate;
+  end loop;
+end;
+end;</pre>	</td></tr>
+</table></div>

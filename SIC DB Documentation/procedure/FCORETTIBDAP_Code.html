@@ -1,0 +1,302 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FCORETTIBDAP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FCORETTIBDAP.html">Details</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_References.html">References</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FCORETTIBDAP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure      fcorettibdap(p_anno in number,p_utente in varchar2,p_id_ente in varchar2) as
+
+suffisso varchar2(50); -- utilizzato per alcuni cursori al fine di modificare dinamicamente il tag.
+
+parametro_where varchar2(50); -- parametro utilizzato per alcune condizioni di where. Il valore viene settato dinamicamente. (vedi sdb_e_1 ed sdb_e_2)
+
+c_riga     number; -- conta le righe
+
+-- fcoretti (sezione declare)
+
+v_contenuto VARCHAR2(4000);
+v_tit VARCHAR2(1);
+v1 VARCHAR2(100);
+v2 VARCHAR2(100);
+
+CURSOR sdb_fcdde_tit IS
+SELECT REPLACE(denominazione,'TOTALE TITOLO ') titolo,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio,0),'9999999990.00')) Stanz,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio,0),'9999999990.00')) AccObbl,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo,0),'9999999990.00')) AccEff,
+       NVL(perc_stanziam_accantonam,0) PercStanzAcc,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio1,0),'9999999990.00')) Stanz1,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio1,0),'9999999990.00')) AccObbl1,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo1,0),'9999999990.00')) AccEff1,
+       NVL(perc_stanziam_accantonam1,0) PercStanzAcc1,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio2,0),'9999999990.00')) Stanz2,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio2,0),'9999999990.00')) AccObbl2,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo2,0),'9999999990.00')) AccEff2,
+       NVL(perc_stanziam_accantonam2,0) PercStanzAcc2
+FROM fin_t_previsione_fcdde
+WHERE anno = p_anno AND
+      tipo_bilancio = 'E' AND
+      tipo_riga = 'P-TOTTIT'
+ORDER BY 1; 
+
+CURSOR sdb_fcdde_tip IS
+SELECT tipologia_lav tip,
+       REPLACE(denominazione,'TOTALE TITOLO ') titolo,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio,0),'9999999990.00')) Stanz,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio,0),'9999999990.00')) AccObbl,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo,0),'9999999990.00')) AccEff,
+       NVL(perc_stanziam_accantonam,0) PercStanzAcc,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio1,0),'9999999990.00')) Stanz1,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio1,0),'9999999990.00')) AccObbl1,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo1,0),'9999999990.00')) AccEff1,
+       NVL(perc_stanziam_accantonam1,0) PercStanzAcc1,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio2,0),'9999999990.00')) Stanz2,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio2,0),'9999999990.00')) AccObbl2,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo2,0),'9999999990.00')) AccEff2,
+       NVL(perc_stanziam_accantonam2,0) PercStanzAcc2,
+       tipo_riga
+FROM fin_t_previsione_fcdde
+WHERE anno = p_anno AND
+      tipo_bilancio = 'E' AND
+      tipo_riga IN ('B-TIPOLOGIA',
+                    'B1-DICUIACCPERCASSA','B1-DICUINONACCPERCASSA',
+                    'B1-TRASFUE','B1-TRASFRESTOM',
+                    'B1-CONTRINVAMMPUB','B1-CONTRINVUE','B1-CONTRINVNETTO',
+                    'B1-ALTRITRACCMMPUB','B1-ALTRITRCCUE','B1-ALTRITRNETTO') AND
+      SUBSTR(tipologia_lav,1,1) = v_tit
+ORDER BY tipologia_lav, tipo_riga; 
+
+CURSOR sdb_fcdde_totfin IS
+SELECT tipologia_lav tip,
+       REPLACE(denominazione,'TOTALE TITOLO ') titolo,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio,0),'9999999990.00')) Stanz,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio,0),'9999999990.00')) AccObbl,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo,0),'9999999990.00')) AccEff,
+       NVL(perc_stanziam_accantonam,0) PercStanzAcc,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio1,0),'9999999990.00')) Stanz1,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio1,0),'9999999990.00')) AccObbl1,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo1,0),'9999999990.00')) AccEff1,
+       NVL(perc_stanziam_accantonam1,0) PercStanzAcc1,
+       LTRIM(TO_CHAR(NVL(stanziamenti_bilancio2,0),'9999999990.00')) Stanz2,
+       LTRIM(TO_CHAR(NVL(accantonamento_obbligatorio2,0),'9999999990.00')) AccObbl2,
+       LTRIM(TO_CHAR(NVL(accantonamento_effettivo2,0),'9999999990.00')) AccEff2,
+       NVL(perc_stanziam_accantonam2,0) PercStanzAcc2,
+       tipo_riga
+FROM fin_t_previsione_fcdde
+WHERE anno = p_anno AND
+      tipo_bilancio = 'E' AND
+      tipo_riga IN ('Q-TOTGEN','R-DICUIPARTECORR','S-DICUICONTOCAP') 
+ORDER BY num_riga; 
+
+
+begin
+
+-- fcoretti (sezione DATA MANIPULATION)
+/* TOGLIERE --> */ c_riga := 100000; 
+/* TOGLIERE --> */ delete fin_t_bdap where tipo_trasmissione = '???????';
+
+FOR r IN sdb_fcdde_tit LOOP
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccEff decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.AccEff||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccEff>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccObbl decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.AccObbl||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccObbl>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_PercStanzAcc decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.PercStanzAcc||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_PercStanzAcc>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_Stanz decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.Stanz||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_Stanz>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  -- anno + 1
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccEff decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.AccEff1||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccEff>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccObbl decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.AccObbl1||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccObbl>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_PercStanzAcc decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.PercStanzAcc1||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_PercStanzAcc>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_Stanz decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.Stanz1||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_Stanz>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  -- anno + 2
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccEff decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.AccEff2||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccEff>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccObbl decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.AccObbl2||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_AccObbl>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_PercStanzAcc decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.PercStanzAcc2||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_PercStanzAcc>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  v_contenuto := '&lt;sp:FCDDE_E.'||r.titolo||'.00.00.00.000_Stanz decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.Stanz2||'&lt;/sp:FCDDE_E.'||r.titolo||'.00.00.00.000_Stanz>'; 
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+  --
+  --
+  v_tit := r.titolo;
+  FOR s IN sdb_fcdde_tip LOOP
+   v1 := 'FCDDE_E.'||SUBSTR(s.tip,1,1)||'.'||SUBSTR(s.tip,2,2)||'.'||SUBSTR(s.tip,4,2)||'.'||SUBSTR(s.tip,6,2)||'.000_';
+   IF s.tipo_riga = 'B-TIPOLOGIA' THEN v2 := NULL;
+    ELSIF s.tipo_riga = 'B1-DICUIACCPERCASSA' THEN v2 := 'AccCassa_';
+    ELSIF s.tipo_riga = 'B1-DICUINONACCPERCASSA' THEN v2 := 'NonAccCassa_';
+    ELSIF s.tipo_riga = 'B1-TRASFUE' THEN v2 := 'TrasfCorrUE_';
+    ELSIF s.tipo_riga = 'B1-TRASFRESTOM' THEN v2 := 'TrasfCorrMondo_';
+    ELSIF s.tipo_riga = 'B1-CONTRINVAMMPUB' THEN v2 := 'ContrInvestPA_';
+    ELSIF s.tipo_riga = 'B1-CONTRINVUE' THEN v2 := 'ContrInvestUE_';
+    ELSIF s.tipo_riga = 'B1-CONTRINVNETTO' THEN v2 := 'ContrInvestNonUE-PA_';
+    ELSIF s.tipo_riga = 'B1-ALTRITRACCMMPUB' THEN v2 := 'TrasfPA_';
+    ELSIF s.tipo_riga = 'B1-ALTRITRCCUE' THEN v2 := 'TrasfUe_';
+    ELSIF s.tipo_riga = 'B1-ALTRITRNETTO' THEN v2 := 'TrasfNonUE-PA_';
+   END IF;
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'AccEff decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.AccEff||'&lt;/sp:'||v1||v2||'AccEff>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'AccObbl decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.AccObbl||'&lt;/sp:'||v1||v2||'AccObbl>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'PercStanzAcc decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.PercStanzAcc||'&lt;/sp:'||v1||v2||'PercStanzAcc>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'Stanz decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.Stanz||'&lt;/sp:'||v1||v2||'Stanz>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   -- anno + 1
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'AccEff decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.AccEff1||'&lt;/sp:'||v1||v2||'AccEff>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'AccObbl decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.AccObbl1||'&lt;/sp:'||v1||v2||'AccObbl>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'PercStanzAcc decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.PercStanzAcc1||'&lt;/sp:'||v1||v2||'PercStanzAcc>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'Stanz decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.Stanz1||'&lt;/sp:'||v1||v2||'Stanz>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   -- anno + 2
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'AccEff decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.AccEff2||'&lt;/sp:'||v1||v2||'AccEff>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'AccObbl decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.AccObbl2||'&lt;/sp:'||v1||v2||'AccObbl>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'PercStanzAcc decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.PercStanzAcc2||'&lt;/sp:'||v1||v2||'PercStanzAcc>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||v2||'Stanz decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.Stanz2||'&lt;/sp:'||v1||v2||'Stanz>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+
+  END LOOP; -- sdb_fcdde_tip;
+END LOOP;  -- sdb_fcdde_tit
+--
+--
+FOR s IN sdb_fcdde_totfin LOOP
+   IF s.tipo_riga = 'Q-TOTGEN' THEN v1 := 'FCDDE_TotaleGenerale_';
+    ELSIF s.tipo_riga = 'R-DICUIPARTECORR' THEN v1 := 'FCDDE_TotaleGeneraleParteCorrente_';
+   v_contenuto := '&lt;sp:'||v1||'AccEff decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.AccEff||'&lt;/sp:'||v1||'AccEff>';
+    ELSIF s.tipo_riga = 'S-DICUICONTOCAP' THEN v1 := 'FCDDE_TotaleGeneraleCCapitale_';
+   END IF;
+   c_riga := c_riga + 1;
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'AccObbl decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.AccObbl||'&lt;/sp:'||v1||'AccObbl>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'PercStanzAcc decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.PercStanzAcc||'&lt;/sp:'||v1||'PercStanzAcc>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'Stanz decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||s.Stanz||'&lt;/sp:'||v1||'Stanz>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   -- anno + 1
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'AccEff decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.AccEff1||'&lt;/sp:'||v1||'AccEff>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'AccObbl decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.AccObbl1||'&lt;/sp:'||v1||'AccObbl>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'PercStanzAcc decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.PercStanzAcc1||'&lt;/sp:'||v1||'PercStanzAcc>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'Stanz decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||s.Stanz1||'&lt;/sp:'||v1||'Stanz>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   -- anno + 2
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'AccEff decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.AccEff2||'&lt;/sp:'||v1||'AccEff>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'AccObbl decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.AccObbl2||'&lt;/sp:'||v1||'AccObbl>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'PercStanzAcc decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.PercStanzAcc2||'&lt;/sp:'||v1||'PercStanzAcc>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+   c_riga := c_riga + 1;
+   v_contenuto := '&lt;sp:'||v1||'Stanz decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||s.Stanz2||'&lt;/sp:'||v1||'Stanz>';
+   INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+   VALUES (p_utente,SYSDATE,p_anno,'???????','E',c_riga,v_contenuto);
+END LOOP; -- sdb_fcdde_totfin
+
+
+
+
+
+COMMIT;
+
+
+
+end; </pre>	</td></tr>
+</table></div>

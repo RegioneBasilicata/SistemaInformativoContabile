@@ -1,0 +1,471 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>IMP_FABBRICATI18</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="IMP_FABBRICATI18.html">Colonne</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="IMP_FABBRICATI18_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>NUM_INV</td>
+<td>NUMBER(38,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MACRO_CESPITE</td>
+<td>NUMBER(38,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PROV</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COMUNE</td>
+<td>VARCHAR2(128 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_CAT</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FGL</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PLLA</td>
+<td>VARCHAR2(128 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUB</td>
+<td>NUMBER(3,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CAT</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONSISTENZA</td>
+<td>VARCHAR2(128 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RENDITA_CATASTALE</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>UTILIZZO_DEL_BENE</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CLASSIFICAZIONE_BENE</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CLASSIFICAZIONE_DEL_BENE</td>
+<td>VARCHAR2(150 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VALORE_CATASTALE_118_11</td>
+<td>NUMBER(15,4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VINCOLI_ARCH</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>INDIRIZZO</td>
+<td>VARCHAR2(500 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CLASSIFUTILIZZO</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>IP_DISM_VAL</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DENOMINAZIONE_IMMOBILE</td>
+<td>VARCHAR2(256 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ACQUISIZIONE_PROVENIENZA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PR_ACQ_EO_COSTR</td>
+<td>NUMBER(15,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ALLA_DATA_DEL</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VALORE_STIMA</td>
+<td>NUMBER(30,8)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_STIMA</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NOTA</td>
+<td>VARCHAR2(2000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VALORE_IMMOBILE</td>
+<td>NUMBER(14,4)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VALORE_MACRO_CESPITE</td>
+<td>NUMBER(38,10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DATA_VALIMMOBILE</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ANNO_INIZIO_AMMORTAMENTO</td>
+<td>NUMBER(6,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ANNI_AMMORTAMENTO</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>MESI_AMMORTAMENTO</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VITA_UTILE</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>33</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VITA_UTILE_RES</td>
+<td>NUMBER(4,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>34</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>ALIQUOTA_AMM</td>
+<td>NUMBER(8,2)</td>
+<td>Yes</td>
+<td>null</td>
+<td>35</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CRIT_AMM</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>36</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COSTO_STORICO_AL_2017</td>
+<td>NUMBER(38,10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>37</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONSIS_NETTA_AL_2017</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>38</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_PIU</td>
+<td>NUMBER(38,6)</td>
+<td>Yes</td>
+<td>null</td>
+<td>39</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VAR_MENO</td>
+<td>NUMBER(38,8)</td>
+<td>Yes</td>
+<td>null</td>
+<td>40</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CSAGG</td>
+<td>NUMBER(38,10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>41</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>BASEAMM</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>42</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FONDO_AMM_AL_2017</td>
+<td>NUMBER(38,14)</td>
+<td>Yes</td>
+<td>null</td>
+<td>43</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>QUOTA_AMM_2018</td>
+<td>NUMBER(38,14)</td>
+<td>Yes</td>
+<td>null</td>
+<td>44</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FAMMPREVEND</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>45</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CNPREVEND</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>46</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PREZZOVEND</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>47</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>PLUMINUVAL</td>
+<td>NUMBER(38,8)</td>
+<td>Yes</td>
+<td>null</td>
+<td>48</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>RIV_SVAL_CN</td>
+<td>VARCHAR2(26 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>49</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FONDO_AMMORTAMENTO_AL_2018</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>50</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONS_NETTA_AL_CS_AGG_2018</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>51</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>CONS_NETTA2_AGG_2018</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>52</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COSTO_STORICO_2018</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>53</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>REINT_STORNO_FAMM_2017</td>
+<td>NUMBER(38,13)</td>
+<td>Yes</td>
+<td>null</td>
+<td>54</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_COM</td>
+<td>NUMBER(10,0)</td>
+<td>Yes</td>
+<td>null</td>
+<td>55</td>
+<td>null</td>
+	</tr>
+</table></div>

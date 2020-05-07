@@ -1,0 +1,506 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>IND_PREV_BDAP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="IND_PREV_BDAP.html">Details</a></div></div>
+<div class="tab"><div><a href="IND_PREV_BDAP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="IND_PREV_BDAP_References.html">References</a></div></div>
+<div class="tab"><div><a href="IND_PREV_BDAP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="IND_PREV_BDAP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure ind_prev_bdap (p_anno in number, p_utente in varchar2) is
+
+p_id_ente varchar2(20) := '123456789123';
+c_riga number := 0;
+
+tot_CompEnt             varchar2(2000);
+tot_CompeEntMediaAcc    varchar2(2000);
+tot_Risc 	            varchar2(2000);
+tot_RiscMedia      		varchar2(2000);
+tot_CompEnt2 			varchar2(2000);
+tot_CompEnt3 			varchar2(2000);
+
+cursor ind_sintetici1 is  -- Indicatori Sintetici p_anno
+select 
+ decode (tag_sint_tot,null,null,     '  &lt;ip:'||tag_sint_tot||' decimals="2" contextRef="d_'||(anno +0)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(TOT_MISSIONI1,0),'9999999990.00'))||'&lt;/ip:'||tag_sint_tot||'>') 		  is_tot_miss1
+,decode (tag_sint_mis13,null,null,   '  &lt;ip:'||tag_sint_mis13||' decimals="2" contextRef="d_'||(anno +0)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(MISSIONE13_1,0),'9999999990.00'))||'&lt;/ip:'||tag_sint_mis13||'>')       is_miss13_1
+,decode (tag_sint_no_mis13,null,null,'  &lt;ip:'||tag_sint_no_mis13||' decimals="2" contextRef="d_'||(anno +0)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(NETTO_MISSIONI1,0),'9999999990.00'))||'&lt;/ip:'||TAG_SINT_NO_MIS13||'>') is_no_miss13_1
+from fin_t_indicatori_bilancio
+where anno = p_anno
+and utente = p_utente
+and nvl(tipo_bilancio,'X') = 'P'
+and nvl(tipo_indicatore,'X') = 'S'
+and definizione is not null
+order by ord;
+
+cursor ind_sintetici2 is  -- Indicatori Sintetici p_anno + 1
+select 
+ decode (tag_sint_tot,null,null,     '  &lt;ip:'||tag_sint_tot||' decimals="2" contextRef="d_'||(anno +1)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(TOT_MISSIONI2,0),'9999999990.00'))||'&lt;/ip:'||tag_sint_tot||'>') 		  is_tot_miss2
+,decode (tag_sint_mis13,null,null,   '  &lt;ip:'||tag_sint_mis13||' decimals="2" contextRef="d_'||(anno +1)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(MISSIONE13_2,0),'9999999990.00'))||'&lt;/ip:'||tag_sint_mis13||'>')       is_miss13_2
+,decode (tag_sint_no_mis13,null,null,'  &lt;ip:'||tag_sint_no_mis13||' decimals="2" contextRef="d_'||(anno +1)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(NETTO_MISSIONI2,0),'9999999990.00'))||'&lt;/ip:'||TAG_SINT_NO_MIS13||'>') is_no_miss13_2
+from fin_t_indicatori_bilancio
+where anno = p_anno
+and utente = p_utente
+and nvl(tipo_bilancio,'X') = 'P'
+and nvl(tipo_indicatore,'X') = 'S'
+and definizione is not null
+order by ord;
+
+cursor ind_sintetici3 is  -- Indicatori Sintetici p_anno + 2
+select 
+ decode (tag_sint_tot,null,null,     '  &lt;ip:'||tag_sint_tot||' decimals="2" contextRef="d_'||(anno +2)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(TOT_MISSIONI3,0),'9999999990.00'))||'&lt;/ip:'||tag_sint_tot||'>') 		  is_tot_miss3
+,decode (tag_sint_mis13,null,null,   '  &lt;ip:'||tag_sint_mis13||' decimals="2" contextRef="d_'||(anno +2)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(MISSIONE13_3,0),'9999999990.00'))||'&lt;/ip:'||tag_sint_mis13||'>')       is_miss13_3
+,decode (tag_sint_no_mis13,null,null,'  &lt;ip:'||tag_sint_no_mis13||' decimals="2" contextRef="d_'||(anno +2)||'" unitRef="'||unitref||'">'||ltrim(to_char(nvl(NETTO_MISSIONI3,0),'9999999990.00'))||'&lt;/ip:'||TAG_SINT_NO_MIS13||'>') is_no_miss13_3
+from fin_t_indicatori_bilancio
+where anno = p_anno
+and utente = p_utente
+and nvl(tipo_bilancio,'X') = 'P'
+and nvl(tipo_indicatore,'X') = 'S'
+and definizione is not null
+order by ord;
+
+
+cursor ind_entrata is  -- Indicatori Analitici Entrate
+select 
+ '  &lt;ip:IA-ENT_'||DEFINIZIONE||'_CompEnt  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCOMPE_SU_TOT1,0),'9999999990.00'))     ||'&lt;/ip:IA-ENT_'||DEFINIZIONE||'_CompEnt>' CompEnt
+,'  &lt;ip:IA-ENT_'||DEFINIZIONE||'_CompEntMediaAcc  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(MACC_SU_MTOT,0),'9999999990.00'))  ||'&lt;/ip:IA-ENT_'||DEFINIZIONE||'_CompEntMediaAcc>' CompeEntMediaAcc
+,'  &lt;ip:IA-ENT_'||DEFINIZIONE||'_Risc         decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCASSA_SU_TOT1,0),'9999999990.00'))  ||'&lt;/ip:IA-ENT_'||DEFINIZIONE||'_Risc>' Risc
+,'  &lt;ip:IA-ENT_'||DEFINIZIONE||'_RiscMedia     decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(MRISC_SU_MACC,0),'9999999990.00'))    ||'&lt;/ip:IA-ENT_'||DEFINIZIONE||'_RiscMedia>' RiscMedia
+,'  &lt;ip:IA-ENT_'||DEFINIZIONE||'_CompEnt  decimals="2" contextRef="d_'||(anno + 1)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCOMPE_SU_TOT2,0),'9999999990.00'))     ||'&lt;/ip:IA-ENT_'||DEFINIZIONE||'_CompEnt>' CompEnt2
+,'  &lt;ip:IA-ENT_'||DEFINIZIONE||'_CompEnt  decimals="2" contextRef="d_'||(anno + 2)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCOMPE_SU_TOT3,0),'9999999990.00'))     ||'&lt;/ip:IA-ENT_'||DEFINIZIONE||'_CompEnt>' CompEnt3
+from fin_t_indicatori_bilancio 
+where anno = p_anno
+and utente = p_utente
+and nvl(tipo_bilancio,'X') = 'P'
+and nvl(tipo_indicatore,'X') = 'E'
+and definizione is not null
+order by ord;
+
+cursor ind_spese is -- Indicatori Analitici Spese
+select
+ '  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProg  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG1,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProg>' CompSpeMissProg
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProg  decimals="2" contextRef="d_'||(anno + 1)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG2,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProg>' CompSpeMissProg2
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProg  decimals="2" contextRef="d_'||(anno + 2)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG3,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProg>' CompSpeMissProg3
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPV  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV1,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPV>' CompSpeMissProgFPV
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPV  decimals="2" contextRef="d_'||(anno + 1)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV2,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPV>' CompSpeMissProgFPV2
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPV  decimals="2" contextRef="d_'||(anno + 2)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV3,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPV>' CompSpeMissProgFPV3
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CapPag  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(Cap_Pag1,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CapPag>' CapPag
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgMedia  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG_MEDIA,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgMedia>' CompSpeMissProgMedia
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPVMedia  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV_MEDIA,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CompSpeMissProgFPVMedia>' CompSpeMissProgFPVMedia
+,'  &lt;ip:IA-SPE_Prog'||DEFINIZIONE||'_CapPagMedia  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(Cap_Pag_Media,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_Prog'||DEFINIZIONE||'_CapPagMedia>' CapPagMedia
+from fin_t_indicatori_bilancio 
+where anno = p_anno
+and utente = p_utente
+and nvl(tipo_bilancio,'X') = 'P'
+and nvl(tipo_indicatore,'X') = 'U'
+and definizione is not null
+and codice_indicatore2 is not null
+order by ord;
+
+cursor ind_spese_missioni is -- Indicatori Analitici Spese
+select
+ '  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProg  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG1,0),'9999999990.00'))    		   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProg>' CompSpeMissProg
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProg  decimals="2" contextRef="d_'||(anno + 1)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG2,0),'9999999990.00'))    		   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProg>' CompSpeMissProg2
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProg  decimals="2" contextRef="d_'||(anno + 2)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG3,0),'9999999990.00'))    		   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProg>' CompSpeMissProg3
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPV  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV1,0),'9999999990.00'))     			   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPV>' CompSpeMissProgFPV
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPV  decimals="2" contextRef="d_'||(anno + 1)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV2,0),'9999999990.00'))     			   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPV>' CompSpeMissProgFPV2
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPV  decimals="2" contextRef="d_'||(anno + 2)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV3,0),'9999999990.00'))     			   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPV>' CompSpeMissProgFPV3
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CapPag  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(Cap_Pag1,0),'9999999990.00'))       		 			   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CapPag>' CapPag
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgMedia  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_MIS_PROG_MEDIA,0),'9999999990.00'))     ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgMedia>' CompSpeMissProgMedia
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPVMedia  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(INC_FPV_MEDIA,0),'9999999990.00'))       ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CompSpeMissProgFPVMedia>' CompSpeMissProgFPVMedia
+,'  &lt;ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CapPagMedia  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(Cap_Pag_Media,0),'9999999990.00'))     			   ||'&lt;/ip:IA-SPE_TotMiss'||DEFINIZIONE||'_CapPagMedia>' CapPagMedia
+from fin_t_indicatori_bilancio 
+where anno = p_anno
+and utente = p_utente
+and nvl(tipo_bilancio,'X') = 'P'
+and nvl(tipo_indicatore,'X') = 'U'
+and definizione is not null
+and codice_indicatore2 is null
+order by ord;
+begin
+
+-- *** pulisco la fin_t_bdap
+    delete fin_t_bdap where utente = p_utente;
+-- *****
+
+-- INDICATORI PREV
+-- testata file
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',010,'&lt;?xml version="1.0" encoding="UTF-8"?>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',020,'&lt;xbrli:xbrl xmlns:ipe="http://www.rgs.mef.gov.it/xbrl/bdap/ind/prev/enti/2016-12-07" xmlns:ip="http://www.rgs.mef.gov.it/xbrl/bdap/ind/prev/2016-12-07" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xbrli="http://www.xbrl.org/2003/instance">');
+
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',030,'  ');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',040,'  &lt;!--RIFERIMENTO ALLA TASSONOMIA (entry point) -->');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',050,'  &lt;link:schemaRef xlink:type="simple" xlink:href="bdap-ind-prev-enti_2016-12-07.xsd"/>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',060,'  ');
+
+-- CONTESTI 
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',090,'  &lt;!-- CONTESTI -->');
+
+	-- anno_0 
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',190,'  &lt;xbrli:context id="d_'||(p_anno)||'">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',200,'    &lt;xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',210,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',220,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',230,'    &lt;xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',240,'      &lt;xbrli:startDate>'||(p_anno)||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',250,'      &lt;xbrli:endDate>'||(p_anno)||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',260,'    &lt;/xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',270,'  &lt;/xbrli:context>');
+
+-- anno_1 
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',280,'  &lt;xbrli:context id="d_'||(p_anno +1)||'">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',290,'    &lt;xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',300,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',310,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',320,'    &lt;xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',330,'      &lt;xbrli:startDate>'||(p_anno+1)||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',340,'      &lt;xbrli:endDate>'||(p_anno+1)||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',350,'    &lt;/xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',360,'  &lt;/xbrli:context>');
+
+-- anno_2 
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',370,'  &lt;xbrli:context id="d_'||(p_anno +2)||'">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',380,'    &lt;xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',390,'      &lt;xbrli:identifier scheme="http://www.rgs.mef.gov.it/xbrl/idente/codicebdap">'||p_id_ente||'&lt;/xbrli:identifier>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',400,'    &lt;/xbrli:entity>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',440,'    &lt;/xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',410,'    &lt;xbrli:period>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',420,'      &lt;xbrli:startDate>'||(p_anno+2)||'-01-01&lt;/xbrli:startDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',430,'      &lt;xbrli:endDate>'||(p_anno+2)||'-12-31&lt;/xbrli:endDate>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',450,'  &lt;/xbrli:context>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',460,'  ');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',470,'  &lt;!-- UNITA'' DI MISURA -->');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',480,'  &lt;xbrli:unit id="eur">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',490,'    &lt;xbrli:measure>iso4217:EUR&lt;/xbrli:measure>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',500,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',510,'  &lt;xbrli:unit id="pure">');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',520,'    &lt;xbrli:measure>xbrli:pure&lt;/xbrli:measure>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',530,'  &lt;/xbrli:unit>');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',540,'  ');
+insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',550,'  &lt;!-- FATTI DA RIPORTARE - INIZIO -->');
+
+c_riga := 600;
+
+-- *********************
+-- indicatori Sintetici
+-- *********************
+
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,' ');
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,'  &lt;!-- Indicatori sintetici -->');
+
+-- indicatori p_anno
+
+ 	for is1 in ind_sintetici1 loop
+        c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is1.is_tot_miss1);
+
+ 	if is1.is_miss13_1 is not null
+ 	then
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is1.is_miss13_1);
+ 	end if;
+
+ 	if is1.is_no_miss13_1 is not null
+ 	then
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is1.is_no_miss13_1);
+ 	end if;
+
+ 	commit;
+ 	end loop;
+
+-- indicatori p_anno + 1
+
+ 	for is2 in ind_sintetici2 loop
+
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is2.is_tot_miss2);
+
+ 	if is2.is_miss13_2 is not null
+ 	then
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is2.is_miss13_2);
+ 	end if;
+
+ 	if is2.is_no_miss13_2 is not null
+ 	then
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is2.is_no_miss13_2);
+ 	end if;
+
+    commit;
+ 	end loop;
+
+-- indicatori p_anno + 2
+
+ 	for is3 in ind_sintetici3 loop
+
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is3.is_tot_miss3);
+
+ 	if is3.is_miss13_3 is not null
+ 	then
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is3.is_miss13_3);
+ 	end if;
+
+ 	if is3.is_no_miss13_3 is not null
+ 	then
+        c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','S',c_riga,is3.is_no_miss13_3);
+ 	end if;
+
+ 	commit;
+ 	end loop;
+
+ -- *********************
+ -- indicatori Entrate
+ -- *********************
+
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,' ');
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,'  &lt;!-- Indicatori analitici Entrate -->');
+
+ 	for ie in ind_entrata loop
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,ie.CompEnt);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,ie.CompeEntMediaAcc);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,ie.RiscMedia);
+
+ 		c_riga := c_riga+1;
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,ie.CompEnt2);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,ie.CompEnt3);
+
+ 		commit;
+ 	end loop;
+
+
+ 	-- Totale Analitici Entrate
+	select 
+	 '  &lt;ip:IA-ENT_TotaleEntrate_CompEnt  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCOMPE_SU_TOT1,0),'9999999990.00'))     ||'&lt;/ip:IA-ENT_TotaleEntrate_CompEnt>' 
+	,'  &lt;ip:IA-ENT_TotaleEntrate_CompEntMediaAcc  decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(MACC_SU_MTOT,0),'9999999990.00'))  ||'&lt;/ip:IA-ENT_TotaleEntrate_CompEntMediaAcc>'
+	,'  &lt;ip:IA-ENT_TotaleEntrate_Risc         decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCASSA_SU_TOT1,0),'9999999990.00'))  ||'&lt;/ip:IA-ENT_TotaleEntrate_Risc>'
+	,'  &lt;ip:IA-ENT_TotaleEntrate_RiscMedia     decimals="2" contextRef="d_'||(anno + 0)||'" unitRef="pure">'||ltrim(to_char(nvl(MRISC_SU_MACC,0),'9999999990.00'))    ||'&lt;/ip:IA-ENT_TotaleEntrate_RiscMedia>'
+	,'  &lt;ip:IA-ENT_TotaleEntrate_CompEnt  decimals="2" contextRef="d_'||(anno + 1)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCOMPE_SU_TOT2,0),'9999999990.00'))     ||'&lt;/ip:IA-ENT_TotaleEntrate_CompEnt>'
+	,'  &lt;ip:IA-ENT_TotaleEntrate_CompEnt  decimals="2" contextRef="d_'||(anno + 2)||'" unitRef="pure">'||ltrim(to_char(nvl(PREVCOMPE_SU_TOT2,0),'9999999990.00'))     ||'&lt;/ip:IA-ENT_TotaleEntrate_CompEnt>'
+	into
+ 	 tot_CompEnt         
+	,tot_CompeEntMediaAcc
+	,tot_Risc 	        
+	,tot_RiscMedia      	
+	,tot_CompEnt2 		
+	,tot_CompEnt3 
+	from fin_t_indicatori_bilancio 
+	where anno = p_anno
+	and utente = p_utente
+	and nvl(tipo_bilancio,'X') = 'P'
+	and nvl(tipo_indicatore,'X') = 'E'
+	and upper(desc_cod1) = 'TOTALE ENTRATE'
+	order by ord;
+
+	c_riga := c_riga+1;
+
+ 	insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 	values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,tot_CompEnt);
+
+ 	c_riga := c_riga+1;
+
+ 	insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 	values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,tot_CompeEntMediaAcc);
+
+ 	c_riga := c_riga+1;
+
+ 	insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 	values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,tot_Risc);
+
+ 	c_riga := c_riga+1;
+
+ 	insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 	values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,tot_RiscMedia);
+
+ 	c_riga := c_riga+1;
+
+ 	insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 	values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,tot_CompEnt2);
+
+ 	c_riga := c_riga+1;
+
+ 	insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 	values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,tot_CompEnt3);
+
+ 	commit;
+
+
+ -- *********************
+ -- indicatori Uscite
+ -- *********************
+
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,' ');
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,'  &lt;!-- Indicatori analitici Uscite -->');
+
+ 	for iu in ind_spese loop
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,iu.CompSpeMissProg);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,iu.CompSpeMissProg2);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,iu.CompSpeMissProg3);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,iu.CompSpeMissProgFPV);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,iu.CompSpeMissProgFPV2);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,iu.CompSpeMissProgFPV3);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,iu.CapPag);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,iu.CompSpeMissProgMedia);
+
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,iu.CompSpeMissProgFPVMedia);
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,iu.CapPagMedia);
+
+ 		commit;
+ 	end loop;
+
+for im in ind_spese_missioni loop
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,im.CompSpeMissProg);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,im.CompSpeMissProg2);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,im.CompSpeMissProg3);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,im.CompSpeMissProgFPV);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,im.CompSpeMissProgFPV2);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','U',c_riga,im.CompSpeMissProgFPV3);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,im.CapPag);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,im.CompSpeMissProgMedia);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,im.CompSpeMissProgFPVMedia);
+
+ 		c_riga := c_riga+1;
+
+ 		insert into FIN_T_BDAP (UTENTE,DATA_CREAZIONE,ANNO,TIPO_TRASMISSIONE,EU,RIGA,CONTENUTO)
+ 		values (p_utente,sysdate,p_anno,'PREVIND','E',c_riga,im.CapPagMedia);
+
+ 		commit;
+ 	end loop;
+
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,' ');
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,'  &lt;!-- FATTI DA RIPORTARE - FINE -->');
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,' ');
+ c_riga := c_riga+1;
+ insert into fin_t_bdap values (p_utente,sysdate,p_anno,'PREVIND','T',c_riga,'&lt;/xbrli:xbrl>');
+
+ 	commit;
+
+end;</pre>	</td></tr>
+</table></div>

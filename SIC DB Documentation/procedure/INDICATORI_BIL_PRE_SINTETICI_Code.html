@@ -1,0 +1,3483 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>INDICATORI_BIL_PRE_SINTETICI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_SINTETICI.html">Details</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_SINTETICI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_SINTETICI_References.html">References</a></div></div>
+<div class="tab"><div><a href="INDICATORI_BIL_PRE_SINTETICI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="INDICATORI_BIL_PRE_SINTETICI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure indicatori_bil_pre_sintetici (p_anno in number) is 
+
+    -- *** per evitare di lavorare su bil previsione non fissato l'utente lo impostiamo di fisso
+    p_utente varchar2 (20) := 'PREV'||p_anno;
+	
+    -- variabili per indicatori sintetici
+	type vettore_3 is varray(3) of number;
+	type vettore_9 is varray(9) of number;
+	id_utente number := 0;
+	disavanzo number := 0;
+	p_ord number := 0;
+
+	-- ENTRATE
+	compe_1_1 number := 0; -- contiene lo stanziamento di competenza per l'indice 1.1
+	fpv_entrata_101 number := 0; -- FPV Entrata relativo al MACROAGG 101 
+	fpv_spesa_101 number := 0; -- FPV Uscite relativo al MACROAGG 101
+	compe_E_1_2_3 number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno
+	compe_E_1_2_3a1 number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno+1
+	compe_E_1_2_3a2 number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno+2
+	cassa_E_1_2_3 number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno
+	fondo_anticipazioni_liq number := 0;
+	m_acc_123 number := 0;
+	m_rev_123 number := 0;
+
+	compe_3_1 number := 0; -- contiene lo stanziamento di competenza per l'indice 3.1 dell'anno p_anno
+	compe_3_1a1 number := 0; -- contiene lo stanziamento di competenza per l'indice 3.1 dell'anno p_anno+1
+	compe_3_1a2 number := 0; -- contiene lo stanziamento di competenza per l'indice 3.1 dell'anno p_anno+2
+	corr_U_1_2_3   number := 0; -- contiene lo stanziamento spesa corrente anno1
+	corr_U_1_2_3a1 number := 0; -- contiene lo stanziamento spesa corrente anno2
+	corr_U_1_2_3a2 number := 0; -- contiene lo stanziamento spesa corrente anno3
+	FCDE_corrente number:= 0; --contiente il FCDE corrente p_anno
+	FCDE_corrente_a1 number:= 0; --contiente il FCDE corrente p_anno+1
+	FCDE_corrente_a2 number:= 0; --contiente il FCDE corrente p_anno+1
+	FCDE_capitale number:= 0; --contiente il FCDE capitale p_anno
+	FCDE_capitale_a1 number:= 0; --contiente il FCDE capitale p_anno+1
+	FCDE_capitale_a2 number:= 0; --contiente il FCDE capitale p_anno+1
+
+	cassa_U number := 0; --stanziamente di cassa p_anno
+
+	fpv_spesa_4_1 number := 0; -- FPV Uscite relativo all'indicatore 4.1
+
+	fpv_spesa number := 0; -- FPV Uscite generico p_anno
+	fpv_spesa_a1 number := 0; -- FPV Uscite generico p_anno+1
+	fpv_spesa_a2 number := 0; -- FPV Uscite generico p_anno+2
+
+	FPV_ENTRATA number := 0; -- FPV Entrata al 01/01/ p_anno
+	FPV_ENTRATAa1 number := 0; -- FPV Entrata al 01/01/ p_anno+1
+	FPV_ENTRATAa2 number := 0; -- FPV Entrata al 01/01/ p_anno+2
+    FPV_E_NON_UTILIZZATO number := 0; -- FPV anno n-1 non utilizzato e riniviato ad anno successivo
+    FPV_E_NON_UTILIZZATOa1 number := 0; -- FPV anno n-1 non utilizzato e riniviato ad anno successivo+1
+    FPV_E_NON_UTILIZZATOa2 number := 0; -- FPV anno n-1 non utilizzato e riniviato ad anno successivo+2
+
+	compe_E_5 number := 0; --entrate titolo V p_anno
+	compe_E_5a1 number := 0; --entrate titolo V p_anno+1
+	compe_E_5a2 number := 0; --entrate titolo V p_anno+2
+
+	compe_E_1_2_3S number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno perimetro sanità
+	compe_E_1_2_3a1S number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno+1 perimetro sanità
+	compe_E_1_2_3a2S number := 0; -- contiene lo stanziamento di competenza dei primi 3 Titoli dell'anno p_anno+2 perimetro sanità
+
+	sanita_ent_libere number := 0; --rappresente la quota di finanziamento del perimetro sanità con Entrate libere p_anno
+	sanita_ent_liberea1 number := 0; --rappresente la quota di finanziamento del perimetro sanità con Entrate libere p_anno + 1
+	sanita_ent_liberea2 number := 0; --rappresente la quota di finanziamento del perimetro sanità con Entrate libere p_anno + 2
+
+	compe_U_4 number := 0; -- uscite titolo IV p_anno
+	compe_U_4a1 number := 0; --uscite titolo IV p_anno+1
+	compe_U_4a2 number := 0; --uscite titolo IV p_anno+2
+
+	PD1 number := 0; --Debiti da finanziamento
+	PD1_13 number := 0; -- Debiti da finanziamento miss. 13
+
+	PAT number := 0; -- Patrimonio netto
+
+	compe_E_40206 number := 0; -- contiene lo stanziamento di competenza categoria 4.02.06 p_anno 
+	compe_E_40206a1 number := 0; -- contiene lo stanziamento di competenza categoria 4.02.06 p_anno+1
+	compe_E_40206a2 number := 0; -- contiene lo stanziamento di competenza categoria 4.02.06 p_anno+2
+
+	compe_E_8_2 number := 0; -- contiene lo stanziamento di competenza 'E.4.03.01','E.4.03.04' per l'indicatore 8.2 p_anno 
+	compe_E_8_2a1 number := 0; -- contiene lo stanziamento di competenza 'E.4.03.01','E.4.03.04' per l'indicatore 8.2 p_anno+1
+	compe_E_8_2a2 number := 0; -- contiene lo stanziamento di competenza 'E.4.03.01','E.4.03.04' per l'indicatore 8.2 p_anno+2
+
+
+	E_TDRAP number := 0; -- riga E tabella dimostrativa Risultato di Amministrazione
+	A_TDRAP number := 0; -- riga A tabella dimostrativa Risultato di Amministrazione
+
+	compe_E_9 number := 0; --entrate titolo IX p_anno
+	compe_E_9a1 number := 0; --entrate titolo IX p_anno+1
+	compe_E_9a2 number := 0; --entrate titolo IX p_anno+2
+
+	popolazione_res number := 0;
+
+
+		-- indicatore 1.1
+		i1_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 2.1
+		i2_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 2.2
+		i2_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 2.3
+		i2_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 2.4
+		i2_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 3.1
+		i3_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 3.2
+		i3_2 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 3.3
+		i3_3 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 3.4
+		i3_4 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 4.1
+		i4_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 5.1
+		i5_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 5.2
+		i5_2 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 5.3
+		i5_3 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.1
+		i6_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.2
+		i6_2 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.3
+		i6_3 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.4
+		i6_4 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.5
+		i6_5 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.6
+		i6_6 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 6.7
+		i6_7 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 7.1
+		i7_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 7.2
+		i7_2 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 8.1
+		i8_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 8.2
+		i8_2 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 8.3
+		i8_3 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 9.1
+		i9_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.2
+		i9_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.3
+		i9_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 9.4
+		i9_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 10.1
+		i10_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 10.2
+		i10_2 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 10.3
+		i10_3 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 10.4
+		i10_4 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 11.1
+		i11_1 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+		-- indicatore 12.1
+		i12_1 vettore_3 := vettore_3(0,0,0);
+
+		-- indicatore 12.2
+		i12_2 vettore_9 := vettore_9(0,0,0,0,0,0,0,0,0);
+
+
+begin
+
+	begin
+    select nvl(user_id,0) into id_utente
+	from fnd_user 
+	where user_name = p_utente;
+    exception when no_data_found then id_utente := 1000;
+    end;
+	-- lancio procedura stato patrimoniale
+
+	 genera_economica.piacee_importi(p_anno,id_utente);
+	-- ***************************************
+
+	-- pulisco la FIN_T_INDICATORI_BILANCIO per l'anno, l'utente e la tipologia di indicatore considerato
+	delete FIN_T_INDICATORI_BILANCIO where anno = p_anno and utente = p_utente and TIPO_BILANCIO = 'P' and TIPO_INDICATORE = 'S';
+		commit;
+	-- ********************************************
+
+
+    -- indice 1.1 anno1 TOT
+
+    select nvl(sum(nvl(competenza_anno0,0)),0) into compe_1_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (capitolo = 'U00002' or MACROAGGREGATO in ('101','107') or titolo_uscite = '4' or piano_conti_fina ='U.1.02.01.01.000');
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_1_2_3,compe_E_1_2_3a1,compe_E_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) in ('1','2','3');
+
+    if (compe_E_1_2_3 + fondo_anticipazioni_liq) > 0
+    then
+    i1_1(1) := round(((compe_1_1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_E_1_2_3 + fondo_anticipazioni_liq))*100,2);
+    end if;
+
+    -- indice 1.1 anno2 TOT
+
+    select nvl(sum(nvl(competenza_anno1,0)),0) into compe_1_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (capitolo = 'U00002' or MACROAGGREGATO in ('101','107') or titolo_uscite = '4' or piano_conti_fina ='U.1.02.01.01.000');
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+1
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+    
+    if (compe_E_1_2_3a1 + fondo_anticipazioni_liq) > 0
+    then
+    i1_1(2) := round(((compe_1_1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_E_1_2_3a1 + fondo_anticipazioni_liq))*100,2);
+    end if;
+    
+    -- indice 1.1 anno3 TOT
+
+    select nvl(sum(nvl(competenza_anno2,0)),0) into compe_1_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (capitolo = 'U00002' or MACROAGGREGATO in ('101','107') or titolo_uscite = '4' or piano_conti_fina ='U.1.02.01.01.000');
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+2
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if (compe_E_1_2_3a2 + fondo_anticipazioni_liq) > 0
+    then
+    i1_1(3) := round(((compe_1_1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_E_1_2_3a2 + fondo_anticipazioni_liq))*100,2);
+    end if;
+    
+    -- indice 1.1 anno1 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0) into compe_1_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (capitolo = 'U00002' or MACROAGGREGATO in ('101','107') or titolo_uscite = '4' or piano_conti_fina ='U.1.02.01.01.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_E_1_2_3 + fondo_anticipazioni_liq) > 0
+    then
+    i1_1(4) := round(((compe_1_1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_E_1_2_3 + fondo_anticipazioni_liq))*100,2);
+    end if; 
+    
+    -- indice 1.1 anno2 MIS13
+
+    select nvl(sum(nvl(competenza_anno1,0)),0) into compe_1_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (capitolo = 'U00002' or MACROAGGREGATO in ('101','107') or titolo_uscite = '4' or piano_conti_fina ='U.1.02.01.01.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 1
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_E_1_2_3a1 + fondo_anticipazioni_liq) > 0
+    then
+    i1_1(5) := round(((compe_1_1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_E_1_2_3a1 + fondo_anticipazioni_liq))*100,2);
+    end if;
+    
+    -- indice 1.1 anno3 MIS13
+
+    select nvl(sum(nvl(competenza_anno2,0)),0) into compe_1_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (capitolo = 'U00002' or MACROAGGREGATO in ('101','107') or titolo_uscite = '4' or piano_conti_fina ='U.1.02.01.01.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 2
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_E_1_2_3a2 + fondo_anticipazioni_liq) > 0
+    
+    then
+    i1_1(6) := round(((compe_1_1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_E_1_2_3a2 + fondo_anticipazioni_liq))*100,2);
+    end if;
+    -- indice 1.1 anno1, anno2 e anno 3 DIFF
+    i1_1(7) := i1_1(1) - i1_1(4);
+    i1_1(8) := i1_1(2) - i1_1(5);
+    i1_1(9) := i1_1(3) - i1_1(6);
+
+
+    -- insert indicatore 1 e 1.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','1','Rigidita'' strutturale di bilancio');
+    	commit;
+
+    p_ord := p_ord + 1;
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','1.1','Incidenza spese rigide (disavanzo, personale e debito) su entrate correnti',
+    	'[Disavanzo iscritto in spesa + Stanziamenti competenza  (Macroaggregati 1.1 "Redditi di lavoro dipendente" + 1.7 "Interessi passivi" + Titolo 4 "Rimborso prestiti" + "IRAP" [pdc U.1.02.01.01] – FPV entrata concernente il Macroaggregato 1.1 + FPV spesa concernente il Macroaggregato 1.1)] / (Stanziamenti di competenza dei primi tre titoli delle Entrate + Utilizzo Fondo anticipazioni di liquidità del DL 35/2013)'
+    	,i1_1(1),i1_1(2),i1_1(3),i1_1(4),i1_1(5),i1_1(6),i1_1(7),i1_1(8),i1_1(9));
+    	commit;
+
+  	-- indice 2.1
+
+  	select round(sum(nvl(d.document_amount,0))/3,2) into m_acc_123
+	from fin_t_documenti d
+	,vw_nb_articoli a
+	where d.doc_type = 'ACC'
+	and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+	and d.segment8 between (p_anno-3) and (p_anno - 1)
+	and a.anno = d.segment8
+	and a.eu||a.codice = d.segment2
+	and substr(a.liv1,1,1) in ('1','2','3');
+
+	if compe_E_1_2_3 > 0
+    then
+    i2_1(1) := round(m_acc_123/compe_E_1_2_3*100,2);
+	end if;
+    
+    if compe_E_1_2_3a1 > 0
+    then
+    i2_1(2) := round(m_acc_123/compe_E_1_2_3a1*100,2);
+    end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+	i2_1(3) := round(m_acc_123/compe_E_1_2_3a2*100,2);
+    end if;
+
+	-- insert indicatore 2 e 2.1 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','2','Entrate correnti');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','2.1','Indicatore di realizzazione delle previsioni di competenza concernenti le entrate correnti',
+    	'Media accertamenti primi tre titoli di entrata nei tre esercizi precedenti / Stanziamenti di competenza dei primi tre titoli delle "Entrate correnti"'
+    	,i2_1(1),i2_1(2),i2_1(3),null,null,null,null,null,null);
+    	commit;
+
+    -- indice 2.2
+
+    select round(sum(nvl(d.document_amount,0))/3,2) into m_rev_123
+	from fin_t_documenti d
+	,vw_nb_articoli a
+	where d.doc_type = 'REV'
+	and nvl(d.OPEN_BALANCE_PROPOSED,0) > 0
+	and d.segment8 between (p_anno-3) and (p_anno - 1)
+	and a.anno = d.segment8
+	and a.eu||a.codice = d.segment2
+	and substr(a.liv1,1,1) in ('1','2','3');
+
+	select nvl(sum(nvl(CASSA_ANNO0,0)),0) into cassa_E_1_2_3
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) in ('1','2','3');
+
+    if cassa_E_1_2_3 > 0
+    then
+    i2_2(1) := round(m_rev_123/cassa_E_1_2_3*100,2);
+    end if;
+
+    -- insert indicatore 2.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','2.2','Indicatore di realizzazione delle previsioni di cassa corrente',
+    	'Media incassi primi tre titoli di entrata nei tre esercizi precedenti / Stanziamenti di cassa dei primi tre titoli delle "Entrate correnti"'
+    	,i2_2(1),i2_2(2),i2_2(3),null,null,null,null,null,null);
+    	commit;
+
+    -- indicatore 2.3
+
+    select round(sum(nvl(d.document_amount,0))/3,2) into m_acc_123
+	from fin_t_documenti d
+	,vw_nb_articoli a
+	where d.doc_type = 'ACC'
+	and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+	and d.segment8 between (p_anno-3) and (p_anno - 1)
+
+	and a.anno = d.segment8
+	and a.eu||a.codice = d.segment2
+	and ((substr(a.PCF,1,6) = 'E.1.01' and substr(a.PCF,1,9) &lt;> 'E.1.01.04') or substr(a.PCF,1,3) = 'E.3');
+	if compe_E_1_2_3 > 0
+    then
+    i2_3(1) := round(m_acc_123/compe_E_1_2_3*100,2);
+	end if;
+    
+    if compe_E_1_2_3a1 > 0
+    then
+    i2_3(2) := round(m_acc_123/compe_E_1_2_3a1*100,2);
+	end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+    i2_3(3) := round(m_acc_123/compe_E_1_2_3a2*100,2);
+    end if;
+    
+	-- insert indicatore 2.3 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','2.3','Indicatore di realizzazione delle previsioni di competenza concernenti le entrate proprie',
+    	'Media accertamenti nei tre esercizi precedenti (pdc E.1.01.00.00.000 "Tributi" – E.1.01.04.00.000 "Compartecipazioni di tributi" + E.3.00.00.00.000 "Entrate extratributarie") / Stanziamenti di competenza dei primi tre titoli delle "Entrate correnti"'
+    	,i2_3(1),i2_3(2),i2_3(3),null,null,null,null,null,null);
+    	commit;
+
+    -- indicatore 2.4
+
+    select round(sum(nvl(d.document_amount,0))/3,2) into m_rev_123
+	from fin_t_documenti d
+	,vw_nb_articoli a
+	where d.doc_type = 'REV'
+	and nvl(d.OPEN_BALANCE_PROPOSED,0) > 0
+	and d.segment8 between (p_anno-3) and (p_anno - 1)
+	and a.anno = d.segment8
+	and a.eu||a.codice = d.segment2
+	and ((substr(a.PCF,1,6) = 'E.1.01' and substr(a.PCF,1,9) &lt;> 'E.1.01.04') or substr(a.PCF,1,3) = 'E.3');
+
+	if cassa_E_1_2_3 > 0
+    then
+    i2_4(1) := round(m_rev_123/cassa_E_1_2_3*100,2);
+    end if;
+    
+	-- insert indicatore 2.4 
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORd,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','2.4','Indicatore di realizzazione delle previsioni di cassa concernenti le entrate proprie',
+    	'Media incassi nei tre esercizi precedenti (pdc E.1.01.00.00.000 "Tributi" – "Compartecipazioni di tributi" E.1.01.04.00.000 + E.3.00.00.00.000 "Entrate extratributarie") / Stanziamenti di cassa dei primi tre titoli delle "Entrate correnti"'
+    	,i2_4(1),i2_4(2),i2_4(3),null,null,null,null,null,null);
+    	commit;
+
+
+
+    -- indice 3.1 anno1 TOT
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (MACROAGGREGATO in ('101') or piano_conti_fina ='U.1.02.01.01.000');
+
+	select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into FCDE_corrente,FCDE_corrente_a1,FCDE_corrente_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and piano_conti_fina ='U.1.10.01.03.000';
+
+
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3 - FCDE_corrente - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_1(1) := round((compe_3_1 - fpv_entrata_101 + fpv_spesa_101)/ (corr_U_1_2_3 - FCDE_corrente - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.1 anno2 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+1
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if (corr_U_1_2_3a1  - FCDE_corrente_a1 - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    -- indice 3.1 anno3 TOT
+    i3_1(2) := round((compe_3_1a1 - fpv_entrata_101 + fpv_spesa_101)/ (corr_U_1_2_3a1  - FCDE_corrente_a1 - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+2
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if (corr_U_1_2_3a2  - FCDE_corrente_a2 - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_1(3) := round((compe_3_1a2 - fpv_entrata_101 + fpv_spesa_101)/ (corr_U_1_2_3a2  - FCDE_corrente_a2 - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.1 anno1 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (MACROAGGREGATO in ('101') or piano_conti_fina ='U.1.02.01.01.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (corr_U_1_2_3  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_1(4) := round((compe_3_1 - fpv_entrata_101 + fpv_spesa_101)/ (corr_U_1_2_3  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.1 anno2 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 1
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (corr_U_1_2_3a1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_1(5) := round((compe_3_1a1 - fpv_entrata_101 + fpv_spesa_101)/ (corr_U_1_2_3a1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.1 anno3 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 2
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (corr_U_1_2_3a2  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_1(6) := round((compe_3_1a2 - fpv_entrata_101 + fpv_spesa_101)/ (corr_U_1_2_3a2  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    -- indice 3.1 anno1, anno2 e anno 3 DIFF
+    i3_1(7) := i3_1(1) - i3_1(4);
+    i3_1(8) := i3_1(2) - i3_1(5);
+    i3_1(9) := i3_1(3) - i3_1(6);
+
+
+    -- insert indicatore 3 e 3.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','3','Spese di personale');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','3.1','Incidenza spesa personale sulla spesa corrente (Indicatore di equilibrio economico-finanziario)',
+    	'Stanziamenti di competenza (Macroaggregato 1.1 + IRAP [pdc U.1.02.01.01] – FPV entrata concernente il Macroaggregato 1.1 + FPV spesa concernente il Macroaggregato 1.1) / Stanziamenti competenza (Spesa corrente – FCDE corrente – FPV di entrata concernente il Macroaggregato 1.1 + FPV spesa concernente il Macroaggregato 1.1) '
+    	,i3_1(1),i3_1(2),i3_1(3),i3_1(4),i3_1(5),i3_1(6),i3_1(7),i3_1(8),i3_1(9));
+    	commit;
+
+
+ -- indice 3.2 anno1 TOT
+      -- ******Numeratore
+	where ANNO = p_anno
+      --§§§§§§§§§§§§§§§§§§§§§§§ da verificare §§§§§§§§§§§§§§§§§§§§§§§§§§§
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	and UTENTE = p_utente
+	and capitolo in(
+    select distinct segment2 
+    from fin_t_documenti
+    where doc_type = 'LIQ'
+    and segment8 = p_anno
+    and nvl(deletion_status_flag,'N') = 'N'
+    and attribute16 in ('U.1.01.01.01.004','U.1.01.01.01.008','U.1.01.01.01.003','U.1.01.01.01.007'));
+
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    	-- ********** Denominatore
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (MACROAGGREGATO in ('101') or piano_conti_fina ='U.1.02.01.01.000');
+
+
+    if (compe_3_1 - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_2(1) := round((corr_U_1_2_3 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1 - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.2 anno2 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+1
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_2(2) := round((corr_U_1_2_3a1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.2 anno3 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+2
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_2(3) := round((corr_U_1_2_3a2 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.2 anno1 MIS13
+
+   select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and capitolo in(
+    select distinct segment2 
+    from fin_t_documenti
+    where doc_type = 'LIQ'
+    and segment8 = p_anno
+    and nvl(deletion_status_flag,'N') = 'N'
+    and attribute16 in ('U.1.01.01.01.004','U.1.01.01.01.008','U.1.01.01.01.003','U.1.01.01.01.007'))
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_3_1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_2(4) := round((corr_U_1_2_3 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.2 anno2 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 1
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    if (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    then
+    i3_2(5) := round((corr_U_1_2_3a1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.2 anno3 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 2
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_2(6) := round((corr_U_1_2_3a2 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if; 
+    
+    -- indice 3.2 anno1, anno2 e anno 3 DIFF
+    i3_2(7) := i3_2(1) - i3_2(4);
+    i3_2(8) := i3_2(2) - i3_2(5);
+    i3_2(9) := i3_2(3) - i3_2(6);
+
+
+    -- insert indicatore 3.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','3.2','Incidenza del salario accessorio ed incentivante rispetto al totale della spesa di personale. Indica il peso delle componenti afferenti la contrattazione decentrata dell''ente rispetto al totale dei redditi da lavoro',
+    	'Stanziamenti di competenza (pdc 1.01.01.004 + 1.01.01.008 "indennità e altri compensi al personale a tempo indeterminato e determinato"+ pdc 1.01.01.003 + 1.01.01.007 "straordinario al personale a tempo indeterminato e determinato" + FPV in uscita concernente il Macroaggregato 1.1  – FPV di entrata concernente il Macroaggregato 1.1) / Stanziamenti di competenza (Macroaggregato 1.1 + pdc 1.02.01.01 "IRAP"– FPV di entrata concernente il Macroaggregato 1.1 + FPV spesa concernente il Macroaggregato 1.1)'
+    	,i3_2(1),i3_2(2),i3_2(3),i3_2(4),i3_2(5),i3_2(6),i3_2(7),i3_2(8),i3_2(9));
+    	commit;
+
+
+    -- indice 3.3 anno1 TOT
+      -- ******Numeratore
+      --§§§§§§§§§§§§§§§§§§§§§§§ da verificare §§§§§§§§§§§§§§§§§§§§§§§§§§§
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and piano_conti_fina in ('U.1.03.02.010.000','U.1.03.02.12.000');
+
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    	-- ********** Denominatore
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (MACROAGGREGATO in ('101') or piano_conti_fina ='U.1.02.01.01.000');
+
+
+    if (compe_3_1 - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_3(1) := round((corr_U_1_2_3 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1 - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.3 anno2 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+1
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_3(2) := round((corr_U_1_2_3a1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.3 anno3 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+2
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	and eu = 'U'
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+    and MACROAGGREGATO  = '101';
+
+    if (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_3(3) := round((corr_U_1_2_3a2 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.3 anno1 MIS13
+
+   select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and piano_conti_fina in ('U.1.03.02.010.000','U.1.03.02.12.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_3_1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_3(4) := round((corr_U_1_2_3 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.3 anno2 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 1
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_3(5) := round((corr_U_1_2_3a1 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    -- indice 3.3 anno3 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 2
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101) > 0
+    then
+    i3_3(6) := round((corr_U_1_2_3a2 - fpv_entrata_101 + fpv_spesa_101)/ (compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 3.3 anno1, anno2 e anno 3 DIFF
+    i3_3(7) := i3_3(1) - i3_3(4);
+    i3_3(8) := i3_3(2) - i3_3(5);
+    i3_3(9) := i3_3(3) - i3_3(6);
+
+
+    -- insert indicatore 3.3 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','3.3','Incidenza della spesa di personale con forme di contratto flessibile. Indica come gli enti soddisfano le proprie esigenze di risorse umane, mixando le varie alternative contrattuali più rigide (personale dipendente) o meno rigide (forme di lavoro flessibile)',
+    	'Stanziamenti di competenza (pdc U.1.03.02.010 "Consulenze" + pdc U.1.03.02.12 "lavoro flessibile/LSU/Lavoro interinale") / Stanziamenti di competenza (Macroaggregato 1.1 "Redditi di lavoro dipendente" + pdc U.1.02.01.01 "IRAP" + FPV in uscita concernente il Macroaggregato 1.1 – FPV  in entrata concernente il Macroaggregato 1.1)'
+    	,i3_3(1),i3_3(2),i3_3(3),i3_3(4),i3_3(5),i3_3(6),i3_3(7),i3_3(8),i3_3(9));
+    	commit;
+
+
+	-- indice 3.4 anno1 TOT
+      -- ******Numeratore
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (MACROAGGREGATO in ('101') or piano_conti_fina ='U.1.02.01.01.000');  
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	and eu = 'U'
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+    and MACROAGGREGATO  = '101';
+
+    	-- ********** Denominatore
+    select nvl(popolazione_residente,0) into popolazione_res
+	from fin_t_dati_generali
+	where ANNO_FINANZIARIO = p_anno;
+
+
+    if popolazione_res > 0
+    then
+    i3_4(1) := round((compe_3_1 - fpv_entrata_101 + fpv_spesa_101)/ popolazione_res,2);
+    end if;
+    
+    -- indice 3.4 anno2 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+1
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if popolazione_res > 0
+    then
+    i3_4(2) := round((compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101)/ popolazione_res,2);
+    end if;
+    
+    -- indice 3.4 anno3 TOT
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from fin_t_articoli
+	where anno = p_anno+2
+	and eu = 'U'
+	and NB_MACROAGGREGATO = '101';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101';
+
+    if popolazione_res > 0
+    then
+    i3_4(3) := round((compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101)/ popolazione_res,2);
+    end if;
+    
+    -- indice 3.4 anno1 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (MACROAGGREGATO in ('101') or piano_conti_fina ='U.1.02.01.01.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if popolazione_res > 0
+    then
+    i3_4(4) := round((compe_3_1 - fpv_entrata_101 + fpv_spesa_101)/ popolazione_res,2);
+    end if;
+
+    -- indice 3.4 anno2 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 1
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if popolazione_res > 0
+    then
+    i3_4(5) := round((compe_3_1a1  - fpv_entrata_101 + fpv_spesa_101)/ popolazione_res,2);
+    end if;
+    
+    -- indice 3.4 anno3 MIS13
+
+    select (nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV')),0) +
+	nvl(sum(previsione_definitiva_segment9(anno,eu||codice,'FPV-REG')),0)) into fpv_entrata_101
+	from vw_nb_articoli
+	where anno = p_anno + 2
+	and eu = 'U'
+	and MACRO_AGG = '101'
+	and liv1 = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO  = '101'
+    and ETITOLO_UMISSIONE = '13';
+
+    if popolazione_res > 0
+    then
+    i3_4(6) := round((compe_3_1a2  - fpv_entrata_101 + fpv_spesa_101)/ popolazione_res,2);
+    end if;
+    
+    -- indice 3.4 anno1, anno2 e anno 3 DIFF
+    i3_4(7) := i3_4(1) - i3_4(4);
+    i3_4(8) := i3_4(2) - i3_4(5);
+    i3_4(9) := i3_4(3) - i3_4(6);
+
+
+    -- insert indicatore 3.4 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	commit;
+    	(p_anno,p_utente,p_ord,'P','S','3.4','Spesa di personale procapite. (Indicatore di equilibrio dimensionale in valore assoluto)',
+    	'Stanziamenti di competenza (Macroaggregato 1.1 + IRAP [pdc 1.02.01.01] – FPV entrata concernente il Macroaggregato 1.1 + FPV spesa concernente il Macroaggregato 1.1 ) / popolazione residente  (Popolazione al 1° gennaio dell''esercizio di riferimento o, se non disponibile, al 1° gennaio dell''ultimo anno disponibile)'
+    	,i3_4(1),i3_4(2),i3_4(3),i3_4(4),i3_4(5),i3_4(6),i3_4(7),i3_4(8),i3_4(9));
+
+
+    -- indice 4.1 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000');
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000');
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3 - fpv_spesa_101) >0 
+    then
+    i4_1(1) := round((compe_3_1 - fpv_spesa_4_1)/ (corr_U_1_2_3 - fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 4.1 anno2 TOT
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000');
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3a1 - fpv_spesa_101) > 0
+    then
+    i4_1(2) := round((compe_3_1a1 - fpv_spesa_4_1)/ (corr_U_1_2_3a1 - fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 4.1 anno3 TOT
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000');
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3a2 - fpv_spesa_101) > 0
+    then
+    i4_1(3) := round((compe_3_1a2 - fpv_spesa_4_1)/ (corr_U_1_2_3a2 - fpv_spesa_101)*100,2);
+    end if;
+    -- indice 4.1 anno1 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000')
+	and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000')
+    and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3 - fpv_spesa_101) > 0
+    then
+    i4_1(4) := round((compe_3_1 - fpv_spesa_4_1)/ (corr_U_1_2_3 - fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 4.1 anno2 MIS13
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000')
+    and ETITOLO_UMISSIONE = '13';
+
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3a1  - fpv_spesa_101) > 0
+    then
+    i4_1(5) := round((compe_3_1a1 - fpv_spesa_4_1)/ (corr_U_1_2_3a1  - fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 4.1 anno3 MIS13
+
+	and UTENTE = p_utente
+    select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and eu = 'U'
+    and piano_conti_fina in ('U.1.03.02.15.000','U.1.04.03.01.000','U.1.04.03.02.000')
+    and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_101
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE = '1';
+
+    if (corr_U_1_2_3a2  - fpv_spesa_101) > 0
+    then
+    i4_1(6) := round((compe_3_1a2 - fpv_spesa_4_1)/ (corr_U_1_2_3a2  - fpv_spesa_101)*100,2);
+    end if;
+    
+    -- indice 4.1 anno1, anno2 e anno 3 DIFF
+    i4_1(7) := i4_1(1) - i4_1(4);
+    i4_1(8) := i4_1(2) - i4_1(5);
+    i4_1(9) := i4_1(3) - i4_1(6);
+
+
+    -- insert indicatore 4 e 4.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','4','Esternalizzazione dei servizi');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','4.1','Indicatore di esternalizzazione dei servizi',
+    	'Stanziamenti di competenza (pdc U.1.03.02.15.000 "Contratti di servizio pubblico" + pdc U.1.04.03.01.000 "Trasferimenti correnti a imprese controllate" + pdc U.1.04.03.02.000 "Trasferimenti correnti a altre imprese partecipate") al netto del relativo FPV di spesa  / totale stanziamenti di competenza spese Titolo I al netto del FPV'
+    	,i4_1(1),i4_1(2),i4_1(3),i4_1(4),i4_1(5),i4_1(6),i4_1(7),i4_1(8),i4_1(9));
+    	commit;
+
+
+-- indice 5.1 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107';
+
+
+     -- *** DENOMINATORE
+     -- si utilizzano le variabili compe_E_1_2_3 calcolati nel primo indice
+    
+    if compe_E_1_2_3 > 0
+    then
+    i5_1(1) := round(compe_3_1/compe_E_1_2_3*100,2);
+    end if;
+    
+    if compe_E_1_2_3a1 > 0 
+    then
+    i5_1(2) := round(compe_3_1a1/compe_E_1_2_3a1*100,2);
+    end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+    i5_1(3) := round(compe_3_1a2/compe_E_1_2_3a2*100,2);
+    end if;
+
+
+    -- indice 5.1 anno1 MIS13
+
+    -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107'
+	and ETITOLO_UMISSIONE = '13';
+
+    if compe_E_1_2_3 > 0
+    then
+	i5_1(4) := round(compe_3_1/compe_E_1_2_3*100,2);
+    end if;
+    
+    if compe_E_1_2_3a1 > 0
+    then
+    i5_1(5) := round(compe_3_1a1/compe_E_1_2_3a1*100,2);
+    end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+    i5_1(6) := round(compe_3_1a2/compe_E_1_2_3a2*100,2);
+    end if;
+
+    -- indice 5.1 anno1, anno2 e anno 3 DIFF
+    i5_1(7) := i5_1(1) - i5_1(4);
+    i5_1(8) := i5_1(2) - i5_1(5);
+    i5_1(9) := i5_1(3) - i5_1(6);
+
+
+    -- insert indicatore 5 e 5.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','5','Interessi passivi');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','5.1','Incidenza degli interessi passivi sulle entrate correnti (che ne costituiscono la fonte di copertura)',
+    	'Stanziamenti di competenza Macroaggregato 1.7 "Interessi passivi" / Stanziamenti di competenza primi tre titoli ("Entrate correnti")'
+    	,i5_1(1),i5_1(2),i5_1(3),i5_1(4),i5_1(5),i5_1(6),i5_1(7),i5_1(8),i5_1(9));
+    	commit;
+
+
+    -- indice 5.2 anno1 TOT
+     -- ***** NUMERATORE *******
+	and UTENTE = p_utente
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and eu = 'U'
+	and MACROAGGREGATO = '107'
+	and piano_conti_fina = 'U.1.07.06.04.000';
+
+
+
+     -- *** DENOMINATORE
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107';
+
+    if compe_3_1 > 0
+    then
+    i5_2(1) := round(corr_U_1_2_3/compe_3_1*100,2);
+    end if;
+    
+    if compe_3_1a1 > 0
+    then
+    i5_2(2) := round(corr_U_1_2_3a1/compe_3_1a1*100,2);
+    end if;
+    
+    if compe_3_1a2 > 0
+    then
+    i5_2(3) := round(corr_U_1_2_3a2/compe_3_1a2*100,2);
+    end if;
+
+
+    -- indice 5.2 anno1 MIS13
+
+    -- ***** NUMERATORE *******
+     select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107'
+	and piano_conti_fina = 'U.1.07.06.04.000'
+	and ETITOLO_UMISSIONE = '13';
+
+	if compe_3_1 > 0
+    then
+    i5_2(4) := round(corr_U_1_2_3/compe_3_1*100,2);
+    end if;
+    
+    if compe_3_1a1 > 0
+    then
+    i5_2(5) := round(corr_U_1_2_3a1/compe_3_1a1*100,2);
+    end if;
+    
+    if compe_3_1a2 > 0
+    then
+    i5_2(6) := round(corr_U_1_2_3a2/compe_3_1a2*100,2);
+    end if;
+
+    -- indice 5.1 anno1, anno2 e anno 3 DIFF
+    i5_2(7) := i5_2(1) - i5_2(4);
+    i5_2(8) := i5_2(2) - i5_2(5);
+    i5_2(9) := i5_2(3) - i5_2(6);
+
+
+    -- insert indicatore 5.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','5.2','Incidenza degli interessi sulle anticipazioni sul totale degli interessi passivi',
+    	'Stanziamenti di competenza  voce del piano dei conti finanziario U.1.07.06.04.000 "Interessi passivi su anticipazioni di tesoreria" / Stanziamenti di competenza Macroaggregato 1.7 "Interessi passivi"'
+    	,i5_2(1),i5_2(2),i5_2(3),i5_2(4),i5_2(5),i5_2(6),i5_2(7),i5_2(8),i5_2(9));
+    	commit;
+
+
+
+    -- indice 5.3 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107'
+	and piano_conti_fina = 'U.1.07.06.02.000';
+
+
+
+     -- *** DENOMINATORE
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107';
+
+    if compe_3_1 > 0
+    then
+    i5_3(1) := round(corr_U_1_2_3/compe_3_1*100,2);
+    end if;
+    
+    if compe_3_1a1 > 0
+    then
+    i5_3(2) := round(corr_U_1_2_3a1/compe_3_1a1*100,2);
+    end if;
+    
+    if compe_3_1a2 > 0
+    then
+    i5_3(3) := round(corr_U_1_2_3a2/compe_3_1a2*100,2);
+    end if;
+
+
+    -- indice 5.3 anno1 MIS13
+
+    -- ***** NUMERATORE *******
+     select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and MACROAGGREGATO = '107'
+	and piano_conti_fina = 'U.1.07.06.02.000'
+	and ETITOLO_UMISSIONE = '13';
+
+	if compe_3_1 > 0
+    then
+    i5_3(4) := round(corr_U_1_2_3/compe_3_1*100,2);
+    end if;
+    
+    if compe_3_1a1 > 0
+    then
+    i5_3(5) := round(corr_U_1_2_3a1/compe_3_1a1*100,2);
+    end if;
+    
+    if compe_3_1a2 > 0
+    then
+    i5_3(6) := round(corr_U_1_2_3a2/compe_3_1a2*100,2);
+    end if;
+
+    -- indice 5.3 anno1, anno2 e anno 3 DIFF
+    i5_3(7) := i5_3(1) - i5_3(4);
+    i5_3(8) := i5_3(2) - i5_3(5);
+    -- insert indicatore 5.3 
+    i5_3(9) := i5_3(3) - i5_3(6);
+
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','5.3','Incidenza degli interessi di mora sul totale degli interessi passivi',
+    	'Stanziamenti di competenza voce del piano dei conti finanziario U.1.07.06.02.000 "Interessi di mora" / Stanziamenti di competenza  Macroaggregato 1.7 "Interessi passivi"'
+    	,i5_3(1),i5_3(2),i5_3(3),i5_3(4),i5_3(5),i5_3(6),i5_3(7),i5_3(8),i5_3(9));
+    	commit;
+
+
+-- indice 6.1 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203');
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE in ('1','2');
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and TITOLO_USCITE in ('1','2');
+
+    if (corr_U_1_2_3 - fpv_spesa) > 0
+    then
+    i6_1(1) := round((compe_3_1 - fpv_spesa_4_1)/ (corr_U_1_2_3 - fpv_spesa)*100,2);
+    end if;
+    
+    -- indice 6.1 anno2 TOT
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+    if (corr_U_1_2_3a1 - fpv_spesa_a1) > 0
+    then
+    i6_1(2) := round((compe_3_1a1 - fpv_spesa_4_1)/ (corr_U_1_2_3a1 - fpv_spesa_a1)*100,2);
+    end if;
+    
+    -- indice 6.1 anno3 TOT
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+    if (corr_U_1_2_3a2 - fpv_spesa_a2) > 0
+    then
+    i6_1(3) := round((compe_3_1a2 - fpv_spesa_4_1)/ (corr_U_1_2_3a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.1 anno1 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203')
+	and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203')
+    and ETITOLO_UMISSIONE = '13';
+
+    if (corr_U_1_2_3 - fpv_spesa) > 0
+    then
+    i6_1(4) := round((compe_3_1 - fpv_spesa_4_1)/ (corr_U_1_2_3 - fpv_spesa)*100,2);
+    end if;
+    
+    -- indice 6.1 anno2 MIS13
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203')
+    and ETITOLO_UMISSIONE = '13';
+
+    if (corr_U_1_2_3a1  - fpv_spesa_a1) > 0
+    then
+    i6_1(5) := round((compe_3_1a1 - fpv_spesa_4_1)/ (corr_U_1_2_3a1  - fpv_spesa_a1)*100,2);
+    end if;
+    
+    -- indice 6.1 anno3 MIS13
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa_4_1
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203')
+    and ETITOLO_UMISSIONE = '13';
+
+    if (corr_U_1_2_3a2  - fpv_spesa_a2) > 0
+    then
+    i6_1(6) := round((compe_3_1a2 - fpv_spesa_4_1)/ (corr_U_1_2_3a2  - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.1 anno1, anno2 e anno 3 DIFF
+    i6_1(7) := i6_1(1) - i6_1(4);
+    i6_1(8) := i6_1(2) - i6_1(5);
+    i6_1(9) := i6_1(3) - i6_1(6);
+
+
+    -- insert indicatore 6 e 6.1 
+    	values
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	(p_anno,p_utente,p_ord,'P','S','6','Investimenti');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.1','Incidenza investimenti su spesa corrente e in conto capitale',
+    	'Totale stanziamento di competenza  Macroaggregati 2.2 + 2.3 al netto dei relativi FPV / Totale stanziamento di competenza titolo 1 e 2 della spesa al netto del FPV'
+    	,i6_1(1),i6_1(2),i6_1(3),i6_1(4),i6_1(5),i6_1(6),i6_1(7),i6_1(8),i6_1(9));
+    	commit;
+
+	--indice 6.2 anno1_2_3 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato = '202';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato = '202';
+
+     -- *** DENOMINATORE
+     -- popolazione_res
+    if popolazione_res > 0
+    then
+    i6_2(1) := round((compe_3_1 - fpv_spesa)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_2(2) := round((compe_3_1a1 - fpv_spesa_a1)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_2(3) := round((compe_3_1a2 - fpv_spesa_a2)/ popolazione_res,2);
+    end if; 
+    
+    -- indice 6.2 anno1_2_3 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato = '202'
+	and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato = '202'
+    and ETITOLO_UMISSIONE = '13';
+
+	if popolazione_res > 0
+    then
+    i6_2(4) := round((compe_3_1 - fpv_spesa)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_2(5) := round((compe_3_1a1 - fpv_spesa_a1)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_2(6) := round((compe_3_1a2 - fpv_spesa_a2)/ popolazione_res,2);
+    end if;
+    
+    -- indice 6.2 anno1, anno2 e anno 3 DIFF
+    i6_2(7) := i6_2(1) - i6_2(4);
+    i6_2(8) := i6_2(2) - i6_2(5);
+    i6_2(9) := i6_2(3) - i6_2(6);
+
+
+    -- insert indicatore 6.2 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.2','Investimenti diretti procapite. (Indicatore di equilibrio dimensionale in valore assoluto)',
+    	'Stanziamenti di competenza  per Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" al netto del relativo FPV / popolazione residente  (al 1° gennaio dell''esercizio di riferimento o, se non disponibile, al 1° gennaio dell''ultimo anno disponibile)'
+    	,i6_2(1),i6_2(2),i6_2(3),i6_2(4),i6_2(5),i6_2(6),i6_2(7),i6_2(8),i6_2(9));
+    	commit;
+
+
+    --indice 6.3 anno1_2_3 TOT
+      -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato = '203';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato = '203';
+
+     -- *** DENOMINATORE
+     -- popolazione_res
+
+    if popolazione_res > 0
+    then
+    i6_3(1) := round((compe_3_1 - fpv_spesa)/ popolazione_res,2);
+	end if;
+    
+	end if;
+    if popolazione_res > 0
+    then
+    i6_3(2) := round((compe_3_1a1 - fpv_spesa_a1)/ popolazione_res,2);
+    
+    if popolazione_res > 0
+    then
+    i6_3(3) := round((compe_3_1a2 - fpv_spesa_a2)/ popolazione_res,2);
+    end if;
+    
+    -- indice 6.3 anno1_2_3 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato = '203'
+	and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato = '203'
+    and ETITOLO_UMISSIONE = '13';
+
+	if popolazione_res > 0
+    then
+    i6_3(4) := round((compe_3_1 - fpv_spesa)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_3(5) := round((compe_3_1a1 - fpv_spesa_a1)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_3(6) := round((compe_3_1a2 - fpv_spesa_a2)/ popolazione_res,2);
+    end if;
+    
+    -- indice 6.2 anno1, anno2 e anno 3 DIFF
+    i6_3(7) := i6_3(1) - i6_3(4);
+    i6_3(8) := i6_3(2) - i6_3(5);
+    i6_3(9) := i6_3(3) - i6_3(6);
+
+
+    -- insert indicatore 6.3 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.3','Contributi agli investimenti procapite.(Indicatore di equilibrio dimensionale in valore assoluto)',
+    	'Stanziamenti di competenza Macroaggregato 2.3 Contributi agli investimenti al netto del relativo FPV / popolazione residente (al 1° gennaio dell''esercizio di riferimento o, se non disponibile, al 1° gennaio dell''ultimo anno disponibile)'
+    	,i6_3(1),i6_3(2),i6_3(3),i6_3(4),i6_3(5),i6_3(6),i6_3(7),i6_3(8),i6_3(9));
+    	commit;
+
+
+    --indice 6.4 anno1_2_3 TOT
+      -- ***** NUMERATORE *******
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203');
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+     -- *** DENOMINATORE
+     -- popolazione_res
+
+    if popolazione_res > 0
+    then
+    i6_4(1) := round((compe_3_1 - fpv_spesa)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_4(2) := round((compe_3_1a1 - fpv_spesa_a1)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_4(3) := round((compe_3_1a2 - fpv_spesa_a2)/ popolazione_res,2);
+    end if;
+    
+    -- indice 6.4 anno1_2_3 MIS13
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203')
+	and ETITOLO_UMISSIONE = '13';
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203')
+    and ETITOLO_UMISSIONE = '13';
+
+    if popolazione_res > 0
+    then
+	i6_4(4) := round((compe_3_1 - fpv_spesa)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_4(5) := round((compe_3_1a1 - fpv_spesa_a1)/ popolazione_res,2);
+	end if;
+    
+    if popolazione_res > 0
+    then
+    i6_4(6) := round((compe_3_1a2 - fpv_spesa_a2)/ popolazione_res,2);
+    end if;
+    
+    -- indice 6.2 anno1, anno2 e anno 3 DIFF
+    i6_4(7) := i6_4(1) - i6_4(4);
+    i6_4(8) := i6_4(2) - i6_4(5);
+    i6_4(9) := i6_4(3) - i6_4(6);
+
+
+    -- insert indicatore 6.4
+    p_ord := p_ord + 1;
+
+				,NETTO_MISSIONI1
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.4','Investimenti complessivi procapite. (Indicatore di equilibrio dimensionale in valore assoluto)',
+    	'Totale stanziamenti di competenza  per Macroaggregati 2.2 "Investimenti fissi lordi e acquisto di terreni" e 2.3 "Contributi agli investimenti" al netto dei relativi FPV / popolazione residente (al 1° gennaio dell''esercizio di riferimento o, se non disponibile, al 1° gennaio dell''ultimo anno disponibile)'
+    	,i6_4(1),i6_4(2),i6_4(3),i6_4(4),i6_4(5),i6_4(6),i6_4(7),i6_4(8),i6_4(9));
+    	commit;
+
+
+    --indice 6.5 anno1_2_3 TOT
+      -- ***** NUMERATORE *******
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '1';
+
+    -- ***** DENOMINATORE ****
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203');
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+    if (compe_3_1 - fpv_spesa) > 0
+    then
+    i6_5(1) := round((compe_E_1_2_3 - corr_U_1_2_3)/(compe_3_1 - fpv_spesa)*100,2);
+	end if;
+    
+    if (compe_3_1a1 - fpv_spesa_a1) > 0
+    then
+    i6_5(2) := round((compe_E_1_2_3a1 - corr_U_1_2_3a1)/(compe_3_1a1 - fpv_spesa_a1)*100,2);
+	end if;
+    
+    if (compe_3_1a2 - fpv_spesa_a2) > 0
+    then
+    i6_5(3) := round((compe_E_1_2_3a2 - corr_U_1_2_3a2)/(compe_3_1a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.5 anno1_2_3 MIS13
+    -- **** NUMERATORE *******
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_1_2_3S,compe_E_1_2_3a1S,compe_E_1_2_3a2S
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) in ('1','2','3')
+    and nvl(SANITA,'N') = 'S';
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '1'
+	and ETITOLO_UMISSIONE = '13'
+	and nvl(SANITA,'N') = 'S';
+
+	select sum(previsione_definitiva_segment9(anno,eu||codice,'REGIONE')) into sanita_ent_libere
+	from vw_nb_articoli
+	where anno = p_anno
+	and eu='U'
+	and nvl(sanita_sn,'N') = 'S'
+	and nb_titolo = '1';
+
+	select sum(previsione_definitiva_segment9(anno,eu||codice,'REGIONE')) into sanita_ent_liberea1
+	from vw_nb_articoli
+	where anno = p_anno+1
+	and eu='U'
+	and nvl(sanita_sn,'N') = 'S'
+	and nb_titolo = '1';
+
+	select sum(previsione_definitiva_segment9(anno,eu||codice,'REGIONE')) into sanita_ent_liberea2
+	from vw_nb_articoli
+	where anno = p_anno+2
+	and eu='U'
+	and nvl(sanita_sn,'N') = 'S'
+	and nb_titolo = '1';
+
+
+    if (compe_3_1 - fpv_spesa) > 0
+    then
+	i6_5(4) := round((compe_E_1_2_3S + sanita_ent_libere - corr_U_1_2_3)/(compe_3_1 - fpv_spesa)*100,2);
+	end if;
+    
+    if (compe_3_1a1 - fpv_spesa_a1) > 0
+    then
+    i6_5(5) := round((compe_E_1_2_3a1S + sanita_ent_liberea1 - corr_U_1_2_3a1)/(compe_3_1a1 - fpv_spesa_a1)*100,2);
+	end if;
+    
+    if (compe_3_1a2 - fpv_spesa_a2) > 0
+    then
+    i6_5(6) := round((compe_E_1_2_3a2S + sanita_ent_liberea2 - corr_U_1_2_3a2)/(compe_3_1a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.5 anno1, anno2 e anno 3 DIFF
+    i6_5(7) := i6_5(1) - i6_5(4);
+    i6_5(8) := i6_5(2) - i6_5(5);
+    i6_5(9) := i6_5(3) - i6_5(6);
+
+
+    -- insert indicatore 6.5
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.5','Quota investimenti complessivi finanziati dal risparmio corrente',
+
+    	'Margine corrente di competenza / Stanziamenti di competenza (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti")'
+    	,i6_5(1),i6_5(2),i6_5(3),i6_5(4),i6_5(5),i6_5(6),i6_5(7),i6_5(8),i6_5(9));
+    	commit;
+
+
+ 	--indice 6.6 anno1_2_3 TOT
+      -- ***** NUMERATORE *******
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_5,compe_E_5a1,compe_E_5a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) = '5';
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '3';
+
+    -- ***** DENOMINATORE ****
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203');
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+    if (compe_3_1 - fpv_spesa) > 0
+    then
+    i6_6(1) := round(ABS(compe_E_5 - corr_U_1_2_3)/(compe_3_1 - fpv_spesa)*100,2);
+	end if;
+    
+    if (compe_3_1a1 - fpv_spesa_a1) > 0
+    then
+    i6_6(2) := round(ABS(compe_E_5a1 - corr_U_1_2_3a1)/(compe_3_1a1 - fpv_spesa_a1)*100,2);
+	end if;
+    
+    if (compe_3_1a2 - fpv_spesa_a2) > 0
+    then
+    i6_6(3) := round(ABS(compe_E_5a2 - corr_U_1_2_3a2)/(compe_3_1a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.6 anno1_2_3 MIS13
+    -- **** NUMERATORE *******
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_5,compe_E_5a1,compe_E_5a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) = '5'
+    and nvl(SANITA,'N') = 'S';
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '3'
+	and ETITOLO_UMISSIONE = '13';
+
+
+    if (compe_3_1 - fpv_spesa) > 0
+    then
+	i6_6(4) := round((compe_E_5 - corr_U_1_2_3)/(compe_3_1 - fpv_spesa)*100,2);
+	end if;
+    
+    if (compe_3_1a1 - fpv_spesa_a1) > 0
+    then
+    i6_6(5) := round((compe_E_5a1 - corr_U_1_2_3a1)/(compe_3_1a1 - fpv_spesa_a1)*100,2);
+	end if;
+    
+    if (compe_3_1a2 - fpv_spesa_a2) > 0
+    then
+    i6_6(6) := round((compe_E_5a2 - corr_U_1_2_3a2)/(compe_3_1a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.6 anno1, anno2 e anno 3 DIFF
+    i6_6(7) := i6_6(1) - i6_6(4);
+    i6_6(8) := i6_6(2) - i6_6(5);
+    i6_6(9) := i6_6(3) - i6_6(6);
+
+
+    -- insert indicatore 6.6
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.6','Quota investimenti complessivi finanziati dal saldo positivo delle partite finanziarie',
+    	'Saldo positivo di competenza delle partite finanziarie / Stanziamenti di competenza (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti")'
+    	,i6_6(1),i6_6(2),i6_6(3),i6_6(4),i6_6(5),i6_6(6),i6_6(7),i6_6(8),i6_6(9));
+    	commit;
+
+
+   --indice 6.7 anno1_2_3 TOT
+      -- ***** NUMERATORE *******
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_5,compe_E_5a1,compe_E_5a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) = '6'
+    and (ECATEGORIA not like '60202%' OR ECATEGORIA not like '60303%');
+
+
+    -- ***** DENOMINATORE ****
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_3_1,compe_3_1a1,compe_3_1a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('202','203');
+	where ANNO = p_anno
+
+	select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO1,0)),0),nvl(sum(nvl(DICUI_FPV_ANNO2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('202','203');
+
+    if (compe_3_1 - fpv_spesa) > 0
+    then
+    i6_7(1) := round(compe_E_5/(compe_3_1 - fpv_spesa)*100,2);
+	end if;
+    
+    if (compe_3_1a1 - fpv_spesa_a1) > 0
+    then
+    i6_7(2) := round(compe_E_5a1/(compe_3_1a1 - fpv_spesa_a1)*100,2);
+	end if;
+    
+    if (compe_3_1a2 - fpv_spesa_a2) > 0
+    then
+    i6_7(3) := round(compe_E_5a2/(compe_3_1a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.7 anno1_2_3 MIS13
+    -- **** NUMERATORE *******
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_5,compe_E_5a1,compe_E_5a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(ETITOLO_UMISSIONE,1,1) = '6'
+    and (ECATEGORIA not like '60202%' OR ECATEGORIA not like '60303%')
+    and nvl(SANITA,'N') = 'S';
+
+    if (compe_3_1 - fpv_spesa) > 0
+    then
+	i6_7(4) := round((compe_E_5 - corr_U_1_2_3)/(compe_3_1 - fpv_spesa)*100,2);
+	end if;
+    
+    if (compe_3_1a1 - fpv_spesa_a1) > 0
+    then
+    i6_7(5) := round((compe_E_5a1 - corr_U_1_2_3a1)/(compe_3_1a1 - fpv_spesa_a1)*100,2);
+	end if;
+    
+    if (compe_3_1a2 - fpv_spesa_a2) > 0
+    then
+    i6_7(6) := round((compe_E_5a2 - corr_U_1_2_3a2)/(compe_3_1a2 - fpv_spesa_a2)*100,2);
+    end if;
+    
+    -- indice 6.7 anno1, anno2 e anno 3 DIFF
+    i6_7(7) := i6_7(1) - i6_7(4);
+    i6_7(8) := i6_7(2) - i6_7(5);
+    i6_7(9) := i6_7(3) - i6_7(6);
+
+
+    -- insert indicatore 6.7
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','6.7','Quota investimenti complessivi finanziati da debito',
+    	'Stanziamenti di competenza  (Titolo 6"Accensione di prestiti" - Categoria 6.02.02 "Anticipazioni" - Categoria 6.03.03 "Accensione prestiti a seguito di escussione di garanzie" - Accensioni di prestiti da rinegoziazioni) / Stanziamenti di competenza (Macroaggregato 2.2 "Investimenti fissi lordi e acquisto di terreni" + Macroaggregato 2.3 "Contributi agli investimenti")'
+    	,i6_7(1),i6_7(2),i6_7(3),i6_7(4),i6_7(5),i6_7(6),i6_7(7),i6_7(8),i6_7(9));
+    	commit;
+
+
+
+   -- indice 7.1 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(cassa_anno0,0)),0) into cassa_U
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('103','202');
+
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0) + nvl(RESIDUO,0)),0) into corr_U_1_2_3
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('103','202');
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and Macroaggregato in ('103','202');
+
+    if (corr_U_1_2_3 - fpv_spesa) &lt;>0 --lino 26/04/2018 dava errore in generazione.
+       then
+        i7_1(1) := round(cassa_U/ (corr_U_1_2_3 - fpv_spesa)*100,2);
+        if i7_1(1) > 100 
+       	   then i7_1(1) := 100; 
+        end if;
+       else 
+        i7_1(1) :=0; 
+    end if;
+    -- indice 7.1 anno1 MIS13
+
+    select nvl(sum(nvl(cassa_anno0,0)),0) into cassa_U
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and Macroaggregato in ('103','202')
+	and ETITOLO_UMISSIONE = '13';
+
+
+    if (corr_U_1_2_3 - fpv_spesa) &lt;>0 --lino 26/04/2018 dava errore in generazione.
+       then
+       i7_1(4) := round(cassa_U/ (corr_U_1_2_3 - fpv_spesa)*100,2);
+       if i7_1(4) > 100 
+      	  then i7_1(4) := 100; 
+       end if;
+       else 
+        i7_1(4) :=0; 
+    end if;
+
+
+
+    -- indice 7.1 anno1, anno2 e anno 3 DIFF
+    i7_1(7) := i7_1(1) - i7_1(4);
+
+
+
+    -- insert indicatore 7 e 7.1 
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','7','Debiti non finanziari');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+				,NETTO_MISSIONI1
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','7.1','Indicatore di smaltimento debiti commerciali',
+    	'Stanziamento di cassa (Macroaggregati 1.3 "Acquisto di beni e servizi" + 2.2 "Investimenti fissi lordi e acquisto di terreni") / stanziamenti di competenza e residui al netto dei relativi FPV (Macroaggregati 1.3 "Acquisto di beni e servizi" + 2.2 "Investimenti fissi lordi e acquisto di terreni")'
+    	,i7_1(1),null,null,i7_1(4),null,null,i7_1(7),null,null);
+    	commit;
+
+
+ -- indice 7.2 anno1 TOT
+     -- ***** NUMERATORE *******
+    select nvl(sum(nvl(cassa_anno0,0)),0) into cassa_U
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (substr(piano_conti_fina,1,6) in ('U.1.05','U.1.06')
+        OR
+        substr(piano_conti_fina,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21'));
+
+
+
+
+     -- *** DENOMINATORE
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0) + nvl(RESIDUO,0)),0) into corr_U_1_2_3
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and (substr(piano_conti_fina,1,6) in ('U.1.05','U.1.06')
+        OR
+        substr(piano_conti_fina,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21'));
+
+
+
+    select nvl(sum(nvl(DICUI_FPV_ANNO0,0)),0) into fpv_spesa
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+   and (substr(piano_conti_fina,1,6) in ('U.1.05','U.1.06')
+        OR
+        substr(piano_conti_fina,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21'));
+
+    if (corr_U_1_2_3 - fpv_spesa) &lt;> 0 -- lino 26/04/2018 da errore se = 0
+       then
+       i7_2(1) := round(cassa_U/(corr_U_1_2_3 - fpv_spesa)*100,2);
+       if i7_2(1) > 100 
+      	  then i7_2(1) := 100; 
+       end if;
+       else
+       i7_2(1) := 0;
+    end if;   
+
+
+    -- indice 7.2 anno1 MIS13
+
+    select nvl(sum(nvl(cassa_anno0,0)),0) into cassa_U
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+	and (substr(piano_conti_fina,1,6) in ('U.1.05','U.1.06')
+        OR
+        substr(piano_conti_fina,1,9) in ('U.1.04.01','U.2.03.01','U.2.04.01','U.2.04.11','U.2.04.16','U.2.04.21'))
+	and ETITOLO_UMISSIONE = '13';
+
+
+    if (corr_U_1_2_3 - fpv_spesa) &lt;> 0 -- lino 26/04/2018 da errore se = 0
+       then
+       i7_2(4) := round(cassa_U/ (corr_U_1_2_3 - fpv_spesa)*100,2);
+       if i7_2(4) > 100 
+       	  then i7_2(4) := 100; 
+       end if;
+       else
+       i7_2(4) := 0;
+    end if;   
+
+
+    -- indice 7.2 anno1, anno2 e anno 3 DIFF
+    i7_2(7) := i7_2(1) - i7_2(4);
+
+
+
+    -- insert indicatore 7.2 
+    p_ord := p_ord + 1;
+
+				,NETTO_MISSIONI1
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','7.2','Indicatore di smaltimento debiti verso altre amministrazioni pubbliche',
+    	'Stanziamento di cassa [Trasferimenti correnti a Amministrazioni Pubbliche (U.1.04.01.00.000) + Trasferimenti di tributi (U.1.05.00.00.000) + Fondi perequativi (U.1.06.00.00.000) + Contributi agli investimenti a Amministrazioni pubbliche (U.2.03.01.00.000) + Altri trasferimenti in conto capitale (U.2.04.01.00.000 + U.2.04.11.00.000 + U.2.04.16.00.000 + U.2.04.21.00.000)] / stanziamenti di competenza e residui, al netto dei relativi FPV, dei  [Trasferimenti correnti a Amministrazioni Pubbliche (U.1.04.01.00.000) + Trasferimenti di tributi (U.1.05.00.00.000) + Fondi perequativi (U.1.06.00.00.000) + Contributi agli investimenti a Amministrazioni pubbliche (U.2.03.01.00.000) + Altri trasferimenti in conto capitale (U.2.04.01.00.000 + U.2.04.11.00.000 + U.2.04.16.00.000 + U.2.04.21.00.000)]'
+    	,i7_2(1),null,null,i7_2(4),null,null,i7_2(7),null,null);
+    	commit;
+
+	-- ****** 8 e 8.1 ***********
+	-- ****8.1 anni 1,2,3 ****
+	 --**** NUMERATORE *****
+	 select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_U_4,compe_U_4a1,compe_U_4a2
+	 from fin_t_previsione
+	 where ANNO = p_anno
+	 and UTENTE = p_utente
+	 and eu = 'U'
+     and TITOLO_USCITE = '4';
+
+	 --**** DENOMINATORE *****
+	 select nvl(sum(nvl(importo,0)),0) into PD1
+	 from nb_piacee_importi
+	 where anno = p_anno - 2
+	 and utente = id_utente
+	 and codice_piacee = 'PD1';
+
+    if PD1 > 0 
+     then
+        i8_1(1) := round(compe_U_4/PD1*100,2);
+        i8_1(2) := round(compe_U_4a1/PD1*100,2);
+        i8_1(3) := round(compe_U_4a2/PD1*100,2);
+    end if;
+	-- indice 8.1 anno1_2_3 MIS13
+    -- **** NUMERATORE *******
+
+    --**** NUMERATORE *****
+	 select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_U_4,compe_U_4a1,compe_U_4a2
+	 from fin_t_previsione
+	 where ANNO = p_anno
+	 and UTENTE = p_utente
+	 and eu = 'U'
+     and TITOLO_USCITE = '4'
+     and ETITOLO_UMISSIONE = '13';
+
+    if PD1 > 0 
+     then
+        i8_1(4) := round(compe_U_4/PD1*100,2);
+        i8_1(5) := round(compe_U_4a1/PD1*100,2);
+        i8_1(6) := round(compe_U_4a2/PD1*100,2);
+    end if;
+
+    -- indice 8.1 anno1, anno2 e anno 3 DIFF
+    i8_1(7) := i8_1(1) - i8_1(4);
+    i8_1(8) := i8_1(2) - i8_1(5);
+    i8_1(9) := i8_1(3) - i8_1(6);
+
+
+    -- insert indicatore 8 e 8.1
+    p_ord := p_ord + 1;
+
+   insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','8','Debiti finanziari');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+				,NETTO_MISSIONI1
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','8.1','Incidenza estinzioni debiti finanziari',
+    	'(Totale competenza Titolo 4 della spesa) / Debito da finanziamento al 31/12 dell''esercizio precedente',
+    	i8_1(1),i8_1(2),i8_1(3),i8_1(4),i8_1(5),i8_1(6),i8_1(7),i8_1(8),i8_1(9));
+    	commit;
+
+
+    --indice 8.2 anno1_2_3 TOT
+      -- ***** NUMERATORE *******
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO = 107
+    and PIANO_CONTI_FINA not in ('U.1.07.06.02.000','U.1.07.06.04.000');
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_U_4,compe_U_4a1,compe_U_4a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and titolo_uscite = '4';
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_40206,compe_E_40206a1,compe_E_40206a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and ecategoria like '40206%';
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_8_2,compe_E_8_2a1,compe_E_8_2a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(PIANO_CONTI_FINA,1,9) in ('E.4.03.01','E.4.03.04');
+
+    -- ***** DENOMINATORE ****
+
+    -- compe_E_1_2_3 ,compe_E_1_2_3a1 ,compe_E_1_2_3a2
+
+    if compe_E_1_2_3 > 0
+    then
+    i8_2(1) := round((corr_U_1_2_3 + compe_U_4 - (compe_E_40206+compe_E_8_2))/compe_E_1_2_3*100,2);
+	end if;
+    
+    if compe_E_1_2_3a1 > 0
+    then
+    i8_2(2) := round((corr_U_1_2_3a1 + compe_U_4a1 - (compe_E_40206a1+compe_E_8_2a1))/compe_E_1_2_3a1*100,2);
+	end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+    i8_2(3) := round((corr_U_1_2_3a2 + compe_U_4a2 - (compe_E_40206a2+compe_E_8_2a2))/compe_E_1_2_3a2*100,2);
+    end if;
+    
+    -- indice 8.2 anno1_2_3 MIS13
+    -- ***** NUMERATORE *******
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and MACROAGGREGATO = 107
+    and PIANO_CONTI_FINA not in ('U.1.07.06.02.000','U.1.07.06.04.000')
+    and ETITOLO_UMISSIONE = '13';
+
+    select nvl(sum(nvl(competenza_anno0,0)),0),nvl(sum(nvl(competenza_anno1,0)),0),nvl(sum(nvl(competenza_anno2,0)),0) into compe_U_4,compe_U_4a1,compe_U_4a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'U'
+    and titolo_uscite = '4'
+    and ETITOLO_UMISSIONE = '13';
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_40206,compe_E_40206a1,compe_E_40206a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and ecategoria like '40206%'
+    and nvl(SANITA,'N') = 'S';
+
+    select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_8_2,compe_E_8_2a1,compe_E_8_2a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and UTENTE = p_utente
+	and eu = 'E'
+    and substr(PIANO_CONTI_FINA,1,9) in ('E.4.03.01','E.4.03.04')
+    and nvl(SANITA,'N') = 'S';
+
+    -- ***** DENOMINATORE ****
+
+    -- compe_E_1_2_3 ,compe_E_1_2_3a1 ,compe_E_1_2_3a2
+
+    if compe_E_1_2_3 > 0
+    then
+    i8_2(4) := round((corr_U_1_2_3 + compe_U_4 - (compe_E_40206+compe_E_8_2))/compe_E_1_2_3*100,2);
+	end if;
+    
+    if compe_E_1_2_3a1 > 0
+    then
+    i8_2(5) := round((corr_U_1_2_3a1 + compe_U_4a1 - (compe_E_40206a1+compe_E_8_2a1))/compe_E_1_2_3a1*100,2);
+	end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+    i8_2(6) := round((corr_U_1_2_3a2 + compe_U_4a2 - (compe_E_40206a2+compe_E_8_2a2))/compe_E_1_2_3a2*100,2);
+    end if;
+    
+    
+    -- indice 8.2 anno1, anno2 e anno 3 DIFF
+    i8_2(7) := i8_2(1) - i8_2(4);
+    i8_2(8) := i8_2(2) - i8_2(5);
+    i8_2(9) := i8_2(3) - i8_2(6);
+
+
+    -- insert indicatore 8.2
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,NETTO_MISSIONI2
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','8.2','Sostenibilità debiti finanziari',
+    	'Stanziamenti di competenza [1.7 "Interessi passivi" – "Interessi di mora" (U.1.07.06.02.000) – "Interessi per anticipazioni prestiti" (U.1.07.06.04.000)]+ Titolo 4 della spesa – (Entrate categoria 4.02.06 "Contributi agli investimenti direttamente destinati al rimborso dei prestiti da amministrazioni pubbliche + Trasferimenti in conto capitale per assunzione di debiti dell''amministrazione da parte di amministrazioni pubbliche  (E.4.03.01.00.000) + Trasferimenti in conto capitale da parte di amministrazioni pubbliche per cancellazione di debiti dell''amministrazione  (E.4.03.04.00.000))] / Stanziamenti competenza titoli 1, 2 e 3 delle entrate'
+    	,i8_2(1),i8_2(2),i8_2(3),i8_2(4),i8_2(5),i8_2(6),i8_2(7),i8_2(8),i8_2(9));
+    	commit;
+
+
+    -- ****8.3 anni 1,2,3 ****
+	 --**** NUMERATORE *****
+	 -- PD1
+	 --**** DENOMINATORE *****
+	 -- popolazione_res
+
+    if popolazione_res > 0
+    then
+	i8_3(1) := round(PD1/popolazione_res,2);
+    end if;
+
+
+	-- indice 8.3 anno1_2_3 MIS13
+
+    --**** NUMERATORE *****
+	select nvl(sum(nvl(m.importo_mov,0) * decode(m.dare_avere,'A',1,-1)),0) into PD1_13
+	from vw_nb_mastrini m
+	,vw_nb_articoli a
+	where to_char(m.data_registrazione,'yyyy') = p_anno-2
+	and m.CODICE_CONTO_BIL like 'PD1%'
+	and a.anno = to_char(m.data_registrazione,'yyyy')
+	and a.eu||a.codice = m.CAPITOLO
+	and a.LIV1 = '13';
+
+    if popolazione_res > 0
+    then
+	i8_3(4) := round(PD1_13/popolazione_res,2);
+    end if;
+
+
+    -- indice 8.3 anno1, anno2 e anno 3 DIFF
+   
+    i8_3(7) := i8_3(1) - i8_3(4);
+
+
+
+    -- insert indicatore 8.3
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','8.3','Indebitamento procapite (in valore assoluto)',
+    	'Debito di finanziamento al 31/12 (2) / popolazione residente(al 1° gennaio dell''esercizio di riferimento o, se non disponibile, al 1° gennaio dell''ultimo anno disponibile)',
+    	i8_3(1),null,null,i8_3(4),null,null,i8_3(7),null,null);
+    	commit;
+
+
+
+    -- ****** 9 e 9.1 ***********
+	-- ****9.1 anni 1 ****
+	 --**** NUMERATORE *****
+	begin
+    select nvl(valore,0) into E_TDRAP
+	from FIN_T_PREVISIONE_TDRAP
+	where ANNO = p_anno
+	and UTENTE = 'PREV'||ANNO
+	and riga = '330';
+    exception when no_data_found then E_TDRAP := 0;
+    end;
+
+	 --**** DENOMINATORE *****
+	begin
+    select nvl(valore,0) into A_TDRAP
+	from FIN_T_PREVISIONE_TDRAP
+	where ANNO = p_anno
+	and UTENTE = 'PREV'||ANNO
+	and riga = '140';
+    exception when no_data_found then A_TDRAP := 0;
+    end;
+
+    if A_TDRAP > 0
+    then
+	i9_1(1) := round(E_TDRAP/A_TDRAP*100,2);
+    end if;
+
+    -- insert indicatore 9 e 9.1
+    p_ord := p_ord + 1;
+
+   insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','9','Composizione avanzo di amministrazione presunto dell''esercizio precedente ');
+    	commit;
+
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','9.1','Incidenza quota libera di parte corrente nell''avanzo presunto',
+    	'Quota libera di parte corrente dell''avanzo presunto/Avanzo di amministrazione presunto',
+    	i9_1(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+
+    -- ****9.2 anni 1 ****
+	 --**** NUMERATORE *****
+	begin
+    select nvl(valore,0) into E_TDRAP
+	from FIN_T_PREVISIONE_TDRAP
+	where ANNO = p_anno
+	and UTENTE = 'PREV'||ANNO
+	and riga = '320';
+    exception when no_data_found then E_TDRAP := 0;
+    end;
+
+
+    if A_TDRAP > 0
+    then
+	i9_2(1) := round(E_TDRAP/A_TDRAP*100,2);
+    end if;
+    
+    -- insert indicatore 9.2
+    p_ord := p_ord + 1;
+				,MISSIONE13_3
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','9.2','Incidenza quota libera in c/capitale nell''avanzo presunto',
+    	'Quota libera in conto capitale dell''avanzo presunto/Avanzo di amministrazione presunto',
+    	i9_2(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+
+     -- ****9.3 anni 1 ****
+	 --**** NUMERATORE *****
+	begin
+    select nvl(valore,0) into E_TDRAP
+	from FIN_T_PREVISIONE_TDRAP
+	where ANNO = p_anno
+	and UTENTE = 'PREV'||ANNO
+	and riga = '230';
+    exception when no_data_found then E_TDRAP := 0;
+    end;
+
+	 --**** DENOMINATORE *****
+	-- A_TDRAP
+    if A_TDRAP > 0
+    then
+	i9_3(1) := round(E_TDRAP/A_TDRAP*100,2);
+    end if;
+
+    -- insert indicatore 9.3
+
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','9.3','Incidenza quota accantonata nell''avanzo presunto',
+    	'Quota accantonata dell''avanzo presunto/Avanzo di amministrazione presunto',
+    	i9_3(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+
+    -- ****9.4 anni 1 ****
+	 --**** NUMERATORE *****
+	begin
+    select nvl(valore,0) into E_TDRAP
+	from FIN_T_PREVISIONE_TDRAP
+	where ANNO = p_anno
+	and UTENTE = 'PREV'||ANNO
+	and riga = '300';
+    exception when no_data_found then E_TDRAP := 0;
+    end;
+
+
+	 --**** DENOMINATORE *****
+	-- A_TDRAP
+
+    if A_TDRAP > 0
+    then
+	i9_4(1) := round(E_TDRAP/A_TDRAP*100,2);
+    end if;
+
+    -- insert indicatore 9 e 9.1
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','9.4','Incidenza quota vincolata nell''avanzo presunto',
+    	'Quota vincolata dell''avanzo presunto/Avanzo di amministrazione presunto',
+    	i9_4(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+-- ****** 10 e 10.1 ***********
+	-- ****10.1 anni 1 ****
+
+	 --**** NUMERATORE *****
+    select nvl(sum(nvl(competenza_anno0,0)),0) into disavanzo
+    from fin_t_previsione p
+    ,fin_t_dati_generali d
+    and d.anno_finanziario = p.anno
+	where p.ANNO = p_anno
+	and p.UTENTE = p_utente
+	and p.eu = 'U'
+	and p.capitolo = p.eu||d.CAP_DISAVANZO_AMM2;
+
+	 --**** DENOMINATORE *****
+	begin
+    select nvl(valore,0) into E_TDRAP
+	from FIN_T_PREVISIONE_TDRAP
+	where ANNO = p_anno
+	and UTENTE = 'PREV'||ANNO
+	and riga = '330';
+    exception when no_data_found then E_TDRAP := 0;
+    end;
+
+	if i9_1(1) &lt; 0 and E_TDRAP > 0
+	then i10_1(1) := round(disavanzo/abs(E_TDRAP)*100,2);
+	end if;
+
+    -- insert indicatore 10 e 10.1
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','10','Disavanzo di amministrazione presunto dell''esercizio precedente');
+    	commit;
+
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','10.1','Quota disavanzo che si prevede di ripianare nell''esercizio ',
+    	'Disavanzo iscritto in spesa del bilancio di previsione / Totale disavanzo di amministrazione di cui alla lettera E dell''allegato riguardante il risultato di amministrazione presunto',
+    	i10_1(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+ 	-- ****10.2 anni 1 ****
+	--**** NUMERATORE *****
+	-- E_TDRAP
+
+	 --**** DENOMINATORE *****
+    begin
+	 select nvl(importo,0) into PAT
+	 from nb_piacee_importi
+	 where anno = p_anno - 2
+	 and utente = id_utente
+	 and codice_piacee = 'PAT';
+    exception when no_data_found then PAT := 0;
+    end ;
+
+	if i9_1(1) &lt; 0 and PAT > 0
+	then i10_2(1) := round(abs(E_TDRAP)/PAT*100,2);
+	end if;
+
+    -- insert indicatore 10.2
+
+	p_ord := p_ord + 1;
+
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','10.2','Sostenibilità patrimoniale del disavanzo presunto',
+    	'Totale disavanzo di amministrazione di cui alla lettera E dell''allegato riguardante il risultato di amministrazione presunto (3) / Patrimonio netto',
+    	i10_2(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+
+	-- ****10.3 anni 1 ****
+	--**** NUMERATORE *****
+	-- disavanzo
+
+	 --**** DENOMINATORE *****
+	-- compe_E_1_2_3
+
+    if compe_E_1_2_3 > 0
+    then
+	i10_3(1) := round(disavanzo/compe_E_1_2_3*100,2);
+    end if;
+
+    -- insert indicatore 10.3
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','10.3','Sostenibilità disavanzo a carico dell''esercizio',
+    	'Disavanzo iscritto in spesa del bilancio di previsione / Competenza dei titoli 1, 2 e 3 delle entrate',
+    	i10_3(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+-- insert indicatore 10.4 per il momento lo inserisco qui perchè nullo
+	p_ord := p_ord + 1;
+
+	insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','10.4','Quota disavanzo presunto derivante da debito autorizzato e non contratto ',
+    	'Disavanzo derivante da debito autorizzato e non contratto/Disavanzo di amministrazione di cui alla lettera E dell''allegato al bilancio di previsione riguardante il risultato di amministrazione presunto',
+    	i10_4(1),null,null,null,null,null,null,null,null);
+    	commit;
+
+
+-- ****** 11 e 11.1 ***********
+	-- ****11.1 anni 1,2,3 ****
+
+	 --**** NUMERATORE *****
+	select nvl(sum(nvl(a0,0)),0),nvl(sum(nvl(a1,0)),0),nvl(sum(nvl(a2,0)),0) into FPV_ENTRATA,FPV_ENTRATAa1,FPV_ENTRATAa2
+	from fin_t_previsione_fpv
+	where ANNO = p_anno
+	and utente = 'PREV'||anno;
+
+	-- #### appena ci sarà la tabella del calcolo sarà ricavata di la
+	select nvl(sum(nvl(c0,0)),0),nvl(sum(nvl(c1,0)),0),nvl(sum(nvl(c2,0)),0)  into FPV_E_NON_UTILIZZATO,FPV_E_NON_UTILIZZATOa1,FPV_E_NON_UTILIZZATOa2
+	from fin_t_previsione_fpv
+	where anno = p_anno
+	--FPV_ENTRATA
+	and utente = 'PREV'||anno;
+
+	 --**** DENOMINATORE *****
+
+    if FPV_ENTRATA > 0  
+    then
+	i11_1(1) := round((FPV_ENTRATA - FPV_E_NON_UTILIZZATO)/FPV_ENTRATA*100,2);
+    end if;
+    
+    if FPV_ENTRATAa1 > 0
+    then
+	i11_1(2) := round((FPV_ENTRATAa1 - FPV_E_NON_UTILIZZATOa1)/FPV_ENTRATAa1*100,2);
+    end if;
+    
+    if FPV_ENTRATAa2 > 0
+    then
+	i11_1(3) := round((FPV_ENTRATAa2 - FPV_E_NON_UTILIZZATOa2)/FPV_ENTRATAa2*100,2);
+    end if;
+
+	-- **+ 11.1 miss 13 anni 1,2,3 ****
+	-- ******** numeratore ****************
+	select nvl(sum(nvl(a0,0)),0),nvl(sum(nvl(a1,0)),0),nvl(sum(nvl(a2,0)),0) into fpv_spesa,fpv_spesa_a1,fpv_spesa_a2
+	from fin_t_previsione_fpv
+	where ANNO = p_anno
+	and utente = 'PREV'||anno
+	and missione = '13';
+
+	select nvl(sum(nvl(c0,0)),0),nvl(sum(nvl(c1,0)),0),nvl(sum(nvl(c2,0)),0)  into FPV_E_NON_UTILIZZATO,FPV_E_NON_UTILIZZATOa1,FPV_E_NON_UTILIZZATOa2
+	from fin_t_previsione_fpv
+	where anno = p_anno
+	and utente = 'PREV'||anno
+	and missione = '13';
+
+	-- ***** denominatore *****
+	--- FPV_ENTRATA
+
+	 if FPV_ENTRATA > 0  
+    then
+    i11_1(4) := round((fpv_spesa - FPV_E_NON_UTILIZZATO)/FPV_ENTRATA*100,2);
+	end if;
+    
+    if FPV_ENTRATAa1 > 0
+    then
+    i11_1(5) := round((fpv_spesa_a1 - FPV_E_NON_UTILIZZATOa1)/FPV_ENTRATAa1*100,2);
+    end if;
+    
+    if FPV_ENTRATAa2 > 0
+    then
+	i11_1(6) := round((fpv_spesa_a2 - FPV_E_NON_UTILIZZATOa2)/FPV_ENTRATAa2*100,2);
+    end if;
+
+	i11_1(7) := i11_1(1) - i11_1(4); 
+	i11_1(8) := i11_1(2) - i11_1(5); 
+	i11_1(9) := i11_1(3) - i11_1(6); 
+
+    -- insert indicatore 11 e 11.1
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','11','Fondo Pluriennale Vincolato');
+    	commit;
+
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','11.1','Utilizzo dell''FPV',
+    	'(Fondo pluriennale vincolato corrente e capitale iscritto in entrata del bilancio - Quota del fondo pluriennale vincolato non destinata ad essere utilizzata nel corso dell''esercizio e rinviata agli esercizi successivi) / Fondo pluriennale vincolato corrente e capitale iscritto in entrata nel bilancio. (Per il FPV riferirsi ai valori riportati nell''allegato del bilancio di previsione concernente il FPV, totale delle colonne a) e c)',
+    	i11_1(1),i11_1(2),i11_1(3),i11_1(4),i11_1(5),i11_1(6),i11_1(7),i11_1(8),i11_1(9));
+    	commit;
+
+
+-- ****** 12 e 12.1 ***********
+	-- ****12.1 anni 1,2,3 ****
+
+	 --**** NUMERATORE *****
+	select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_9,compe_E_9a1,compe_E_9a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and utente = p_utente
+	and eu = 'E'
+	and substr(ETITOLO_UMISSIONE,1,1) = '9'
+	and substr(PIANO_CONTI_FINA,1,9) &lt;> 'E.9.01.04'
+	and PIANO_CONTI_FINA not in ('E.9.01.99.04.000','E.9.01.99.05.000','E.9.01.99.02.000');
+	--compe_E_1_2_3
+
+
+	 --**** DENOMINATORE *****
+
+    if compe_E_1_2_3 > 0
+    then
+	i12_1(1) := round(compe_E_9/compe_E_1_2_3*100,2);
+	end if;
+    
+    if compe_E_1_2_3a1 > 0
+    then
+    i12_1(2) := round(compe_E_9a1/compe_E_1_2_3a1*100,2);
+    end if;
+    
+    if compe_E_1_2_3a2 > 0
+    then
+	i12_1(3) := round(compe_E_9a2/compe_E_1_2_3a2*100,2);
+    end if;
+    
+    -- insert indicatore 11 e 11.1
+    p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','12','Partite di giro e conto terzi');
+    	commit;
+
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','12.1','Incidenza partite di giro e conto terzi in entrata',
+    	'Totale stanziamenti di competenza per Entrate per conto terzi e partite di giro / Totale stanziamenti primi tre titoli delle entrate (al netto dell''anticipazione sanitaria erogata dalla Tesoreria dello Stato  e dei movimenti riguardanti la GSA e i conti di tesoreria sanitari e non sanitari)',
+    	i12_1(1),i12_1(2),i12_1(3),null,null,null,null,null,null);
+    	commit;
+
+
+    -- ****12.2 anni 1,2,3 ****
+
+	 --**** NUMERATORE *****
+	select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_9,compe_E_9a1,compe_E_9a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and utente = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '7'
+	and substr(PIANO_CONTI_FINA,1,9) &lt;> 'U.7.01.04'
+	and PIANO_CONTI_FINA not in ('U.7.01.99.04.000','U.7.01.99.05.000','U.7.01.99.02.000');
+
+
+	 --**** DENOMINATORE *****
+	select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into corr_U_1_2_3,corr_U_1_2_3a1,corr_U_1_2_3a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and utente = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '1';
+
+
+    if corr_U_1_2_3 > 0
+    then
+	i12_2(1) := round(compe_E_9/corr_U_1_2_3*100,2);
+	end if;
+    
+    if corr_U_1_2_3a1 > 0
+    then
+    i12_2(2) := round(compe_E_9a1/corr_U_1_2_3a1*100,2);
+	end if;
+    
+    if corr_U_1_2_3a2 > 0
+    then
+    i12_2(3) := round(compe_E_9a2/corr_U_1_2_3a2*100,2);
+    end if;
+
+	-- ****12.2 MIS13 anni 1,2,3 ****
+
+	 --**** NUMERATORE *****
+	select nvl(sum(nvl(COMPETENZA_ANNO0,0)),0),nvl(sum(nvl(COMPETENZA_ANNO1,0)),0),nvl(sum(nvl(COMPETENZA_ANNO2,0)),0) into compe_E_9,compe_E_9a1,compe_E_9a2
+	from fin_t_previsione
+	where ANNO = p_anno
+	and utente = p_utente
+	and eu = 'U'
+	and TITOLO_USCITE = '7'
+	and substr(PIANO_CONTI_FINA,1,9) &lt;> 'U.7.01.04'
+	and PIANO_CONTI_FINA not in ('U.7.01.99.04.000','U.7.01.99.05.000','U.7.01.99.02.000')
+	and ETITOLO_UMISSIONE ='13';
+
+
+
+    if corr_U_1_2_3 > 0 -- lino 26/04/2018
+       then i12_2(4) := round(compe_E_9/corr_U_1_2_3*100,2);
+	end if;
+
+    if corr_U_1_2_3a1 > 0  -- lino 26/04/2018
+       then i12_2(5) := round(compe_E_9a1/corr_U_1_2_3a1*100,2);
+	end if;
+    
+    if corr_U_1_2_3a2 > 0  -- lino 26/04/2018
+       then i12_2(6) := round(compe_E_9a2/corr_U_1_2_3a2*100,2);
+    end if;
+
+
+
+ 	-- indice 12.2 anno1, anno2 e anno 3 DIFF
+    i12_2(7) := i12_2(1) - i12_2(4);
+    i12_2(8) := i12_2(2) - i12_2(5);
+    i12_2(9) := i12_2(3) - i12_2(6);
+
+
+    -- insert indicatore 12.2
+
+	p_ord := p_ord + 1;
+
+    insert into fin_t_indicatori_bilancio (ANNO,UTENTE,ORD,TIPO_BILANCIO,TIPO_INDICATORE,CODICE_INDICATORE1,DESC_COD1,DEFINIZIONE,TOT_MISSIONI1,TOT_MISSIONI2,TOT_MISSIONI3,MISSIONE13_1
+				,MISSIONE13_2
+				,MISSIONE13_3
+				,NETTO_MISSIONI1
+				,NETTO_MISSIONI2
+				,NETTO_MISSIONI3)
+    	values
+    	(p_anno,p_utente,p_ord,'P','S','12.2','Incidenza partite di giro e conto terzi in uscita',
+    	'Totale stanziamenti di competenza per Uscite per conto terzi e partite di giro / Totale stanziamenti di competenza del titolo I della spesa (al netto del rimborso dell''anticipazione sanitaria erogata dalla Tesoreria dello Stato e dei movimenti riguardanti la GSA e i conti di tesoreria sanitari e non sanitari)',
+    	i12_2(1),i12_2(2),i12_2(3),i12_2(4),i12_2(5),i12_2(6),i12_2(7),i12_2(8),i12_2(9));
+    	commit;
+
+ -- ********** UPDATE per inserimento Target *************
+
+ 	update fin_t_indicatori_bilancio b set (b.TAG_SINT_TOT,b.TAG_SINT_MIS13,b.TAG_SINT_NO_MIS13,b.UNITREF) = 
+ 		(select a.TAG_SINT_TOT,a.TAG_SINT_MIS13,a.TAG_SINT_NO_MIS13,a.UNITREF
+ 		from fin_t_indicatori_bilancio a
+ 		where a.anno = 2000
+ 		and a.utente = 'PREV2000'
+ 		and a.CODICE_INDICATORE1 = b.CODICE_INDICATORE1)
+    and b.TIPO_INDICATORE = 'S';
+ 	where b.anno = p_anno
+ 	and b.utente = p_utente
+ 	and b.TIPO_BILANCIO = 'P'
+
+    commit;
+
+
+
+end;</pre>	</td></tr>
+</table></div>

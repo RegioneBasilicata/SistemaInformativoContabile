@@ -1,0 +1,148 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>DOCALL_ALFRESCO_NOTIFICHE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="DOCALL_ALFRESCO_NOTIFICHE.html">Details</a></div></div>
+<div class="tab"><div><a href="DOCALL_ALFRESCO_NOTIFICHE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="DOCALL_ALFRESCO_NOTIFICHE_References.html">References</a></div></div>
+<div class="tab"><div><a href="DOCALL_ALFRESCO_NOTIFICHE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="DOCALL_ALFRESCO_NOTIFICHE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure DOCALL_ALFRESCO_NOTIFICHE (p_idtestatafattura number) is
+    wChiave number;
+    
+    wNewProgr number;
+    wNewTabCodice number;
+    
+    wNumeroProtocollo varchar2(20);
+    wDataProtocollo varchar2(400);
+    wFatturaNumero varchar2(20);
+    wFatturaData varchar2(400);
+    wOggetto varchar2(4000);
+    wDenominazione varchar2(4000);
+    wPartitaIvaCodFisc varchar2(400);
+    wCorpoMail clob;
+    wMailAssistenza varchar2(4000);
+    wMailAvviso varchar2(4000);
+    wUfficio varchar2(400);
+    wPec varchar2(4000);
+    wDestinatari varchar2(4000);
+    l_body clob;
+    email_id number;
+    
+    wIdDatiInvioFattura number;
+    Sec_Id number;
+
+begin
+
+    Select Apex_Util.Find_Security_Group_Id (P_Workspace => 'SIC')
+    Into   Sec_Id
+    From   Dual;  
+    
+    Apex_Util.Set_Security_Group_Id(P_Security_Group_Id => Sec_Id);
+
+    update gat2_ws.fe_testata_fattura set motivazione = null, ricevuto = 'S' where idtestatafattura = p_idtestatafattura;
+    select iddatiinviofattura into wIdDatiInvioFattura from gat2_ws.fe_testata_fattura where idtestatafattura = p_idtestatafattura;
+
+    docall_alfresco(wIdDatiInvioFattura);
+
+    select chiave, bgg_tab_id, bgg_progr
+    into wChiave, wNewTabCodice, wNewProgr
+    from tb_doc_iva
+    where idtestatafattura = p_idtestatafattura;
+
+   -- Invio mail a nuovo ufficio
+   select
+      tdi.num_prot_entrata
+      ,to_char(tdi.data_prot_entrata,'dd/mm/yyyy') 
+      ,tdi.num_doc
+      ,to_char(tdi.data_doc,'dd/mm/yyyy') 
+      ,tdi.oggetto_fornitura
+      ,nvl(fta.denominazione, fta.cognome||' '||fta.nome)
+      ,nvl(fta.partita_iva, fta.codice_fiscale)
+   into wNumeroProtocollo
+      ,wDataProtocollo
+      ,wFatturaNumero
+      ,wFatturaData
+      ,wOggetto
+      ,wDenominazione
+      ,wPartitaIvaCodFisc 
+   from tb_doc_iva tdi
+      ,fin_t_anagrafica fta 
+   where tdi.finta_id = fta.id
+      and chiave = wChiave;
+
+   wCorpoMail := 'Numero Protocollo: '||wNumeroProtocollo||' - Data Protocollo: '||wDataProtocollo||'&lt;br>
+      Numero Fattura: '||wFatturaNumero||' - Data Fattura: '||wFatturaData||'&lt;br>
+      Oggetto: '||wOggetto||'&lt;br>
+      Cedente Prestatore: '||wDenominazione||'&lt;br>
+      Partita IVA/Codice Fiscale: '||wPartitaIvaCodFisc;
+
+   select MAIL_ASSISTENZA
+   into wMailAssistenza
+   from APPLICATION_PARAMETER;
+
+   select MAIL_AVVISO, UFFICIO
+   into wMailAvviso, wUfficio
+   from BI_GENERALE_GEST
+   where tab_codice = wNewTabCodice
+      and progr = wNewProgr;
+
+   select pec
+   into wPec
+   from FIN_T_STRUTTURE
+   where anno = to_number(to_char(sysdate, 'yyyy'))
+      and codice = wUfficio
+      and attivo = 'S'
+      and data_assestamento = to_date('01011900', 'ddmmyyyy');
+
+
+    if wMailAvviso is not null and wPEC is not null then
+      wDestinatari := wMailAvviso||','||wPEC;
+    elsif wMailAvviso is not null then
+      wDestinatari := wMailAvviso;
+    elsif wPec is not null then
+      wDestinatari := wPEC;
+    else
+      wDestinatari := wMailAssistenza;
+      WCorpoMail := WCorpoMail || '&lt;br/>&lt;br/>Attenzione: Mail di riferimento mancanti.';
+    end if;
+    
+
+    if wDestinatari is not null then --and wNumeroProtocollo != '154092' then
+    
+      l_body := '&lt;html>
+                    &lt;head>
+                    &lt;/head>
+                    &lt;body>
+                      &lt;a href=''http://intranet.regione.basilicata.it/descrizione.asp?sezione=00_Servizi=00_Modulo_contratti_-_Convenzioni_-_Altro'' target=''_blank''>Vai al portale dei servizi Regione Basilicata&lt;/a>&lt;br/>&lt;br/>              
+                      E'' stata ricevuta una nuova fattura:&lt;br/>&lt;br/>
+                      '||WCorpoMail||'
+                    &lt;/body>
+                  &lt;/html>';
+
+      -- Mandare a wDestinatari la mail
+      email_id := apex_mail.send(
+      p_to       => wDestinatari,
+      p_from     => 'noreply@regione.basilicata.it',
+      p_body     => l_body,
+      p_body_html => l_body,
+      p_subj     => 'Nuove Fatture Ricevute');
+      
+      apex_mail.push_queue;           
+    
+    end if;
+
+end;</pre>	</td></tr>
+</table></div>

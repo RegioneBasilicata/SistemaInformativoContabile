@@ -1,0 +1,103 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_SALDO_FATTURE_OLD</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_SALDO_FATTURE_OLD.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_SALDO_FATTURE_OLD_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_SALDO_FATTURE_OLD_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_SALDO_FATTURE_OLD_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_SALDO_FATTURE_OLD_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2019-11-29</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-11-29</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_SALDO_FATTURE_OLD</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>588</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select d.id_fattura
+,d.tipo_fattura
+,d.prot_reg_iva
+,d.prot_fattura
+,d.data_protocollo
+,d.data_registrazione
+,d.data_fattura
+,d.numero_fattura
+,d.id_fornitore 
+,d.sede_fornitore
+,d.tipo_contratto
+,d.progr_contratto
+,decode(m.id_fattura,null,d.totale_fattura,(nvl(m.IMPORTO_FATTURA,0)-nvl(abs(m.IMPORTO_LIQUIDATO),0))) importo_da_liquidare
+,case when d.iva_sp = 'N' 
+ then 0
+ else decode(m.id_fattura,null,d.totale_iva,(nvl(d.totale_iva,0)-nvl(m.IVA_SP,0)))
+end iva_sp_da_liquidare
+,d.totale_fattura
+from vw_complessivo_fatture d
+,vw_mandati_fatture m
+where 
+d.id_fattura = m.ID_FATTURA(+)</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

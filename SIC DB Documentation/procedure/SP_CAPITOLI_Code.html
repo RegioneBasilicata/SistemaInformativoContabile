@@ -1,0 +1,65 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP_CAPITOLI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP_CAPITOLI.html">Details</a></div></div>
+<div class="tab"><div><a href="SP_CAPITOLI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP_CAPITOLI_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP_CAPITOLI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP_CAPITOLI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure SP_capitoli(p_anno in number, p_data in date) authid definer as
+p_accertato number := 0;
+p_impegnato number := 0;
+
+cursor entrate is
+select distinct capitolo_e capitolo
+from sa_capitoli
+where anno = p_anno
+and capitolo_e is not null;
+
+cursor uscite is
+select distinct capitolo_u capitolo
+from sa_capitoli
+where anno = p_anno
+and capitolo_u is not null;
+
+begin
+  for e in entrate loop
+    select nvl(sum(nvl(document_amount,0)),0) into p_accertato
+    from fin_t_documenti
+    where doc_type = 'ACC'
+    and segment8 = p_anno
+    and segment2 = e.capitolo
+    and date_created &lt;= nvl(p_data,to_date('3112'||p_anno,'ddmmyyyy'))
+    and nvl(deletion_status_flag,'N') = 'N';
+    
+    update sa_capitoli set accertato = nvl(p_accertato,0) where anno = p_anno and capitolo_e = e.capitolo;
+  end loop;
+  commit;
+  
+  for u in uscite loop
+    select nvl(sum(nvl(document_amount,0)),0) into p_impegnato
+    from fin_t_documenti
+    where doc_type like 'IMP%'
+    and segment8 = p_anno
+    and segment2 = u.capitolo
+    and date_created &lt;= p_data
+    and nvl(deletion_status_flag,'N') = 'N';
+    
+    update sa_capitoli set impegnato = nvl(p_impegnato,0) where anno = p_anno and capitolo_u = u.capitolo;
+  end loop;
+  commit;
+end;</pre>	</td></tr>
+</table></div>

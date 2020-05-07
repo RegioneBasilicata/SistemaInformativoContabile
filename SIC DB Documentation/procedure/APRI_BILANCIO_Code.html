@@ -1,0 +1,1335 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>APRI_BILANCIO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="APRI_BILANCIO.html">Details</a></div></div>
+<div class="tab"><div><a href="APRI_BILANCIO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="APRI_BILANCIO_References.html">References</a></div></div>
+<div class="tab"><div><a href="APRI_BILANCIO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="APRI_BILANCIO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE apri_bilancio (wanno in NUMBER, wusername in VARCHAR2, wmessaggio out VARCHAR2) IS
+
+ultimo_anno_aperto number;
+
+begin
+wmessaggio := 'Avvio generazione Nuovo anno contabile&lt;br>';
+
+
+select NVl(max (anno_finanziario),0) into ultimo_anno_aperto
+from fin_t_dati_generali;
+
+if wanno &lt;= ultimo_anno_aperto
+   then wmessaggio := 'Anno Contabile gia'' Presente&lt;br>';
+  	    return;
+end if;
+
+-- Tabelle COFOG
+delete nb_cofog_gruppo where anno=wanno;
+commit;
+delete nb_cofog_divisione where anno=wanno;
+commit;
+
+insert into NB_COFOG_DIVISIONE 
+(anno
+,codice
+,descrizione) 
+select 
+wanno,
+codice,
+descrizione
+from NB_COFOG_DIVISIONE
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione COFOG DIVISIONE&lt;br>';
+commit;
+
+insert into NB_COFOG_GRUPPO
+(ANNO
+,DIVISIONE
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+divisione,
+codice,
+descrizione
+from NB_COFOG_gruppo
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione COFOG gruppo&lt;br>';
+commit;
+
+
+-- Tabelle LIVELLI
+delete nb_livelli where  anno=wanno;
+commit;
+delete nb_livello3 where anno=wanno;
+commit;
+delete nb_livello2 where anno=wanno;
+commit;
+delete nb_livello1 where anno=wanno;
+commit;
+
+insert into NB_LIVELLI
+(ANNO
+,ID
+,EU
+,DESCRIZIONE)
+select 
+wanno,
+id,
+eu,
+descrizione
+from nb_livelli
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Livelli&lt;br>';
+commit;
+
+
+insert into NB_LIVELLO1
+(ID
+,ANNO
+,EU
+,CODICE
+,DESCRIZIONE)
+select 
+id + 100000,
+wanno,
+eu,
+codice,
+descrizione
+from nb_livello1
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Livello 1&lt;br>';
+commit;
+
+insert into NB_LIVELLO2
+(ID
+,ANNO
+,EU
+,CODICE
+,DESCRIZIONE
+,ID_LIVELLO1)
+select 
+id + 100000,
+wanno,
+eu,
+codice,
+descrizione,
+id_livello1 + 100000
+from nb_livello2
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Livello 2&lt;br>';
+commit;
+
+insert into NB_LIVELLO3
+(ID
+,ANNO
+,EU
+,CODICE
+,DESCRIZIONE
+,ID_LIVELLO2)
+select 
+id + 100000,
+wanno,
+eu,
+codice,
+descrizione,
+id_livello2 + 100000
+from nb_livello3
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Livello 3&lt;br>';
+commit;
+
+-- Tabella Macroaggregati
+delete nb_macroaggregati where anno=wanno;
+commit;
+
+insert into NB_MACROAGGREGATI
+(ANNO
+,CODICE
+,DESCRIZIONE
+,TIPO)
+select 
+wanno,
+codice,
+descrizione,
+tipo
+from nb_macroaggregati
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Macroaggregati&lt;br>';
+commit;
+
+
+--Tabelle PCE 
+delete nb_pce_06 where anno=wanno;
+commit;
+delete nb_pce_05 where anno=wanno;
+commit;
+delete nb_pce_04 where anno=wanno;
+commit;
+delete nb_pce_03 where anno=wanno;
+commit;
+delete nb_pce_02 where anno=wanno;
+commit;
+delete nb_pce_01 where anno=wanno;
+commit;
+
+
+insert into nb_pce_01
+(ANNO
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+codice,
+descrizione
+from nb_pce_01
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pce 01&lt;br>';
+commit;
+
+insert into nb_pce_02
+(ANNO
+,LIVELLO01
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+codice,
+descrizione
+from nb_pce_02
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pce 02&lt;br>';
+commit;
+
+insert into nb_pce_03
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+codice,
+descrizione
+from nb_pce_03
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pce 03&lt;br>';
+commit;
+
+insert into nb_pce_04
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+codice,
+descrizione
+from nb_pce_04
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pce 04&lt;br>';
+commit;
+
+insert into nb_pce_05
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,LIVELLO04
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+livello04,
+codice,
+descrizione
+from nb_pce_05
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pce 05&lt;br>';
+commit;
+
+insert into nb_pce_06
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,LIVELLO04
+,LIVELLO05
+,CODICE
+,DESCRIZIONE
+,CONTO_BILCEE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+livello04,
+livello05,
+codice,
+descrizione,
+CONTO_BILCEE
+from nb_pce_06
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pce 06&lt;br>';
+commit;
+
+--Tabelle PCF
+delete nb_pcf_05 where anno=wanno;
+commit;
+delete nb_pcf_04 where anno=wanno;
+commit;
+delete nb_pcf_03 where anno=wanno;
+commit;
+delete nb_pcf_02 where anno=wanno;
+commit;
+delete nb_pcf_01 where anno=wanno;
+commit;
+
+insert into nb_pcf_01
+(ANNO
+,EU
+,CODICE_LIVELLO
+,CODICE
+,DESCRIZIONE
+,CODICE_FINALE)
+select 
+wanno,
+eu,
+codice_livello,
+codice,
+descrizione,
+codice_finale
+from nb_pcf_01
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pcf 01&lt;br>';
+commit;
+
+insert into nb_pcf_02
+(ANNO
+,EU
+,CODICE_LIVELLO
+,LIVELLO01
+,CODICE
+,DESCRIZIONE
+,CODICE_FINALE)
+select 
+wanno,
+eu,
+codice_livello,
+livello01,
+codice,
+descrizione,
+codice_finale
+from nb_pcf_02
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pcf 02&lt;br>';
+commit;
+
+insert into nb_pcf_03
+(ANNO
+,EU
+,CODICE_LIVELLO
+,LIVELLO01
+,LIVELLO02
+,CODICE
+,DESCRIZIONE
+,CODICE_FINALE)
+select 
+wanno,
+eu,
+codice_livello,
+livello01,
+livello02,
+codice,
+descrizione,
+codice_finale
+from nb_pcf_03
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pcf 03&lt;br>';
+commit;
+
+insert into nb_pcf_04
+(ANNO
+,EU
+,CODICE_LIVELLO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,CODICE
+,DESCRIZIONE
+,CODICE_FINALE)
+select 
+wanno,
+eu,
+codice_livello,
+livello01,
+livello02,
+livello03,
+codice,
+descrizione,
+codice_finale
+from nb_pcf_04
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pcf 04&lt;br>';
+commit;
+
+insert into nb_pcf_05
+(ANNO
+,EU
+,CODICE_LIVELLO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,LIVELLO04
+,CODICE
+,DESCRIZIONE
+,CODICE_FINALE
+,CE_SP
+,PCE)
+select 
+wanno,
+eu,
+codice_livello,
+livello01,
+livello02,
+livello03,
+livello04,
+codice,
+descrizione,
+codice_finale,
+ce_sp,
+pce
+from nb_pcf_05
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione pcf 05&lt;br>';
+commit;
+
+--Tabelle PSP
+delete nb_psp_07 where anno=wanno;
+commit;
+delete nb_psp_06 where anno=wanno;
+commit;
+delete nb_psp_05 where anno=wanno;
+commit;
+delete nb_psp_04 where anno=wanno;
+commit;
+delete nb_psp_03 where anno=wanno;
+commit;
+delete nb_psp_02 where anno=wanno;
+commit;
+delete nb_psp_01 where anno=wanno;
+commit;
+
+
+insert into nb_psp_01
+(ANNO
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+codice,
+descrizione
+from nb_psp_01
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 01&lt;br>';
+commit;
+
+insert into nb_psp_02
+(ANNO
+,LIVELLO01
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+codice,
+descrizione
+from nb_psp_02
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 02&lt;br>';
+commit;
+
+insert into nb_psp_03
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+codice,
+descrizione
+from nb_psp_03
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 03&lt;br>';
+commit;
+
+insert into nb_psp_04
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+codice,
+descrizione
+from nb_psp_04
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 04&lt;br>';
+commit;
+
+insert into nb_psp_05
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,LIVELLO04
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+livello04,
+codice,
+descrizione
+from nb_psp_05
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 05&lt;br>';
+commit;
+
+insert into nb_psp_06
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,LIVELLO04
+,LIVELLO05
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+livello04,
+livello05,
+codice,
+descrizione
+from nb_psp_06
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 06&lt;br>';
+commit;
+
+insert into nb_psp_07
+(ANNO
+,LIVELLO01
+,LIVELLO02
+,LIVELLO03
+,LIVELLO04
+,LIVELLO05
+,LIVELLO06
+,CODICE
+,DESCRIZIONE)
+select 
+wanno,
+livello01,
+livello02,
+livello03,
+livello04,
+livello05,
+livello06,
+codice,
+descrizione
+from nb_psp_07
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione psp 07&lt;br>';
+commit;
+
+-- titoli uscite
+delete nb_titoli_uscite where anno=wanno;
+commit;
+
+insert into nb_titoli_uscite
+(ANNO
+,ID
+,DESCRIZIONE)
+select 
+wanno,
+id,
+descrizione
+from nb_titoli_uscite
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Titoli Uscite&lt;br>';
+commit;
+
+-- matrice transizione
+delete nb_matrice_transizione where anno=wanno;
+commit;
+
+insert into nb_matrice_transizione
+(ANNO
+,E_U
+,PCF
+,G_L
+,PROGR
+,D_A
+,CE
+,SP)
+select 
+wanno
+,E_U
+,PCF
+,G_L
+,PROGR
+,D_A
+,CE
+,SP
+from nb_matrice_transizione
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Matrice Transizione&lt;br>';
+commit;
+
+
+-- Importi Manuale Report
+delete fnd_reports_importi_man where VALORE_PARAMETRO_ANNO=wanno;
+commit;
+insert into fnd_reports_importi_man
+(NOME_CAMPO_REPORT
+,DESCRIZIONE_CAMPO_REPORT
+,IMPORTO
+,VALORE_PARAMETRO_ANNO
+,ID_REPORT
+,UTENTE_CREAZIONE
+,DATA_CREAZIONE
+,UTENTE_AGGIORNAMENTO
+,DATA_AGGIORNAMENTO)
+select 
+NOME_CAMPO_REPORT
+,DESCRIZIONE_CAMPO_REPORT
+,IMPORTO
+,wanno
+,ID_REPORT
+,UTENTE_CREAZIONE
+,DATA_CREAZIONE
+,UTENTE_AGGIORNAMENTO
+,DATA_AGGIORNAMENTO
+from fnd_reports_importi_man
+where VALORE_PARAMETRO_ANNO = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Importi Manuali Report&lt;br>';
+commit;
+
+
+-- tabelle base
+
+-- delete fin_t_bilancio where anno=wanno;
+--commit;
+-- delete fin_t_articoli where anno=wanno;
+--commit;
+delete fin_t_capitoli where anno=wanno;
+commit;
+delete fin_t_categorie where anno=wanno;
+commit;
+delete fin_t_fo1 where anno=wanno;
+commit;
+delete fin_t_titoli where anno=wanno;
+commit;
+
+
+
+--Titoli
+
+insert into fin_t_titoli 
+(ANNO
+,EU
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM)
+select 
+wanno
+,eu
+,codice
+,descrizione
+,codice_num
+from fin_t_titoli where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '     Generazione Old Titoli Completata    &lt;br>';
+commit;
+
+--Macro Funzioni Obiettivo
+insert into fin_t_fo1 
+(ANNO
+,EU
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM)
+select 
+wanno
+,eu
+,codice
+,descrizione
+,codice_num
+from fin_t_fo1 where anno = wanno - 1;
+wmessaggio := wmessaggio ||  ' Generazione Macro Funzioni Completata &lt;br>';
+commit;
+
+
+-- Categorie Funzioni Obiettivo
+insert into fin_t_categorie
+(ANNO
+,EU
+,TITOLO
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM)
+select 
+wanno
+,eu
+,titolo
+,codice
+,descrizione
+,codice_num
+from fin_t_categorie where anno = wanno - 1;
+wmessaggio := wmessaggio ||  ' Generazione Funzioni Obiettivo/Categorie Completata &lt;br>';
+commit;
+
+-- Unità Previsionali di Base
+insert into fin_t_capitoli
+(ANNO
+,EU
+,TITOLO
+,CATEGORIA
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM
+,FLAG_ASSESTAMENTO)
+select 
+wanno
+,eu
+,titolo
+,categoria
+,codice
+,descrizione
+,codice_num
+,flag_assestamento
+from fin_t_capitoli where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Unità Previsionali di Base Completata  &lt;br>';
+commit;
+
+-- Tabelle Legge Finanziaria
+delete fin_t_tabelle_legge_finanz where anno=wanno;
+commit;
+
+insert into fin_t_tabelle_legge_finanz 
+(ANNO
+,CODICE
+,DESCRIZIONE
+,PROGRAMMA_STAMPA
+,ANNO_TERMINALE
+,DESCRIZIONE_ASSESTAMENTO)
+,DESCRIZIONE
+select
+WANNO
+,CODICE
+,PROGRAMMA_STAMPA
+,ANNO_TERMINALE
+,DESCRIZIONE_ASSESTAMENTO
+from fin_t_tabelle_legge_finanz 
+where anno = wanno -1;
+wmessaggio := wmessaggio ||  '  Generazione Tabelle Legge Finaziaria Completata    &lt;br>';
+
+
+-- Tabelle Settori
+delete fin_t_settori where anno=wanno;
+commit;
+
+insert into fin_t_settori
+(ANNO
+,SETTORE_O_CLASS_FUNZ_II_GRADO
+,DESCRIZIONE)
+select 
+WANNO
+,SETTORE_O_CLASS_FUNZ_II_GRADO
+,DESCRIZIONE
+from fin_t_settori
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Tabella Settori    &lt;br>';
+commit;
+
+-- Tabelle Modulo Fiscale
+delete fin_raggr_capitoli_dettaglio where anno=wanno;
+commit;
+delete fin_raggr_capitoli_testata where anno=wanno;
+commit;
+
+insert into fin_raggr_capitoli_testata
+(CODICE
+,DESCRIZIONE
+,TIPO_REPORT
+,ANNO)
+select 
+CODICE
+,DESCRIZIONE
+,TIPO_REPORT
+,WANNO
+from fin_raggr_capitoli_testata
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Mod.Fiscale Testata    &lt;br>';
+commit;
+
+insert into fin_raggr_capitoli_dettaglio
+(CODICE_RAGGRUPPAMENTO
+,CODICE_CAPITOLO
+,ANNO
+,TIPOLOGIA_REDDITO
+,STAMPA_CERTIFICAZIONI)
+select 
+ CODICE_RAGGRUPPAMENTO
+,CODICE_CAPITOLO
+,WANNO
+,TIPOLOGIA_REDDITO
+,STAMPA_CERTIFICAZIONI
+from fin_raggr_capitoli_dettaglio
+where anno = wanno - 1;
+wmessaggio := wmessaggio ||  '  Generazione Mod.Fiscale Dettaglio    &lt;br>';
+commit;
+
+
+-- Capitoli
+insert into fin_t_articoli
+(ANNO
+,EU
+,TITOLO
+,CATEGORIA
+,CAPITOLO
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM
+,CODICE_MECCANOGRAFICO
+,TITOLO_SETTORE_RUBRICA
+,CODICE_STATISTICO
+,CODICE_PRECEDENTE
+,CODICE_PRECEDENTE2
+,CODICE_PRECEDENTE3
+,CODICE_PRECEDENTE4
+,CODICE_PRECEDENTE5
+,FLAG_MUTUO
+,FLAG_SPESA_OBBLIGATORIA
+,FLAG_AVANZO_VINCOLATO
+,FLAG_SPESE_CORRENTI
+,FLAG_SPESE_INVESTIMENTO
+,FLAG_SPESE_ANNUALITA
+,FLAG_SPESE_RIMBORSO_PRESTITI
+,FLAG_ASSEGNAZIONE_STATO_UE
+,DIPARTIMENTO
+,NATURA_SPESA
+,NATURA_ENTRATA
+,FONTE_FINANZIAMENTO
+,LEGGE_ISTITUTIVA
+,PROVVEDIMENTO
+,PIANO_DEI_CONTI
+,PIANO_DEI_CONTI2
+,PIANO_DEI_CONTI3
+,PIANO_DEI_CONTI4
+,PIANO_DEI_CONTI5
+,FLAG_ASSESTAMENTO
+,TABELLA
+,ANNO_ISTITUZIONE
+,ABILITATO
+,MODIFICATO_NUOVO
+,FLAG_PERENTI
+,ANNO_TERMINALE_TABELLA
+,CODICE_BILANCIO_SIOPE
+,CODICE_GESTIONALE_SIOPE
+,SANITA_SN
+,NOTE_SANITA
+,NB_PIANO_CONTI_FINA
+,NB_PIANO_CONTI_ECON
+,NB_PIANO_CONTI_PATR
+,NB_CODICE_TRANSAZIONE
+,NB_ENTRATA_RICORRENTE
+,NB_TITOLO
+,NB_MACROAGGREGATO
+,NB_COFOG_II_LIVELLO
+,NB_ID_PADRE
+,NB_PRU
+,CONTO_SANITA
+,NB_FPV
+,NB_CAPITOLO_FPV
+,FONDO
+,VOCE_PSI_IMP
+,VOCE_PSI_PAG
+,VOCE_PSI_PAG2
+,CONTO_SANITA2
+,NB_USCITA_RICORRENTE
+,CHIAVE_CONTABILE
+,COD_CONTO_EVIDENZA
+,TIPO_ENTRATA
+,TIPO_CONTABILITA_ENTE_RICEV
+,DESTINAZIONE)
+select 
+ WANNO
+,EU
+,TITOLO
+,CATEGORIA
+,CAPITOLO
+,CODICE
+,DESCRIZIONE
+,CODICE_NUM
+,CODICE_MECCANOGRAFICO
+,TITOLO_SETTORE_RUBRICA
+,CODICE_STATISTICO
+,eu||codice
+,null
+,null
+,null
+,null
+,FLAG_MUTUO
+,FLAG_SPESA_OBBLIGATORIA
+,FLAG_AVANZO_VINCOLATO
+,FLAG_SPESE_CORRENTI
+,FLAG_SPESE_INVESTIMENTO
+,FLAG_SPESE_ANNUALITA
+,FLAG_SPESE_RIMBORSO_PRESTITI
+,FLAG_ASSEGNAZIONE_STATO_UE
+,DIPARTIMENTO
+,NATURA_SPESA
+,NATURA_ENTRATA
+,FONTE_FINANZIAMENTO
+,LEGGE_ISTITUTIVA
+,PROVVEDIMENTO
+,PIANO_DEI_CONTI
+,PIANO_DEI_CONTI2
+,PIANO_DEI_CONTI3
+,PIANO_DEI_CONTI4
+,PIANO_DEI_CONTI5
+,'N' -- FLAG_ASSESTAMENTO
+,TABELLA
+,ANNO_ISTITUZIONE
+,nvl(ABILITATO,'S')
+,NULL -- Modificato / Nuovo
+,FLAG_PERENTI
+,ANNO_TERMINALE_TABELLA
+,CODICE_BILANCIO_SIOPE
+,CODICE_GESTIONALE_SIOPE
+,SANITA_SN
+,NOTE_SANITA
+,NB_PIANO_CONTI_FINA
+,NB_PIANO_CONTI_ECON
+,NB_PIANO_CONTI_PATR
+,NB_CODICE_TRANSAZIONE
+,NB_ENTRATA_RICORRENTE
+,NB_ID_PADRE + 100000 --NB_ID_PADRE
+,NB_TITOLO
+,NB_MACROAGGREGATO
+,NB_COFOG_II_LIVELLO
+,NB_PRU
+,CONTO_SANITA
+,NB_FPV
+,NB_CAPITOLO_FPV
+,FONDO
+,VOCE_PSI_IMP
+,VOCE_PSI_PAG
+,VOCE_PSI_PAG2
+,CONTO_SANITA2
+,NB_USCITA_RICORRENTE
+,CHIAVE_CONTABILE
+,COD_CONTO_EVIDENZA
+,TIPO_ENTRATA
+,TIPO_CONTABILITA_ENTE_RICEV
+,DESTINAZIONE
+from 
+fin_t_articoli 
+where 
+anno = wanno - 1 and
+nvl(abilitato,'S') &lt;> 'N';
+wmessaggio := wmessaggio ||  '          Generazione Capitoli Completata            &lt;br>';
+commit;
+
+
+--Bilancio
+insert into fin_t_bilancio 
+(ANNO
+,EU
+,TITOLO
+,CATEGORIA
+,CAPITOLO
+,ARTICOLO
+,ENTRATE
+,MUTUI
+,ALIENAZIONE_BENI_IMMOBILI
+,STATO
+,UNIONE_EUROPEA
+,AVANZI
+,AIUTI
+,PREVISTO_ATTUALE
+,PREVISTO_SUCCESSIVO_1
+,PREVISTO_SUCCESSIVO_2
+,RESIDUO
+,CASSA
+,RESIDUO_CONSUNTIVO
+,VARIAZIONE_CASSA_PIU
+,VARIAZIONE_CASSA_MENO
+,VARIAZIONE_COMPETENZA_PIU
+,VARIAZIONE_COMPETENZA_MENO
+,NOTE_CASSA
+,NOTE_COMPETENZA
+,QUOTA_VINCOLATA
+,TIPO_VINCOLO
+,REGIONE
+,ALTRI_SOGGETTI
+,ENTRATE_PLURIENNALE1
+,STATO_PLURIENNALE1
+,UNIONE_EUROPEA_PLURIENNALE1
+,REGIONE_PLURIENNALE1
+,ALTRI_SOGGETTI_PLURIENNALE1
+,MUTUI_PLURIENNALE1
+,TIPO_VINCOLO_PLURIENNALE1
+,QUOTA_VINCOLATA_PLURIENNALE1
+,ENTRATE_PLURIENNALE2
+,STATO_PLURIENNALE2
+,UNIONE_EUROPEA_PLURIENNALE2
+,REGIONE_PLURIENNALE2
+,ALTRI_SOGGETTI_PLURIENNALE2
+,MUTUI_PLURIENNALE2
+,TIPO_VINCOLO_PLURIENNALE2
+,QUOTA_VINCOLATA_PLURIENNALE2
+,AVANZO_PLURIENNALE1
+,AVANZO_PLURIENNALE2
+,ASSESTAMENTO_COMPETENZA_PIU
+,ASSESTAMENTO_COMPETENZA_MENO
+,ASSESTAMENTO_CASSA_PIU
+,ASSESTAMENTO_CASSA_MENO
+,PRE_IMPEGNI
+,IMPEGNI_ACCERTAMENTI_COMPE
+,VARIAZIONI
+,MANDATI_REVERSALI_COMPE
+,MANDATI_REVERSALI_RES
+,COMPETENZA_BLOCCATA
+,CASSA_BLOCCATA
+,ASSESTAMENTO_PLURIENNALE1_PIU
+,ASSESTAMENTO_PLURIENNALE1_MENO
+,ASSESTAMENTO_PLURIENNALE2_PIU
+,ASSESTAMENTO_PLURIENNALE2_MENO
+,BLOCCO_PREIMPEGNI
+,LIQUIDAZIONI_COMPE
+,LIQUIDATO
+,BLOCCO_LIQUIDAZIONI
+,BLOCCO_PREIMPEGNI_IMPEGNI)
+select 
+WANNO
+,a.EU
+,a.TITOLO
+,a.CATEGORIA
+,a.CAPITOLO
+,a.codice
+,0 --ENTRATE
+,0 --,MUTUI
+,0 --,ALIENAZIONE_BENI_IMMOBILI
+,0 --,STATO
+,0 --,UNIONE_EUROPEA
+,0 --,AVANZI
+,0 --,AIUTI
+,0 --,PREVISTO_ATTUALE
+,0 --,PREVISTO_SUCCESSIVO_1
+,0 --,PREVISTO_SUCCESSIVO_2
+,0 --,RESIDUO
+,0 --,CASSA
+,0 --,RESIDUO_CONSUNTIVO
+,0 --,VARIAZIONE_CASSA_PIU
+,0 --,VARIAZIONE_CASSA_MENO
+,0 --,VARIAZIONE_COMPETENZA_PIU
+,0 --,VARIAZIONE_COMPETENZA_MENO
+,null --NOTE_CASSA
+,null --NOTE_COMPETENZA
+,0 --,QUOTA_VINCOLATA
+,b.TIPO_VINCOLO
+,0 --,REGIONE
+,0 --,ALTRI_SOGGETTI
+,0 --,ENTRATE_PLURIENNALE1
+,0 --,STATO_PLURIENNALE1
+,0 --,MUTUI_PLURIENNALE1
+,0 --,UNIONE_EUROPEA_PLURIENNALE1
+,0 --,REGIONE_PLURIENNALE1
+,0 --,ALTRI_SOGGETTI_PLURIENNALE1
+,b.TIPO_VINCOLO_PLURIENNALE1
+,0 --,QUOTA_VINCOLATA_PLURIENNALE1
+,0 --,ENTRATE_PLURIENNALE2
+,0 --,STATO_PLURIENNALE2
+,0 --,UNIONE_EUROPEA_PLURIENNALE2
+,0 --,REGIONE_PLURIENNALE2
+,0 --,ALTRI_SOGGETTI_PLURIENNALE2
+,0 --,MUTUI_PLURIENNALE2
+,b.TIPO_VINCOLO_PLURIENNALE2
+,0 --,QUOTA_VINCOLATA_PLURIENNALE2
+,0 --,AVANZO_PLURIENNALE1
+,0 --,AVANZO_PLURIENNALE2
+,0 --,ASSESTAMENTO_COMPETENZA_PIU
+,0 --,ASSESTAMENTO_COMPETENZA_MENO
+,0 --,ASSESTAMENTO_CASSA_PIU
+,0 --,ASSESTAMENTO_CASSA_MENO
+,0 --,PRE_IMPEGNI
+,0 --,IMPEGNI_ACCERTAMENTI_COMPE
+,0 --,VARIAZIONI
+,0 --,MANDATI_REVERSALI_COMPE
+,0 --,MANDATI_REVERSALI_RES
+,0 --,COMPETENZA_BLOCCATA
+,0 --,CASSA_BLOCCATA
+,0 --,ASSESTAMENTO_PLURIENNALE1_PIU
+,0 --,ASSESTAMENTO_PLURIENNALE1_MENO
+,0 --,ASSESTAMENTO_PLURIENNALE2_PIU
+,0 --,ASSESTAMENTO_PLURIENNALE2_MENO
+,0 --,BLOCCO_PREIMPEGNI
+,0 --,LIQUIDAZIONI_COMPE
+,0 --,LIQUIDATO
+,'N'--BLOCCO_LIQUIDAZIONI
+,'N'--BLOCCO_PREIMPEGNI_IMPEGNI)
+from 
+fin_t_articoli a,
+fin_t_bilancio b
+where 
+nvl(a.abilitato,'S') &lt;> 'N' and
+a.anno = wanno - 1 and
+a.anno = b.anno(+) and
+a.titolo = b.titolo(+) and
+a.categoria = b.categoria(+) and
+a.capitolo = b.capitolo(+) and
+a.codice = b.articolo(+) AND
+a.eu = b.eu;
+wmessaggio := wmessaggio ||  '          Generazione Bilancio Completata            &lt;br>';
+commit;
+
+-- Dati Generali
+insert into fin_t_dati_generali 
+(ANNO_FINANZIARIO
+,ATTIVO
+,DESCRIZIONE
+,INDIRIZZO
+,TEL_FAX
+,QUALIFICA1
+,NOME1
+,FILE1_FIRMA_DIGIT
+,QUALIFICA2
+,NOME2
+,FILE2_FIRMA_DIGIT
+,QUALIFICA3
+,NOME3
+,FILE3_FIRMA_DIGIT
+,QUALIFICA4
+,NOME4
+,FILE4_FIRMA_DIGIT
+,LOGO
+,PARTITA_IVA
+,COMUNE_SEDE_ENTE
+,AVANZO_AMMINISTRAZIONE
+,CASSA
+,VARIAZIONE_AVANZO_PIU
+,VARIAZIONE_AVANZO_MENO
+,AVANZO_REGIONALE
+,VARIAZIONE_CASSA_PIU
+,VARIAZIONE_CASSA_MENO
+,VISIBILITA_ASSESTAMENTO
+,RUOLO_VISIBILITA_ASSESTAMENTO
+,TESORERIA
+,ABI
+,CAB
+,VISIBILITA_PREVISIONE
+,BILANCIO_PREVISIONE_APERTO
+,RUOLO_OPERAZIONI_RAGIONERIA
+,DATA_ATTO_ASSESTAMENTO
+,NUMERO_ATTO_ASSESTAMENTO
+,FILE_PARAMETRI10G
+,VARIAZIONE_AVANZO_DELIBERA
+,OBIETTIVO_PATTO_STABILITA
+,OBIETTIVO_PATTO_STABILITA_IMP
+,SFORAMENTO_PATTO_PREC
+,IMPORTO_COMMISSIONI_BONIFICO
+,QUOTA_ENTI_LOCALI
+,DISAVANZO_AMMINISTRAZIONE
+,MANUTENZIONE_SISTEMA
+,MESSAGGIO_MANUTENZIONE_SISTEMA
+,MANUTENZIONE_PACKAGE
+,MSG_MANUTENZIONE_PACKAGE
+,VARIAZIONE_DISAVANZO_PIU
+,VARIAZIONE_DISAVANZO_MENO
+,DISAVANZO_REGIONALE
+,QUOTA_ENTI_LOCALI_IMP
+,DISAVANZO_EFFETTIVO_ANNI_PREC
+,PERCORSO_FILE
+,TITOLO_PARTITE_GIRO_U
+,TITOLO_PARTITE_GIRO_E
+,ATTIVO_PLURIENNALE
+,FPV_CORRENTE
+,FPV_CAPITALE
+,INDIRIZZO_FTP
+,ATTIVO_PROVVEDIMENTI
+,VARIAZIONE_FPV_CORRENTE
+,VARIAZIONE_FPV_CAPITALE
+,CODICE_ENTE_BANCA_T
+,CODICE_ENTE_BANCA_T_SAN
+,LABEL_NON_PREDEF1
+,COLONNA_NON_PREDEF1
+,CAP_AVANZO_AMM
+,DESC_CAP_AVANZO_AMM
+,CAP_FONDO_CASSA
+,DESC_CAP_FONDO_CASSA
+,CAP_FPV_CORRENTE
+,DESC_CAP_FPV_CORRENTE
+,CAP_FPV_CAPITALE
+,DESC_CAP_FPV_CAPITALE
+,CAP_DISAVANZO_AMM1
+,DESC_CAP_DISAVANZO_AMM1
+,CAP_DISAVANZO_AMM2
+,DESC_CAP_DISAVANZO_AMM2
+,DATA_APPROVAZIONE_PREVISIONE
+,DATA_CHIUSURA_ECONOMICA
+,DIRECTORY_ORACLE_ORDINATIVO
+,N_CONTO_BANCA_IT_ENTE_RICEV
+,PROV_BENEF_ACCR_TES_PROV_STATO
+,FONDOCASSA_DICUI_SANITA
+,COD_CONTO_EVIDENZA_DEFAULT
+,CODICE_BDAP
+,DIRECTORY_ORACLE_BDAP
+,POPOLAZIONE_RESIDENTE
+,RISULTATO_ESERCIZIO
+,FL_SCHEDE_VALUTAZIONE_VISIBILI
+,NUM_CCP_ENTE_PER_REVERSALI)
+select
+ WANNO
+,'N'--ATTIVO
+,DESCRIZIONE
+,INDIRIZZO
+,TEL_FAX
+,QUALIFICA1
+,NOME1
+,FILE1_FIRMA_DIGIT
+,QUALIFICA2
+,NOME2
+,FILE2_FIRMA_DIGIT
+,QUALIFICA3
+,NOME3
+,FILE3_FIRMA_DIGIT
+,QUALIFICA4
+,NOME4
+,FILE4_FIRMA_DIGIT
+,LOGO
+,PARTITA_IVA
+,COMUNE_SEDE_ENTE
+,0--AVANZO_AMMINISTRAZIONE
+,0--CASSA
+,0--VARIAZIONE_AVANZO_PIU
+,0--VARIAZIONE_AVANZO_MENO
+,0--AVANZO_REGIONALE
+,0--VARIAZIONE_CASSA_PIU
+,0--VARIAZIONE_CASSA_MENO
+,'S'--VISIBILITA_ASSESTAMENTO
+,null--RUOLO_VISIBILITA_ASSESTAMENTO
+,TESORERIA
+,ABI
+,CAB
+,null--DATA_ATTO_ASSESTAMENTO
+,'S'--VISIBILITA_PREVISIONE
+,'N'--BILANCIO_PREVISIONE_APERTO
+,null--RUOLO_OPERAZIONI_RAGIONERIA
+,null--NUMERO_ATTO_ASSESTAMENTO
+,FILE_PARAMETRI10G
+,null--VARIAZIONE_AVANZO_DELIBERA
+,0--OBIETTIVO_PATTO_STABILITA
+,0--OBIETTIVO_PATTO_STABILITA_IMP
+,0--SFORAMENTO_PATTO_PREC
+,IMPORTO_COMMISSIONI_BONIFICO
+,0--QUOTA_ENTI_LOCALI
+,0--DISAVANZO_AMMINISTRAZIONE
+,'N'--MANUTENZIONE_SISTEMA
+,null--MESSAGGIO_MANUTENZIONE_SISTEMA
+,'N'--MANUTENZIONE_PACKAGE
+,null--MSG_MANUTENZIONE_PACKAGE
+,0--VARIAZIONE_DISAVANZO_PIU
+,0--VARIAZIONE_DISAVANZO_MENO
+,0--DISAVANZO_REGIONALE
+,0--QUOTA_ENTI_LOCALI_IMP
+,0--DISAVANZO_EFFETTIVO_ANNI_PREC
+,PERCORSO_FILE
+,TITOLO_PARTITE_GIRO_U
+,TITOLO_PARTITE_GIRO_E
+,'S'--ATTIVO_PLURIENNALE
+,0--FPV_CORRENTE
+,0--FPV_CAPITALE
+,INDIRIZZO_FTP
+,'S'--ATTIVO_PROVVEDIMENTI
+,0--VARIAZIONE_FPV_CORRENTE
+,0--VARIAZIONE_FPV_CAPITALE
+,CODICE_ENTE_BANCA_T
+,CODICE_ENTE_BANCA_T_SAN
+,LABEL_NON_PREDEF1
+,COLONNA_NON_PREDEF1
+,CAP_AVANZO_AMM
+,DESC_CAP_AVANZO_AMM
+,CAP_FONDO_CASSA
+,DESC_CAP_FONDO_CASSA
+,CAP_FPV_CORRENTE
+,DESC_CAP_FPV_CORRENTE
+,CAP_FPV_CAPITALE
+,DESC_CAP_FPV_CAPITALE
+,CAP_DISAVANZO_AMM1
+,DESC_CAP_DISAVANZO_AMM1
+,CAP_DISAVANZO_AMM2
+,DESC_CAP_DISAVANZO_AMM2
+,null--DATA_APPROVAZIONE_PREVISIONE
+,null--DATA_CHIUSURA_ECONOMICA
+,DIRECTORY_ORACLE_ORDINATIVO
+,N_CONTO_BANCA_IT_ENTE_RICEV
+,PROV_BENEF_ACCR_TES_PROV_STATO
+,0--FONDOCASSA_DICUI_SANITA
+,COD_CONTO_EVIDENZA_DEFAULT
+,CODICE_BDAP
+,DIRECTORY_ORACLE_BDAP
+,POPOLAZIONE_RESIDENTE
+,0--RISULTATO_ESERCIZIO
+,'N'--FL_SCHEDE_VALUTAZIONE_VISIBILI
+,NUM_CCP_ENTE_PER_REVERSALI
+from fin_t_dati_generali 
+where anno_finanziario = wanno -1;
+wmessaggio := wmessaggio ||  '        Generazione Dati Generali Completata         &lt;br>';
+commit;
+
+-- Aggiorna Tabelle per Controllo di Gestione.
+--controllo_di_gestione(wanno);
+
+commit;
+
+wmessaggio := wmessaggio ||  'Generazione Anno Contabile '||to_char(wanno)||' Completata            &lt;br>';
+
+
+end;</pre>	</td></tr>
+</table></div>

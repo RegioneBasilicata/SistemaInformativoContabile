@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_MANDATI_SIC_2009</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_MANDATI_SIC_2009.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_MANDATI_SIC_2009_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_MANDATI_SIC_2009_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_MANDATI_SIC_2009_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_MANDATI_SIC_2009_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>FIN_MANDATI_SIC_2009</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>2153</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT 
+jugd.segment8 anno_mandato, 
+jugd.date_created data_mandato, 
+to_number(substr(jugd.doc_sequence_value,5,5)) numero_mandato, 
+jugd.description oggetto_mandato, 
+jugd1.segment8 anno_liquidazione,
+substr(jugd1.doc_sequence_value,5) numero_liquidazione,
+jugd1.date_created data_liquidazione,
+jugd1.segment3 struttura_liquidazione, 
+jugd1.document_amount importo_liquidazione,
+jugd1.segment2 liq_capitolo_eu_numero,
+jugd1.segment8 liq_capitolo_anno,
+upb1.capitolo liq_capitolo_upb,
+nvl(jugd1.attribute13,'sconosciuto') LIQ_TIPO_ATTO_AUTORIZZATIVO,
+nvl(jugd1.attribute14,'sconosciuto') LIQ_NUMERO_ATTO_AUTORIZZATIVO,
+nvl(jugd1.data_atto_autorizzativo,trunc(sysdate,'dd')) LIQ_DATA_ATTO_AUTORIZZATIVO,
+jugd2.segment8 anno_impegno,
+to_number(substr(jugd2.doc_sequence_value,5,5)) numero_impegno, 
+jugd2.date_created data_impegno, 
+jugd2.segment3 struttura_impegno, 
+jugd2.document_amount importo_impegno,
+jugd2.segment2 imp_capitolo_eu_numero,
+jugd2.segment8 imp_capitolo_anno,
+upb2.capitolo imp_capitolo_upb,
+nvl(jugd2.attribute13,'sconosciuto') IMP_TIPO_ATTO_AUTORIZZATIVO,
+nvl(jugd2.attribute14,'sconosciuto') IMP_NUMERO_ATTO_AUTORIZZATIVO,
+nvl(jugd2.data_atto_autorizzativo,trunc(sysdate,'dd')) IMP_DATA_ATTO_AUTORIZZATIVO,
+decode(jugd2.ADMINISTRATIVE_EXPEDIENT,null,nvl(jugd2.EXT_DOCUMENT_REF,''),jugd2.ADMINISTRATIVE_EXPEDIENT),
+nvl(jugdtp.amount,0) importo_mandato, 
+nvl(pv.denominazione,pv.cognome||' '||pv.nome) nome_fornitore, 
+pv.codice_fiscale codice_fiscale, 
+pv.partita_iva partita_iva, 
+nvl(pv.data_ns,'') data_nascita, 
+pv.id codice_fornitore 
+from 
+fin_t_documenti jugd, 
+fin_t_documenti jugd2, 
+fin_t_documenti jugd1,
+fin_t_documenti_terze_parti jugdtp, 
+fin_t_anagrafica pv,
+fin_t_articoli upb1,
+fin_t_articoli upb2
+where 
+upper(jugd.doc_type) = 'MAND' and 
+jugd.segment8 >= 2005 and 
+upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y' and 
+jugd.previous_doc_id = jugd1.doc_id(+) and 
+jugd1.previous_doc_id = jugd2.doc_id(+) and
+jugd.doc_id = jugdtp.doc_id(+) and 
+jugdtp.ID_ANA = pv.ID(+) and
+jugd1.segment2 = upb1.eu||upb1.codice and
+jugd1.segment8 = upb1.anno and
+jugd2.segment2 = upb2.eu||upb2.codice and
+jugd2.segment8 = upb2.anno</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

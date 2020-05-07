@@ -1,0 +1,162 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>DOCALL_ALFRESCO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="DOCALL_ALFRESCO.html">Details</a></div></div>
+<div class="tab"><div><a href="DOCALL_ALFRESCO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="DOCALL_ALFRESCO_References.html">References</a></div></div>
+<div class="tab"><div><a href="DOCALL_ALFRESCO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="DOCALL_ALFRESCO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE docall_alfresco
+  (p_Idinvio IN number) IS
+   wobj json;
+   wtempJsonList json_list;
+   wappJson json;
+   wtempData json_value;
+   wnumItems number;
+   wClob clob;
+   wnameFile varchar2(200);
+   wobjectId varchar2(200);
+   esiste  number(1);
+   prog_doc  number;
+   ALFRESCO_URL  varchar2(2000);
+   ALFRESCO_USR  varchar2(2000);
+   ALFRESCO_PSW  varchar2(2000);
+   wLoop number;
+   wId number;
+begin
+--wLoop := 1;
+
+--while wLoop &lt; 3 loop
+--      begin
+--select nvl(max(id),0)+1 into wId from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'Prendo i parametri di alfresco', sysdate); commit;
+
+            select p.alfresco_url, p.alfresco_usr, p.alfresco_psw
+            into ALFRESCO_URL,ALFRESCO_USR,ALFRESCO_PSW
+            from application_parameter p;
+
+--select nvl(max(id),0)+1 into wId from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'alfresco_pkg', sysdate); commit;
+            
+            alfresco_pkg.set_url(ALFRESCO_URL);
+            alfresco_pkg.set_usr(ALFRESCO_USR);
+            alfresco_pkg.set_psw(ALFRESCO_PSW);
+
+select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'cmis1_pkg1', sysdate); commit;
+            
+            cmis1_pkg.set_url(ALFRESCO_URL);
+ select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'cmis1_pkg2', sysdate); commit;
+           cmis1_pkg.set_usr(ALFRESCO_USR);
+ select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'cmis1_pkg3', sysdate); commit;
+           cmis1_pkg.set_psw(ALFRESCO_PSW);
+
+select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'apex_util.set_security_group_id', sysdate); commit;
+
+            apex_util.set_security_group_id(p_security_group_id =>3024427007805833); 
+
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'Inizio ciclo for', sysdate); commit;
+
+            for d in (select t.uri_alfresco , t.idcodice_HDT, f.chiave_tb_doc_iva
+                       from gat2_ws.fe_dati_invio_fattura t,gat2_ws.fe_testata_fattura f
+                       where t.iddatiinviofattura=p_Idinvio and
+                             t.uri_alfresco is not null and
+                             f.iddatiinviofattura=t.iddatiinviofattura and
+                             f.chiave_tb_doc_iva is not null) loop   
+
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'getChildren', sysdate); commit;
+            
+               wClob := cmis1_pkg.getChildren(d.uri_alfresco);
+               wobj := json(wClob);
+            
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, testo, timestamp) values (wId, wClob, sysdate); commit;            
+            
+               -- numero di risultati
+               wtempData := wobj.get('numItems');
+               wnumItems := wtempData.get_number;
+               
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'numItems: '||wnumItems, sysdate); commit;                       
+               
+               -- lista risultati
+               wtempData := wobj.get('objects');
+               if wtempData.is_array then
+                  wtempJsonList := json_list(wtempData);
+               end if;
+               
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'objects', sysdate); commit;                       
+            
+               for i in 1..wnumItems loop
+
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'Ciclo su wnumItems', sysdate); commit;                       
+            
+                 -- Nome del file: objects[] object -> 'properties' -> 'cmis:contentStreamFileName' -> 'value'
+                 wtempData := wtempJsonList.get(i); 
+                 wappJson := json(wtempData);
+                 
+                 wtempData := wappJson.get('object'); 
+                 wappJson := json(wtempData);        
+            
+                 wtempData := wappJson.get('properties'); 
+                 wappJson := json(wtempData);        
+            
+                 wtempData := wappJson.get('cmis:contentStreamFileName'); 
+                 wappJson := json(wtempData);        
+            
+                 wtempData := wappJson.get('value'); 
+                 wnameFile := wtempData.get_string;        
+
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'contentStreamFileName: '||wnameFile, sysdate); commit;                       
+            
+                 if wnameFile is not null then
+                  select count(*)
+                    into esiste
+                    from fin_t_file_esterni
+                    where upper(nome_file)=upper(d.uri_alfresco||'/'||wnameFile) and
+                          flag_alfresco='S';
+select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'esiste = '||esiste, sysdate); commit;                                                 
+                          
+                   if esiste=0 then        
+                    select doc_seq.nextval 
+                      into prog_doc
+                      from dual;
+                      
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'prog_doc = '||prog_doc, sysdate); commit;                                             
+                      
+                    insert into FIN_T_FILE_ESTERNI
+                      (id, nome_file, flag_alfresco)
+                      values (prog_doc,d.uri_alfresco||'/'||wnameFile,'S');
+
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'Inserisco fin_t_file_esterni', sysdate); commit;                       
+                      
+                    insert into TB_FATTURE_ALLEGATI
+                      (id_fattura, creato_da, creato_il, descrizione, documento)
+                     values (d.chiave_tb_doc_iva,1000,sysdate,wnameFile,prog_doc);  
+                     
+--select nvl(max(id),0)+1 into wId  from fin_t_app; insert into FIN_T_APP (ID, operazione, timestamp) values (wId, 'Inserisco TB_FATTURE_ALLEGATI', sysdate); commit;                      
+                     
+                    /*if upper(substr(wnameFile,-3)) = 'XML' then
+                      update gat2_ws.fe_dati_invio_fattura set progressivounivocofile = PrelevaProgressivoUnivoco(wnameFile) where iddatiinviofattura = p_Idinvio;
+                    end if;*/
+                   end if;
+                  end if;
+               end loop; 
+            end loop;
+--            wLoop := 99;
+--      exception when others then
+--            rollback;
+--            wLoop := wLoop + 1;
+--      end;
+--end loop;
+commit;
+end;</pre>	</td></tr>
+</table></div>

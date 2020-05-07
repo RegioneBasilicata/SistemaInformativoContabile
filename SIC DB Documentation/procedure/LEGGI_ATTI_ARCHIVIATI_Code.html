@@ -1,0 +1,147 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LEGGI_ATTI_ARCHIVIATI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LEGGI_ATTI_ARCHIVIATI.html">Details</a></div></div>
+<div class="tab"><div><a href="LEGGI_ATTI_ARCHIVIATI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LEGGI_ATTI_ARCHIVIATI_References.html">References</a></div></div>
+<div class="tab"><div><a href="LEGGI_ATTI_ARCHIVIATI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LEGGI_ATTI_ARCHIVIATI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE leggi_atti_archiviati AS
+    v_anno NUMBER(4);
+    v_da_anno NUMBER(4);
+    v_a_anno NUMBER(4);
+    l_envelope CLOB;
+    l_xml XMLTYPE;
+    l_res clob;
+    l_count_xml XMLTYPE;
+    l_count number;
+    v_data_atto VARCHAR2(10);
+    v_numero_definitivo VARCHAR2(30);
+    v_oggetto VARCHAR2(4000);
+    v_cod_desc_uff_prop VARCHAR2(4000);
+    v_pagina_richiesta NUMBER;
+    
+BEGIN
+
+ -- leggo leggo gli atti riguardanti l'anno di sistema e l’anno precedente
+ 
+ v_a_anno := TO_CHAR(SYSDATE,'YYYY');
+ v_da_anno := v_a_anno - 1;
+ 
+ -- per ogni anno, chiedo una "pagina" di 10 atti per volta, aumentando nel loop di 1 la pagina;
+ -- dal loop sulle pagine esco quando il count degli atti contenuti nella n-sima pagina è 0;
+ -- IL COMMIT LO FACCIO UNA SOLA VOLTA PER ANNO, alla fine del blocco,
+ -- per evitare che un eventuale crash della procedura o del sistema dopo la cancellazione
+ -- lasci la tabella senza righe o con poche righe.
+
+ 
+ FOR v_anno IN v_da_anno .. v_a_anno LOOP
+  
+  DELETE at_atti_archiviati
+  WHERE anno = v_anno;
+
+  v_pagina_richiesta := 1;
+  
+  LOOP /* sulle pagine */
+
+   l_envelope := '&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:typ="http://www.intemaweb.com/provvedimentiamministrativi/types">
+        &lt;soapenv:Header/>
+        &lt;soapenv:Body>
+          &lt;typ:RicercaAttiApprovati>
+             &lt;Richiesta>
+                &lt;Anno>'||TO_CHAR(v_anno)||'&lt;/Anno>
+                &lt;NumeroAtto>
+                   &lt;NumeroA>'||99999||'&lt;/NumeroA>
+                   &lt;NumeroDa>'||1||'&lt;/NumeroDa>
+                &lt;/NumeroAtto>
+                &lt;Paginazione>
+                   &lt;PaginaRichiesta>'||TO_CHAR(v_pagina_richiesta)||'&lt;/PaginaRichiesta>
+                   &lt;TotalePerPagina>10&lt;/TotalePerPagina>
+                &lt;/Paginazione>
+             &lt;/Richiesta>
+             &lt;Autenticazione>
+                &lt;Cod_Fiscale>NTMSRL96A01G942B&lt;/Cod_Fiscale>
+                &lt;Cod_Ufficio>A970001&lt;/Cod_Ufficio>
+             &lt;/Autenticazione>
+          &lt;/typ:RicercaAttiApprovati>
+        &lt;/soapenv:Body>
+      &lt;/soapenv:Envelope>';
+
+   l_xml := APEX_WEB_SERVICE.MAKE_REQUEST(
+      p_url               => 'http://172.18.17.91/WSProvvedimentiFinder/ServizioRicerca.svc',
+      p_action            => 'urn:RicercaAttiApprovati',
+      p_envelope          => l_envelope);
+
+
+   -- conto atti nell'xml ricevuto
+   SELECT XMLQUERY('count(//Atto)' PASSING l_xml returning content) 
+   INTO l_count_xml 
+   FROM DUAL;
+
+   l_count:= l_count_xml.getnumberval;
+
+   -- per ogni atto estraggo alcuni attributi
+
+   FOR i in 1..l_count LOOP /* sugli atti della pagina */
+
+     l_res := APEX_WEB_SERVICE.PARSE_XML(
+     p_xml => l_xml,
+     p_xpath => '//Atto['||i||']/DataAtto/text()');
+     v_data_atto := SUBSTR(l_res,9,2)||'/'||SUBSTR(l_res,6,2)||'/'||SUBSTR(l_res,1,4);
+     l_res := APEX_WEB_SERVICE.PARSE_XML(
+     p_xml => l_xml,
+     p_xpath => '//Atto['||i||']/NumeroDefinitivo/text()');
+     v_numero_definitivo := l_res;
+
+     l_res := APEX_WEB_SERVICE.PARSE_XML(
+     p_xml => l_xml,
+     p_xpath => '//Atto['||i||']/Oggetto/text()');
+     v_oggetto := SUBSTR(l_res,1,4000);
+
+     l_res := APEX_WEB_SERVICE.PARSE_XML(
+     p_xml => l_xml,
+     p_xpath => '//Atto['||i||']/UfficioProponente/DescrizioneUfficio/text()');
+     v_cod_desc_uff_prop := l_res;
+
+     l_res := APEX_WEB_SERVICE.PARSE_XML(
+     p_xml => l_xml,
+     p_xpath => '//Atto['||i||']/UfficioProponente/CodiceUfficio/text()');
+     v_cod_desc_uff_prop := SUBSTR(v_cod_desc_uff_prop||' ['||l_res||']',1,4000);
+ 
+     INSERT INTO at_atti_archiviati(anno,numero_definitivo,oggetto,cod_desc_uff_prop) 
+     VALUES(v_anno,v_numero_definitivo,v_oggetto,v_cod_desc_uff_prop);
+     -- faccio il commit ogni 100 pagine = 1000 atti
+     IF MOD(v_pagina_richiesta,100) = 0 
+       THEN 
+        COMMIT; 
+     END IF;
+
+   END LOOP; /* sugli atti della pagina*/
+   
+   IF l_count = 0 
+    THEN 
+      EXIT;
+     ELSE 
+      v_pagina_richiesta := v_pagina_richiesta + 1;   
+   END IF;
+  END LOOP; /* sulle pagine */
+
+  COMMIT;
+  
+ END LOOP; /* sugli anni */
+ setta_data_def_atti;
+END;</pre>	</td></tr>
+</table></div>

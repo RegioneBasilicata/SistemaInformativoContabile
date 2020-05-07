@@ -1,0 +1,271 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CONTROLLO_DODICESIMI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CONTROLLO_DODICESIMI.html">Details</a></div></div>
+<div class="tab"><div><a href="CONTROLLO_DODICESIMI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CONTROLLO_DODICESIMI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CONTROLLO_DODICESIMI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CONTROLLO_DODICESIMI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure controllo_dodicesimi (w_anno in number,wutente in varchar2) as
+wmis varchar2(10);
+wprog varchar2(10);
+wdesc_miss varchar2(1000);
+wdesc_prog varchar2(1000);
+wstanziamento number(15,2);
+wdodicesimo number(15,2);
+
+a01 number(15,2);
+a02 number(15,2);
+a03 number(15,2);
+a04 number(15,2);
+a05 number(15,2);
+a06 number(15,2);
+a07 number(15,2);
+a08 number(15,2);
+a09 number(15,2);
+a10 number(15,2);
+a11 number(15,2);
+a12 number(15,2);
+
+i01 number(15,2);
+i02 number(15,2);
+i03 number(15,2);
+i04 number(15,2);
+i05 number(15,2);
+i06 number(15,2);
+i07 number(15,2);
+i08 number(15,2);
+i09 number(15,2);
+i10 number(15,2);
+i11 number(15,2);
+i12 number(15,2);
+
+riga number := 0;
+wid_padre number;
+wmese varchar2(2);
+
+cursor misprog is
+select 
+a.nb_id_padre id_padre
+,l1.codice Missione
+,l2.codice Programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,sum(pluriennale1_definitivo(w_anno,a.eu||a.codice)) stanziamento
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2
+where a.anno=w_anno 
+and a.abilitato = 'S'
+and a.eu = 'U' 
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+group by a.nb_id_padre,l1.codice ,l2.codice ,l1.descrizione ,l2.descrizione
+order by 1,2;
+
+cursor movimenti is
+select 
+to_char(d.date_created,'mm') mese
+,sum(nvl(d.document_amount,0)) impegnato
+from 
+fin_t_articoli a,
+fin_t_documenti d
+where a.anno=w_anno 
+and a.abilitato = 'S'
+and a.eu = 'U' 
+and a.nb_id_padre=wid_padre
+and d.segment8=w_anno
+and d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+and nvl(d.deletion_status_flag,'N') &lt;> 'Y'
+and d.segment2=a.eu||a.codice
+and to_char(d.date_created,'ddmmyyyy') &lt;> '0101'||to_char(w_anno)
+group by to_char(d.date_created,'mm') 
+order by 1;
+
+begin
+
+ delete tmp_tabulati where utente = wutente;
+ commit;
+
+
+ for mp in misprog loop
+
+    a01 := 0 ;
+    a02 := 0 ;
+    a03 := 0 ;
+    a04 := 0 ;
+    a05 := 0 ;
+    a06 := 0 ;
+    a07 := 0 ;
+    a08 := 0 ;
+    a09 := 0 ;
+    a10 := 0 ;
+    a11 := 0 ;
+    a12 := 0 ;
+
+  wid_padre:=mp.id_padre;
+  wmis := mp.missione;
+  wprog := mp.programma ;
+  wdesc_miss :=mp.desc_missione ;
+  wdesc_prog :=mp.desc_programma;
+  wstanziamento := mp.stanziamento;
+
+    i01 := 0 ;
+    i02 := 0 ;
+    i03 := 0 ;
+    i04 := 0 ;
+    i05 := 0 ;
+    i06 := 0 ;
+    i07 := 0 ;
+    i08 := 0 ;
+    i09 := 0 ;
+    i10 := 0 ;
+    i11 := 0 ;
+    i12 := 0 ;
+
+
+  for i in movimenti loop
+    if i.mese = '01'
+       then i01 := i.impegnato;
+    end if;   
+    if i.mese = '02'
+       then i02 := i.impegnato;
+    end if;   
+    if i.mese = '03'
+       then i03 := i.impegnato;
+    end if;   
+    if i.mese = '04'
+       then i04 := i.impegnato;
+    end if;   
+    if i.mese = '05'
+       then i05 := i.impegnato;
+    end if;   
+    if i.mese = '06'
+       then i06 := i.impegnato;
+    end if;   
+    if i.mese = '07'
+       then i07 := i.impegnato;
+    end if;   
+    if i.mese = '08'
+       then i08 := i.impegnato;
+    end if;   
+    if i.mese = '09'
+       then i09 := i.impegnato;
+    end if;   
+    if i.mese = '10'
+       then i10 := i.impegnato;
+    end if;   
+    if i.mese = '11'
+       then i11 := i.impegnato;
+    end if;   
+    if i.mese = '12'
+       then i12 := i.impegnato;
+    end if;   
+  end loop i;
+
+  if mp.stanziamento > 0
+    then
+    wdodicesimo := (mp.stanziamento/12);
+    a01 := wdodicesimo;
+    a02 := wdodicesimo + (a01-i01) ;
+    a03 := wdodicesimo + (a02-i02) ;
+    a04 := wdodicesimo + (a03-i03) ;
+    a05 := wdodicesimo + (a04-i04) ;
+    a06 := wdodicesimo + (a05-i05) ;
+    a07 := wdodicesimo + (a06-i06) ;
+    a08 := wdodicesimo + (a07-i07) ;
+    a09 := wdodicesimo + (a08-i08) ;
+    a10 := wdodicesimo + (a09-i09) ;
+    a11 := wdodicesimo + (a10-i10) ;
+    a12 := wdodicesimo + (a11-i11) ;
+  end if;
+
+  riga:=riga+1;
+
+  insert into tmp_tabulati 
+  (UTENTE
+  ,NUM_ORD_RIGA
+  ,CAR01
+  ,CAR02
+  ,CAR03
+  ,CAR04
+  ,CAR05
+  ,NUM01
+  ,NUM02
+  ,NUM03
+  ,NUM04
+  ,NUM05
+  ,NUM06
+  ,NUM07
+  ,NUM08
+  ,NUM09
+  ,NUM10
+  ,NUM11
+  ,NUM12
+  ,NUM13
+  ,NUM14
+  ,NUM15
+  ,NUM16
+  ,NUM17
+  ,NUM18
+  ,NUM19
+  ,NUM20
+  ,NUM21
+  ,NUM22
+  ,NUM23
+  ,NUM24
+  ,NUM25) 
+  values
+  (wutente
+  ,riga
+  ,wmis
+  ,wprog
+  ,wdesc_miss
+  ,wdesc_prog
+  ,'CONTROLLODODICESIMI'||to_char(sysdate,'dd.mm.yyyy hh24:mi:ss')
+  ,a01
+  ,a02
+  ,a03
+  ,a04
+  ,a05
+  ,a06
+  ,a07
+  ,a08
+  ,a09
+  ,a10
+  ,a11
+  ,a12
+  ,i01
+  ,i02
+  ,i03
+  ,i04
+  ,i05
+  ,i06
+  ,i07
+  ,i08
+  ,i09
+  ,i10
+  ,i11
+  ,i12
+  ,wstanziamento);
+  commit;
+
+ end loop mp;
+
+end;
+</pre>	</td></tr>
+</table></div>

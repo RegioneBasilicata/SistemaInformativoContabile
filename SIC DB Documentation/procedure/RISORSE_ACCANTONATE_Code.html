@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>RISORSE_ACCANTONATE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="RISORSE_ACCANTONATE.html">Details</a></div></div>
+<div class="tab"><div><a href="RISORSE_ACCANTONATE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="RISORSE_ACCANTONATE_References.html">References</a></div></div>
+<div class="tab"><div><a href="RISORSE_ACCANTONATE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="RISORSE_ACCANTONATE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure risorse_accantonate(p_anno in number, p_utente in varchar2, p_ricalcolo in number) as
+-- p_anno rapprenseta l'anno del Rendiconto
+-- p_utente contiene il nome dell'utente che lancia la procedura 
+-- p_ricalcolo è un flag numerico (0,1) che se = 1 comporta il ricalcolo di tutte le colonne calcolate in precedenza, per evitare di sovrascrivere dati inseriti manualmente da Sistema SIC lanciare la procedura sempre con valore p_ricalcolo = 0
+
+verifica_anno number := 0; -- variabile per verificare se ci sono dati in tabella per l'anno p_anno
+var_rendiconto number := 0; -- variabile utilizzata per inserire la somma, capitolo per capitolo, delle variazioni fatte, in sede di Rendiconto, per l’utilizzo dei fondi accantonati attraverso l'applicazione in bilancio della corrispondente quota del risultato di amministrazione.
+ris_applicate number := 0; -- variabile utilizzata per inserire la somma, capitolo per capitolo, delle variazioni fatte per l’utilizzo dei fondi accantonati attraverso l'applicazione in bilancio della corrispondente quota del risultato di amministrazione.
+
+
+	-- cursore che recupera i dati iniziali (se presenti) dell'anno p_anno
+	cursor capitoli is
+	select TIPO_VINCOLO
+	,CAP_U
+	,DES_CAP
+	,RIS_ACCANT_01_01
+	from TB_RISORSE_ACCANTONATE
+	where ANNO = p_anno;
+
+
+
+BEGIN
+-- verifica la presenza di dati per l'anno in p_anno, nel caso non ce ne fossero si procede con una INSERT dei dati dell'anno p_anno - 1
+ select count(*) into verifica_anno
+ from TB_RISORSE_ACCANTONATE
+ where ANNO = p_anno;
+ 
+ if verifica_anno = 0 --se verificata si fa una INSERT dai dati dell'anno (p_anno-1)
+  then 
+  insert into TB_RISORSE_ACCANTONATE (ANNO
+    ,TIPO_VINCOLO
+	,CAP_U
+	,DES_CAP
+	,RIS_ACCANT_01_01
+    ,ORDINAMENTO)
+    select p_anno
+    ,TIPO_VINCOLO
+	,CAP_U
+	,DES_CAP
+	,RIS_ACCANT_31_12
+    ,ORDINAMENTO
+	from TB_RISORSE_ACCANTONATE
+	where ANNO = p_anno-1;
+  end if;
+  
+  for cap in capitoli loop
+-- calcolo le variazioni apportate per l’utilizzo dei fondi accantonati attraverso l'applicazione in bilancio della corrispondente quota del risultato di amministrazione.
+
+  SELECT nvl(sum(decode(SUBSTR(a.doc_type,7,3),'NEG',-a.document_amount,a.document_amount)),0) into ris_applicate
+     FROM fin_t_documenti a
+     WHERE a.segment8 = p_anno
+     and a.doc_type in 
+     (
+     'V_COM_POS',
+     'V_COM_NEG',
+     'A_COM_POS',
+     'A_COM_NEG'
+     )
+     and nvl(a.deletion_status_flag,'N')&lt;>'Y'
+     and a.segment2 = cap.cap_u
+    and attribute13 &lt;> 'RENDICONTO'; --non si considerano le variazioni applicate in sede di rendiconto che invece confluiscono nella colonna VARIAZIONI_RENDICONTO
+    
+    if ris_applicate > 0
+     then
+     update TB_RISORSE_ACCANTONATE set UTILIZZO_ACCANT = -ris_applicate where anno = p_anno and cap_u = cap.cap_u;
+     commit;
+    end if;
+    
+    SELECT nvl(sum(decode(SUBSTR(a.doc_type,7,3),'NEG',-a.document_amount,a.document_amount)),0) into  var_rendiconto
+     FROM fin_t_documenti a
+     WHERE a.segment8 = p_anno
+     and a.doc_type in 
+     (
+     'V_COM_POS',
+     'V_COM_NEG',
+     'A_COM_POS',
+     'A_COM_NEG'
+     )
+     and nvl(a.deletion_status_flag,'N')&lt;>'Y'
+     and a.segment2 = cap.cap_u
+    and attribute13 = 'RENDICONTO'; -- si considerano solo le variazioni applicate in sede di rendiconto che confluiscono nella colonna VARIAZIONI_RENDICONTO
+    
+    
+    if var_rendiconto &lt;> 0
+     then
+     update TB_RISORSE_ACCANTONATE set VARIAZIONI_RENDICONTO = var_rendiconto where anno = p_anno and cap_u = cap.cap_u;
+     commit;
+    end if;
+    
+  --  if p_ricalcolo = 1
+   --  then
+   -- viene ricalcolato il totale delle risorse accantonate al 31/12/p_anno
+     update TB_RISORSE_ACCANTONATE set RIS_ACCANT_31_12 = nvl(RIS_ACCANT_01_01,0) + nvl(UTILIZZO_ACCANT,0) + nvl(ACCANT_STANZIATI_ESER,0) + nvl(VARIAZIONI_RENDICONTO,0) where anno = p_anno and cap_u = cap.cap_u;
+     commit;
+   -- end if;
+    
+  end loop; 
+
+
+END;</pre>	</td></tr>
+</table></div>

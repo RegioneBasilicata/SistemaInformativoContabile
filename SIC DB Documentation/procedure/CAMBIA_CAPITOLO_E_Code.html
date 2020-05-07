@@ -1,0 +1,111 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CAMBIA_CAPITOLO_E</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CAMBIA_CAPITOLO_E.html">Details</a></div></div>
+<div class="tab"><div><a href="CAMBIA_CAPITOLO_E_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CAMBIA_CAPITOLO_E_References.html">References</a></div></div>
+<div class="tab"><div><a href="CAMBIA_CAPITOLO_E_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CAMBIA_CAPITOLO_E_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure CAMBIA_CAPITOLO_E (p_anno in number, p_capitolo_attuale in varchar2, p_capitolo_nuovo in varchar2, p_doc_id in number,p_utente in number) IS
+
+l_exst number := 0;
+tot_reversali number := 0;
+anno_acc number := 0;
+importo_acc number := 0;
+
+begin
+
+      select count(*)  into l_exst
+      from fin_t_articoli
+      where anno = p_anno
+      and eu||codice = p_capitolo_nuovo;
+
+  if l_exst > 0 
+  then
+
+  begin
+   select segment8,document_amount into anno_acc,importo_acc
+   from fin_t_documenti
+   where doc_id = p_doc_id;
+   exception when no_data_found then anno_acc := 9999; importo_acc := 0;
+  end;
+   if anno_acc &lt; p_anno
+   then
+     update bas_ind set ind_cap = p_capitolo_nuovo where doc_id = p_doc_id and ind_anno >= p_anno;
+     commit;
+     update fin_t_accertamenti_residui set capitolo_spesa_corrente = p_capitolo_nuovo where anno_finanziario >= p_anno and doc_id_accertamento = p_doc_id;
+     commit;
+
+     for r in (select doc_id,open_balance_proposed,doc_sequence_value
+               from fin_t_documenti
+               where doc_type = 'REV'
+               and previous_doc_id = p_doc_id
+               and segment8 = p_anno
+               and segment2 = p_capitolo_attuale
+               and nvl(open_balance_proposed,0) > 0) loop
+
+       update fin_t_documenti set segment2 = p_capitolo_nuovo, LAST_UPDATED_BY = p_utente, LAST_UPDATE_DATE = sysdate where doc_id = r.doc_id;
+       commit;
+       update fin_t_bilancio set mandati_reversali_res = (mandati_reversali_res - nvl(r.open_balance_proposed,0)) where anno = p_anno and eu||articolo = p_capitolo_attuale;
+       update fin_t_bilancio set mandati_reversali_res = (mandati_reversali_res + nvl(r.open_balance_proposed,0)) where anno = p_anno and eu||articolo = p_capitolo_nuovo;
+          commit;
+       
+       insert into fin_t_documenti_modificati (DOC_TYPE, DOC_SEQUENCE_VALUE, ANNO_FINANZIARIO, DATA_VARIAZIONE, VARIATO_DA, SEGMENT2) 
+       values ('REV',r.doc_sequence_value,p_anno,sysdate,p_utente,p_capitolo_nuovo);
+       commit;
+     end loop;
+    else 
+     update bas_ind set ind_cap = p_capitolo_nuovo where doc_id = p_doc_id and ind_anno >= p_anno;
+     commit;
+     update fin_t_accertamenti_residui set capitolo_spesa_corrente = p_capitolo_nuovo where anno_finanziario >= p_anno and doc_id_accertamento = p_doc_id;
+     commit;
+
+     for r in (select doc_id,open_balance_proposed,doc_sequence_value
+               from fin_t_documenti
+               where doc_type = 'REV'
+               and previous_doc_id = p_doc_id
+               and segment8 = p_anno
+               and segment2 = p_capitolo_attuale
+               and nvl(open_balance_proposed,0) > 0) loop
+
+       update fin_t_documenti set segment2 = p_capitolo_nuovo, LAST_UPDATED_BY = p_utente, LAST_UPDATE_DATE = sysdate where doc_id = r.doc_id;
+       commit;
+         
+          update fin_t_bilancio set mandati_reversali_compe = (mandati_reversali_compe - nvl(r.open_balance_proposed,0)) where anno = p_anno and eu||articolo = p_capitolo_attuale;
+          update fin_t_bilancio set mandati_reversali_compe = (mandati_reversali_compe + nvl(r.open_balance_proposed,0)) where anno = p_anno and eu||articolo = p_capitolo_nuovo;
+         
+          commit;
+       
+       insert into fin_t_documenti_modificati (DOC_TYPE, DOC_SEQUENCE_VALUE, ANNO_FINANZIARIO, DATA_VARIAZIONE, VARIATO_DA, SEGMENT2) 
+       values ('REV',r.doc_sequence_value,p_anno,sysdate,p_utente,p_capitolo_nuovo);
+       commit;
+    
+     end loop;
+      -- in caso di accertamento di competenza aggiorno il capitolo anche sulla fin_t_documenti e anche i dati di bilancio
+          update fin_t_documenti set segment2 = p_capitolo_nuovo, LAST_UPDATED_BY = p_utente, LAST_UPDATE_DATE = sysdate where doc_id = p_doc_id;
+          commit;
+          update fin_t_bilancio set impegni_accertamenti_compe = (impegni_accertamenti_compe - nvl(importo_acc,0)) where anno = p_anno and eu||articolo = p_capitolo_attuale;
+          update fin_t_bilancio set impegni_accertamenti_compe = (impegni_accertamenti_compe + nvl(importo_acc,0)) where anno = p_anno and eu||articolo = p_capitolo_nuovo;
+          commit;
+
+  end if;
+
+
+
+ end if;
+
+end;</pre>	</td></tr>
+</table></div>

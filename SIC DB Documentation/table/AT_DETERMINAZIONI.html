@@ -1,0 +1,191 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AT_DETERMINAZIONI</h2>
+<div class="tabs clearfix">
+
+<div class="tab" id="current"><div><a href="AT_DETERMINAZIONI.html">Colonne</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Flashback.html">Flashback</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="AT_DETERMINAZIONI_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Colonne"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>COLUMN_NAME</th>
+	<th>DATA_TYPE</th>
+	<th>NULLABLE</th>
+	<th>DATA_DEFAULT</th>
+	<th>COLUMN_ID</th>
+	<th>COMMENTS</th>
+</tr>
+	<tr>
+<td>ID_ATTO</td>
+<td>NUMBER(10,0)</td>
+<td>No</td>
+<td>null</td>
+<td>1</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_STRUTTURA</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>COD_STRUTTURA</td>
+<td>VARCHAR2(30 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_ISTRUTTORE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_RESPONSABILE_PO</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_DIRIGENTE</td>
+<td>VARCHAR2(100 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OGGETTO</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>NUM_ALLEGATI</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>DESC_TIPO_PUBBLICAZIONE</td>
+<td>VARCHAR2(50 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TESTO</td>
+<td>VARCHAR2(4000 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_SOGG_A_PRIVACY</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_NESSUNA_OP</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_IMP_LIQ_CONT</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_IMPPRNT_LIQ_CONT</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_LIQ_IMPREC</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_ACCERTAMENTO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_RIDECO_IMPEGNO</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_RID_PREIMP_DADELIB</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_RIDUZ_LIQUIDAZ</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>FL_RETTIF_CONTABILI</td>
+<td>VARCHAR2(1 BYTE)</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+	</tr>
+</table></div>

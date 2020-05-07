@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>U_CONSUNTIVO_PERENTI_SUCC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="U_CONSUNTIVO_PERENTI_SUCC.html">Details</a></div></div>
+<div class="tab"><div><a href="U_CONSUNTIVO_PERENTI_SUCC_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="U_CONSUNTIVO_PERENTI_SUCC_References.html">References</a></div></div>
+<div class="tab"><div><a href="U_CONSUNTIVO_PERENTI_SUCC_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="U_CONSUNTIVO_PERENTI_SUCC_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE             "U_CONSUNTIVO_PERENTI_SUCC" 
+(w_anno in number,w_capitolo in varchar2
+,w_man_rev_residui out number
+,w_pag_per_anno1 in out number, w_pag_per_anno2 in out number,w_pag_per_anno3 in out number,w_data_creazione in date) IS
+doc_id_impegno number;
+doc_id_storno_impegno number;
+doc_id_mandato number;
+pagamenti_successivi number(15,2);
+pagamenti_successivi_res number(15,2):=0;
+data_mov date:= nvl(w_data_creazione,to_date('3112'||w_anno,'ddmmyyyy'));
+
+cursor impegni is
+select  distinct
+nvl(jugd.document_amount,0) pv_importo_impegno,
+to_number(to_char(jugd.date_created,'yyyy')) pv_anno_impegno,
+jugd.doc_type pv_tipo_impegno,
+substr(bi.ind_cap,1,6) pv_capitolo_spesa,
+jugd.previous_doc_id pv_ndp_impegno,
+jugd.doc_id pv_doc_id_impegno
+from
+fina_documenti jugd,
+bas_ind   bi
+where
+jugd.doc_type in ('IMP','IMP-PER','IMP-DEF')
+and upper(nvl(jugd.proposal_status_flag,'B'))    &lt;> 'B'
+and upper(nvl(jugd.deletion_status_flag,'N')) &lt;> 'Y'
+and jugd.auditing_status_flag in ('T' ,'B')
+and jugd.gl_date is not null
+and jugd.period_name is not null
+and jugd.date_created is not null
+and nvl(jugd.segment8,0) &lt; w_anno
+AND bi.ind_cap = w_capitolo
+and to_char(jugd.data_perenzione,'yyyy') = w_anno
+and bi.doc_id = jugd.doc_id
+and bi.ind_anno = w_anno;
+
+
+cursor mandati is
+SELECT
+jugd.document_amount pv_importo_documento_mandato,
+to_number(to_char(jugd.date_created,'yyyy'))    pv_anno_mandato,
+--jugd1.doc_id pv_numero_documento_liq,
+jugd2.doc_id  pv_numero_documento_impegno,
+jugd3.date_created pv_data_storno_mandato
+FROM
+fina_documenti jugd,
+fina_documenti         jugd1, /* liquidazione */
+fina_documenti         jugd2, /* impegno */
+fina_documenti         jugd3 /* movimento_storno */
+WHERE
+upper(jugd.doc_type)                                                                                                                                          = 'MAND' and
+upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z')) ='PI' and
+upper(nvl(jugd.deletion_status_flag,'N'))  &lt;> 'Y'     and
+nvl(jugd.segment8,0) = w_anno    and
+jugd.date_created &lt;= data_mov and--nvl(jugd.date_created,w_data_creazione) &lt;= w_data_creazione and
+jugd.previous_doc_id = jugd1.doc_id and
+jugd1.previous_doc_id= jugd2.doc_id and
+jugd2.doc_id = doc_id_impegno and
+jugd.doc_id = jugd3.previous_doc_id(+)    and
+upper(jugd3.doc_type(+)) = 'ST-MAND' and
+upper(nvl(jugd3.proposal_status_flag(+),'Z'))||upper(nvl(jugd3.auditing_status_flag(+),'Z')) ='PI';
+
+
+BEGIN
+
+pagamenti_successivi := 0;
+for i in impegni loop
+ doc_id_impegno := i.pv_doc_id_impegno;
+
+-- calcolo mandati
+ for m in mandati loop
+     if m.pv_data_storno_mandato is null
+     then pagamenti_successivi := nvl(pagamenti_successivi,0)  + nvl(m.pv_importo_documento_mandato,0);
+     pagamenti_successivi_res := nvl(pagamenti_successivi_res,0)  + nvl(m.pv_importo_documento_mandato,0);
+ end if;
+ end loop;
+-- fine calcolo mandati
+  if i.pv_anno_impegno = w_anno - 1
+   then w_pag_per_anno1 := w_pag_per_anno1 + nvl(pagamenti_successivi_res,0);
+ --  w_pag_per_anno2 := w_pag_per_anno2 + 0;
+ --  w_pag_per_anno3 := w_pag_per_anno3 + 0;
+   elsif i.pv_anno_impegno = w_anno - 2
+   then 
+   --w_pag_per_anno1 := w_pag_per_anno1 + 0;
+   w_pag_per_anno2 := w_pag_per_anno2 + nvl(pagamenti_successivi_res,0);
+   --w_pag_per_anno3 := w_pag_per_anno3 + 0;
+   else 
+   --w_pag_per_anno1 := w_pag_per_anno1 + 0;
+   --w_pag_per_anno2 := w_pag_per_anno2 + 0;
+   w_pag_per_anno3 := w_pag_per_anno3 +  nvl(pagamenti_successivi_res,0);
+   end if;
+   pagamenti_successivi_res := 0;
+end loop;
+   w_man_rev_residui := nvl(pagamenti_successivi,0);
+   
+END;</pre>	</td></tr>
+</table></div>

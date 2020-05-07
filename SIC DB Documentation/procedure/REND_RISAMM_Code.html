@@ -1,0 +1,1068 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>REND_RISAMM</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="REND_RISAMM.html">Details</a></div></div>
+<div class="tab"><div><a href="REND_RISAMM_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="REND_RISAMM_References.html">References</a></div></div>
+<div class="tab"><div><a href="REND_RISAMM_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="REND_RISAMM_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure rend_risamm (p_anno in number, p_utente in varchar2) as
+
+campoman01 number := 0;
+campoman02 number := 0;
+campoman03 number := 0;
+campoman04 number := 0;
+campoman05 number := 0;
+campoman06 number := 0;
+campoman07 number := 0;
+campoman08 number := 0;
+campoman09 number := 0;
+campoman020 number := 0;
+campoman021 number := 0;
+campoman022 number := 0;
+
+campoman01_c number := 0;
+campoman02_c number := 0;
+campoman03_c number := 0;
+campoman04_c number := 0;
+campoman05_c number := 0;
+campoman06_c number := 0;
+campoman07_c number := 0;
+campoman08_c number := 0;
+campoman09_c number := 0;
+campoman020_c number := 0;
+campoman021_c number := 0;
+campoman022_c number := 0;
+
+desc_campoman01 varchar2(2000); 
+desc_campoman02 varchar2(2000);
+desc_campoman03 varchar2(2000);
+desc_campoman04 varchar2(2000);
+desc_campoman05 varchar2(2000);
+desc_campoman06 varchar2(2000);
+desc_campoman07 varchar2(2000);
+desc_campoman08 varchar2(2000);
+desc_campoman09 varchar2(2000);
+desc_campoman020 varchar2(2000);
+desc_campoman021 varchar2(2000);
+desc_campoman022 varchar2(2000);
+
+fondo_cassa_i number := 0;
+fondo_cassa_i_c number := 0; --fondo cassa iniziale del Consiglio per Consolidato
+
+risc_res    number := 0;  
+risc_comp   number := 0;
+risc_tot    number := 0;
+resatt_res  number := 0;  
+resatt_comp number := 0;
+resatt_tot  number := 0;
+
+pag_res      number := 0;   
+pag_comp     number := 0; 
+pag_tot      number := 0; 
+respass_res  number := 0;  
+respass_comp number := 0; 
+respass_tot  number := 0;
+
+saldo_cassa_3112 number := 0;
+pag_az_esec_3112 number := 0;
+fondo_cassa_3112 number := 0;
+
+fpv_contocorr number := 0;
+fpv_contocap number := 0;
+
+risult_amm_3112 number := 0;
+
+tot_parte_accanton number := 0;
+tot_parte_vincolata number := 0;
+tot_parte_dest_investim number := 0;
+tot_parte_disponibile number := 0;
+
+disavanzo_deb_au number := 0;
+disavanzo_deb_au_c number := 0;
+
+c_riga number := 1;
+
+
+
+begin
+
+ delete FIN_T_RENDICONTO_RISAMM where anno = p_anno and utente = p_utente;
+ commit;
+
+ fondo_cassa_i := fondo_cassa_iniziale(p_anno);	
+ 
+ 
+  -- per gestire il calcolo nel consolidato
+ if p_utente = 'CONSOLIDATO'
+  then fondo_cassa_i_c := sic_consiglio.fondo_cassa_iniziale(p_anno);	
+ end if;
+  
+  fondo_cassa_i := fondo_cassa_i + fondo_cassa_i_c;
+
+ insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Fondo cassa al 1° gennaio'
+	 ,nvl(fondo_cassa_i,0)
+	 ,'RISAMM_FondoCassa1Gen'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+ SELECT NVL(SUM(NVL(riscossioni_pagamenti_res,0)),0),
+        NVL(SUM(NVL(riscossioni_pagamenti_compe,0)),0),
+        NVL(SUM(NVL(riscossioni_pagamenti_totale,0)),0),
+        NVL(SUM(NVL(rimanenze_residui,0)),0),
+        NVL(SUM(NVL(residui_competenza,0)),0),
+        NVL(SUM(NVL(residui_finali,0)),0)
+ INTO risc_res,
+      risc_comp,
+      risc_tot,
+      resatt_res,
+      resatt_comp,
+      resatt_tot
+ FROM fin_t_consuntivo_excel 
+ WHERE anno_consuntivo = p_anno AND 
+       tipo_capitolo = 'E' AND 
+       utente = p_utente;
+
+-- **** RISCOSSIONI ********
+  insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,RESIDUI,COMPETENZA,TOTALE,TAG_BDAP_RESIDUO,TAG_BDAP_COMPETENZA,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'RISCOSSIONI'
+	 ,'(+)'
+	 ,nvl(risc_res,0)
+	 ,nvl(risc_comp,0)
+	 ,nvl(risc_tot,0)
+	 ,'RISAMM_RiscossioniResidui'
+	 ,'RISAMM_RiscossioniCompetenza'
+	 ,'RISAMM_Riscossioni'
+	);
+	commit;
+	c_riga := c_riga + 1;
+-- *************************
+
+ SELECT NVL(SUM(NVL(riscossioni_pagamenti_res,0)),0),
+        NVL(SUM(NVL(riscossioni_pagamenti_compe,0)),0),
+        NVL(SUM(NVL(riscossioni_pagamenti_totale,0)),0),
+        NVL(SUM(NVL(rimanenze_residui,0)),0),
+        NVL(SUM(NVL(residui_competenza,0)),0),
+        NVL(SUM(NVL(residui_finali,0)),0)
+ INTO pag_res,
+      pag_comp,
+      pag_tot,
+      respass_res,
+      respass_comp,
+      respass_tot
+ FROM fin_t_consuntivo_excel 
+ WHERE anno_consuntivo = p_anno AND 
+       tipo_capitolo = 'U' AND 
+       utente = p_utente;
+
+-- ****** PAGAMENTI **********
+     insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,RESIDUI,COMPETENZA,TOTALE,TAG_BDAP_RESIDUO,TAG_BDAP_COMPETENZA,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'PAGAMENTI'
+	 ,'(-)'
+	 ,nvl(pag_res,0)
+	 ,nvl(pag_comp,0)
+	 ,nvl(pag_tot,0)
+	 ,'RISAMM_PagamentiResidui'
+	 ,'RISAMM_PagamentiCompetenza'
+	 ,'RISAMM_Pagamenti'
+	);
+	commit;
+	c_riga := c_riga + 1;
+-- ******************************
+
+saldo_cassa_3112 := fondo_cassa_i + risc_tot - pag_tot;
+pag_az_esec_3112 := 0;
+fondo_cassa_3112 := saldo_cassa_3112 - pag_az_esec_3112; 
+
+-- ****** SALDO CASSA ********
+   insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'SALDO DI CASSA AL 31 DICEMBRE'
+	 ,'(=)'
+	 ,nvl(saldo_cassa_3112,0)
+	 ,'RISAMM_SaldoCassa31Dic'
+	);
+	commit;
+	c_riga := c_riga + 1;
+-- *****************************
+
+-- *** PAGAMENTI AZIONI ESECUTIVE ********
+
+ insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'PAGAMENTI per azioni esecutive non regolarizzate al 31 dicembre'
+	 ,'(-)'
+	 ,nvl(pag_az_esec_3112,0)
+	 ,'RISAMM_PagamentiAzioniEsecutiveNonRegolarizzate31Dic'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+-- *** FONDO CASSA 3112 ********
+
+ insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'FONDO DI CASSA AL 31 DICEMBRE'
+	 ,'(=)'
+	 ,nvl(fondo_cassa_3112,0)
+	 ,'RISAMM_FondoCassa31Dic'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+-- **** RESIDUI ATTIVI ********
+  insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,RESIDUI,COMPETENZA,TOTALE,TAG_BDAP_RESIDUO,TAG_BDAP_COMPETENZA,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'RESIDUI ATTIVI'
+	 ,'(+)'
+	 ,nvl(resatt_res,0)
+	 ,nvl(resatt_comp,0)
+	 ,nvl(resatt_tot,0)
+	 ,'RISAMM_ResiduiAttiviResidui'
+	 ,'RISAMM_ResiduiAttiviCompetenza'
+	 ,'RISAMM_ResiduiAttivi'
+	);
+	commit;
+	c_riga := c_riga + 1;
+-- *************************
+
+-- **** di cui derivanti da accertamenti di tributi effettuati sulla base della stima del dipartimento delle finanze ********
+  insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,RESIDUI,COMPETENZA,TOTALE,TAG_BDAP_RESIDUO,TAG_BDAP_COMPETENZA,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'di cui derivanti da accertamenti di tributi effettuati sulla base della stima del dipartimento delle finanze'
+	 ,null
+	 ,0
+	 ,0
+	 ,0
+	 ,null
+	 ,null
+	 ,'RISAMM_ResiduiAttiviDaAccertamentiTributi'
+	);
+	commit;
+	c_riga := c_riga + 1;
+-- *************************
+
+
+
+-- **** RESIDUI PASSIVI ********
+  insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,RESIDUI,COMPETENZA,TOTALE,TAG_BDAP_RESIDUO,TAG_BDAP_COMPETENZA,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'RESIDUI PASSIVI'
+	 ,'(-)'
+	 ,nvl(respass_res,0)
+	 ,nvl(respass_comp,0)
+	 ,nvl(respass_tot,0)
+	 ,'RISAMM_ResiduiPassiviResidui'
+	 ,'RISAMM_ResiduiPassiviCompetenza'
+	 ,'RISAMM_ResiduiPassivi'
+	);
+	commit;
+	c_riga := c_riga + 1;
+-- *************************
+
+ SELECT NVL(SUM(NVL(fpv,0)),0) 
+ INTO fpv_contocorr
+ FROM fin_t_consuntivo_excel
+ WHERE tipo_capitolo = 'U' AND 
+       anno_consuntivo = p_anno AND 
+       utente = p_utente AND 
+       -- nvl(nb_titolo,'99') = '1';  -- 08/05/2014 dott.lavieri
+       nvl(nb_titolo,'99') != '2';
+
+ SELECT NVL(SUM(NVL(fpv,0)),0) 
+ INTO fpv_contocap
+ FROM fin_t_consuntivo_excel
+ WHERE tipo_capitolo = 'U' AND 
+       anno_consuntivo = p_anno AND 
+       utente = p_utente AND 
+       nvl(nb_titolo,'99') = '2';
+
+-- *** FPV CORRENTE ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'FONDO PLURIENNALE VINCOLATO PER SPESE CORRENTI'
+	 ,'(-)'
+	 ,nvl(fpv_contocorr,0)
+	 ,'RISAMM_FondoPluriennaleVincolatoSpeseCorrenti'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+-- *** FPV CAPITALE ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'FONDO PLURIENNALE VINCOLATO PER SPESE IN CONTO CAPITALE'
+	 ,'(-)'
+	 ,nvl(fpv_contocap,0)
+	 ,'RISAMM_FondoPluriennaleVincolatoSpeseContoCapitale'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+
+ risult_amm_3112 := fondo_cassa_3112 + resatt_tot - respass_tot - fpv_contocap - fpv_contocorr;
+
+ -- *** RISULTATO AMM. 3112 ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,SEGNO_TOTALE
+  	,TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'RISULTATO DI AMMINISTRAZIONE AL 31 DICEMBRE '||p_anno
+	 ,'(=)'
+	 ,nvl(risult_amm_3112,0)
+	 ,'RISAMM_RisultatoAmministrazione31Dic'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ -- *** Composizione Risultato Amm. 3112 ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Composizione del risultato di amministrazione al 31 dicembre '||p_anno	 
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ -- *** Parte Accantonata ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Parte Accantonata'	 
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman01,
+      campoman01
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN01';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+
+if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman01_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN01';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+ end if;
+
+  -- *** FCDDE ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman01
+	 ,nvl(campoman01,0) + nvl(campoman01_c,0)
+	 ,'RISAMM_AccantFondoCreditiDubbiaEsigibilita'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman02,
+      campoman02
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN02';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+
+
+if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman02_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN02';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+  -- *** Residui Perenti ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman02
+	 ,nvl(campoman02,0) + nvl(campoman02_c,0)
+	 ,'RISAMM_AccantResiduiPerenti'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman03,
+      campoman03
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+ 
+       nome_campo_report = 'CAMPOMAN03';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman03_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN03';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ end if;
+
+ -- *** Fondo anticipazioni liquidità DL 35 del 2013 e successive modifiche e rifinanziamenti ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman03
+	 ,nvl(campoman03,0) + nvl(campoman03_c,0)
+	 ,'RISAMM_AccantFondoAnticipazioniLiquidita'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman04,
+      campoman04
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN04';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+ if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman04_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN04';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+  -- *** Fondo perdite società partecipate ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman04
+	 ,nvl(campoman04,0) + nvl(campoman04_c,0)
+	 ,'RISAMM_AccantFondoPerditeSocietaPartecipate'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+
+
+
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman021,
+      campoman021
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN21';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman021_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN21';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+   -- *** Fondo contenzioso ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman021
+	 ,nvl(campoman021,0) +nvl(campoman021_c,0)
+	 ,'RISAMM_AccantFondoContenzioso'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman022,
+      campoman022
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN22';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman022_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN22';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ end if;
+ 
+   -- *** Altri accantonamenti ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman022
+	 ,nvl(campoman022,0) + nvl(campoman022_c,0)
+	 ,'RISAMM_AccantAltri'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ tot_parte_accanton := campoman01 + campoman02 + campoman03 + campoman04 + campoman021 + campoman022 + campoman01_c + campoman02_c + campoman03_c + campoman04_c + campoman021_c + campoman022_c;
+
+	values
+ -- *** PArte accantonata totale ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Totale parte accantonata (B)'
+	 ,nvl(tot_parte_accanton,0)
+	 ,'RISAMM_ParteAccantonataTotale'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+  -- *** Parte Vincolata ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Parte Vincolata'	 
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman05,
+      campoman05
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN05';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+ if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman05_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN05';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+  -- *** Vincoli derivanti da leggi e dai principi contabili ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman05
+	 ,nvl(campoman05,0) + nvl(campoman05_c,0)
+	 ,'RISAMM_VincoliLeggiPrincipiContabili'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman06,
+      campoman06
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN06';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+  if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman06_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN06';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+ -- *** Vincoli derivanti da trasferimenti ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	);
+	 ,desc_campoman06
+	 ,nvl(campoman06,0) + nvl(campoman06_c,0)
+	 ,'RISAMM_VincoliTrasferimenti'
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman07,
+      campoman07
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN07';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+
+  if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman07_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN07';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+-- *** Vincoli derivanti dalla contrazione di mutui ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman07
+	 ,nvl(campoman07,0) + nvl(campoman07_c,0)
+	 ,'RISAMM_VincoliContrazioneMutui'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman08,
+      campoman08
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN08';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+   if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman08_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN08';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+end if;
+
+-- *** Vincoli formalmente attribuiti dall'ente  ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman08
+	 ,nvl(campoman08,0) + nvl(campoman08_c,0)
+	 ,'RISAMM_VincoliAttributiEnte'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman09,
+      campoman09
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN09';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ 
+    if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman09_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN09';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+  end if;
+-- *** Altri vincoli  ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman09
+	 ,nvl(campoman09,0) + nvl(campoman09_c,0)
+	 ,'RISAMM_VincoliAltri'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+ tot_parte_vincolata := campoman05 + campoman06 + campoman07 + campoman08 + campoman09 + campoman05_c + campoman06_c + campoman07_c + campoman08_c + campoman09_c; 
+
+  -- *** TOTALE parte Vincolata ********
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Totale parte vincolata (C)'
+	 ,nvl(tot_parte_vincolata,0)
+	 ,'RISAMM_ParteVincolataTotale'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+
+ BEGIN
+ SELECT descrizione_campo_report,
+        NVL(importo,0)
+ INTO desc_campoman020,
+      campoman020
+ FROM fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN20';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+
+    if p_utente = 'CONSOLIDATO'
+ then 
+ BEGIN
+ SELECT 
+        NVL(importo,0)
+ INTO  campoman020_c
+ FROM sic_consiglio.fnd_reports_importi_man
+ WHERE valore_parametro_anno = p_anno AND
+       id_report = 64 AND
+       nome_campo_report = 'CAMPOMAN20';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+ end if;
+ 
+ -- *** Parte destinata Investimenti ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,desc_campoman020
+ 	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+
+-- *** TOTALE parte destinata investimenti ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Totale parte destinata agli investimenti (D)'
+	 ,nvl(campoman020,0) + nvl(campoman020_c,0)
+	 ,'RISAMM_ParteDestinataInvestimentiTotale'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************
+ tot_parte_disponibile :=  NVL(risult_amm_3112,0) - NVL(tot_parte_accanton,0) - NVL(tot_parte_vincolata,0) - (nvl(campoman020,0) + nvl(campoman020_c,0));
+
+-- *** TOTALE parte disponibile ********
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'Totale parte disponibile (E=A-B-C-D)'
+	 ,nvl(tot_parte_disponibile,0)
+	 ,'RISAMM_ParteDisponibile'
+	);
+	commit;
+	c_riga := c_riga + 1;
+
+-- ********************************  
+
+-- *** F) di cui Disavanzo da debito autorizzato e non contratto ********
+    select nvl(sum(nvl(disavanzo_debito_au,0)),0) into disavanzo_deb_au
+    from fin_t_dati_generali
+    where anno_finanziario = p_anno;
+    
+    if p_utente = 'CONSOLIDATO'
+    then
+    end if;
+    select nvl(sum(nvl(disavanzo_debito_au,0)),0) into disavanzo_deb_au_c
+    from sic_consiglio.fin_t_dati_generali
+    where anno_finanziario = p_anno;
+    
+
+	insert into fin_t_rendiconto_risamm (DATA_GENERAZIONE,UTENTE,RIGA,ANNO,DESCRIZIONE,
+  	TOTALE,TAG_BDAP_TOTALE)
+	values
+	(sysdate
+	 ,p_utente
+	 ,c_riga
+	 ,p_anno
+	 ,'F) di cui Disavanzo da debito autorizzato e non contratto'
+	 ,disavanzo_deb_au+disavanzo_deb_au_c
+	 ,'RISAMM_DisavanzoDerivanteDebitoAutorizzatoNonContratto'
+	);
+	commit;
+
+-- ******************************** 
+
+end;</pre>	</td></tr>
+</table></div>

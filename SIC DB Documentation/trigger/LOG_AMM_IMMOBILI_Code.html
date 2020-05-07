@@ -1,0 +1,43 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>LOG_AMM_IMMOBILI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="LOG_AMM_IMMOBILI.html">Details</a></div></div>
+<div class="tab"><div><a href="LOG_AMM_IMMOBILI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="LOG_AMM_IMMOBILI_References.html">References</a></div></div>
+<div class="tab"><div><a href="LOG_AMM_IMMOBILI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="LOG_AMM_IMMOBILI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER LOG_AMM_IMMOBILI 
+after delete or update
+on BI_AMM_IMM
+for each row
+declare
+tipo_aggiornamento varchar2(1);
+data_aggiornamento date;
+begin
+if updating
+   then tipo_aggiornamento := 'V';
+   else tipo_aggiornamento := 'E';
+end if;
+data_aggiornamento := sysdate;
+insert into tb_log_ammortamenti
+(TIPO_BENE, VAR_EL, COD_INV, ANNO, TIPO_TAB_AMM,  PERC_AMM_CIV, PERC_AMM_FISC, 
+ AMM_ANT, AMM_CIVIL, AMM_IND, AMM_ORD, FONDO_PERD, MODIFICATO_DA, MODIFICATO_IL )
+values
+('I', tipo_aggiornamento, :OLD.COD_CESP, :OLD.ANNO, :OLD.TIPO_TAB_AMM, :OLD.PERC_AMM_CIV, :OLD.PERC_AMM_FISC, 
+ :OLD.AMM_ANT, :OLD.AMM_CIVIL, :OLD.AMM_IND, :OLD.AMM_ORD, :OLD.FONDO_PERD, nvl(v('APP_USER'),user), data_aggiornamento);
+end;
+</pre>	</td></tr>
+</table></div>

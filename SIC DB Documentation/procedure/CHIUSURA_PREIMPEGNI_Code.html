@@ -1,0 +1,180 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CHIUSURA_PREIMPEGNI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CHIUSURA_PREIMPEGNI.html">Details</a></div></div>
+<div class="tab"><div><a href="CHIUSURA_PREIMPEGNI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CHIUSURA_PREIMPEGNI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CHIUSURA_PREIMPEGNI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CHIUSURA_PREIMPEGNI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE chiusura_preimpegni (p_anno in number,p_riconferma varchar2) IS
+
+/*
+
+devi cancellare il campo preimpegno precedente dalla documenti e creare il campo preimpegno_automatico
+stessa cosa per la log_documenti e gestire il tutto nel trigger di log.
+
+
+
+operazioni da svolgere
+  prendere in considerazione tutti i preimpegni con open_balanced_proposed &lt;> 0
+  confrontare document_amount e open_balanced_proposed
+  . se = 
+    - cancellare il preimpegno 
+    - Aggiornare fina_bilancio cancellando la quota di preimpegno
+
+  . se &lt;>   
+    - trasformare il document_amount = document_amount - open_balanced_proposed
+    - azzerare l'open_balanced_proposed
+    - Aggiornare fina_bilancio cancellando la quota pari all'open_balanced_proposed
+
+
+
+**************************************************************************
+p_riconferma = 'S' per la cancellazione standard richiesta prima del Consuntivo (consente all'Ufficio Ragioneria di riconfermate il PRE-IMP nell'anno successivo
+p_riconferma = 'N' quando viene lanciata post Riacceramento 
+**************************************************************************
+*/
+
+ wattivita varchar2(240);
+ 
+ confermabile varchar2(1) := p_riconferma;
+
+ cursor preimpegni is 
+  select 
+  doc_id, 
+  doc_type, 
+  doc_sequence_value, 
+  date_created, 
+  open_balance_proposed, 
+  document_amount, 
+  deletion_status_flag, 
+  deletion_reason, 
+  description, 
+  last_updated_by, 
+  last_update_date, 
+  segment2, 
+  segment4, 
+  segment8, 
+  segment3, 
+  segment7, 
+  segment9, 
+  segment11,
+  attribute13,
+  attribute14
+  from fin_t_documenti 
+  where segment8 = p_anno
+  and 	nvl(deletion_status_flag,'N') &lt;> 'Y' 
+	and 	proposal_status_flag||auditing_status_flag = 'PI'
+	and		doc_type = 'PRE-IMP' 
+	and		nvl(open_balance_proposed,0) &lt;> 0 
+  order by doc_sequence_value;
+
+
+BEGIN
+
+ if p_anno &lt; to_char(sysdate,'yyyy')
+  then
+
+  for a in preimpegni loop
+
+
+-- I° caso preimpegno mai utilizzato
+  if a.document_amount = a.open_balance_proposed
+  	 then 
+-- aggiorno bilancio
+	   begin
+	    update fin_t_bilancio b
+		  set	b.pre_impegni = b.pre_impegni - a.document_amount			
+		  where b.anno = a.segment8 and
+	  	      b.eu||b.articolo = a.segment2;
+	   end;
+
+-- cancello il preimpegno 
+	   begin
+	    update fin_t_documenti b
+		  set	b.deletion_reason = 'Annullato in automatico a chiusura Anno '||p_anno,
+		      b.deletion_status_flag = 'Y'
+		  where b.doc_id = a.doc_id;
+	   end;
+
+-- segnalo l'attività svolta
+     wattivita := 'Eliminato';    
+
+-- II° caso preimpegno utilizzato
+	   else
+
+-- aggiorno bilancio
+	 begin
+	  update fin_t_bilancio b
+		set	b.pre_impegni = b.pre_impegni - a.open_balance_proposed			
+		where b.anno = a.segment8 and
+	  	    b.eu||b.articolo = a.segment2;
+	 end;
+
+-- aggiorno preimpegno portando a zero l'open balance proposed
+	 begin
+	  update fin_t_documenti b
+		set	b.open_balance_proposed = 0,
+		    b.revertion_reason = 'Importo di '||to_char(a.open_balance_proposed,'9G999G999G999G999G990D00')||' Ridotto in automatico a chiusura Anno '||p_anno,
+		    b.document_amount = a.document_amount - a.open_balance_proposed
+		where b.doc_id = a.doc_id;
+	 end;
+
+-- segnalo l'attività svolta
+     wattivita := 'Ridotto';    
+
+  end if;
+
+ if a.attribute13 not in ('DETERMINA','DELIBERA','D.G.R.')--(a.attribute13 = 'AG' or a.attribute13 ='PREIMP-PROVV')
+  then confermabile := 'N';
+ end if;
+ 
+-- inserisco i dati del preimpegno nella tabella di appoggio
+		insert into fin_t_preimpegni_abbattuti
+		(ANNO
+		,PREIMPEGNO
+		,OGGETTO
+		,IMPORTO
+		,RESIDUO
+		,ATTIVITA_SVOLTA
+		,NUOVO_PREIMPEGNO
+		,CAPITOLO
+		,CONFERMABILE_SN
+        ,attribute13
+        ,attribute14) 
+		values
+	  (
+	   p_anno,
+   	 a.doc_sequence_value,
+     a.description,
+     a.document_amount,
+     a.open_balance_proposed,
+     wattivita,
+     null,
+     a.segment2,   
+	   confermabile,
+       a.attribute13,
+       a.attribute14);
+
+
+   commit;
+
+
+   END LOOP;
+ END if;
+
+END;</pre>	</td></tr>
+</table></div>

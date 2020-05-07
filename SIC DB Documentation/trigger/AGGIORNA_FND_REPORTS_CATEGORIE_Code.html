@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>AGGIORNA_FND_REPORTS_CATEGORIE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_CATEGORIE.html">Details</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_CATEGORIE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_CATEGORIE_References.html">References</a></div></div>
+<div class="tab"><div><a href="AGGIORNA_FND_REPORTS_CATEGORIE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="AGGIORNA_FND_REPORTS_CATEGORIE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+trigger aggiorna_fnd_reports_categorie
+	AFTER INSERT OR DELETE OR UPDATE ON fnd_reports_categorie
+	FOR EACH ROW
+	DECLARE
+
+		wcodice NUMBER;
+		wdescrizione VARCHAR2(2000);
+		wcodice_padre NUMBER;
+
+	BEGIN
+
+		IF INSERTING OR UPDATING THEN
+
+			wcodice := :new.codice;
+			wdescrizione := :new.descrizione;
+			wcodice_padre := :new.codice_padre;
+
+			IF UPDATING THEN
+
+				BEGIN
+
+					delete from SIC_ALSIA.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_APT.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_ARBEA.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_ARDSU.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_ARPAB.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_CONSIGLIO.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_PARCOGALLIPOLI.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_PARCOMURGIA.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_LAB.fnd_reports_categorie where codice = wcodice;
+
+				END;
+
+			END IF;
+
+			BEGIN
+
+				insert into SIC_ALSIA.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_APT.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_ARBEA.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_ARDSU.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_ARPAB.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_CONSIGLIO.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_PARCOGALLIPOLI.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_PARCOMURGIA.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+				insert into SIC_LAB.fnd_reports_categorie (codice, descrizione, codice_padre) values (wcodice, wdescrizione, wcodice_padre);
+
+			END;
+
+		ELSE
+
+			wcodice := :old.codice;
+
+			BEGIN
+
+					delete from SIC_ALSIA.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_APT.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_ARBEA.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_ARDSU.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_ARPAB.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_CONSIGLIO.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_PARCOGALLIPOLI.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_PARCOMURGIA.fnd_reports_categorie where codice = wcodice;
+					delete from SIC_LAB.fnd_reports_categorie where codice = wcodice;
+
+			END;
+
+		END IF;
+
+	END aggiorna_fnd_reports_categorie;</pre>	</td></tr>
+</table></div>

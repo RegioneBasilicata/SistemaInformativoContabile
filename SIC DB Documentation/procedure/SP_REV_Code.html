@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SP_REV</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SP_REV.html">Details</a></div></div>
+<div class="tab"><div><a href="SP_REV_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SP_REV_References.html">References</a></div></div>
+<div class="tab"><div><a href="SP_REV_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SP_REV_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure SP_REV(p_anno in number, p_data in date) authid definer as
+
+esercizio number := p_anno;
+
+id_causale number := 0;
+descr_causale varchar2(2000);
+id_rev number;
+
+id_pn_testa number := 0;
+indice number :=0; --indice
+conto_dare number;
+conto_avere number;
+p_data_mov date := nvl(p_data,to_date('3112'||esercizio,'ddmmyyyy'));
+
+cursor rev is
+select distinct d.date_created data_doc,
+d.doc_id doc_id
+,d.description||' Reversale n.'||d.doc_sequence_value||' - Capitolo '||d.segment2 descrizione
+,nvl(d.document_amount,0) importo_rev
+,d.created_by utente
+,a.conto_sanita conto
+,p.conto_partite_giro
+from fin_t_documenti d
+,fin_t_articoli a
+, sa_piano_dei_conti p
+, fin_distinte_rev_testata x
+, fin_distinte_rev_dettaglio y
+where d.segment8 = esercizio
+and d.doc_type = 'REV'
+and nvl(d.open_balance_proposed,0) > 0 
+--and trunc(d.date_created,'dd') &lt;= trunc(p_data_mov,'dd')
+and a.anno = d.segment8
+and a.eu||a.codice = d.segment2 
+and nvl(a.sanita_sn,'X') = 'S'
+and p.codice = a.conto_sanita
+and y.ANNO_FINANZIARIO = d.segment8
+and y.NUMERO_REVERSALE = d.doc_sequence_value
+and nvl(y.TIPO_REVERSALE,'X') = 'V'
+and x.ANNO_FINANZIARIO = y.ANNO_FINANZIARIO
+and x.NUMERO_DISTINTA = y.NUMERO_DISTINTA
+and nvl(x.DOCUMENTI_SANITA,'X') = 'S';--and nvl(a.conto_sanita,'X') &lt;> 'X'; --and nvl(a.conto_sanita,'X') in ('2','5','6')
+
+
+BEGIN
+
+-- rilevazione "Incasso della rimessa della quota del finanziamento del SSN nei conti di Tesoreria Sanità"
+for i in rev loop
+
+id_rev := i.doc_id;
+id_pn_testa := 0;
+-- trovo la causale contabile relativa al capitolo
+  begin
+    select nvl(id,0),nvl(denominazione,'X')
+      into id_causale,descr_causale
+    from sa_causali_contabili
+    where capitolo = 'U00000'
+    and doc_type = 'IMP';
+    exception when no_data_found then id_causale:= 0; descr_causale := '';
+  end;
+ 
+  -- PRIMA NOTA TESTA
+  -- stacca id per sa_prima_nota_testa
+      select nvl(max(num_reg),0) + 1 into id_pn_testa
+      from sa_prima_nota_testa
+      where data = i.data_doc;
+    --FINE   
+    -- inserisco la testata in sa_prima_nota_testa
+    insert into sa_prima_nota_testa(DATA,NUM_REG,DOC_ID,DESCRIZIONE_MOV,SA_CC_ID,utente)
+    values
+    (i.data_doc,
+     id_pn_testa,
+     i.doc_id,
+     i.descrizione,
+     id_causale, --causale contabile "Incasso della rimessa della quota del finanziamento del SSN nei conti di Tesoreria Sanità
+     i.utente
+    );
+    commit;
+  -- FINE PNT
+  
+      -- stacco identificativo univoco e progressivo per il rigo della sa_prima_nota_corpo
+        SELECT sq_sapc.NEXTVAL into indice 
+        FROM dual;
+        -- ****
+        insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+        values
+        (i.data_doc,
+        id_pn_testa,
+         8, -- Tesoreria Sanità
+         indice,
+         'D',
+         nvl(i.importo_rev,0)
+        );
+        commit;
+  
+    -- stacco identificativo univoco e progressivo per il rigo della sa_prima_nota_corpo
+    SELECT sq_sapc.NEXTVAL into indice 
+    FROM dual;
+    -- ****
+    insert into sa_prima_nota_corpo (T_DATA,T_NUM_REG,ID_CONTO,PROGR,D_A,IMPORTO)
+    values
+    (i.data_doc,
+    id_pn_testa,
+    nvl(i.conto_partite_giro,i.conto), -- Crediti oppure se i.conto_partite_giro è not null Debito v/Regione
+    indice,
+    'A',
+    nvl(i.importo_rev,0)
+    );
+    commit;
+ 
+  -- FINE causali guidate
+ 
+  end loop;
+END;</pre>	</td></tr>
+</table></div>

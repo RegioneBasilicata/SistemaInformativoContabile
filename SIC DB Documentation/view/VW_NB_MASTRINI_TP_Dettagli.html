@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_NB_MASTRINI_TP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_NB_MASTRINI_TP.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_NB_MASTRINI_TP_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_NB_MASTRINI_TP_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_NB_MASTRINI_TP_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_NB_MASTRINI_TP_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2017-10-13</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2019-06-13</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_NB_MASTRINI_TP</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>1462</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>select m.DATA_REGISTRAZIONE
+,m.doc_id
+,m.expedient_id
+,t.ID_ANA id_cred_deb
+,t.DENOMINAZIONE_ANA creditore_debitore
+,m.CODICE_CONTO_BIL CONTO
+,m.DESC_CONTO_BIL DESCRIZIONE
+,decode(m.TIPO_CONTO_BIL, 'A', 'Attivo','P','Passivo','Economico') TIPO_CONTO
+,m.DESC_MOVIMENTO desc_movimento
+,SUM(DECODE(m.DARE_AVERE,'D',t.IMPORTO,0)) tot_dare
+,SUM(DECODE(m.DARE_AVERE,'A',t.IMPORTO,0)) tot_avere
+,(SUM(DECODE(m.DARE_AVERE,'D',t.IMPORTO,0)*decode(m.d_a_conto,'A',-1,1))+SUM(DECODE(m.DARE_AVERE,'A',t.IMPORTO,0)*decode(m.d_a_conto,'D',-1,1))) SALDO
+from vw_nb_mastrini m
+,nb_prima_nota_corpo_tp t
+where t.T_DATA = m.DATA_REGISTRAZIONE
+and t.T_NUM_REG = m.NUMERO_REGISTRAZIONE
+and t.progr = m.progr
+group by 
+ m.DATA_REGISTRAZIONE
+ ,m.doc_id
+ ,m.expedient_id
+,t.ID_ANA
+,t.DENOMINAZIONE_ANA
+,m.CODICE_CONTO_BIL 
+,m.DESC_CONTO_BIL 
+,m.DESC_MOVIMENTO
+,decode(m.TIPO_CONTO_BIL, 'A', 'Attivo','P','Passivo','Economico')
+UNION ALL
+select 
+ a.data DATA_REGISTRAZIONE
+,null doc_id
+,null expedient_id
+,a.id_cred_deb
+,nvl(f.DENOMINAZIONE,f.NOME||' '||f.cognome) creditore_debitore
+,a.codice_conto CONTO
+,p.DESCRIZIONE
+,decode(p.TIPO, 'A', 'Attivo','P','Passivo','Economico') TIPO_CONTO
+,a.DESC_MOVIMENTO desc_movimento
+,a.dare tot_dare
+,a.avere tot_avere
+,(nvl(a.dare,0)*decode(p.D_A,'A',-1,1))+(nvl(a.avere,0)*decode(p.D_A,'D',-1,1)) SALDO
+from nb_apertura_tp a 
+,nb_piacee p
+,fin_t_anagrafica f
+where p.conto_vis = a.codice_conto
+and f.id = a.id_cred_deb
+order by tipo_conto, conto</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

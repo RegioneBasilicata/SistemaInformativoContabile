@@ -1,0 +1,164 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FCORETTIBDAP_EQVFP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FCORETTIBDAP_EQVFP.html">Details</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_EQVFP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_EQVFP_References.html">References</a></div></div>
+<div class="tab"><div><a href="FCORETTIBDAP_EQVFP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="FCORETTIBDAP_EQVFP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure fcorettibdap_EQVFP(p_anno in number,p_utente in varchar2,p_id_ente in varchar2) as
+
+c_riga     number; -- conta le righe
+
+-- fcoretti (sezione declare)
+
+v_contenuto VARCHAR2(4000);
+v_contenuto1 VARCHAR2(4000);
+v_contenuto2 VARCHAR2(4000);
+
+CURSOR sdb_eqvfp_tit IS
+ SELECT '&lt;sp:EQVFP_EntTitolo'||DECODE(SUBSTR(descrizione,1,2),'B)','1','C)','2','D)','3','E)','4','F)','5')||' decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO,0),'9999999990.00'))||'&lt;/sp:EQVFP_EntTitolo'||DECODE(SUBSTR(descrizione,1,2),'B)','1','C)','2','D)','3','E)','4','F)','5')||'>' r_anno,
+        '&lt;sp:EQVFP_EntTitolo'||DECODE(SUBSTR(descrizione,1,2),'B)','1','C)','2','D)','3','E)','4','F)','5')||' decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO1,0),'9999999990.00'))||'&lt;/sp:EQVFP_EntTitolo'||DECODE(SUBSTR(descrizione,1,2),'B)','1','C)','2','D)','3','E)','4','F)','5')||'>' r_anno1,
+        '&lt;sp:EQVFP_EntTitolo'||DECODE(SUBSTR(descrizione,1,2),'B)','1','C)','2','D)','3','E)','4','F)','5')||' decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO2,0),'9999999990.00'))||'&lt;/sp:EQVFP_EntTitolo'||DECODE(SUBSTR(descrizione,1,2),'B)','1','C)','2','D)','3','E)','4','F)','5')||'>' r_anno2
+
+
+
+INTO v_contenuto,
+      v_contenuto1,
+      v_contenuto2
+ FROM fin_t_previsione_efp
+ WHERE anno = p_anno AND
+       tipo_bilancio = 'E'  AND
+       tipo_riga = 'TITOLI';
+
+-- ATTENZIONE, LA CONDIZIONE SU TIPO_RIGA DEVE INCLUDERE SOLO VALORI POI TRATTATI NELL'IF
+CURSOR sdb_eqvfp_dett IS
+SELECT tipo_riga,
+       LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO,0),'9999999990.00')) stabil,
+       LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO1,0),'9999999990.00')) stabil1,
+       LTRIM(TO_CHAR(NVL(STANZIAMENTI_BILANCIO2,0),'9999999990.00')) stabil2
+FROM fin_t_previsione_efp
+WHERE anno = p_anno AND
+      tipo_bilancio = 'E'  AND
+      tipo_riga IN ('A1','A2','G','H1','H2','H3','H4','H5','H','I1','I3','I4','I','L','M','N');
+
+
+begin
+
+-- fcoretti (sezione DATA MANIPULATION)
+/* TOGLIERE --> */ c_riga := 100000; 
+/* TOGLIERE --> */ delete fin_t_bdap where contenuto like '%&lt;sp:EQVFP_%';
+
+ FOR r in sdb_eqvfp_tit LOOP
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,r.r_anno);
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,r.r_anno1);
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,r.r_anno2);
+ END LOOP;
+
+ FOR r in sdb_eqvfp_dett LOOP
+
+  IF r.tipo_riga = 'A1' THEN
+    v_contenuto :=  '&lt;sp:EQVFP_FPVEntrataSpeseCorrenti decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_FPVEntrataSpeseCorrenti>';
+    v_contenuto1 := '&lt;sp:EQVFP_FPVEntrataSpeseCorrenti decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_FPVEntrataSpeseCorrenti>';
+    v_contenuto2 := '&lt;sp:EQVFP_FPVEntrataSpeseCorrenti decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_FPVEntrataSpeseCorrenti>';
+  ELSIF r.tipo_riga = 'A2' THEN
+    v_contenuto :=  '&lt;sp:EQVFP_FPVEntrataCCapitaleNettoQuoteFinanzDebito decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_FPVEntrataCCapitaleNettoQuoteFinanzDebito>';
+    v_contenuto1 := '&lt;sp:EQVFP_FPVEntrataCCapitaleNettoQuoteFinanzDebito decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_FPVEntrataCCapitaleNettoQuoteFinanzDebito>';
+    v_contenuto2 := '&lt;sp:EQVFP_FPVEntrataCCapitaleNettoQuoteFinanzDebito decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_FPVEntrataCCapitaleNettoQuoteFinanzDebito>';
+  -- ATTENZIONE ASSICURARSI CHE EQVFP_SpaziFinanziariLS2016Art1.728 e (G) e EQVFP_SpaziFinanziariLS2016Art1.732 (M)
+  -- NON VADANO INVERITI RISPETTO A TIPO_RIGA (non avevo elementi per distinguere se non l'ordine di apparizione dei tag nell'excel nell'xsd)
+  ELSIF r.tipo_riga = 'G' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpaziFinanziariLS2016Art1.728 decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpaziFinanziariLS2016Art1.728>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpaziFinanziariLS2016Art1.728 decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpaziFinanziariLS2016Art1.728>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpaziFinanziariLS2016Art1.728 decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpaziFinanziariLS2016Art1.728>';
+  ELSIF r.tipo_riga = 'H1' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo1NettoFPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo1NettoFPV>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo1NettoFPV decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo1NettoFPV>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo1NettoFPV decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo1NettoFPV>';
+  ELSIF r.tipo_riga = 'H2' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo1FPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo1FPV>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo1FPV decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo1FPV>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo1FPV decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo1FPV>';
+  ELSIF r.tipo_riga = 'H3' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo1FCDDE decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo1FCDDE>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo1FCDDE decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo1FCDDE>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo1FCDDE decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo1FCDDE>';
+  ELSIF r.tipo_riga = 'H4' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo1FondoContenzioso decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo1FondoContenzioso>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo1FondoContenzioso decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo1FondoContenzioso>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo1FondoContenzioso decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo1FondoContenzioso>';
+  ELSIF r.tipo_riga = 'H5' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo1AltriAccantonamenti decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo1AltriAccantonamenti>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo1AltriAccantonamenti decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo1AltriAccantonamenti>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo1AltriAccantonamenti decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo1AltriAccantonamenti>';
+  ELSIF r.tipo_riga = 'H' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo1SaldiFP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo1SaldiFP>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo1SaldiFP decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo1SaldiFP>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo1SaldiFP decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo1SaldiFP>';
+  ELSIF r.tipo_riga = 'I1' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo2NettoFPV decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo2NettoFPV>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo2NettoFPV decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo2NettoFPV>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo2NettoFPV decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo2NettoFPV>';
+  ELSIF r.tipo_riga = 'I3' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo2FCDDE decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo2FCDDE>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo2FCDDE decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo2FCDDE>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo2FCDDE decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo2FCDDE>';
+  ELSIF r.tipo_riga = 'I4' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo2AltriAccantonamenti decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo2AltriAccantonamenti>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo2AltriAccantonamenti decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo2AltriAccantonamenti>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo2AltriAccantonamenti decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo2AltriAccantonamenti>';
+  ELSIF r.tipo_riga = 'I' THEN
+    v_contenuto := '&lt;sp:EQVFP_EntTitolo2SaldiFP decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_EntTitolo2SaldiFP>';
+    v_contenuto1 := '&lt;sp:EQVFP_EntTitolo2SaldiFP decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_EntTitolo2SaldiFP>';
+    v_contenuto2 := '&lt;sp:EQVFP_EntTitolo2SaldiFP decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_EntTitolo2SaldiFP>';
+  ELSIF r.tipo_riga = 'L' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpeTitolo3 decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpeTitolo3>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpeTitolo3 decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpeTitolo3>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpeTitolo3 decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpeTitolo3>';
+  ELSIF r.tipo_riga = 'M' THEN
+    v_contenuto := '&lt;sp:EQVFP_SpaziFinanziariLS2016Art1.732 decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_SpaziFinanziariLS2016Art1.732>';
+    v_contenuto1 := '&lt;sp:EQVFP_SpaziFinanziariLS2016Art1.732 decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_SpaziFinanziariLS2016Art1.732>';
+    v_contenuto2 := '&lt;sp:EQVFP_SpaziFinanziariLS2016Art1.732 decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_SpaziFinanziariLS2016Art1.732>';
+  ELSIF r.tipo_riga = 'N' THEN
+    v_contenuto := '&lt;sp:EQVFP_EquilibrioFinale decimals="2" contextRef="d_'||p_anno||'" unitRef="eur">'||r.stabil||'&lt;/sp:EQVFP_EquilibrioFinale>';
+    v_contenuto1 := '&lt;sp:EQVFP_EquilibrioFinale decimals="2" contextRef="d_'||(p_anno+1)||'" unitRef="eur">'||r.stabil1||'&lt;/sp:EQVFP_EquilibrioFinale>';
+    v_contenuto2 := '&lt;sp:EQVFP_EquilibrioFinale decimals="2" contextRef="d_'||(p_anno+2)||'" unitRef="eur">'||r.stabil2||'&lt;/sp:EQVFP_EquilibrioFinale>';
+  END IF;
+
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,v_contenuto);
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,v_contenuto1);
+  c_riga := c_riga + 1;
+  INSERT INTO fin_t_bdap(utente,data_creazione,anno,tipo_trasmissione,eu,riga,contenuto) 
+  VALUES (p_utente,SYSDATE,p_anno,'PREVSDB','E',c_riga,v_contenuto2);
+
+ END LOOP;  --sdb_eqvfp_dett
+
+COMMIT;
+
+
+
+end;</pre>	</td></tr>
+</table></div>

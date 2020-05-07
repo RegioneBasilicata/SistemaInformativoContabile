@@ -1,0 +1,286 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>INVIA_MAIL</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="INVIA_MAIL.html">Details</a></div></div>
+<div class="tab"><div><a href="INVIA_MAIL_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="INVIA_MAIL_References.html">References</a></div></div>
+<div class="tab"><div><a href="INVIA_MAIL_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="INVIA_MAIL_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure invia_mail(
+    p_id_mail    number,
+    p_tipo_mail  varchar2) is
+  p_sender       varchar2(200);
+  p_recipients   varchar2(200);
+  p_subject      varchar2(2000);
+	p_text		     varchar2(4000);
+  p_fil          BFILE; 
+  p_lobd         BLOB; 
+  p_filename     VARCHAR2(255);
+  p_inizio       number;
+  p_fine         number;
+  p_ticket       number;
+  p_marcatore    varchar2(200);
+  p_coda         number;
+  p_descr_coda   varchar2(200);
+  p_password     varchar2(8);
+  p_testo_pwd    varchar2(4000);
+  p_testo_risolto  varchar2(4000);
+  p_testo_commento varchar2(4000);
+  p_tipo_c       varchar2(1);
+  p_tipo_r       varchar2(1);
+  p_creato_da    varchar2(200);
+  p_richiedente  varchar2(200);
+  p_proprietario varchar2(200);
+  p_no_mail      varchar2(200);
+  p_utente       varchar2(200);
+  p_stato        varchar2(200);
+  p_risolto      date;
+  conn           utl_smtp.connection;
+  i              number;
+  len            number;
+BEGIN
+  if p_tipo_mail in ('R','X') then
+   -- invio mail risposta
+     select m.DA,m.A,m.OGGETTO,m.TICKET,c.testo_risposta,
+            c.marcatore,t.coda,c.testo_password,t.utente_richiedente
+        into p_recipients,p_sender,p_subject,p_ticket,
+             p_text,p_marcatore,p_coda,p_testo_pwd,p_richiedente
+        from gsa_mail m,gsa_code c,gsa_tickets t
+        where m.id=p_id_mail and
+              t.id=m.ticket and
+              c.id=t.coda;
+     p_text:=replace(p_text,'$Ticket_id',p_ticket);     
+     p_text:=replace(p_text,'$Coda_marc',p_marcatore);     
+     p_text:=replace(p_text,'$Ticket_oggetto',p_subject);
+     if p_tipo_mail='X' then
+     -- aggiunge testo per profilazione utente
+        select password,nome
+          into p_password,p_utente
+          from gsa_richiedenti
+          where id=p_richiedente;
+        update gsa_richiedenti
+          set password=lower(cripta_pwd(p_password))
+          where id=p_richiedente;
+        commit;            
+        p_testo_pwd:=replace(p_testo_pwd,'$Username',p_utente);
+        p_testo_pwd:=replace(p_testo_pwd,'$Password',p_password);
+        p_testo_pwd:=replace(p_testo_pwd,'$Coda_email',p_sender);
+        p_text:=p_text||'&lt;p>'||p_testo_pwd;
+     end if;
+  elsif p_tipo_mail='T' then
+   -- invio mail agli osservatori
+     select m.A,m.OGGETTO,m.TICKET,c.descrizione,
+            c.testo_osservatori,c.marcatore,t.coda,c.testo_password,
+            t.tipo_creato_da,t.tipo_utente,s.descrizione
+        into p_sender,p_subject,p_ticket,p_descr_coda,
+             p_text,p_marcatore,p_coda,p_testo_pwd,
+             p_tipo_c,p_tipo_r,p_stato
+        from gsa_mail m,gsa_code c,gsa_tickets t,gsa_stati_ticket s
+        where m.id=p_id_mail and
+              t.id=m.ticket and
+              c.id=t.coda and
+              s.stato(+)=t.stato;
+     if instr(p_sender,'&lt;')>0 then
+        p_sender:=substr(p_sender,instr(p_sender,'&lt;')+1,instr(p_sender,'>')-instr(p_sender,'&lt;')-1);
+     end if;   
+     p_recipients:='';
+     for r in 
+        (select u.email_address mail
+           from gsa_utenti_code c,fnd_user u
+           where c.coda=p_coda and
+                 c.tipo_ug='U' and
+                 u.user_id=c.codice
+         union
+         select u.email_address mail
+           from gsa_utenti_code c,gsa_utenti_gruppo g,fnd_user u
+           where c.coda=p_coda and
+                 c.tipo_ug='G' and
+                 g.gruppo_id=c.codice and
+                 u.user_id=g.utente) loop
+        p_recipients:=p_recipients||r.mail||';';
+     end loop;            
+     if p_tipo_c='U' then
+        select u.email_address
+          into p_creato_da
+          from gsa_tickets t,fnd_user u
+          where t.id=p_ticket and
+                u.user_id=t.creato_da;
+     else
+        select r.email
+          into p_creato_da
+          from gsa_tickets t,gsa_richiedenti r
+          where t.id=p_ticket and
+                r.id=t.creato_da;
+     end if;
+     if p_tipo_r='U' then
+        select u.email_address
+          into p_richiedente
+          from gsa_tickets t,fnd_user u
+          where t.id=p_ticket and
+                u.user_id=t.utente_richiedente;
+     else
+        select r.email
+          into p_richiedente
+          from gsa_tickets t,gsa_richiedenti r
+          where t.id=p_ticket and
+                r.id=t.utente_richiedente;
+     end if;
+     select nvl(max(u.email_address),'Nessuno')
+       into p_proprietario
+       from gsa_tickets t,fnd_user u
+       where t.id=p_ticket and
+             u.user_id=t.preso_in_carico_da;
+     p_text:=replace(p_text,'$Data_sistema',to_char(sysdate,'dy dd MON yyyy hh24:mi:ss '));
+     p_text:=replace(p_text,'$Ticket_creato_da',p_creato_da);
+     p_text:=replace(p_text,'$Coda_nome',p_descr_coda);
+     p_text:=replace(p_text,'$Ticket_proprietario',p_proprietario);
+     p_text:=replace(p_text,'$Ticket_id',p_ticket);     
+     p_text:=replace(p_text,'$Ticket_oggetto',p_subject);
+     p_text:=replace(p_text,'$Ticket_stato',p_stato);
+     p_text:=replace(p_text,'$Ticket_richiedente',p_richiedente);
+  elsif p_tipo_mail in ('G','C') then
+   -- rigiro la risposta al richiedente e agli altri osservatori della coda
+     select m.da,m.A,m.OGGETTO,m.TICKET,c.descrizione,c.marcatore,t.coda,c.testo_password,
+            t.tipo_creato_da,t.tipo_utente,t.data_risolto,c.testo_chiusura,c.testo_commento
+        into p_no_mail,p_sender,p_subject,p_ticket,p_descr_coda,p_marcatore,p_coda,p_testo_pwd,
+             p_tipo_c,p_tipo_r,p_risolto,p_testo_risolto,p_testo_commento
+        from gsa_mail m,gsa_code c,gsa_tickets t
+        where m.id=p_id_mail and
+              t.id=m.ticket and
+              c.id=t.coda;
+     if instr(p_no_mail,'&lt;')>0 then
+        p_no_mail:=substr(p_no_mail,instr(p_no_mail,'&lt;')+1,instr(p_no_mail,'>')-instr(p_no_mail,'&lt;')-1);
+     end if;   
+     if instr(p_sender,'&lt;')>0 then
+        p_sender:=substr(p_sender,instr(p_sender,'&lt;')+1,instr(p_sender,'>')-instr(p_sender,'&lt;')-1);
+     end if;   
+     p_recipients:='';
+     for r in 
+        (select u.email_address mail
+           from gsa_utenti_code c,fnd_user u
+           where c.coda=p_coda and
+                 c.tipo_ug='U' and
+                 u.user_id=c.codice and
+                 u.email_address&lt;>p_no_mail
+         union
+         select u.email_address mail
+           from gsa_utenti_code c,gsa_utenti_gruppo g,fnd_user u
+           where c.coda=p_coda and
+                 c.tipo_ug='G' and
+                 g.gruppo_id=c.codice and
+                 u.user_id=g.utente and
+                 u.email_address&lt;>p_no_mail) loop
+        p_recipients:=p_recipients||r.mail||';';
+     end loop;            
+    -- allega mail anche al richiedente, se e' un commento solo agli osservatori
+     if p_tipo_mail = 'G' then
+        if p_tipo_c ='U' then
+           select u.email_address
+             into p_creato_da
+             from gsa_tickets t,fnd_user u
+             where t.id=p_ticket and
+                   u.user_id=t.creato_da;
+        else
+           select r.email
+             into p_creato_da
+             from gsa_tickets t,gsa_richiedenti r
+             where t.id=p_ticket and
+                   r.id=t.creato_da;
+       end if;
+       if p_tipo_r='U' then
+          select u.email_address
+            into p_richiedente
+            from gsa_tickets t,fnd_user u
+            where t.id=p_ticket and
+                  u.user_id=t.utente_richiedente;
+       else
+          select r.email
+            into p_richiedente
+            from gsa_tickets t,gsa_richiedenti r
+            where t.id=p_ticket and
+                  r.id=t.utente_richiedente;
+       end if;
+       if p_richiedente&lt;>p_no_mail then
+          p_recipients:=p_recipients||p_richiedente||';';
+       end if;   
+     end if;
+     if p_tipo_mail='C'
+        then p_text:=p_testo_commento;
+     end if;   
+     if p_risolto is not null then
+        p_text:=p_testo_risolto;
+        p_text:=replace(p_text,'$Ticket_oggetto',p_subject);
+        p_text:=replace(p_text,'$Coda_email',p_sender);
+     end if;
+  end if;
+  for cp in
+     (select riga_corpo
+        from gsa_mail_corpo
+        where id_mail=p_id_mail
+        order by progr) loop
+     p_text:=p_text||cp.riga_corpo||'&lt;p>';   
+  end loop;
+  conn := demo_mail.begin_mail(
+    sender     => p_sender,
+    recipients => p_recipients,
+    subject    => p_subject,
+    mime_type  => demo_mail.MULTIPART_MIME_TYPE);
+  if p_tipo_mail&lt;>'R' then
+    for al in 
+      (select p_id_mail||nome_file nome
+         from gsa_mail_allegati
+         where id_mail=p_id_mail) loop
+  
+      p_inizio:=1;
+      p_fine:=1;
+      p_filename:=al.nome;
+      p_fil:=BFILENAME('DIR_FILE',p_filename); 
+      dbms_lob.CREATETEMPORARY(p_lobd,true); 
+      dbms_lob.fileopen(p_fil, dbms_lob.lob_readonly); 
+      dbms_lob.loadblobfromfile(p_lobd,p_fil,dbms_lob.getlength(p_fil),p_inizio,p_fine); 
+  
+      demo_mail.begin_attachment(
+        conn         => conn,
+        mime_type    => 'application/xls',
+        inline       => TRUE,
+        filename     => p_filename,
+        transfer_enc => 'base64');
+        -- split the Base64 encoded attachment into multiple lines
+       i   := 1;
+       len := DBMS_LOB.getLength(p_lobd);
+       WHILE (i &lt; len) LOOP
+          IF(i + demo_mail.MAX_BASE64_LINE_WIDTH &lt; len)THEN
+             UTL_SMTP.Write_Raw_Data (conn
+                                    , UTL_ENCODE.Base64_Encode(
+                                            DBMS_LOB.Substr(p_lobd, demo_mail.MAX_BASE64_LINE_WIDTH, i)));
+          ELSE
+             UTL_SMTP.Write_Raw_Data (conn
+                                    , UTL_ENCODE.Base64_Encode(
+                                            DBMS_LOB.Substr(p_lobd, (len - i)+1,  i)));
+          END IF;
+          UTL_SMTP.Write_Data(conn, UTL_TCP.CRLF);
+          i := i + demo_mail.MAX_BASE64_LINE_WIDTH;
+       END LOOP;
+       demo_mail.end_attachment(conn => conn);
+    end loop;
+  end if;
+  demo_mail.attach_text(
+    conn      => conn,
+    data      => p_text,
+    mime_type => 'text/html');
+  demo_mail.end_mail( conn => conn );
+END;</pre>	</td></tr>
+</table></div>

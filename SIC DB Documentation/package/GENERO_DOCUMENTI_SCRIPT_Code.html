@@ -1,0 +1,341 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>GENERO_DOCUMENTI_SCRIPT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="GENERO_DOCUMENTI_SCRIPT.html">Details</a></div></div>
+<div class="tab"><div><a href="GENERO_DOCUMENTI_SCRIPT_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="GENERO_DOCUMENTI_SCRIPT_References.html">References</a></div></div>
+<div class="tab"><div><a href="GENERO_DOCUMENTI_SCRIPT_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="GENERO_DOCUMENTI_SCRIPT_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PACKAGE      genero_documenti_script AS
+
+vtipo_documento        varchar2(20);
+vdata_movimento         date;
+voggetto         varchar2(240);
+vcapitolo         varchar2(6);
+vimporto         number;
+vimporto_plur1         number;
+vimporto_plur2         number;
+
+vchiave_atto       varchar2(50); 
+vtipo_atto         varchar2(15);
+vdata_atto         date;
+vnumero_atto         number;
+
+vdipartimento       varchar2(10);
+vconto_economica    varchar2(10);
+vratei  number(15,2);
+vcodice_fiscale  varchar2(16);
+vimposta_irap number(15,2);
+vrisconti number(15,2);
+vimporto_iva number(15,2);
+vcodice_risposta     number;
+vnumero_documento     number;
+vnumero_documento_plur1     number;
+vnumero_documento_plur2     number;
+vdocumento_padre     number;
+vdocumento_precedente     number;
+vdescrizione_risposta     varchar2(200);
+vcog varchar2(9);
+vcog_plur1 varchar2(9);
+vcog_plur2 varchar2(9);
+vpiano_dei_conti varchar2(16);
+vpiano_dei_conti_plur1 varchar2(16);
+vpiano_dei_conti_plur2 varchar2(16);
+vvalido770 varchar2(1);
+vtipologia_reddito varchar2(15);
+vimponibile_irap  number(15,2);
+vid_terze_parti number;
+vcollegato_a_mandato varchar2(1);
+vmanutenzione_package varchar2(1);
+vmsg_manuten_package varchar2(200);
+
+
+
+vdoc_id             number;
+vdoc_sequence_value     number;
+vsegment8         number(4);
+vsegment8_plur    number(4);
+vsegment2         varchar2(6);
+vdescription       varchar2(240);
+vdate_created        date;
+vnumerazione         number(2);
+vdoc_type         varchar2(20);
+vdataultima         date;
+vopen_balance_proposed     number(15,2);
+vdocument_amount     number(15,2);
+vcreation_date         date;
+vdata_approvazione     date;
+vcreated_by         number(15);
+vgl_date          date;
+vperiod_name         varchar2(20);
+vproposal_status_flag     varchar2(1) ;
+vauditing_status_flag     varchar2(1) ;
+vdisponibilita_documento    number(15,2);
+vprevious_doc_id        number;
+vexpedient_id        number;
+vdoc_id_capo_filiera    number;
+vanno_attivo        varchar2(1);
+vcapitolo_successivo    varchar2(6);
+vassestamento_visibile1     varchar2(1);
+vruolo_visibilita     varchar2(100);
+vruolo_trovato         varchar2(1);
+
+vanno_finanziario_rev number(4);
+vanno_finanziario_acc number(4);
+vanno_finanziario_mand number(4);
+vanno_finanziario_liq number(4);
+vanno_finanziario_imp number(4);
+vdoc_id_impegno number;
+vdoc_id_liquidazione number;
+vdoc_id_accertamento number;
+
+
+vcompetenza            number(15,2);
+vvariazione_competenza        number(15,2);
+vassestamento_competenza        number(15,2);
+vdisponibilita_competenza     number(15,2);
+vcassa                 number(15,2);
+vvariazione_cassa         number(15,2);
+vassestamento_cassa        number(15,2);
+vdisponibilita_cassa        number(15,2);
+vblocco_preimpegni        number(15,2);
+vpre_impegni            number(15,2);
+vimpegni_accertamenti_compe    number(15,2);
+vvariazioni            number(15,2);
+vliquidazioni_compe        number(15,2);
+vmandati_reversali_compe        number(15,2);
+vmandati_reversali_res        number(15,2);
+vcompetenza_bloccata        number(15,2);
+vcassa_bloccata            number(15,2);
+vvariazione_competenza_piu    number(15,2);
+vvariazione_competenza_meno    number(15,2);
+vassestamento_competenza_piu    number(15,2);
+vassestamento_competenza_meno    number(15,2);
+vvariazione_cassa_piu        number(15,2);
+vvariazione_cassa_meno        number(15,2);
+vassestamento_cassa_piu        number(15,2);
+vassestamento_cassa_meno        number(15,2);
+vblocco_liquidazioni            varchar2(1);
+vblocco_preimpegni_impegni      varchar2(1);
+
+vdescrizione_capitolo    varchar2(1000);
+vcapitolo_por                    varchar2(1);
+vcapitolo_perente                    varchar2(1);
+vconto_economica1            varchar2(10);
+vconto_economica2            varchar2(10);
+vconto_economica3            varchar2(10);
+vconto_economica4            varchar2(10);
+vconto_economica5            varchar2(10);
+
+vimporto_impegnato            number(15,2);
+vimporto_prenotato            number(15,2);
+vstrutture                    varchar2(10);
+vtitolarita                    varchar2(1);
+vimporto_condiviso            number(15,2);
+vdata_i_condivisione        date;
+vdata_f_condivisione        date;
+
+
+procedure aggiorno_bilancio
+(
+ptipo_documento in varchar2,
+pdocumento_padre in number,
+pdata_movimento in date,
+poggetto in varchar2,
+pcapitolo in varchar2,
+pimporto in number,
+pimporto_plur1 in number,
+pimporto_plur2 in number,
+ptipo_atto in varchar2,
+pdata_atto in date,
+pnumero_atto in number,
+pdipartimento in varchar2,
+pconto_economica in varchar2,
+pcodice_fiscale in varchar2,
+pratei in number,
+pimposta_irap in number,
+prisconti in number,
+pimporto_iva in number,
+pcog in varchar2,
+pcog_plur1 in varchar2,
+pcog_plur2 in varchar2,
+pvalido770 in varchar2,
+ptipologia_reddito in varchar2,
+pimponibile_irap in number,
+pid_terze_parti number,
+pcollegato_a_mandato in varchar2,
+ppiano_dei_conti varchar2,
+ppiano_dei_conti_plur1 varchar2,
+ppiano_dei_conti_plur2 varchar2,
+pcodice_risposta out number,
+pnumero_documento out number,
+pnumero_documento_plur1 out number,
+pnumero_documento_plur2 out number,
+pdescrizione_risposta out varchar2
+)
+;
+
+procedure leggo_bilancio
+(
+ psegment8 in number,
+ psegment2 in varchar2,
+ pcompetenza out number,
+ pvariazione_competenza out number,
+ passestamento_competenza out number,
+ pdisponibilita_competenza out number,
+ pcassa out number,
+ pvariazione_cassa out number,
+ passestamento_cassa out number,
+ pdisponibilita_cassa out number,
+ pblocco_preimpegni out number,
+ ppre_impegni out number,
+ pimpegni_accertamenti_compe out number,
+ pvariazioni out number,
+ pliquidazioni_compe out number,
+ pmandati_reversali_compe out number,
+ pmandati_reversali_res out number,
+ pcompetenza_bloccata out number,
+ pcassa_bloccata out number,
+ pvariazione_competenza_piu out number,
+ pvariazione_competenza_meno out number,
+ passestamento_competenza_piu out number,
+ passestamento_competenza_meno out number,
+ pvariazione_cassa_piu out number,
+ pvariazione_cassa_meno out number,
+ passestamento_cassa_piu out number,
+ passestamento_cassa_meno out number,
+ pcodice_risposta out number,
+ pdescrizione_risposta out varchar2
+);
+
+procedure leggo_bilancio_lock
+(
+ psegment8 in number,
+ psegment2 in varchar2,
+ pcompetenza out number,
+ pvariazione_competenza out number,
+ passestamento_competenza out number,
+ pdisponibilita_competenza out number,
+ pcassa out number,
+ pvariazione_cassa out number,
+ passestamento_cassa out number,
+ pdisponibilita_cassa out number,
+ pblocco_preimpegni out number,
+ ppre_impegni out number,
+ pimpegni_accertamenti_compe out number,
+ pvariazioni out number,
+ pliquidazioni_compe out number,
+ pmandati_reversali_compe out number,
+ pmandati_reversali_res out number,
+ pcompetenza_bloccata out number,
+ pcassa_bloccata out number,
+ pvariazione_competenza_piu out number,
+ pvariazione_competenza_meno out number,
+ passestamento_competenza_piu out number,
+ passestamento_competenza_meno out number,
+ pvariazione_cassa_piu out number,
+ pvariazione_cassa_meno out number,
+ passestamento_cassa_piu out number,
+ passestamento_cassa_meno out number,
+ pblocco_liquidazioni out varchar2,
+ pblocco_preimpegni_impegni out varchar2,
+ pcodice_risposta out number,
+ pdescrizione_risposta out varchar2
+);
+
+procedure leggo_struttura_bilancio_lock
+(
+ psegment8 in number,
+ psegment2 in varchar2,
+ pdipartimento in varchar2,
+ ptitolarita out varchar2,
+ pimporto_condiviso out number,
+ pdata_i_condivisione out date,
+ pdata_f_condivisione out date,
+ pimporto_impegnato out number,
+ pimporto_prenotato out number,
+ pcodice_risposta out number,
+ pdescrizione_risposta out varchar2
+);
+
+
+PROCEDURE leggo_capitolo
+(
+ psegment8 in number,
+ psegment2 in varchar2,
+ pdescrizione_capitolo out varchar2,
+ pcapitolo_por out varchar2,
+ pcapitolo_perente out varchar2,
+ pconto_economica1 out varchar2,
+ pconto_economica2 out varchar2,
+ pconto_economica3 out varchar2,
+ pconto_economica4 out varchar2,
+ pconto_economica5 out varchar2,
+ pcodice_risposta out number,
+ pdescrizione_risposta out varchar2
+);
+
+PROCEDURE prenotazione_preimpegni
+(
+ ptipo_prenotazione in varchar2,
+ pnumero_preimpegno in number,
+ pimporto_da_prenotare in number,
+ pcodice_risposta  out varchar2,
+ pdescrizione_risposta out varchar2
+);
+
+procedure preimpegni;
+procedure preimpegni_delibera;
+procedure impegni;
+procedure impegni_delibera;
+procedure cancella_preimpegni;
+procedure impegni_definitivi;
+procedure accertamenti;
+procedure insussistenze;
+procedure cancella_impegni_definitivi;
+procedure impegni_perenti;
+procedure cancella_impegni_perenti;
+procedure tipo_impegno_da_cancellare;
+procedure tipo_variazione_impegno;
+procedure economie;
+procedure cancella_economie;
+procedure liquidazioni;
+procedure mandati;
+procedure reversali;
+procedure storno_mandati;
+procedure storno_reversali;
+procedure cancella_liquidazioni;
+procedure variazione_preimpegni;
+procedure variazione_impegni;
+procedure variazione_impegni_definitivi;
+procedure variazione_impegni_perenti;
+procedure variazione_liquidazioni;
+procedure scrivo_documenti;
+procedure bas_ind_anno_successivo;
+procedure reversali_collegate;
+procedure inserisco_terze_parti;
+procedure storno_mandati_terze_parti;
+procedure preimpegni_pluriennali;
+procedure preimpegno_corrente;
+procedure preimpegno_plur1;
+procedure preimpegno_plur2;
+procedure gestione_operatore;
+procedure gestione_data_movimento;
+
+
+
+end genero_documenti_script; </pre>	</td></tr>
+</table></div>

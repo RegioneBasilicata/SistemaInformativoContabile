@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>IMPORTO_PERENZIONE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="IMPORTO_PERENZIONE.html">Details</a></div></div>
+<div class="tab"><div><a href="IMPORTO_PERENZIONE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="IMPORTO_PERENZIONE_References.html">References</a></div></div>
+<div class="tab"><div><a href="IMPORTO_PERENZIONE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="IMPORTO_PERENZIONE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure importo_perenzione (p_anno in number) is
+
+--p_anno corrisponde all'anno del consuntivo della perenzione + 1 es. consutivo 2013 ---> p_anno = 2014
+liquidato number := 0;
+economie number := 0;
+st_imp number := 0;
+corr number := 0; --utilizzare doc_id_capo_filiera
+st_liq number := 0;
+
+importo_perenzione number := 0;
+
+
+cursor perenti is
+SELECT DISTINCT 
+  jugd.doc_sequence_value p_numero_perente,
+  jugd.doc_id p_doc_id,
+  upper(jugd.proposal_status_flag) p_proposal_status_flag,
+  upper(jugd.auditing_status_flag) p_auditing_status_flag,
+  to_number(TO_CHAR(jugd.data_perenzione,'yyyy')) p_anno_perenzione,  
+  nvl(document_amount,0) p_importo_originario
+FROM fina_documenti jugd
+WHERE jugd.doc_type IN ('IMP','IMP-DEF')
+AND upper(NVL(jugd.proposal_status_flag,'X')) = 'P'
+AND upper(NVL(jugd.deletion_status_flag,'N')) &lt;> 'Y'
+AND jugd.auditing_status_flag in ('T','B')
+AND jugd.gl_date IS NOT NULL
+AND jugd.period_name IS NOT NULL
+AND jugd.date_created  IS NOT NULL
+and jugd.data_perenzione is not null
+AND jugd.doc_sequence_value  &lt;> '200102646'
+-- ******
+--and jugd.doc_sequence_value = '200806465' -- da utilizzare per sistemare singolo IMP
+-- ******
+AND to_number(TO_CHAR(jugd.data_perenzione,'yyyy')) = p_anno
+and nvl(jugd.closed_amount_proposed,0) = 0;   
+
+
+begin
+if p_anno &lt; 2014 
+then return;
+else
+ for c in perenti loop
+   -- determino importo di liquidato
+   select nvl(sum(nvl(document_amount,0)),0) into liquidato
+   from fin_t_documenti
+   where doc_type = 'LIQ'
+   and nvl(deletion_status_flag,'N') = 'N'
+   and segment8 &lt;= c.p_anno_perenzione
+   and previous_doc_id = c.p_doc_id;
+   -- fine importo liquidato
+   
+   -- determino importo di st-liq
+   select nvl(sum(nvl(document_amount,0)),0) into st_liq
+   from fin_t_documenti
+   where doc_type = 'ST-LIQ'
+   and nvl(deletion_status_flag,'N') = 'N'
+   and segment8 &lt;= c.p_anno_perenzione
+   and doc_id_capo_filiera = c.p_doc_id;
+   -- fine importo st-liq
+   
+   --determino importo st-imp,eco,dis
+   select nvl(sum(nvl(document_amount,0)),0) into st_imp
+   from fin_t_documenti
+   where doc_type in ('ST-IMP','ST-IMPDEF','ECO','DIS')
+   and nvl(deletion_status_flag,'N') = 'N'
+   and segment8 &lt; c.p_anno_perenzione
+   and previous_doc_id = c.p_doc_id;
+  --fine st-imp
+  
+   --determino importo corr,corr-dis
+   select nvl(sum(nvl(document_amount,0)),0) into corr
+   from fin_t_documenti
+   where doc_type in ('CORR','CORR-DIS')
+   and nvl(deletion_status_flag,'N') = 'N'
+   and segment8 &lt; c.p_anno_perenzione
+   and doc_id_capo_filiera = c.p_doc_id;
+  --fine corr
+   importo_perenzione := nvl(c.p_importo_originario,0) - (liquidato - st_liq) - (st_imp - corr);
+   
+   update fin_t_documenti set closed_amount_proposed = importo_perenzione where doc_id = c.p_doc_id;
+   commit;
+  
+ end loop;
+ end if;
+
+end;</pre>	</td></tr>
+</table></div>

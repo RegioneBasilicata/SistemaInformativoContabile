@@ -1,0 +1,1596 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>REND_QGR</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="REND_QGR.html">Details</a></div></div>
+<div class="tab"><div><a href="REND_QGR_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="REND_QGR_References.html">References</a></div></div>
+<div class="tab"><div><a href="REND_QGR_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="REND_QGR_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+procedure rend_qgr (p_anno number, p_utente varchar2) as
+
+c_riga number := 0;
+fci_cons number := 0; --fondo cassa iniziale consiglio
+
+CP_fondo_cassa_i number := 0;
+CP_util_avamm_comp number := 0;
+CP_disav_comp number := 0;
+CP_fpv_corr number := 0;
+CP_fpv_cap number :=0;
+
+
+CP_util_avamm_comp_C number := 0; -- per dati Consiglio
+CP_disav_comp_C number := 0; -- per dati Consiglio
+
+cp_fpv_corr_usc number := 0;
+cp_fpv_cap_usc number :=0;
+
+CP_tit1_cassa_u number := 0;
+CP_tit2_cassa_u number := 0;
+CP_tit3_cassa_u number := 0;
+CP_tit4_cassa_u number := 0;
+CP_tit5_cassa_u number := 0;
+CP_tit7_cassa_u number := 0;
+
+codtit_E varchar2 (20);
+desctit_E varchar2(1000);
+totale_entrate_titolo_A number := 0;
+totale_entrate_titolo_R number := 0;
+totale_entrate_esercizio_A number := 0;
+totale_entrate_esercizio_R number := 0;
+totale_comp_entrate_A number := 0;
+totale_comp_entrate_R number := 0;
+
+disavanzo_esercizio number := 0;
+avanzo_esercizio_I number := 0;
+avanzo_esercizio_P number := 0;
+
+codtit_U varchar2 (20);
+desctit_U varchar2(1000);
+totale_spese_titolo_I number := 0;
+totale_spese_titolo_P number := 0;
+totale_spese_esercizio_I number :=0;
+totale_spese_esercizio_P number :=0;
+totale_comp_spese_I number := 0;
+totale_comp_spese_A number := 0;
+
+totale_pareggio_e number := 0;
+totale_pareggio_u number := 0;
+
+antic_liq number := 0;
+antic_liq_u number := 0;
+
+-- **** dati per riquadro Gestione Bilancio e Gestione Accantonamenti 
+av_dis_bilancio number := 0; --a) Avanzo di competenza (+) /Disavanzo di competenza (-) 
+ris_acc_bilancio number := 0; -- b) Risorse accantonate  stanziate nel bilancio dell'esercizio N  (+)(8), colonna ACCANT_STANZIATI_ESER della Tabella TB_RISORSE_ACCANTONATE
+ris_vinc_bilancio number := 0; -- c) Risorse vincolate nel bilancio (+)(9) valore della colonna Risorse vincolate nel bilancio al 31/12/N in corrispondenza della riga "Totale risorse vincolate al netto di quelle che sono state oggetto di accantonamenti (n=l-m)"
+variazione_acc_rend number := 0; --e)Variazione accantonamenti effettuata in sede di rendiconto'(+)/(-)(10) sum(VARIAZIONI_RENDICONTO) tabella TB_RISORSE_ACCANTONATE
+
+CURSOR fin_t_cons_excel_u IS
+ SELECT nb_titolo tit_u,
+        desc_nb_titolo desc_tit_u, 
+        NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) compe_u,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) cassa_u 
+ FROM fin_t_consuntivo_excel
+ WHERE tipo_capitolo = 'U' AND 
+       anno_consuntivo = p_anno AND 
+       utente = p_utente AND 
+       nb_titolo IN ('1','2','3','4','5','7')
+ GROUP BY nb_titolo,
+          desc_nb_titolo;
+
+
+
+
+begin
+if p_anno > 2018
+then
+
+ delete FIN_T_RENDICONTO_QGR where anno = p_anno and utente = p_utente;
+ commit;
+
+ CP_fondo_cassa_i := fondo_cassa_iniziale(p_anno); 
+ 
+ if p_utente = 'CONSOLIDATO'
+  then
+  fci_cons := sic_consiglio.fondo_cassa_iniziale(p_anno); 
+ end if;
+  
+ CP_fondo_cassa_i := CP_fondo_cassa_i + fci_cons;
+ 
+ begin
+ SELECT  NVL(avanzo_amministrazione,0) +
+         NVL(variazione_avanzo_delibera,0) +
+         NVL(variazione_avanzo_piu,0) -
+         NVL(variazione_avanzo_meno,0) UTIL_AVAMM_COMP,
+         NVL(disavanzo_amministrazione,0) + 
+         NVL(disavanzo_effettivo_anni_prec,0)+
+         NVL(variazione_disavanzo_piu,0) - 
+         NVL(variazione_disavanzo_meno,0) +
+         NVL(disavanzo_regionale,0) DISAAVAMM_COMP
+ INTO CP_util_avamm_comp,
+      CP_disav_comp
+ FROM fin_t_dati_generali 
+ WHERE anno_finanziario = p_anno; 
+ exception when no_data_found then CP_util_avamm_comp := 0; CP_disav_comp := 0;
+ end;
+
+ if p_utente = 'CONSOLIDATO'
+  then
+  begin
+ SELECT  NVL(avanzo_amministrazione,0) +
+         NVL(variazione_avanzo_delibera,0) +
+         NVL(variazione_avanzo_piu,0) -
+         NVL(variazione_avanzo_meno,0) UTIL_AVAMM_COMP,
+         NVL(disavanzo_amministrazione,0) + 
+         NVL(disavanzo_effettivo_anni_prec,0)+
+         NVL(variazione_disavanzo_piu,0) - 
+         NVL(variazione_disavanzo_meno,0) +
+         NVL(disavanzo_regionale,0) DISAAVAMM_COMP
+ INTO CP_util_avamm_comp_C,
+      CP_disav_comp_C
+ FROM sic_consiglio.fin_t_dati_generali 
+ WHERE anno_finanziario = p_anno; 
+ exception when no_data_found then CP_util_avamm_comp_C := 0; CP_disav_comp_C := 0;
+ end;
+
+end if;
+
+   CP_util_avamm_comp := CP_util_avamm_comp + CP_util_avamm_comp_C;
+   CP_disav_comp := CP_disav_comp + CP_disav_comp_C;
+
+ /* questo valore deve coincidere con quello rilevato da FPV_FONTE sulle uscite
+ -- FPV corrente ENTRATE
+     SELECT NVL(SUM(NVL(a.aiuti,0)),0)
+     INTO CP_fpv_corr
+     FROM fin_t_bilancio a,
+          fin_t_articoli b
+     WHERE a.anno = p_anno AND
+           a.eu = 'U' AND
+           a.eu = b.eu AND
+           a.anno = b.anno AND
+           a.articolo = b.codice AND
+           NVL(a.aiuti,0) > 0 AND 
+           b.nb_titolo &lt;> '2'; 
+  */
+  -- FPV corrente ENTRATE
+     SELECT NVL(SUM(NVL(a.fpv_fonte,0)),0)
+     INTO CP_fpv_corr
+     FROM fin_t_consuntivo_excel a
+     WHERE a.anno_consuntivo = p_anno AND
+           a.tipo_capitolo = 'U' AND
+           NVL(a.fpv_fonte,0) > 0 AND 
+           a.utente = p_utente AND
+           a.nb_titolo &lt;> '2'; 
+
+  -- FPV capitale ENTRATE
+    SELECT NVL(SUM(NVL(a.fpv_fonte,0)),0)
+     INTO CP_fpv_cap
+     FROM fin_t_consuntivo_excel a
+     WHERE a.anno_consuntivo = p_anno AND
+           a.tipo_capitolo = 'U' AND
+           NVL(a.fpv_fonte,0) > 0 AND 
+           a.utente = p_utente AND
+           a.nb_titolo = '2'; 
+
+  c_riga := c_riga + 1;
+  -- riga fondo cassa iniziale
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_RIS)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Fondo di cassa  all''inizio dell''esercizio',
+      CP_fondo_cassa_i,
+      'QGEN_FondoCassaInizioEsercizio'
+      );
+   commit;
+
+   c_riga := c_riga + 1;
+   -- riga avanzo/disavanzo
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Utilizzo avanzo di amministrazione',
+      CP_util_avamm_comp,
+      'QGEN_UtilizzoAvanzoAmministrazione',
+      'Disavanzo di amministrazione',
+      CP_disav_comp,
+      'QGEN_DisavanzoAmministrazione'
+      );
+     commit;
+
+     c_riga := c_riga + 1;
+  -- riga ancipazioni di liquidità
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA --Utilizzo avanzo  di amministrazione Utilizzo avanzo  di amministrazione 
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'di cui Utilizzo Fondo anticipazioni di liquidità (DL 35/2013 e successive modifiche e rifinanziamenti)',
+      antic_liq,
+      'QGEN_UtilizzoAvanzoAmminstrazioneUtilizzoFondoAnticipazioniLiquidita'
+      );
+   commit;
+    
+    c_riga := c_riga + 1;
+    -- FFERRANTE 19/03/2020 nuova riga inserita da RGS con Rendiconto 2019
+    -- riga Disavanzo da Debito autorizzato e non contratto
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA --Utilizzo avanzo  di amministrazione Utilizzo avanzo  di amministrazione 
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Disavanzo derivante da debito autorizzato e non contratto ripianato con accensione di prestiti',
+      0,
+      'QGEN_DisavanzoDebitoAutorizzatoNonContrattoRipianatoAccensionePrestiti'
+      );
+   commit;
+ 
+  c_riga := c_riga + 1;
+  -- riga FPV_corrente Entrata
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Fondo pluriennale vincolato di parte corrente',
+      CP_fpv_corr,
+      'QGEN_FondoPluriennaleVincolatoParteCorrente'
+      );
+   commit;
+
+ c_riga := c_riga + 1;
+  -- riga FPV_capitale Entrata
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Fondo pluriennale vincolato di parte capitale',
+      CP_fpv_cap,
+      'QGEN_FondoPluriennaleVincolatoContoCapitale'
+      );
+   commit;
+   
+   -- FFERRANTE 19/03/2020 nuova riga inserita da RGS con Rendiconto 2019
+   -- riga di cui Fondo pluriennale vincolato in c/capitale finanziato da debito
+    c_riga := c_riga + 1;
+  
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'di cui Fondo pluriennale vincolato in c/capitale finanziato da debito',
+      0,
+      'QGEN-ENT_FondoPluriennaleVincolatoContoCapitaleFinanziatoDebito'
+      );
+   commit;
+   
+   c_riga := c_riga + 1;
+  -- riga Fondo pluriennale vincolato per incremento di attività finanziarie
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Fondo pluriennale vincolato per incremento di attività finanziarie',
+      0,-- ******************* DA VERIFICARE con Ufficio
+      'QGEN_FondoPluriennaleVincolatoAttivitaFinanziarie'
+      );
+   commit;
+   
+   --**************************
+   -- 123 riprendi di qua  123
+   --**************************
+
+   -- TITOLO 1 Entrate e Spese
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 1;
+
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0), 
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 1 AND
+                     anno_consuntivo = p_anno AND 
+                     utente = p_utente;
+
+      --Uscite
+   SELECT id,descrizione 
+   INTO codtit_u, desctit_u
+   FROM nb_titoli_uscite
+   WHERE anno = p_anno
+   and id = 1;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) ,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+        into  totale_spese_titolo_I,totale_spese_titolo_P
+    FROM fin_t_consuntivo_excel
+    WHERE tipo_capitolo = 'U' AND 
+           anno_consuntivo = p_anno AND 
+           utente = p_utente AND 
+           nb_titolo = '1';
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + totale_spese_titolo_I;
+    totale_spese_esercizio_P := totale_spese_esercizio_P + totale_spese_titolo_P;
+
+     c_riga := c_riga + 1;
+   -- riga Titolo 1 Entrate/Uscite
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,U_IMPEGNI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo1_A',
+      'QGEN_EntrateTitolo1_I',
+      'Titolo '||codtit_U||' - '||desctit_U,
+      totale_spese_titolo_I,
+      totale_spese_titolo_P,
+      'QGEN_SpeseTitolo1_I',
+      'QGEN_SpeseTitolo1_P'
+      );
+     commit;
+
+   -- ************************
+
+   -- *** FPV Spese Corrente
+
+   c_riga := c_riga + 1;
+   -- riga FPV spese corrente
+
+  begin
+       select nvl(sum(nvl(fpv,0)),0) into cp_fpv_corr_usc
+       from fin_t_consuntivo_excel
+       where tipo_capitolo = 'U' AND 
+       anno_consuntivo = p_anno AND 
+       utente = p_utente AND 
+       nvl(nb_titolo,'99') != '2'; 
+  end; 
+
+    insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Fondo pluriennale vincolato di parte corrente',
+      cp_fpv_corr_usc,
+      'QGEN_SpeseTitolo1_FPV'
+      );
+     commit;
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + cp_fpv_corr_usc;
+
+    -- *****************************
+
+    -- TITOLO 2 Entrate
+
+     -- Entrate
+    SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 2;
+
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 2 AND
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+                     
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+    
+    c_riga := c_riga + 1;  
+-- riga Titolo 2 Entrate
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo2_A',
+      'QGEN_EntrateTitolo2_I'
+      );
+     commit;
+
+
+                     
+     -- TITOLO 3 Entrate
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 3;
+
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 3 AND
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+                     
+     c_riga := c_riga + 1;
+
+   -- riga Titolo 3 Entrate
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo3_A',
+      'QGEN_EntrateTitolo3_I'
+      );
+     commit;
+    
+  -- TITOLO 4 Entrate e TITOLO 2 Spese
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 4;
+
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 4 AND
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+
+      --Uscite
+      SELECT id,descrizione 
+   INTO codtit_u, desctit_u
+   FROM nb_titoli_uscite
+   WHERE anno = p_anno
+   and id = 2;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) ,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+        into totale_spese_titolo_I,totale_spese_titolo_P
+    FROM fin_t_consuntivo_excel
+    WHERE tipo_capitolo = 'U' AND 
+           anno_consuntivo = p_anno AND 
+           utente = p_utente AND 
+           nb_titolo = '2';
+
+   
+    totale_spese_esercizio_I := totale_spese_esercizio_I + totale_spese_titolo_I;
+    totale_spese_esercizio_P := totale_spese_esercizio_P + totale_spese_titolo_P;
+
+
+    c_riga := c_riga + 1;
+
+   -- riga Titolo 2 Entrate/Uscite
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo4_A',
+      'QGEN_EntrateTitolo4_I',
+      'Titolo '||codtit_U||' - '||desctit_U,
+      totale_spese_titolo_I,
+      totale_spese_titolo_P,
+      'QGEN_SpeseTitolo2_I',
+      'QGEN_SpeseTitolo2_P'
+      );
+     commit;
+
+
+   -- ************************
+
+   -- *** FPV Spese Capitale
+
+   c_riga := c_riga + 1;
+   -- riga FPV spese capitale
+
+  begin
+       select nvl(sum(nvl(fpv,0)),0) into cp_fpv_cap_usc
+       from fin_t_consuntivo_excel
+       where tipo_capitolo = 'U' AND 
+       anno_consuntivo = p_anno AND 
+       utente = p_utente AND 
+       nvl(nb_titolo,'99') = '2'; 
+  end; 
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + cp_fpv_cap_usc;
+
+    insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Fondo pluriennale vincolato di parte capitale',
+      cp_fpv_cap_usc,
+      'QGEN_SpeseTitolo2_FPV'
+      );
+     commit;
+    -- *****************************
+
+  -- *** FPV Spese Capitale
+
+   c_riga := c_riga + 1;
+  
+   -- riga di cui Fondo pluriennale vincolato in c/capitale finanziato da debito
+
+  begin
+       select nvl(sum(nvl(fpv,0)),0) into cp_fpv_cap_usc
+       from fin_t_consuntivo_excel
+       where tipo_capitolo = 'U' AND 
+       anno_consuntivo = p_anno AND 
+       utente = p_utente AND 
+       nvl(nb_titolo,'99') = '99'; 
+  end; 
+
+
+    insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'di cui Fondo pluriennale vincolato in c/capitale finanziato da debito',
+      0, -- ***** da verificare con UFFICIO
+      'QGEN-SPE_FondoPluriennaleVincolatoContoCapitaleFinanziatoDebito'
+      );
+     commit;
+    -- *****************************
+
+    -- TITOLO 5 Entrate e TITOLO 3 Spese
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 5; 
+
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+                     SUBSTR(nb_livello1,1,1) = 5 AND
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+
+
+      --Uscite
+   SELECT id,descrizione 
+   INTO codtit_u, desctit_u
+   FROM nb_titoli_uscite
+   WHERE anno = p_anno
+   and id = 3;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) ,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+        into totale_spese_titolo_I,totale_spese_titolo_P
+    FROM fin_t_consuntivo_excel
+    WHERE tipo_capitolo = 'U' AND 
+           anno_consuntivo = p_anno AND 
+           utente = p_utente AND 
+           nb_titolo = '3';
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + totale_spese_titolo_I;
+    totale_spese_esercizio_P := totale_spese_esercizio_P + totale_spese_titolo_P;
+
+
+    c_riga := c_riga + 1;
+
+   -- riga Titolo 5 Entrate + Titolo 3 Uscite
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo5_A',
+      'QGEN_EntrateTitolo5_I',
+      'Titolo '||codtit_U||' - '||desctit_U,
+      totale_spese_titolo_I,
+      totale_spese_titolo_P,
+      'QGEN_SpeseTitolo3_I',
+      'QGEN_SpeseTitolo3_P'
+      );
+     commit;
+
+
+   -- TITOLO Entrate Finali e Spese Finali
+    c_riga := c_riga + 1;
+
+   -- riga Entrate Finali e Spese Finali
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Totale entrate finali',
+      totale_entrate_esercizio_A,
+      totale_entrate_esercizio_R,
+      'QGEN_TotaleEntrateFinali_A',
+      'QGEN_TotaleEntrateFinali_I',
+      'Totale spese finali',
+      totale_spese_esercizio_I,
+      totale_spese_esercizio_P,
+      'QGEN_TotaleSpeseFinali_I',
+      'QGEN_TotaleSpeseFinali_P'
+      );
+     commit;
+
+   -- ************************
+
+   -- TITOLO 6 Entrate e 4 Spese
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 6;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+          NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+          into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 6 AND
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+
+      --Uscite
+   SELECT id,descrizione 
+   INTO codtit_u, desctit_u
+   FROM nb_titoli_uscite
+   WHERE anno = p_anno
+   and id = 4;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) ,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+        into totale_spese_titolo_I,totale_spese_titolo_P
+    FROM fin_t_consuntivo_excel
+    WHERE tipo_capitolo = 'U' AND 
+           anno_consuntivo = p_anno AND 
+           utente = p_utente AND 
+           nb_titolo = '4';
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + totale_spese_titolo_I;
+    totale_spese_esercizio_P := totale_spese_esercizio_P + totale_spese_titolo_P;
+
+
+    c_riga := c_riga + 1;
+
+   -- riga Titolo 6 Entrate - 4 Uscite
+      ,RIGA
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo6_A',
+      'QGEN_EntrateTitolo6_I',
+      'Titolo '||codtit_U||' - '||desctit_U,
+      totale_spese_titolo_I,
+      totale_spese_titolo_P,
+      'QGEN_SpeseTitolo4_I',
+      'QGEN_SpeseTitolo4_P'
+      );
+     commit;
+     
+       -- ************************
+       
+    totale_spese_esercizio_I := totale_spese_esercizio_I + antic_liq_u; -- il fondo anticipazione di liquidità va sommata al Totale generale
+    
+     c_riga := c_riga + 1;
+  -- riga FPV attività finanziarie
+  insert into fin_t_rendiconto_qgr 
+      (DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP)
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'di cui Fondo anticipazioni di liquidità (DL 35/2013 e successive modifiche e rifinanziamenti)',
+      antic_liq_u,
+      'QGEN_SpeseTitolo4_I-FAL'
+      );
+   commit;
+
+   -- ************************
+
+      -- TITOLO 7 Entrate e 5 Spese
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 7;
+
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 7 AND
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+
+      --Uscite
+   SELECT id,descrizione 
+   INTO codtit_u, desctit_u
+   FROM nb_titoli_uscite
+   WHERE anno = p_anno
+   and id = 5;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) ,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+        into totale_spese_titolo_I,totale_spese_titolo_P
+    FROM fin_t_consuntivo_excel
+    WHERE tipo_capitolo = 'U' AND 
+           anno_consuntivo = p_anno AND 
+           utente = p_utente AND 
+           nb_titolo = '5';
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + totale_spese_titolo_I;
+    totale_spese_esercizio_P := totale_spese_esercizio_P + totale_spese_titolo_P;
+
+
+    c_riga := c_riga + 1;
+
+   -- riga Titolo 7 Entrate - 5 Uscite
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo7_A',
+      'QGEN_EntrateTitolo7_I',
+      'Titolo '||codtit_U||' - '||desctit_U,
+      totale_spese_titolo_I,
+      totale_spese_titolo_P,
+      'QGEN_SpeseTitolo5_I',
+      'QGEN_SpeseTitolo5_P'
+      );
+     commit;
+
+   -- ************************
+
+      -- TITOLO 9 Entrate e 7 Spese
+
+     -- Entrate
+   SELECT SUBSTR(codice,1,1), descrizione
+   INTO codtit_E,desctit_E
+   FROM nb_livello1
+   WHERE anno = p_anno
+   AND eu = 'E'
+   AND SUBSTR(codice,1,1) = 9;
+
+   SELECT  NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) , 
+           NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+           into totale_entrate_titolo_A,totale_entrate_titolo_R
+    FROM fin_t_consuntivo_excel 
+    WHERE tipo_capitolo = 'E' AND 
+                     SUBSTR(nb_livello1,1,1) = 9 AND
+                     anno_consuntivo = P_anno AND 
+                     utente = P_utente;
+
+      --Uscite
+   SELECT id,descrizione 
+   INTO codtit_u, desctit_u
+   FROM nb_titoli_uscite
+   WHERE anno = p_anno
+   and id = 7;
+
+   SELECT NVL(SUM(NVL(ACCERTAMENTI_IMPEGNI_COMPE,0)),0) ,
+        NVL(SUM(NVL(RISCOSSIONI_PAGAMENTI_TOTALE,0)),0) 
+        into totale_spese_titolo_I,totale_spese_titolo_P
+    FROM fin_t_consuntivo_excel
+    WHERE tipo_capitolo = 'U' AND 
+           anno_consuntivo = p_anno AND 
+           utente = p_utente AND 
+           nb_titolo = '7';
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + totale_entrate_titolo_A;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + totale_entrate_titolo_R;
+
+    totale_spese_esercizio_I := totale_spese_esercizio_I + totale_spese_titolo_I;
+    totale_spese_esercizio_P := totale_spese_esercizio_P + totale_spese_titolo_P;
+
+
+    c_riga := c_riga + 1;
+
+   -- riga Titolo 6 Entrate - 4 Uscite
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Titolo '||codtit_E||' - '||desctit_E,
+      totale_entrate_titolo_A,
+      totale_entrate_titolo_R,
+      'QGEN_EntrateTitolo9_A',
+      'QGEN_EntrateTitolo9_I',
+      'Titolo '||codtit_U||' - '||desctit_U,
+      totale_spese_titolo_I,
+      totale_spese_titolo_P,
+      'QGEN_SpeseTitolo7_I',
+      'QGEN_SpeseTitolo7_P'
+      );
+     commit;
+
+   -- ************************
+
+
+   -- TOTALE Entrate Esercizio e Spese Esercizio
+
+
+    c_riga := c_riga + 1;
+
+   -- riga TOTALE Entrate/Uscite Esercizio
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'Totale entrate dell''esercizio',
+      totale_entrate_esercizio_A,
+      totale_entrate_esercizio_R,
+      'QGEN_TotaleEntrateEsercizio_A',
+      'QGEN_TotaleEntrateEsercizio_I',
+      'Totale spese dell''esercizio',
+      totale_spese_esercizio_I,
+      totale_spese_esercizio_P,
+      'QGEN_TotaleSpeseEsercizio_I',
+      'QGEN_TotaleSpeseEsercizio_P'
+      );
+     commit;
+
+   -- ************************
+
+
+   -- TOTALE Entrate Generale e Spese Generale
+
+
+    c_riga := c_riga + 1;
+
+    totale_entrate_esercizio_A := totale_entrate_esercizio_A + CP_util_avamm_comp + CP_fpv_corr + CP_fpv_cap;
+    totale_entrate_esercizio_R := totale_entrate_esercizio_R + CP_fondo_cassa_i;
+    totale_spese_esercizio_I := totale_spese_esercizio_I + CP_disav_comp;
+
+
+   -- riga TOTALE Entrate/Uscite Esercizio
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,E_TAG_BDAP_ACC
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'TOTALE COMPLESSIVO ENTRATE',
+      totale_entrate_esercizio_A,
+      totale_entrate_esercizio_R,
+      'QGEN_TotaleComplessivoEntrate_A',
+      'QGEN_TotaleComplessivoEntrate_I',
+      'TOTALE COMPLESSIVO SPESE',
+      totale_spese_esercizio_I,
+      totale_spese_esercizio_P,
+      'QGEN_TotaleComplessivoSpese_I',
+      'QGEN_TotaleComplessivoSpese_P'
+      );
+     commit;
+
+   -- ************************
+
+
+   -- AVANZO/DISAVANZO ESERCIZIO
+
+
+    c_riga := c_riga + 1;
+
+    if  totale_spese_esercizio_I > totale_entrate_esercizio_A
+     then disavanzo_esercizio := totale_spese_esercizio_I - totale_entrate_esercizio_A;
+     av_dis_bilancio := disavanzo_esercizio;
+     avanzo_esercizio_I := 0;
+     else avanzo_esercizio_I := - totale_spese_esercizio_I + totale_entrate_esercizio_A;
+     av_dis_bilancio := avanzo_esercizio_I;
+     disavanzo_esercizio := 0;
+    end if;
+
+    avanzo_esercizio_P := totale_entrate_esercizio_R - totale_spese_esercizio_P;
+
+
+
+
+   -- riga Avanzo/Disavanzo Esercizio
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'DISAVANZO DELL''ESERCIZIO ',
+      disavanzo_esercizio,
+      'QGEN_DisavanzoEsercizio',
+      'AVANZO DI COMPETENZA/FONDO DI CASSA ',
+      avanzo_esercizio_I,
+      avanzo_esercizio_P,
+      'QGEN_AvanzoCompetenzaFC_I',
+      'QGEN_AvanzoCompetenzaFC_P'
+      );
+     commit;
+
+   -- ************************
+   
+   -- riga di cui Disavanzo da debito autorizzato e non contratto formatosi nell'esercizio (7)
+   insert into fin_t_rendiconto_qgr (
+      DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_TAG_BDAP_ACC
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'di cui Disavanzo da debito autorizzato e non contratto formatosi nell''esercizio',
+      0, -- **** da verificare con Ufficio
+      'QGEN_DisavanzoDebitoAutorizzatoNonContrattoFormatosiEsercizio'
+      );
+     commit;
+
+   -- ************************
+
+  -- TOTALE A PAREGGIO
+
+
+    c_riga := c_riga + 1;
+
+
+   -- riga Avanzo/Disavanzo Esercizio
+   insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_ENTRATA
+      ,E_ACCERTAMENTI
+      ,E_RISCOSSIONI
+      ,E_TAG_BDAP_ACC
+      ,E_TAG_BDAP_RIS
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_PAGAMENTI
+      ,U_TAG_BDAP_IMP
+      ,U_TAG_BDAP_PAG
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'TOTALE A PAREGGIO',
+      (totale_entrate_esercizio_A + nvl(disavanzo_esercizio,0)),
+      'TOTALE A PAREGGIO',
+      totale_entrate_esercizio_R,
+      'QGEN_EntrateTotalePareggio_A',
+      'QGEN_EntrateTotalePareggio_I',
+      (totale_spese_esercizio_I + avanzo_esercizio_I),
+      (totale_spese_esercizio_P + avanzo_esercizio_P),
+      'QGEN_SpeseTotalePareggio_I',
+      'QGEN_SpeseTotalePareggio_P'
+      );
+     commit;
+
+   -- ************************
+   
+   -- 
+   -- FFERRANTE 10/03/2020 - di qua comincia la parte relativa alle sezioni "GESTIONE DEL BILANCIO" e "GESTIONE DEGLI ACCANTONAMENTI IN SEDE DI RENDICONTOE introdotte da RGS con il Rendiconto 2019
+   --
+   
+   -- ************************
+   
+   -- *************************
+   -- ****GESTIONE BILANCIO****
+   -- *************************
+   
+   
+   c_riga := c_riga + 1;
+
+
+   -- riga GESTIONE DEL BILANCIO
+   insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'GESTIONE DEL BILANCIO',
+      'BIL'
+      );
+     commit; 
+   
+
+    c_riga := c_riga + 1;
+
+   -- riga a) Avanzo di competenza (+) /Disavanzo di competenza (-) 
+   insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'a) Avanzo di competenza (+) /Disavanzo di competenza (-)',
+      av_dis_bilancio,
+      'QGEN-BIL_AvanzoDisavanzoCompetenza'
+      ,'BIL'
+      );
+     commit;
+   
+   c_riga := c_riga + 1;   
+   -- riga b) Risorse accantonate  stanziate nel bilancio dell'esercizio N
+   
+ 
+    select nvl(sum(nvl(ACCANT_STANZIATI_ESER,0)),0) into ris_acc_bilancio
+    from tb_risorse_accantonate
+    where anno = p_anno;
+    
+    insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'b) Risorse accantonate  stanziate nel bilancio dell''esercizio '||p_anno,
+      ris_acc_bilancio,
+      'QGEN-BIL_RisorseAccantonateStanziateBilancioEsercizio',
+      'BIL'
+      );
+     commit;
+
+    c_riga := c_riga + 1;   
+   -- riga c) Risorse vincolate nel bilancio (+)
+ 
+    select nvl(sum(nvl(RIS_VINC_3112,0)),0) into ris_vinc_bilancio
+    from tb_risorse_vincolate
+    where anno = p_anno
+    and nvl(lower(codice_riga),'x') = 'n';
+    
+    insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,DESC_RIGO_USCITA
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'c) Risorse vincolate nel bilancio (+)',
+      ris_vinc_bilancio,
+      'QGEN-BIL_RisorseVincolateBilancio',
+      'BIL'
+      );
+     commit;
+   
+    c_riga := c_riga + 1;   
+   -- riga d) Equilibrio di bilancio (d=a-b-c)
+ 
+    insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'd) Equilibrio di bilancio (d=a-b-c)',
+      (nvl(av_dis_bilancio,0) - nvl( ris_vinc_bilancio,0) - nvl(ris_vinc_bilancio,0)),
+      'QGEN-BIL_EquilibrioBilancio',
+      'BIL'
+      );
+     commit;
+     
+   -- ******************************************
+   -- ****GESTIONE ACCANTONAMENTI RENDICONTO****
+   -- ******************************************
+   
+   
+   c_riga := c_riga + 1;
+
+
+   -- riga GESTIONE ACCANTONAMENTI IN SEDE DI RENDICONTO
+   insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'GESTIONE DEGLI ACCANTONAMENTI IN SEDE DI RENDICONTO',
+      'ACC'
+      );
+     commit; 
+     
+      c_riga := c_riga + 1;   
+  
+   -- riga d) Equilibrio di bilancio (d=a-b-c)
+ 
+    insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'd) Equilibrio di bilancio (d=a-b-c)',
+      (nvl(av_dis_bilancio,0) - nvl( ris_vinc_bilancio,0) - nvl(ris_vinc_bilancio,0)),
+      'QGEN-ACC_EquilibrioBilancio', 
+      'ACC'
+      );
+     commit;
+     
+      c_riga := c_riga + 1;   
+   -- e)Variazione accantonamenti effettuata in sede di rendiconto'(+)/(-)
+  
+    select nvl(sum(nvl(VARIAZIONI_RENDICONTO,0)),0) into variazione_acc_rend
+    from tb_risorse_accantonate
+    where anno = p_anno;
+    
+    insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'e)Variazione accantonamenti effettuata in sede di rendiconto(+)/(-)',
+      variazione_acc_rend,
+      'QGEN-ACC_VariazioneAccantonamentiEffettuataRendiconto',
+      'ACC'
+      );
+     commit;
+     
+       c_riga := c_riga + 1;   
+  
+   -- riga f) Equilibrio complessivo (f=d-e)
+ 
+    insert into fin_t_rendiconto_qgr (
+     DATA_GENERAZIONE
+      ,UTENTE
+      ,RIGA
+      ,ANNO
+      ,DESC_RIGO_USCITA
+      ,U_IMPEGNI
+      ,U_TAG_BDAP_IMP 
+      ,TIPO
+      )
+   values
+     (sysdate,
+      p_utente,
+      c_riga,
+      p_anno,
+      'f) Equilibrio complessivo (f=d-e',
+      (nvl(av_dis_bilancio,0) - nvl( ris_vinc_bilancio,0) - nvl(ris_vinc_bilancio,0) - nvl(variazione_acc_rend,0)),
+      'QGEN-ACC_EquilibrioComplessivo', 
+      'ACC'
+      );
+     commit;
+     
+      c_riga := c_riga + 1;   
+     
+ else rend_qgr_old(p_anno,p_utente);
+end if;
+end;</pre>	</td></tr>
+</table></div>

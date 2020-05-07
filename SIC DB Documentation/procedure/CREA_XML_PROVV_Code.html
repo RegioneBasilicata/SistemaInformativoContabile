@@ -1,0 +1,598 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CREA_XML_PROVV</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CREA_XML_PROVV.html">Details</a></div></div>
+<div class="tab"><div><a href="CREA_XML_PROVV_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CREA_XML_PROVV_References.html">References</a></div></div>
+<div class="tab"><div><a href="CREA_XML_PROVV_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CREA_XML_PROVV_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+PROCEDURE crea_xml_provv(w_id_atto in number,RIS OUT NUMBER,DESCR_RIS OUT VARCHAR2) is
+--    dest_loc  BLOB;
+    src_loc   BFILE;
+
+    doc xmldom.DOMDocument;
+    main_node xmldom.DOMNode;
+    
+    root_node xmldom.DOMNode;
+    root_elmt xmldom.DOMElement;
+ 
+    item_node           xmldom.DOMNode;
+    item_node_body      xmldom.DOMNode;
+    item_node_messrich  xmldom.DOMNode;
+    item_node_intest    xmldom.DOMNode;
+    item_node_richiesta xmldom.DOMNode;
+    item_node_provv     xmldom.DOMNode;
+    item_node_docinfo   xmldom.DOMNode;
+    item_node_corpo     xmldom.DOMNode;
+    item_node_dati_cont xmldom.DOMNode;
+    item_node_impegni   xmldom.DOMNode;
+    item_node_liquid    xmldom.DOMNode;
+    item_node_lista_ben xmldom.DOMNode;
+    item_node_benefic   xmldom.DOMNode;
+    item_node_dati_fisc xmldom.DOMNode;
+    item_node_contratto xmldom.DOMNode;
+    item_node_lista_all xmldom.DOMNode;
+    item_node_allegati  xmldom.DOMNode;
+    item_node_trasp     xmldom.DOMNode;
+    item_node_c_trasp   xmldom.DOMNode;
+    item_node_c2_trasp  xmldom.DOMNode;
+    item_node_tipol     xmldom.DOMNode;
+    item_node_lob       xmldom.DOMNode;
+    item_node_lista_fattura   xmldom.DOMNode;
+    item_node_fattura   xmldom.DOMNode;
+    item_node_fattura_allegato xmldom.DOMNode;
+    item_node_allegato  xmldom.DOMNode;
+    textNode            xmldom.DOMText; 
+    textNode2           xmldom.DOMNode;
+    iAllegati           number;
+    nome_allegato       varchar2(100);
+    formato_allegato    varchar2(100);
+    link                varchar2(4000);
+
+    file_exp            CLOB;
+
+    item_elmt xmldom.DOMElement;
+    item_text xmldom.DOMText;
+    l_response_msg clob;
+    l_xml clob;
+    l_risultato xmltype;
+    num_provv    varchar2(20);
+    err_provv    varchar2(200);
+    
+
+--  c clob;
+--  n number;
+--  offset      pls_integer := 1;
+--  chunksize   pls_integer;  
+--  domnode     dbms_xmldom.DOMNode;  
+--  domtext     dbms_xmldom.DOMText;
+  
+  l_bfile     BFILE;
+  p_clob      CLOB;
+  ostream     SYS.UTL_CHARACTEROUTPUTSTREAM;
+  l_step      PLS_INTEGER := 12000;
+  amt         integer;
+  pos         integer;
+  a_buf       varchar2(10);  
+  
+begin   
+for atto in (SELECT at.fl_urgente, rt.ID, rt.TIPO_RICHIESTA,rt.CODICE_ESTERNO, rt.TIPO_ATTO, rt.NUMERO_DEFINITIVO,
+			  rt.NUMERO_PROVVISORIO, replace(rt.OGGETTO,'à','a''') oggetto, rt.TIPO_PUBBLICAZIONE, rt.CODICE_CUP,
+			  rt.FLAG_PRIVACY, rt.STATO, rt.DATA_MODIFICA, rt.DATA_ATTO, rt.CORPO_ATTO,
+			  rt.FLAG_INVESTIMENTO_PUB, rt.CODICE_FISCALE, rt.CODICE_UFFICIO 
+              FROM  AT_RICHIESTE_INTEMA rt , at_atti_testa at
+			  WHERE at.ID_ATTO=w_id_atto and rt.CODICE_ESTERNO = at.ID_ATTO) loop --3427,3573
+doc := xmldom.newDOMDocument;
+
+/** inizio nodo principale */
+-- create root element
+main_node := xmldom.makeNode(doc);
+root_elmt := xmldom.createElement(doc, 'soapenv:Envelope');
+--xmldom.setAttribute(root_elmt, 'versione', '1.0');
+xmldom.setAttribute(root_elmt, 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
+xmldom.setAttribute(root_elmt, 'xmlns:typ', 'http://regione.basilicata.it/provvedimentiamministrativi/types');
+root_node := xmldom.appendChild(main_node, xmldom.makeNode(root_elmt));
+/* fine nodo principale */
+
+/* inizio intestazione */
+item_node := WS_UTILITY.AggiungiNodo (doc, 'soapenv:Header', root_node, NULL);
+  /* inizio body */
+item_node_body := WS_UTILITY.AggiungiNodo (doc, 'soapenv:Body', root_node, NULL);    
+ /* inizio mess_richiesta */
+ item_node_messrich := WS_UTILITY.AggiungiNodo (doc, 'typ:Messaggio_Richiesta', item_node_body, NULL);     
+ /* inizio intestazione */
+  item_node_intest := WS_UTILITY.AggiungiNodo (doc, 'typ:Intestazione', item_node_messrich, NULL);     
+ /* Dati intestazione */
+   item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:InfoMittDest', item_node_intest, 'SIC');     
+   item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Applicazione', item_node_intest, 'SIC');     
+ /* inizio richiesta */
+  item_node_richiesta := WS_UTILITY.AggiungiNodo (doc, 'typ:Richiesta', item_node_messrich, NULL);     
+  /* inizio provv */
+   item_node_provv := WS_UTILITY.AggiungiNodo (doc, 'typ:CreaProvvedimento', item_node_richiesta, NULL);     
+   /* doc_info */
+    item_node_docinfo := WS_UTILITY.AggiungiNodo (doc, 'typ:DocumentoInfo', item_node_provv, NULL);     
+     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Tipo_Atto', item_node_docinfo, atto.tipo_atto);     
+		 /*root_elmt := xmldom.createElement(doc, 'typ:NumeroDefinitivo');
+ 		 xmldom.setAttribute(root_elmt, 'xsi:nil', 'true');
+		 xmldom.setAttribute(root_elmt, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+		 root_node := xmldom.appendChild(item_node_docinfo, xmldom.makeNode(root_elmt));
+		 root_elmt := xmldom.createElement(doc, 'typ:NumeroProvvisorio');
+ 		 xmldom.setAttribute(root_elmt, 'xsi:nil' , 'true');
+		 xmldom.setAttribute(root_elmt, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+		 root_node := xmldom.appendChild(item_node_docinfo, xmldom.makeNode(root_elmt));*/
+     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Oggetto', item_node_docinfo, atto.oggetto);     
+     if atto.fl_urgente='N' then
+        item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Urgente', item_node_docinfo, 'false');     
+     else  	
+        item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Urgente', item_node_docinfo, 'true');     
+     end if;
+     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Tipo_Pubblicazione', item_node_docinfo, atto.TIPO_PUBBLICAZIONE);     
+		 /*root_elmt := xmldom.createElement(doc, 'typ:Codice_Cup');
+ 		 xmldom.setAttribute(root_elmt, 'xsi:nil', 'true');
+		 xmldom.setAttribute(root_elmt, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+		 root_node := xmldom.appendChild(item_node_docinfo, xmldom.makeNode(root_elmt));
+     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_privacy', item_node_docinfo, atto.FLAG_PRIVACY); */   
+     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Stato', item_node_docinfo, atto.STATO);     
+     /* corpo atto */
+       item_node_corpo := WS_UTILITY.AggiungiNodo (doc, 'typ:Corpo_Atto', item_node_docinfo, NULL);     
+       begin
+ /*        src_loc := BFILENAME('DIR_PROVVEDIMENTI', atto.CODICE_ESTERNO||'.pdf');
+         DBMS_LOB.OPEN(src_loc, DBMS_LOB.LOB_READONLY);
+         dbms_lob.createtemporary(dest_loc, TRUE);
+         DBMS_LOB.LOADFROMFILE(
+               dest_lob => dest_loc
+              , src_lob  => src_loc
+              , amount   => DBMS_LOB.getLength(src_loc));
+         DBMS_LOB.CLOSE(src_loc);
+    -- se il file e' piccolo si riesce ad allegare direttamente
+         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Modello_Unico_PDF', item_node_corpo, utl_raw.cast_to_varchar2(utl_encode.base64_encode(dest_loc)));     
+         DBMS_LOB.FREETEMPORARY(dest_loc);*/
+
+                 item_node_lob := WS_UTILITY.AggiungiNodo (doc, 'typ:Modello_Unico_PDF', item_node_corpo, NULL); 
+                 textNode := DBMS_XMLDOM.createTextNode(doc, '');
+                 textNode2 := DBMS_XMLDOM.appendChild(item_node_lob, DBMS_XMLDOM.makeNode(textNode));
+                 ostream := XMLDOM.SETNODEVALUEASCHARACTERSTREAM(textNode2); 
+                 l_bfile := BFILENAME('DIR_PROVVEDIMENTI',  atto.CODICE_ESTERNO||'.pdf');
+                 DBMS_LOB.fileopen(l_bfile, DBMS_LOB.file_readonly);
+   
+                 FOR i IN 0 .. TRUNC((DBMS_LOB.getlength(l_bfile) - 1 )/l_step) LOOP
+                   p_clob := UTL_RAW.cast_to_varchar2(UTL_ENCODE.base64_encode(DBMS_LOB.substr(l_bfile, l_step, i * l_step + 1)));
+                   amt := 10;
+                   pos := 1;
+                       
+                   WHILE pos &lt;= dbms_lob.getlength(p_clob)
+                     LOOP
+                       dbms_lob.read(p_clob, amt, pos, a_buf);
+                       ostream.write(a_buf, 0, amt);
+                       pos := pos + amt;
+                   END LOOP;
+                 END LOOP;
+                
+                 DBMS_LOB.fileclose(l_bfile);
+
+                 ostream.close();  
+
+		       exception
+                 when others then
+             		 item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:errore', item_node_corpo, SQLCODE||' - '||SUBSTR(SQLERRM, 1, 100));     
+       end;
+     /* dati contabile */
+       item_node_dati_cont := WS_UTILITY.AggiungiNodo (doc, 'typ:Dati_Contabili', item_node_docinfo, NULL);     
+--       if atto.tipo_atto=0 then
+    -- determina (impegni e liquidazione) 
+          for imp in (SELECT ID_RICHIESTA, ID_DOCUMENTO, ID_DOCUMENTO_PADRE, TIPO_DOCUMENTO, BILANCIO, 
+           					 UPB, CAPITOLO, CODICE_OBIETTIVO_GESTIONALE,PIANO_CONTI_FINA, ltrim(to_char(IMPORTO,'999999999999.99')) IMPORTO,
+							 NUM_IMPEGNO, ANNO_DELIBERA, NUMERO_PRE_IMP, ANNO_PERENTE, NUMERO_IMP_PERENTE,
+							 NUMERO_LIQUIDAZIONE, TIPO_ASSUNZIONE, NUM_ASSUNZIONE,	DATA_ASSUNZIONE, NUMERO_ECO,
+							 DATA_MANDATO, NUMERO_MANDATO, TIPO_OPERAZIONE_CONTABILE, CODICE_RICHIESTA_RAG, MISSIONE, PROGRAMMA
+					  FROM AT_DATI_CONTABILI 
+                      WHERE ID_RICHIESTA = atto.id AND TIPO_DOCUMENTO='Impegni') loop
+        /* impegni */
+           item_node_impegni := WS_UTILITY.AggiungiNodo (doc, 'typ:Impegni', item_node_dati_cont, NULL);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Bilancio', item_node_impegni, imp.BILANCIO);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:UPB', item_node_impegni, imp.UPB);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:MissioneProgramma', item_node_impegni, imp.MISSIONE||'.'||imp.PROGRAMMA);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Capitolo', item_node_impegni, imp.CAPITOLO);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_obiettivo_Gestionale', item_node_impegni, imp.CODICE_OBIETTIVO_GESTIONALE);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Piano_dei_Conti_Finanziario', item_node_impegni, imp.PIANO_CONTI_FINA);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo', item_node_impegni, imp.IMPORTO);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NumeroImpegno', item_node_impegni, imp.NUM_IMPEGNO);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Anno', item_node_impegni, imp.BILANCIO);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NumeroPreImpegno', item_node_impegni, imp.NUMERO_PRE_IMP);     
+           for liq in (SELECT ID_RICHIESTA, ID_DOCUMENTO, ID_DOCUMENTO_PADRE, TIPO_DOCUMENTO, BILANCIO, 
+           					  UPB, CAPITOLO, CODICE_OBIETTIVO_GESTIONALE,PIANO_CONTI_FINA, ltrim(to_char(IMPORTO,'999999999999.99')) IMPORTO,
+							  NUM_IMPEGNO, ANNO_DELIBERA, NUMERO_PRE_IMP, ANNO_PERENTE, NUMERO_IMP_PERENTE,
+							  NUMERO_LIQUIDAZIONE, TIPO_ASSUNZIONE, NUM_ASSUNZIONE,	DATA_ASSUNZIONE, NUMERO_ECO,
+							  DATA_MANDATO, NUMERO_MANDATO, TIPO_OPERAZIONE_CONTABILE, CODICE_RICHIESTA_RAG, 
+                              MISSIONE, PROGRAMMA, PROGR_IMP, PROGR_LIQ
+							  FROM AT_DATI_CONTABILI 
+                              WHERE ID_RICHIESTA = atto.id AND ID_DOCUMENTO_PADRE=imp.ID_DOCUMENTO) loop
+           /* liquidazioni su impegno (determine) */
+              item_node_liquid := WS_UTILITY.AggiungiNodo (doc, 'typ:Liquidazioni', item_node_impegni, NULL);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Esercizio', item_node_liquid, liq.BILANCIO);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:UPB', item_node_liquid, liq.UPB);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:MissioneProgramma', item_node_liquid, liq.MISSIONE||'.'||liq.PROGRAMMA);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:PianoContiFinanziario', item_node_liquid, liq.PIANO_CONTI_FINA);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Capitolo', item_node_liquid, liq.CAPITOLO);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo', item_node_liquid, liq.IMPORTO);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NumeroImpegno', item_node_liquid, NULL);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NumeroAssunzione', item_node_liquid, NULL);     
+             /* lista beneficiari */
+                item_node_lista_ben := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Beneficiari', item_node_liquid, NULL);     
+                for ben in (SELECT ltrim(to_char(tp.importo_pagato,'999999999999.99')) importo_pagato,
+                   				   ltrim(to_char(tp.importo_pagato,'999999999999.99')) importo_spettante, a.DENOMINAZIONE flg_persona,
+								   SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) denominazione, 
+								   a.PARTITA_IVA partita_iva,	a.CODICE_FISCALE codice_fiscale, tp.id_pagamento id_modalita_pagamento,
+								   tp.iban iban, tp.id_ana id_anagragrafica, tp.id_sede id_sede, tp.id_ana_conti_bancari id_conto,
+								   tp.CODICE_GESTIONALE_SIOPE codice_siope, tp.CODICE_CUP cod_cup, tp.CODICE_CIG cod_cig,
+								   lpad(tp.tipo_contratto,3,0)||lpad(tp.progr_contratto,4,0) chiave_contratto,
+                   g.num_contratto
+							FROM at_dati_contabili dc, at_terze_parti tp , fin_t_anagrafica a,bi_generale_gest g 
+							where dc.id_richiesta=tp.id_richiesta 
+							      and dc.id_documento=tp.id_documento 
+							      and tp.id_ana=a.id 
+							      and tp.id_richiesta= atto.id 
+							      and tp.id_documento= liq.ID_DOCUMENTO 
+                    and g.tab_codice=tp.tipo_contratto
+                    and g.progr=tp.progr_contratto) loop 
+                  item_node_benefic := WS_UTILITY.AggiungiNodo (doc, 'typ:Beneficiari', item_node_lista_ben, NULL);  
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Spettante', item_node_benefic, ben.importo_spettante);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Pagato', item_node_benefic, ben.importo_pagato);     
+                  if ben.flg_persona is null then
+                     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_benefic, 'true');
+                  else
+                     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_benefic, 'false');
+                  end if;	        
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Denominazione', item_node_benefic, ben.denominazione);     
+                  item_node_dati_fisc := WS_UTILITY.AggiungiNodo (doc, 'typ:Dati_Fiscali', item_node_benefic, NULL);  
+                    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Partita_Iva', item_node_dati_fisc, ben.partita_iva);     
+                    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Fiscale', item_node_dati_fisc, ben.codice_fiscale);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Modalita_Pagamento', item_node_benefic, ben.id_modalita_pagamento);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IBAN', item_node_benefic, ben.iban);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Anagrafica', item_node_benefic, ben.id_anagragrafica);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Sede', item_node_benefic, ben.id_sede);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Conto', item_node_benefic, ben.id_conto);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Siope', item_node_benefic, ben.codice_siope);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Cup', item_node_benefic, ben.cod_cup);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Cig', item_node_benefic, ben.cod_cig);     
+                  item_node_contratto := WS_UTILITY.AggiungiNodo (doc, 'typ:Contratto', item_node_benefic, NULL);  
+                    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Contratto', item_node_contratto, ben.chiave_contratto);     
+         				    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Numero_Repertorio', item_node_contratto, ben.num_contratto);     
+                    item_node_lista_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Fatture', item_node_contratto, NULL);   
+                    for fatt in (SELECT brg.chiave_fattura,brg.NUM_DOC,to_char(brg.DATA_DOC,'yyyy-mm-dd') data_doc,brg.OGGETTO_FORNITURA oggetto,
+                                      ltrim(to_char(brg.importo,'999999999999.99')) imp_fatt,
+                                      ltrim(to_char(bixr.IMPORTO_X_RATA,'999999999999.99')) imp_x_rata 
+                                FROM w_bi_rate_gest brg,
+                                     bi_impegni_x_rate bixr 
+                                WHERE brg.atto=w_id_atto and
+                                      brg.cod_tipo_contratto = bixr.TAB_CODICE AND 
+                                      bixr.progr_imp =liq.progr_imp and
+                                      brg.numero_contratto  = bixr.GEN_PROGR AND 
+                                      brg.PROGR_RATA = bixr.PROGR_RATA and
+                                      brg.cod_forn = ben.id_anagragrafica and
+                                      bixr.progr_liq_atto=liq.progr_liq) loop
+                       item_node_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Fattura_Beneficiario', item_node_lista_fattura, NULL);   
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Fatture_SIC', item_node_fattura, fatt.chiave_fattura);     
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Parziale', item_node_fattura, fatt.imp_x_rata);     
+                    end loop;               
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IsDatoSensibile', item_node_benefic, 'false');     
+                end loop;
+           end loop;
+--- aggiunta beneficiario impegno dovrebbe essere una singola riga per impegno
+           /* lista beneficiari impegni*/
+           for ben_imp in (SELECT ltrim(to_char(tp.importo_pagato,'999999999999.99')) importo_pagato,
+                        ltrim(to_char(tp.importo_pagato,'999999999999.99')) importo_spettante, a.DENOMINAZIONE flg_persona,
+                        SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) denominazione, 
+                        a.PARTITA_IVA partita_iva,	a.CODICE_FISCALE codice_fiscale, tp.id_pagamento id_modalita_pagamento,
+                        tp.iban iban, tp.id_ana id_anagragrafica, tp.id_sede id_sede, tp.id_ana_conti_bancari id_conto,
+                        tp.CODICE_GESTIONALE_SIOPE codice_siope, tp.CODICE_CUP cod_cup, tp.CODICE_CIG cod_cig,
+                        lpad(tp.tipo_contratto,3,0)||lpad(tp.progr_contratto,4,0) chiave_contratto, 
+                        g.num_contratto, dc.PROGR_IMP, dc.PROGR_LIQ
+                       FROM at_dati_contabili dc, at_terze_parti tp , fin_t_anagrafica a,bi_generale_gest g 
+                       where dc.id_richiesta=atto.id 
+                             and dc.ID_DOCUMENTO_PADRE=imp.ID_DOCUMENTO
+                             and tp.id_documento=dc.id_documento
+                             and tp.id_richiesta=dc.id_richiesta
+                             and a.id = tp.id_ana
+                             and g.tab_codice=tp.tipo_contratto
+                             and g.progr=tp.progr_contratto) loop 
+                  item_node_benefic := WS_UTILITY.AggiungiNodo (doc, 'typ:Beneficiario', item_node_impegni, NULL);  
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Spettante', item_node_benefic, ben_imp.importo_spettante);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Pagato', item_node_benefic, ben_imp.importo_pagato);     
+                  if ben_imp.flg_persona is null then
+                     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_benefic, 'true');
+                  else
+                     item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_benefic, 'false');
+                  end if;	        
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Denominazione', item_node_benefic, ben_imp.denominazione);     
+                  item_node_dati_fisc := WS_UTILITY.AggiungiNodo (doc, 'typ:Dati_Fiscali', item_node_benefic, NULL);  
+                    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Partita_Iva', item_node_dati_fisc, ben_imp.partita_iva);     
+                    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Fiscale', item_node_dati_fisc, ben_imp.codice_fiscale);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Modalita_Pagamento', item_node_benefic, ben_imp.id_modalita_pagamento);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IBAN', item_node_benefic, ben_imp.iban);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Anagrafica', item_node_benefic, ben_imp.id_anagragrafica);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Sede', item_node_benefic, ben_imp.id_sede);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Conto', item_node_benefic, ben_imp.id_conto);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Siope', item_node_benefic, ben_imp.codice_siope);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Cup', item_node_benefic, ben_imp.cod_cup);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Cig', item_node_benefic, ben_imp.cod_cig);     
+                  item_node_contratto := WS_UTILITY.AggiungiNodo (doc, 'typ:Contratto', item_node_benefic, NULL);  
+                    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Contratto', item_node_contratto, ben_imp.chiave_contratto);     
+         				    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Numero_Repertorio', item_node_contratto, ben_imp.num_contratto);     
+                    item_node_lista_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Fatture', item_node_contratto, NULL);   
+                    for fatt_imp in (SELECT brg.chiave_fattura,brg.NUM_DOC,to_char(brg.DATA_DOC,'yyyy-mm-dd') data_doc,brg.OGGETTO_FORNITURA oggetto,
+                                      ltrim(to_char(brg.importo,'999999999999.99')) imp_fatt,
+                                      ltrim(to_char(bixr.IMPORTO_X_RATA,'999999999999.99')) imp_x_rata 
+                                FROM w_bi_rate_gest brg,
+                                     bi_impegni_x_rate bixr 
+                                WHERE brg.atto=w_id_atto and
+                                      brg.cod_tipo_contratto = bixr.TAB_CODICE AND 
+                                      brg.numero_contratto  = bixr.GEN_PROGR AND 
+                                      brg.PROGR_RATA = bixr.PROGR_RATA and
+                       item_node_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Fattura_Beneficiario', item_node_lista_fattura, NULL);   
+                                      brg.cod_forn = ben_imp.id_anagragrafica and
+                                      bixr.progr_imp =ben_imp.progr_imp and
+                                      bixr.progr_liq_atto=ben_imp.progr_liq) loop
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Fatture_SIC', item_node_fattura, fatt_imp.chiave_fattura);     
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Parziale', item_node_fattura, fatt_imp.imp_x_rata);     
+                    end loop;               
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IsDatoSensibile', item_node_benefic, 'false');     
+           end loop;
+-- fine aggiunta beneficiario impegno --
+          end loop;
+--       elsif atto.tipo_atto=2 then
+    -- disposizione (solo liquidazioni)
+         for liq in (SELECT ID_RICHIESTA, ID_DOCUMENTO, ID_DOCUMENTO_PADRE, TIPO_DOCUMENTO, BILANCIO, 
+         					UPB, CAPITOLO, CODICE_OBIETTIVO_GESTIONALE,PIANO_CONTI_FINA, ltrim(to_char(IMPORTO,'999999999999.99')) IMPORTO,
+							NUM_IMPEGNO, ANNO_DELIBERA, NUMERO_PRE_IMP, ANNO_PERENTE, NUMERO_IMP_PERENTE,
+							NUMERO_LIQUIDAZIONE, TIPO_ASSUNZIONE, NUM_ASSUNZIONE,	DATA_ASSUNZIONE, NUMERO_ECO,
+							DATA_MANDATO, NUMERO_MANDATO, TIPO_OPERAZIONE_CONTABILE, CODICE_RICHIESTA_RAG, 
+                            MISSIONE, PROGRAMMA, PROGR_IMP, PROGR_LIQ
+							FROM AT_DATI_CONTABILI 
+                            WHERE ID_RICHIESTA = atto.id AND ID_DOCUMENTO_PADRE is null AND TIPO_DOCUMENTO='Liquidazioni') loop
+         /* liquidazioni disposizioni */
+            item_node_liquid := WS_UTILITY.AggiungiNodo (doc, 'typ:Liquidazioni', item_node_dati_cont, NULL);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Esercizio', item_node_liquid, liq.BILANCIO);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:UPB', item_node_liquid, liq.UPB);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:MissioneProgramma', item_node_liquid, liq.MISSIONE||'.'||liq.PROGRAMMA);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:PianoContiFinanziario', item_node_liquid, liq.PIANO_CONTI_FINA);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Capitolo', item_node_liquid, liq.CAPITOLO);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo', item_node_liquid, liq.IMPORTO);     
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NumeroImpegno', item_node_liquid, liq.NUM_IMPEGNO);  
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:TipoAssunzione', item_node_liquid, liq.TIPO_ASSUNZIONE);  
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NumeroAssunzione', item_node_liquid, liq.NUM_ASSUNZIONE);  
+            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:DataAssunzione', item_node_liquid, to_char(liq.DATA_ASSUNZIONE,'yyyy-mm-dd+hh24:mi'));  
+           /* lista beneficiari */
+              item_node_lista_ben := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Beneficiari', item_node_liquid, NULL);     
+              for ben in (SELECT ltrim(to_char(tp.importo_pagato,'999999999999.99')) importo_pagato,
+                                 ltrim(to_char(tp.importo_pagato,'999999999999.99')) importo_spettante, a.DENOMINAZIONE flg_persona,
+							     SUBSTR(NVL(a.DENOMINAZIONE,a.COGNOME||' '||a.NOME||' '||a.ALTRI_NOMI),1,200) denominazione, 
+							     a.PARTITA_IVA partita_iva,	a.CODICE_FISCALE codice_fiscale, tp.id_pagamento id_modalita_pagamento,
+							     tp.iban iban, tp.id_ana id_anagragrafica, tp.id_sede id_sede, tp.id_ana_conti_bancari id_conto,
+							     tp.CODICE_GESTIONALE_SIOPE codice_siope, tp.CODICE_CUP cod_cup, tp.CODICE_CIG cod_cig,
+							     lpad(tp.tipo_contratto,3,0)||lpad(tp.progr_contratto,4,0) chiave_contratto,
+                   g.num_contratto
+							FROM at_dati_contabili dc, at_terze_parti tp , fin_t_anagrafica a,bi_generale_gest g
+								where dc.id_richiesta=tp.id_richiesta 
+								      and dc.id_documento=tp.id_documento 
+								      and tp.id_ana=a.id 
+								      and tp.id_richiesta= atto.id 
+								      and tp.id_documento= liq.ID_DOCUMENTO 
+                      and g.tab_codice=tp.tipo_contratto
+                      and g.progr=tp.progr_contratto) loop
+                item_node_benefic := WS_UTILITY.AggiungiNodo (doc, 'typ:Beneficiari', item_node_lista_ben, NULL);  
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Spettante', item_node_benefic, ben.importo_spettante);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Pagato', item_node_benefic, ben.importo_pagato);     
+                if ben.flg_persona is null then
+                   item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_benefic, 'true');
+                else
+                   item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_benefic, 'false');
+                end if;	        
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Denominazione', item_node_benefic, ben.denominazione);     
+                item_node_dati_fisc := WS_UTILITY.AggiungiNodo (doc, 'typ:Dati_Fiscali', item_node_benefic, NULL);  
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Partita_Iva', item_node_dati_fisc, ben.partita_iva);     
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Fiscale', item_node_dati_fisc, ben.codice_fiscale);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Modalita_Pagamento', item_node_benefic, ben.id_modalita_pagamento);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IBAN', item_node_benefic, ben.iban);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Anagrafica', item_node_benefic, ben.id_anagragrafica);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Cup', item_node_benefic, ben.cod_cup);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Sede', item_node_benefic, ben.id_sede);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:ID_Conto', item_node_benefic, ben.id_conto);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Siope', item_node_benefic, ben.codice_siope);     
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Cig', item_node_benefic, ben.cod_cig);     
+                item_node_contratto := WS_UTILITY.AggiungiNodo (doc, 'typ:Contratto', item_node_benefic, NULL);  
+                  item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Contratto', item_node_contratto, ben.chiave_contratto);     
+      				    item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Numero_Repertorio', item_node_contratto, ben.num_contratto);     
+                  item_node_lista_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Fatture', item_node_contratto, NULL);   
+                  for fatt in (SELECT brg.chiave_fattura,brg.NUM_DOC,to_char(brg.DATA_DOC,'yyyy-mm-dd') data_doc,
+                                    replace(brg.OGGETTO_FORNITURA,'à','a''') oggetto,
+                                    ltrim(to_char(brg.importo,'999999999999.99')) imp_fatt,
+                                    ltrim(to_char(bixr.IMPORTO_X_RATA,'999999999999.99')) imp_x_rata 
+                                FROM w_bi_rate_gest brg,
+                                     bi_impegni_x_rate bixr 
+                                WHERE brg.atto=w_id_atto and
+                                      brg.cod_tipo_contratto = bixr.TAB_CODICE AND 
+                                      brg.numero_contratto  = bixr.GEN_PROGR AND 
+                                      brg.PROGR_RATA = bixr.PROGR_RATA and  
+                                      brg.cod_forn = ben.id_anagragrafica and
+                                      bixr.progr_imp =liq.progr_imp and
+                                      bixr.progr_liq_atto=liq.progr_liq) loop
+                       item_node_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Fattura_Beneficiario', item_node_lista_fattura, NULL);   
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Fatture_SIC', item_node_fattura, fatt.chiave_fattura);     
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Parziale', item_node_fattura, fatt.imp_x_rata);     
+                  end loop;               
+                item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IsDatoSensibile', item_node_benefic, 'false');     
+
+              end loop;
+         end loop;
+--       else null;
+--       end if;	
+       item_node_lista_all := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Allegati', item_node_docinfo, NULL);     
+       for alleg in (SELECT ID, ALLEGATO, ID_RICHIESTA, 
+                            substr(allegato,(instr(allegato,'\',-1)+1),(length(allegato)-(instr(allegato,'\',-1)))) a_file
+                     FROM AT_RICHIESTE_ALLEGATI_INTEMA 
+                     WHERE ID_RICHIESTA = atto.id) loop
+         item_node_allegati := WS_UTILITY.AggiungiNodo (doc, 'typ:Allegati', item_node_lista_all, NULL);     
+           item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:NomeFile', item_node_allegati, alleg.a_file);     
+
+       begin
+                 item_node_lob := WS_UTILITY.AggiungiNodo (doc, 'typ:File_Allegato', item_node_allegati, NULL); 
+                 textNode := DBMS_XMLDOM.createTextNode(doc, '');
+                 textNode2 := DBMS_XMLDOM.appendChild(item_node_lob, DBMS_XMLDOM.makeNode(textNode));
+                 ostream := XMLDOM.SETNODEVALUEASCHARACTERSTREAM(textNode2); 
+                 l_bfile := BFILENAME('DIR_FILE_SIC', alleg.a_file);
+                 DBMS_LOB.fileopen(l_bfile, DBMS_LOB.file_readonly);
+   
+                 FOR i IN 0 .. TRUNC((DBMS_LOB.getlength(l_bfile) - 1 )/l_step) LOOP
+                   p_clob := UTL_RAW.cast_to_varchar2(UTL_ENCODE.base64_encode(DBMS_LOB.substr(l_bfile, l_step, i * l_step + 1)));
+                   amt := 10;
+                   pos := 1;
+                       
+                   WHILE pos &lt;= dbms_lob.getlength(p_clob)
+                     LOOP
+                       dbms_lob.read(p_clob, amt, pos, a_buf);
+                       ostream.write(a_buf, 0, amt);
+                       pos := pos + amt;
+                   END LOOP;
+                 END LOOP;
+                
+                 DBMS_LOB.fileclose(l_bfile);
+
+                 ostream.close();  
+
+               end;
+		       exception
+                 when others then
+             		 item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:errore', item_node_allegati, SQLCODE||' - '||SUBSTR(SQLERRM, 1, 100));     
+               
+       end loop;
+       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Esterno', item_node_docinfo, atto.codice_esterno);   
+       item_node_trasp := WS_UTILITY.AggiungiNodo (doc, 'typ:Legge_Trasparenza', item_node_docinfo, NULL);     
+       -- record unico
+           for trasp in (SELECT t.fl_autorizzata_pubblicazione , t.note , t.desc_norma, t.desc_uff_resp_proc , t.desc_funz_resp_proc ,
+                                t.desc_modalita_indivduaz_benef , t.tipo_contratto, t.progr_contratto, t.oggetto_contratto , 
+                                t.num_repertorio, replace(t.sintesi_pubblicazione,'à','a''') sintesi_pubblicazione
+                         FROM AT_DATI_TRASPARENZA t 
+                         WHERE t.id_atto=atto.codice_esterno) loop
+    
+              if trasp.fl_autorizzata_pubblicazione='S' then
+                 item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Autorizzazione_Pubblicazione', item_node_trasp, 'true');     
+              else  	
+                 item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Autorizzazione_Pubblicazione', item_node_trasp, 'false');     
+              end if;
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Note_Pubblicazione', item_node_trasp, trasp.note);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Norma_Attribuzione_Beneficio', item_node_trasp, trasp.desc_norma);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Ufficio_Responsabile_Procedimento', item_node_trasp, trasp.desc_uff_resp_proc);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Funzionario_Responsabile_Procedimento', item_node_trasp, trasp.desc_funz_resp_proc);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Modalita_Individuazione_Beneficiario', item_node_trasp, trasp.desc_modalita_indivduaz_benef);     
+              item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Contenuto_Atto', item_node_trasp, trasp.sintesi_pubblicazione);     
+            end loop;              
+            item_node_c_trasp := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Contratti', item_node_trasp, NULL);     
+            for contr in (SELECT DISTINCT lpad(g.tab_codice,3,0)||lpad(g.progr,4,0) chiave_contratto,g.num_contratto,
+                                 g.cig,g.codice_cup
+                            FROM bi_rate_gest r,bi_generale_gest g
+                            WHERE r.id_atto = atto.codice_esterno and
+                            g.tab_codice=r.tab_codice and
+                            g.progr=r.gen_progr
+                            union
+                           SELECT DISTINCT lpad(g.tab_codice,3,0)||lpad(g.progr,4,0) chiave_contratto,g.num_contratto,g.cig,g.codice_cup
+                            FROM at_atti_testa a,bi_generale_gest g
+                            WHERE a.id_atto=atto.codice_esterno and
+                                  g.tab_codice=a.cod_contratto and
+                                  g.progr=a.progr_contratto) loop
+              item_node_c2_trasp := WS_UTILITY.AggiungiNodo (doc, 'typ:Contratti', item_node_c_trasp, NULL);     
+      				item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Contratto', item_node_c2_trasp, contr.chiave_contratto);     
+      				item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:CIG', item_node_c2_trasp, contr.cig);     
+      				item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:CUP', item_node_c2_trasp, contr.codice_cup);     
+      				item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Numero_Repertorio', item_node_c2_trasp, contr.num_contratto);     
+--fatture collegate al contratto
+              item_node_lista_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Fatture', item_node_c2_trasp, NULL);   
+                for fatt in (SELECT chiave_fattura,num_doc,to_char(DATA_DOC,'yyyy-mm-dd') data_doc,
+                                    cod_forn,denominazione,pers_fis,p_iva,c_fiscale,sede_forn,
+                                    indirizzo||' '||cap||' '||comune sede,pag_fatt,iban_fatt,
+                                    oggetto_fornitura,to_char(importo,'999999999999.99') importo
+                                    FROM w_bi_rate_gest
+                                    WHERE atto=w_id_atto and
+                                          lpad(cod_tipo_contratto,3,0)||lpad(numero_contratto,4,0)=contr.chiave_contratto) loop
+                     item_node_fattura := WS_UTILITY.AggiungiNodo (doc, 'typ:Fattura', item_node_lista_fattura, NULL);   
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Fatture_SIC', item_node_fattura, fatt.chiave_fattura);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Numero_Fattura_Beneficiario', item_node_fattura, fatt.num_doc);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Data_Fattura_Beneficiario', item_node_fattura, fatt.data_doc);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Anagrafica', item_node_fattura, fatt.cod_forn);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Denominazione_Beneficiario', item_node_fattura, fatt.denominazione);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Flag_Persona_Fisica', item_node_fattura, fatt.pers_fis);     
+                       item_node_dati_fisc := WS_UTILITY.AggiungiNodo (doc, 'typ:Dati_Fiscali', item_node_fattura, NULL);  
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Partita_Iva', item_node_dati_fisc, fatt.p_iva);     
+                         item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Codice_Fiscale', item_node_dati_fisc, fatt.c_fiscale);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IBAN', item_node_fattura, fatt.iban_fatt);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Sede', item_node_fattura, fatt.sede_forn);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Sede', item_node_fattura, fatt.sede);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Id_Modalita_Di_Pagamento', item_node_fattura, fatt.pag_fatt);     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Descrizione_Fattura', item_node_fattura, replace(replace(fatt.oggetto_fornitura,'à','a'),'''',''));     
+                       item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Importo_Totale_Fattura', item_node_fattura, fatt.importo);     
+                    select count(*)
+                        into iAllegati
+                        from tb_fatture_allegati tfa,fin_t_file_esterni f
+                        where tfa.id_fattura=fatt.chiave_fattura and
+                              f.flag_alfresco='S' and
+                              f.id=tfa.documento;          
+                     if iAllegati > 0 then
+                        item_node_fattura_allegato := WS_UTILITY.AggiungiNodo (doc, 'typ:Lista_Allegati_Fattura', item_node_fattura, NULL);   
+                        for j in (select nvl(tfa.descrizione,'Allegati ') descrizione,
+                                         p.alfresco_doc2||f.nome_file nome_file
+                                  from tb_fatture_allegati tfa,fin_t_file_esterni f,application_parameter p
+                                  where tfa.id_fattura=fatt.chiave_fattura and
+                                    f.flag_alfresco='S' and
+                                    f.id=tfa.documento ) loop
+                          formato_allegato := substr(j.descrizione,-3);
+                          nome_allegato := j.descrizione;
+                          link := j.nome_file;
+                          item_node_allegato := WS_UTILITY.AggiungiNodo (doc, 'typ:Allegato_Fattura', item_node_fattura_allegato, NULL);  
+                            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Nome', item_node_allegato, nome_allegato);     
+                            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Formato', item_node_allegato, formato_allegato);     
+                            item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Url', item_node_allegato, link);   
+                        end loop;
+                     end if;
+                end loop;               
+--fine fatture collegate al contratto
+            end loop;
+       item_node_tipol := WS_UTILITY.AggiungiNodo (doc, 'typ:Tipologia_Provvedimento', item_node_docinfo, NULL);     
+		 item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:IdTipologiaProvvedimento', item_node_tipol, '8');     
+
+   item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Fiscale', item_node_provv, atto.CODICE_FISCALE);   
+   item_node := WS_UTILITY.AggiungiNodo (doc, 'typ:Cod_Ufficio', item_node_provv, atto.CODICE_UFFICIO);   
+--p_return := DBMS_XMLDOM.getXMLType(doc);
+--:P4_PROVVEDIMENTO:=DBMS_XMLDOM.getXMLType(doc).getclobval ();
+--:P4_PROVVEDIMENTO:='Ok';
+end loop;
+ /*file_exp:=DBMS_XMLDOM.getXMLType(doc).getclobval ();
+ sys.htp.init;
+ sys.owa_util.mime_header( 'application/octet-stream', FALSE,'UTF-8' );
+ sys.htp.p('Content-length: ' || sys.dbms_lob.getlength(utl_raw.cast_to_raw(file_exp)));
+ sys.htp.p('Content-Disposition: attachment; filename="prova.xml"' );
+ sys.owa_util.http_header_close;
+ sys.wpg_docload.download_file(utl_raw.cast_to_raw(file_exp));*/
+ xmldom.writeToFile(doc, 'DIR_PROVVEDIMENTI/'||w_id_atto||'.xml');
+ xmldom.freeDocument(doc);
+ --dbms_output.put_line('OK');
+ RIS:=0;
+ DESCR_RIS:='OK';
+EXCEPTION
+    WHEN OTHERS THEN
+      RIS:=1;
+      DESCR_RIS:=SUBSTR(SQLERRM,1,200);
+end;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,265 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VW_DATI_IMP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VW_DATI_IMP.html">Colonne</a></div></div>
+<div class="tab"><div><a href="VW_DATI_IMP_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="VW_DATI_IMP_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab" id="current"><div><a href="VW_DATI_IMP_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="VW_DATI_IMP_Trigger.html">Trigger</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dettagli"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>Name</th>
+	<th>Value</th>
+</tr>
+	<tr>
+<td>CREATED</td>
+<td>2011-12-07</td>
+	</tr>
+	<tr>
+<td>LAST_DDL_TIME</td>
+<td>2017-06-07</td>
+	</tr>
+	<tr>
+<td>OWNER</td>
+<td>GAT2</td>
+	</tr>
+	<tr>
+<td>VIEW_NAME</td>
+<td>VW_DATI_IMP</td>
+	</tr>
+	<tr>
+<td>TEXT_LENGTH</td>
+<td>6786</td>
+	</tr>
+	<tr>
+<td>TEXT</td>
+<td>SELECT a.comdef,a.PRVDEF,
+    sum(SATPROP)    "SATPROP"   ,   
+    sum(SATAFF)     "SATAFF"    ,   
+    sum(SATGRA)     "SATGRA"    ,   
+    sum(SAT1)       "SAT1"      ,   
+    sum(SAUPROP)    "SAUPROP"   ,   
+    sum(SAUAFF)     "SAUAFF"    ,   
+    sum(SAUGRA)     "SAUGRA"    ,   
+    sum(SAU1)       "SAU1"      ,   
+    sum(CER1)       "CER1"      ,   
+    sum(CER2)       "CER2"      ,   
+    sum(CER3)       "CER3"      ,   
+    sum(CER4)       "CER4"      ,   
+    sum(CER5)       "CER5"      ,   
+    sum(CER6)       "CER6"      ,   
+    sum(CER7)       "CER7"      ,   
+    sum(CER8)       "CER8"      ,   
+    sum(CER9)       "CER9"      ,   
+    sum(LEG1)       "LEG1"      ,   
+    sum(LEG2)       "LEG2"      ,   
+    sum(LEG3)       "LEG3"      ,   
+    sum(LEG4)       "LEG4"      ,   
+    sum(LEG5)       "LEG5"      ,   
+    sum(PATAT)      "PATAT"     ,   
+    sum(BARB)       "BARB"      ,   
+    sum(SARCHI)     "SARCHI"    ,   
+    sum(IND1)       "IND1"      ,   
+    sum(IND2)       "IND2"      ,   
+    sum(IND3)       "IND3"      ,   
+    sum(IND4)       "IND4"      ,   
+    sum(IND5)       "IND5"      ,   
+    sum(IND6)       "IND6"      ,   
+    sum(IND7)       "IND7"      ,   
+    sum(IND8)       "IND8"      ,   
+    sum(IND9)       "IND9"      ,   
+    sum(IND10)      "IND10"     ,   
+    sum(IND11)      "IND11"     ,   
+    sum(IND12)      "IND12"     ,   
+    sum(IND13)      "IND13"     ,   
+    sum(ORT1)       "ORT1"      ,   
+    sum(ORT2)       "ORT2"      ,   
+    sum(ORT3)       "ORT3"      ,   
+    sum(ORT4)       "ORT4"      ,   
+    sum(ORT5)       "ORT5"      ,   
+    sum(ORT6)       "ORT6"      ,   
+    sum(ORT7)       "ORT7"      ,   
+    sum(ORT8)       "ORT8"      ,   
+    sum(FIO1)       "FIO1"      ,   
+    sum(FIO2)       "FIO2"      ,   
+    sum(FIO3)       "FIO3"      ,   
+    sum(FIO4)       "FIO4"      ,   
+    sum(FIO5)       "FIO5"      ,   
+    sum(FIO6)       "FIO6"      ,   
+    sum(FOR1)       "FOR1"      ,   
+    sum(FOR2)       "FOR2"      ,   
+    sum(FOR3)       "FOR3"      ,   
+    sum(FOR4)       "FOR4"      ,   
+    sum(FOR5)       "FOR5"      ,   
+    sum(FOR6)       "FOR6"      ,   
+    sum(SEMENTI)    "SEMENTI"   ,   
+    sum(TER1)       "TER1"      ,   
+    sum(TER2)       "TER2"      ,   
+    sum(TOTSEM)     "TOTSEM"    ,   
+    sum(VITE2)      "VITE2"     ,   
+    sum(OLITAV)     "OLITAV"    ,   
+    sum(OLIOLI)     "OLIOLI"    ,   
+    sum(ARAN)       "ARAN"      ,   
+    sum(MAN)        "MAN"       ,   
+    sum(CLEM)       "CLEM"      ,   
+    sum(LIMO)       "LIMO"      ,   
+    sum(ALTAGR)     "ALTAGR"    ,   
+    sum(MELO)       "MELO"      ,   
+    sum(PERO)       "PERO"      ,   
+    sum(PESCO)      "PESCO"     ,   
+    sum(NETTA)      "NETTA"     ,   
+    sum(ALBIC)      "ALBIC"     ,   
+    sum(CILIEG)     "CILIEG"    ,   
+    sum(SUSI)       "SUSI"      ,   
+    sum(FICO)       "FICO"      ,   
+    sum(ALTFRU1)    "ALTFRU1"   ,   
+    sum(ACTI)       "ACTI"      ,   
+    sum(ALTFRU2)    "ALTFRU2"   ,   
+    sum(MANDOR)     "MANDOR"    ,   
+    sum(NOCCIO)     "NOCCIO"    ,   
+    sum(CAST)       "CAST"      ,   
+    sum(NOCE)       "NOCE"      ,   
+    sum(ALTFRU3)    "ALTFRU3"   ,   
+    sum(VIVFRU)     "VIVFRU"    ,   
+    sum(VIVORN)     "VIVORN"    ,   
+    sum(VIVALT)     "VIVALT"    ,   
+    sum(ALTLEG)     "ALTLEG"    ,   
+    sum(ALTSER)     "ALTSER"    ,   
+    sum(TOTLEGN)    "TOTLEGN"   ,   
+    sum(ORTI)       "ORTI"      ,   
+    sum(PRATI)      "PRATI"     ,   
+    sum(PASNAT)     "PASNAT"    ,   
+    sum(PASMAG)     "PASMAG"    ,   
+    sum(TOTPRAPAS)  "TOTPRAPAS" ,   
+    sum(PRAFIN)     "PRAFIN"    ,   
+    sum(SAU2)       "SAU2"      ,   
+    sum(ARBPIO)     "ARBPIO"    ,   
+    sum(ARBALT)     "ARBALT"    ,   
+    sum(TOTARB)     "TOTARB"    ,   
+    sum(BOSFUS)     "BOSFUS"    ,   
+    sum(BOSCED)     "BOSCED"    ,   
+    sum(BOSALT)     "BOSALT"    ,   
+    sum(TOTBOS)     "TOTBOS"    ,   
+    sum(SANU2)      "SANU2"     ,   
+    sum(ALTRASUP)   "ALTRASUP"  ,   
+    sum(SAT2)       "SAT2"      ,   
+    sum(BOV1)       "BOV1"      ,   
+    sum(BOV2)       "BOV2"      ,   
+    sum(BOV3)       "BOV3"      ,   
+    sum(BOV4)       "BOV4"      ,   
+    sum(BOV5)       "BOV5"      ,   
+    sum(BOV6)       "BOV6"      ,   
+    sum(BOV7)       "BOV7"      ,   
+    sum(BOV8)       "BOV8"      ,   
+    sum(BOV9)       "BOV9"      ,   
+    sum(TOTBOV)     "TOTBOV"    ,   
+    sum(BUF1)       "BUF1"      ,   
+    sum(BUF2)       "BUF2"      ,   
+    sum(BUF3)       "BUF3"      ,   
+    sum(TOTBUF)     "TOTBUF"    ,   
+    sum(EQUI1)      "EQUI1"     ,   
+    sum(EQUI2)      "EQUI2"     ,   
+    sum(TOTEQUI)    "TOTEQUI"   ,   
+    sum(OVI1)       "OVI1"      ,   
+    sum(OVI2)       "OVI2"      ,   
+    sum(OVI3)       "OVI3"      ,   
+    sum(TOTOVI)     "TOTOVI"    ,   
+    sum(CAPRE)      "CAPRE"     ,   
+    sum(ALCAP)      "ALCAP"     ,   
+    sum(TOTCAPRI)   "TOTCAPRI"  ,   
+    sum(SUI1)       "SUI1"      ,   
+    sum(SUI2)       "SUI2"      ,   
+    sum(SUI3)       "SUI3"      ,   
+    sum(SUI4)       "SUI4"      ,   
+    sum(SUI5)       "SUI5"      ,   
+    sum(SUI6)       "SUI6"      ,   
+    sum(SUI7)       "SUI7"      ,   
+    sum(SUI8)       "SUI8"      ,   
+    sum(TOTSUI)     "TOTSUI"    ,   
+    sum(AVI1)       "AVI1"      ,   
+    sum(AVI2)       "AVI2"      ,   
+    sum(AVI3)       "AVI3"      ,   
+    sum(AVI4)       "AVI4"      ,   
+    sum(AVI5)       "AVI5"      ,   
+    sum(AVI6)       "AVI6"      ,   
+    sum(TOTAVI)     "TOTAVI"    ,   
+    sum(CON1)       "CON1"      ,   
+    sum(CON2)       "CON2"      ,   
+    sum(TOTCON)     "TOTCON"    ,   
+    sum(TOTSTR)     "TOTSTR"    ,   
+    sum(NUMALV)     "NUMALV"    ,   
+    sum(AMAS1)      "AMAS1"     ,   
+    sum(AMAS2)      "AMAS2"     ,   
+    sum(AMAS3)      "AMAS3"     ,   
+    sum(AMAS4)      "AMAS4"     ,   
+    sum(AMAS5)      "AMAS5"     ,   
+    sum(AMAS6)      "AMAS6"     ,   
+    sum(AFEM1)      "AFEM1"     ,   
+    sum(AFEM2)      "AFEM2"     ,   
+    sum(AFEM3)      "AFEM3"     ,   
+    sum(AFEM4)      "AFEM4"     ,   
+    sum(AFEM5)      "AFEM5"     ,   
+    sum(AFEM6)      "AFEM6"     ,   
+    sum(ATOT1)      "ATOT1"     ,   
+    sum(ATOT2)      "ATOT2"     ,   
+    sum(ATOT3)      "ATOT3"     ,   
+    sum(ATOT4)      "ATOT4"     ,   
+    sum(ATOT5)      "ATOT5"     ,   
+    sum(NOASS1)     "NOASS1"    ,   
+    sum(NOASS2)     "NOASS2"    ,   
+    sum(NOASS3)     "NOASS3"    ,   
+    sum(NOASS4)     "NOASS4"    ,   
+    sum(NOASS5)     "NOASS5"    ,   
+    sum(NOASS6)     "NOASS6"    ,   
+    sum(CAPO)       "CAPO"      ,   
+    sum(CAPSTU)     "CAPSTU"    ,  
+    sum(CORSI)      "CORSI"       
+     FROM AGR_IMP_AZIENDA d, AGR_IMP_ANAG a 
+     where d.codaz=a.codaz
+     group by a.comdef,a.PRVDEF</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+	</tr>
+	<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+	</tr>
+	<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+	</tr>
+</table></div>

@@ -1,0 +1,33 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>INSERT_DEMO_CUST</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="INSERT_DEMO_CUST.html">Details</a></div></div>
+<div class="tab"><div><a href="INSERT_DEMO_CUST_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="INSERT_DEMO_CUST_References.html">References</a></div></div>
+<div class="tab"><div><a href="INSERT_DEMO_CUST_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="INSERT_DEMO_CUST_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+TRIGGER "GAT2"."INSERT_DEMO_CUST"
+BEFORE INSERT ON demo_customers
+FOR EACH ROW
+DECLARE
+  cust_id number;
+BEGIN
+  SELECT demo_cust_seq.nextval
+    INTO cust_id
+    FROM dual;
+  :new.CUSTOMER_ID := cust_id;
+END;</pre>	</td></tr>
+</table></div>

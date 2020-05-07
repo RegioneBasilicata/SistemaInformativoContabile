@@ -1,0 +1,423 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>FIN_T_STRUTTURE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="FIN_T_STRUTTURE.html">Colonne</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Vincoli.html">Vincoli</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Autorizzazioni.html">Autorizzazioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Statistiche.html">Statistiche</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Trigger.html">Trigger</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Flashback.html">Flashback</a></div></div>
+<div class="tab" id="current"><div><a href="FIN_T_STRUTTURE_Dipendenze.html">Dipendenze</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Dettagli.html">Dettagli</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Partizioni.html">Partizioni</a></div></div>
+<div class="tab"><div><a href="FIN_T_STRUTTURE_Indici.html">Indici</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Dipendenze"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>OWNER</th>
+	<th>NAME</th>
+	<th>TYPE</th>
+	<th>REFERENCED_OWNER</th>
+	<th>REFERENCED_NAME</th>
+	<th>REFERENCED_TYPE</th>
+</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_UFFICI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_DETTAGLIO_CESPITI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_UFFICI_DATA</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_AMM_X_UFF</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_UFFICI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_UFFICI_DATA</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_DETTAGLIO_CESPITI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_PERSONALE_UFFICI_G</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../trigger/LOG_STRUTTURE.html">GAT2</a></td>
+<td><a href="../trigger/LOG_STRUTTURE.html">LOG_STRUTTURE</a></td>
+<td><a href="../trigger/LOG_STRUTTURE.html">TRIGGER</a></td>
+<td><a href="../trigger/LOG_STRUTTURE.html">GAT2</a></td>
+<td><a href="../trigger/LOG_STRUTTURE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../trigger/LOG_STRUTTURE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_NEWFATT_SIFESR1420.html">GAT2</a></td>
+<td><a href="../view/VW_NEWFATT_SIFESR1420.html">VW_NEWFATT_SIFESR1420</a></td>
+<td><a href="../view/VW_NEWFATT_SIFESR1420.html">VIEW</a></td>
+<td><a href="../view/VW_NEWFATT_SIFESR1420.html">GAT2</a></td>
+<td><a href="../view/VW_NEWFATT_SIFESR1420.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_NEWFATT_SIFESR1420.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_ARTICOLI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_COSTI_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>VW_PERSONALE_UFFICI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_AMM_X_UFF</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_ARTICOLI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_COSTI_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_PERSONALE_UFFICI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../synonym/FINA_T_STRUTTURE.html">GAT2</a></td>
+<td><a href="../synonym/FINA_T_STRUTTURE.html">FINA_T_STRUTTURE</a></td>
+<td><a href="../synonym/FINA_T_STRUTTURE.html">SYNONYM</a></td>
+<td><a href="../synonym/FINA_T_STRUTTURE.html">GAT2</a></td>
+<td><a href="../synonym/FINA_T_STRUTTURE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../synonym/FINA_T_STRUTTURE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">GAT2</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">VW_DIPARTIMENTI_STRUTTURE</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">VIEW</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">GAT2</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_DIPARTIMENTI_STRUTTURE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_INFORMATICI_ASS.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_ASS.html">VW_BENI_INFORMATICI_ASS</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_ASS.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_ASS.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_ASS.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_ASS.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_INFORMATICI.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI.html">VW_BENI_INFORMATICI</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_RIGHI_ARTICOLI.html">GAT2</a></td>
+<td><a href="../view/VW_RIGHI_ARTICOLI.html">VW_RIGHI_ARTICOLI</a></td>
+<td><a href="../view/VW_RIGHI_ARTICOLI.html">VIEW</a></td>
+<td><a href="../view/VW_RIGHI_ARTICOLI.html">GAT2</a></td>
+<td><a href="../view/VW_RIGHI_ARTICOLI.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_RIGHI_ARTICOLI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/AGGIORNA_ABIL_RIACCERTAMENTI.html">GAT2</a></td>
+<td><a href="../procedure/AGGIORNA_ABIL_RIACCERTAMENTI.html">AGGIORNA_ABIL_RIACCERTAMENTI</a></td>
+<td><a href="../procedure/AGGIORNA_ABIL_RIACCERTAMENTI.html">PROCEDURE</a></td>
+<td><a href="../procedure/AGGIORNA_ABIL_RIACCERTAMENTI.html">GAT2</a></td>
+<td><a href="../procedure/AGGIORNA_ABIL_RIACCERTAMENTI.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../procedure/AGGIORNA_ABIL_RIACCERTAMENTI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>ECONOMATO</td>
+<td>VW_CONTRATTI</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../procedure/RICODIFICA_UFFICI.html">GAT2</a></td>
+<td><a href="../procedure/RICODIFICA_UFFICI.html">RICODIFICA_UFFICI</a></td>
+<td><a href="../procedure/RICODIFICA_UFFICI.html">PROCEDURE</a></td>
+<td><a href="../procedure/RICODIFICA_UFFICI.html">GAT2</a></td>
+<td><a href="../procedure/RICODIFICA_UFFICI.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../procedure/RICODIFICA_UFFICI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/DOCALL_ALFRESCO_NOTIFICHE.html">GAT2</a></td>
+<td><a href="../procedure/DOCALL_ALFRESCO_NOTIFICHE.html">DOCALL_ALFRESCO_NOTIFICHE</a></td>
+<td><a href="../procedure/DOCALL_ALFRESCO_NOTIFICHE.html">PROCEDURE</a></td>
+<td><a href="../procedure/DOCALL_ALFRESCO_NOTIFICHE.html">GAT2</a></td>
+<td><a href="../procedure/DOCALL_ALFRESCO_NOTIFICHE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../procedure/DOCALL_ALFRESCO_NOTIFICHE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_PROVVEDITORATO.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_PROVVEDITORATO.html">VW_BENI_PROVVEDITORATO</a></td>
+<td><a href="../view/VW_BENI_PROVVEDITORATO.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_PROVVEDITORATO.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_PROVVEDITORATO.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_PROVVEDITORATO.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_INFORMATICI_NA.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_NA.html">VW_BENI_INFORMATICI_NA</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_NA.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_NA.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_NA.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_INFORMATICI_NA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_INF_POSTAZIONE.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INF_POSTAZIONE.html">VW_BENI_INF_POSTAZIONE</a></td>
+<td><a href="../view/VW_BENI_INF_POSTAZIONE.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_INF_POSTAZIONE.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INF_POSTAZIONE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_INF_POSTAZIONE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_TELEFONIA.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_TELEFONIA.html">VW_BENI_TELEFONIA</a></td>
+<td><a href="../view/VW_BENI_TELEFONIA.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_TELEFONIA.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_TELEFONIA.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_TELEFONIA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_FATTURE.html">GAT2</a></td>
+<td><a href="../view/VW_FATTURE.html">VW_FATTURE</a></td>
+<td><a href="../view/VW_FATTURE.html">VIEW</a></td>
+<td><a href="../view/VW_FATTURE.html">GAT2</a></td>
+<td><a href="../view/VW_FATTURE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_FATTURE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GESTIONE</td>
+<td>MV_IMPEGNI_MANDATI</td>
+<td>MATERIALIZED VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_INF_PA.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INF_PA.html">VW_BENI_INF_PA</a></td>
+<td><a href="../view/VW_BENI_INF_PA.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_INF_PA.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INF_PA.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_INF_PA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">GAT2</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">FIN_V_PREIMP_DIP</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">VIEW</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">GAT2</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/FIN_V_PREIMP_DIP.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_BENI_INF_TOT.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INF_TOT.html">VW_BENI_INF_TOT</a></td>
+<td><a href="../view/VW_BENI_INF_TOT.html">VIEW</a></td>
+<td><a href="../view/VW_BENI_INF_TOT.html">GAT2</a></td>
+<td><a href="../view/VW_BENI_INF_TOT.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_BENI_INF_TOT.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_MINUTERIA.html">GAT2</a></td>
+<td><a href="../view/VW_MINUTERIA.html">VW_MINUTERIA</a></td>
+<td><a href="../view/VW_MINUTERIA.html">VIEW</a></td>
+<td><a href="../view/VW_MINUTERIA.html">GAT2</a></td>
+<td><a href="../view/VW_MINUTERIA.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_MINUTERIA.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>VW_STORICO_STRUTTURE_REGIONE</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>SIMIP</td>
+<td>SIMIP_ATTIVITA_NOTTURNE</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_CESPITI.html">GAT2</a></td>
+<td><a href="../view/VW_CESPITI.html">VW_CESPITI</a></td>
+<td><a href="../view/VW_CESPITI.html">VIEW</a></td>
+<td><a href="../view/VW_CESPITI.html">GAT2</a></td>
+<td><a href="../view/VW_CESPITI.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_CESPITI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">GAT2</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">CONTROLLO_DI_GESTIONE</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">PROCEDURE</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">GAT2</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../procedure/CONTROLLO_DI_GESTIONE.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>GENERA_CODICI_INTERNO_REGIONE</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../view/VW_FATTURE_SIFESR1420.html">GAT2</a></td>
+<td><a href="../view/VW_FATTURE_SIFESR1420.html">VW_FATTURE_SIFESR1420</a></td>
+<td><a href="../view/VW_FATTURE_SIFESR1420.html">VIEW</a></td>
+<td><a href="../view/VW_FATTURE_SIFESR1420.html">GAT2</a></td>
+<td><a href="../view/VW_FATTURE_SIFESR1420.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../view/VW_FATTURE_SIFESR1420.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">GAT2</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">VM_COSTI_BENI_MOBILI</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">MATERIALIZED VIEW</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">GAT2</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../materialized view/VM_COSTI_BENI_MOBILI.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>IMPORT_STRUTTURE_REGIONE</td>
+<td>PROCEDURE</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>GAT2_WS</td>
+<td>PARAMETRIAPPLICAZIONESTRUTTURE</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td>SIMIP_1420</td>
+<td>TRG_AP00_ANAGRAFICA_PROGETTI</td>
+<td>TRIGGER</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+	<tr>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">GAT2</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">PDP2_COMPONI_OBSTRAT</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">PROCEDURE</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">GAT2</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">FIN_T_STRUTTURE</a></td>
+<td><a href="../procedure/PDP2_COMPONI_OBSTRAT.html">TABLE</a></td>
+	</tr>
+	<tr>
+<td>GAT2_WS</td>
+<td>STRUTTUREATTIVE</td>
+<td>VIEW</td>
+<td>GAT2</td>
+<td>FIN_T_STRUTTURE</td>
+<td>TABLE</td>
+	</tr>
+</table></div>
