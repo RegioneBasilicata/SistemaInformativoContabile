@@ -1,0 +1,36 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CPT_TESTATA_SETTORI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CPT_TESTATA_SETTORI.html">Details</a></div></div>
+<div class="tab"><div><a href="CPT_TESTATA_SETTORI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CPT_TESTATA_SETTORI_References.html">References</a></div></div>
+<div class="tab"><div><a href="CPT_TESTATA_SETTORI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CPT_TESTATA_SETTORI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function cpt_testata_settori (p3_anno in NUMBER, p3_eu in varchar2) return VARCHAR2 IS
+testata varchar2(4000);
+begin
+ select 
+ listagg(''''||descrizione,''',')
+ within group (order by id) settori 
+ into testata
+ from cpt_settori 
+ where id between (p3_anno * 100000) and ((p3_anno * 100000)+99999)
+ and eu=p3_eu
+ group by substr(id,1,4);
+
+return (testata||'''');
+end;</pre>	</td></tr>
+</table></div>
