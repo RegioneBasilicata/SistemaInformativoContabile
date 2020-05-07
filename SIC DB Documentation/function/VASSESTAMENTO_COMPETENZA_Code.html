@@ -1,0 +1,54 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>VASSESTAMENTO_COMPETENZA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="VASSESTAMENTO_COMPETENZA.html">Details</a></div></div>
+<div class="tab"><div><a href="VASSESTAMENTO_COMPETENZA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="VASSESTAMENTO_COMPETENZA_References.html">References</a></div></div>
+<div class="tab"><div><a href="VASSESTAMENTO_COMPETENZA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="VASSESTAMENTO_COMPETENZA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function vassestamento_competenza(p_anno in NUMBER, p_capitolo in varchar2, p_data in date) return number IS
+importo number(15,2) := 0; 
+vdata_atto_assestamento date;
+vdata number;
+
+BEGIN
+vdata := to_number(to_char(p_data,'yyyymmdd'));
+
+ begin
+ select data_atto_assestamento 
+ into vdata_atto_assestamento
+ from fin_t_dati_generali 
+ where anno_finanziario=p_anno;
+ exception when no_data_found then null;
+ end;
+
+
+ select 
+ nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+ into importo
+ from  fin_t_documenti d
+ where d.segment8 = p_anno
+ and d.segment2 = p_capitolo
+ and to_number(to_char(d.creation_date,'yyyymmdd')) > vdata
+ and 
+ (
+ d.doc_type in ('A_COM_POS','A_COM_NEG' ) 
+ or 
+ (doc_type in ('V_COM_POS','V_COM_NEG') and nvl(attribute10,'N')&lt;>'Y') and trunc(date_created,'dd') &lt; trunc(nvl(vdata_atto_assestamento,date_created+1),'dd')    );
+ 
+ return nvl(importo,0);
+END; </pre>	</td></tr>
+</table></div>
