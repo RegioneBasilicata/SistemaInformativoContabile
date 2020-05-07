@@ -1,0 +1,64 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TOTALI_DIPARTIMENTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TOTALI_DIPARTIMENTO.html">Details</a></div></div>
+<div class="tab"><div><a href="TOTALI_DIPARTIMENTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TOTALI_DIPARTIMENTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="TOTALI_DIPARTIMENTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TOTALI_DIPARTIMENTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function totali_dipartimento (w_tipo in VARCHAR2, 
+                                         w_dipartimento in VARCHAR2, 
+                                         w_anno in NUMBER,
+                                         w_corr_cap in number
+                                         ) return number IS
+totale number := 0;
+
+begin
+if upper(w_tipo) = 'IMP'
+then
+  begin
+  select nvl(sum(nvl(i.document_amount,0)),0) into totale
+    from fin_t_documenti i 
+    ,fin_t_articoli a 
+    where i.doc_type like upper(w_tipo)||'%'
+    and nvl(i.deletion_status_flag,'N') = 'N'
+    and i.segment8 = w_anno
+    and nvl(substr(i.segment3,1,2),'X') = w_dipartimento
+    and a.anno = i.segment8
+    and a.eu||a.codice = i.segment2
+    and a.nb_titolo = w_corr_cap;
+    exception when no_data_found then totale := 0;
+  end;
+ else  
+  begin
+  select nvl(sum(nvl(i.OPEN_BALANCE_PROPOSED,0)),0) into totale
+    from fin_t_documenti i 
+    ,fin_t_articoli a 
+    where i.doc_type like upper(w_tipo)||'%'
+    and nvl(i.deletion_status_flag,'N') = 'N'
+    and i.segment8 = w_anno
+    and nvl(substr(i.segment3,1,2),'X') = w_dipartimento
+    and a.anno = i.segment8
+    and a.eu||a.codice = i.segment2
+    and a.nb_titolo = w_corr_cap;
+    exception when no_data_found then totale := 0;
+  end;
+  end if;
+  
+  return(totale);
+  
+END;</pre>	</td></tr>
+</table></div>

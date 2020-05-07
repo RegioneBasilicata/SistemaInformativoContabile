@@ -1,0 +1,65 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>STRING_DISTANCE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="STRING_DISTANCE.html">Details</a></div></div>
+<div class="tab"><div><a href="STRING_DISTANCE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="STRING_DISTANCE_References.html">References</a></div></div>
+<div class="tab"><div><a href="STRING_DISTANCE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="STRING_DISTANCE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION string_distance
+(s varchar2,
+ t varchar2)
+RETURN integer IS
+   s_len    INTEGER := NVL (length(s), 0);
+   t_len    INTEGER := NVL (length(t), 0);
+   TYPE arr_type is TABLE OF NUMBER INDEX BY BINARY_INTEGER;
+   d_col    arr_type ;
+   dist     INTEGER := 0;
+BEGIN
+   IF s_len = 0 THEN
+      dist := t_len;
+   ELSIF t_len = 0 THEN
+      dist := s_len;
+   ELSE
+      FOR j IN 1 .. (t_len+1) * (s_len+1) - 1 LOOP
+          d_col(j) := 0 ;
+      END LOOP;
+      FOR i IN 0 .. s_len LOOP
+          d_col(i) := i;
+      END LOOP;
+      FOR j IN 1 .. t_len LOOP
+          d_col(j * (s_len + 1)) := j;
+      END LOOP;
+
+      FOR i IN 1.. s_len LOOP
+        FOR j IN 1 .. t_len LOOP
+          IF substr(s, i, 1) = substr(t, j, 1)
+          THEN
+             d_col(j * (s_len + 1) + i) := d_col((j-1) * (s_len+1) + i-1) ;
+          ELSE
+             d_col(j * (s_len + 1) + i) := LEAST (
+                       d_col( j * (s_len+1) + (i-1)) + 1,      -- Deletion
+                       d_col((j-1) * (s_len+1) + i) + 1,       -- Insertion
+                       d_col((j-1) * (s_len+1) + i-1) + 1 ) ;  -- Substitution
+          END IF ;
+        END LOOP;
+      END LOOP;
+      dist :=  d_col(t_len * (s_len+1) + s_len);
+   END IF;
+
+   RETURN (dist);
+END;</pre>	</td></tr>
+</table></div>

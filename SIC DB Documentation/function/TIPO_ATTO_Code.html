@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>TIPO_ATTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="TIPO_ATTO.html">Details</a></div></div>
+<div class="tab"><div><a href="TIPO_ATTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="TIPO_ATTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="TIPO_ATTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="TIPO_ATTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION TIPO_ATTO (p_doc_id number) RETURN varchar2 IS
+
+preimp_sn varchar2(1);
+numero_preimp number;
+tipo_doc varchar2(10);
+tipo_atto varchar2(100);
+p_attribute23 varchar2(100);
+p_preimp_prec number;
+
+
+begin 
+ select doc_type 
+ ,nvl(attribute13,'X')
+ ,nvl(attribute23,'X')
+ ,doc_sequence_value
+ into tipo_doc
+ ,tipo_atto
+ ,p_attribute23
+ ,numero_preimp
+ from fin_t_documenti
+ where doc_id = p_doc_id;
+
+select count(*) into p_preimp_prec
+from fin_t_preimpegni_abbattuti
+where nuovo_preimpegno = numero_preimp;
+
+ if (tipo_doc = 'PRE-IMP' and tipo_atto = 'DETERMINA' and p_attribute23 = 'X' and nvl(p_preimp_prec,0) = 0)
+  then 
+     begin
+     select i.attribute13 into tipo_atto
+     from fin_t_documenti i 
+     where i.doc_type like 'IMP%' 
+     and i.previous_doc_id = p_doc_id 
+     and i.doc_id = (select max(doc_id) from fin_t_documenti where doc_type like 'IMP%' and previous_doc_id = p_doc_id);
+     exception when no_data_found then tipo_atto := 'PROVVISORIO';
+     end;
+ end if;
+
+   return(tipo_atto);   
+
+End;</pre>	</td></tr>
+</table></div>
