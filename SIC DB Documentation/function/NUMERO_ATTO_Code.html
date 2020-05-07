@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>NUMERO_ATTO</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="NUMERO_ATTO.html">Details</a></div></div>
+<div class="tab"><div><a href="NUMERO_ATTO_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="NUMERO_ATTO_References.html">References</a></div></div>
+<div class="tab"><div><a href="NUMERO_ATTO_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="NUMERO_ATTO_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION NUMERO_ATTO (p_doc_id number) RETURN varchar2 IS
+
+preimp_sn varchar2(1);
+tipo_doc varchar2(10);
+tipo_atto varchar2(100);
+numero_atto varchar2(100);
+numero_atto_pre varchar2(100);
+p_attribute23 varchar2(100);
+
+
+begin 
+ select doc_type 
+ ,nvl(attribute13,'X')
+ ,nvl(attribute23,'X')
+ ,attribute14
+ into tipo_doc
+ ,tipo_atto
+ ,p_attribute23
+ ,numero_atto
+ from fin_t_documenti
+ where doc_id = p_doc_id;
+
+ if (tipo_doc = 'PRE-IMP' and tipo_atto = 'DETERMINA' and p_attribute23 = 'X')
+  then 
+     begin
+     select i.attribute14 into numero_atto_pre
+     from fin_t_documenti i 
+     where i.doc_type like 'IMP%' 
+     and i.previous_doc_id = p_doc_id 
+     and i.doc_id = (select max(doc_id) from fin_t_documenti where doc_type like 'IMP%' and previous_doc_id = p_doc_id);
+     exception when no_data_found then numero_atto_pre := numero_atto;
+     end;
+     return(numero_atto_pre);
+  else
+    return(numero_atto);   
+ end if;
+
+
+
+End;</pre>	</td></tr>
+</table></div>

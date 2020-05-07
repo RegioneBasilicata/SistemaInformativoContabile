@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>OPEN_BALANCE_IMPWEB_TP</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="OPEN_BALANCE_IMPWEB_TP.html">Details</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_IMPWEB_TP_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_IMPWEB_TP_References.html">References</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_IMPWEB_TP_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="OPEN_BALANCE_IMPWEB_TP_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION OPEN_BALANCE_IMPWEB_TP (p_doc_id number, p_id_ana number, p_id_ana_sede number) RETURN number IS
+tot_liquidazioni number := 0;
+tot_eco number := 0;
+totale_tp number := 0;
+doc_amount number := 0;
+
+begin
+   
+   select nvl(sum(nvl(d.document_amount,0)),0) into doc_amount
+   from fin_t_documenti d
+   where d.doc_id = p_doc_id;
+   
+ 
+   select nvl(sum(nvl(t.amount,0)),0) into tot_liquidazioni
+   from fin_t_documenti d
+   ,fin_t_documenti_terze_parti t
+   where d.doc_type in ('IMP-PER','LIQ','ECO','DIS')
+   and d.previous_doc_id = p_doc_id
+   and nvl(d.deletion_status_flag,'N') = 'N'
+   and t.doc_id = d.doc_id
+   and t.id_ana = p_id_ana
+   and t.id_sede = p_id_ana_sede;
+
+  
+   select nvl(sum(nvl(amount,0)),0) into totale_tp
+   from fin_t_documenti_terze_parti
+   where doc_id = p_doc_id
+   and id_ana = p_id_ana
+   and id_sede = p_id_ana_sede;
+   
+   if doc_amount = totale_tp
+    then 
+       select nvl(sum(nvl(d.document_amount,0)),0) into tot_eco
+       from fin_t_documenti d
+       where d.doc_type in ('ECO','DIS')
+       and nvl(d.deletion_status_flag,'N') = 'N'
+       and d.previous_doc_id = p_doc_id
+       and d.doc_id not in (select t.doc_id from fin_t_documenti d
+                               ,fin_t_documenti_terze_parti t
+                               where d.doc_type in ('ECO','DIS')
+                               and d.previous_doc_id = p_doc_id
+                               and nvl(d.deletion_status_flag,'N') = 'N'
+                               and t.doc_id = d.doc_id
+                               and t.id_ana = p_id_ana
+                               and t.id_sede = p_id_ana_sede);
+        return(totale_tp - tot_liquidazioni - tot_eco);
+   else return(totale_tp - tot_liquidazioni);
+   end if;
+   
+   
+-- FFERRANTE 13/03/2018 modificata per gestire anche le Economine e i Disimpegni. 
+-- in questa fase (no TP su ECO e DIS) possiamo solo verificare quando c'è un solo beneficiario sull'impegno 
+-- se i beneficiari sono > 1 il controllo non resituirà comunque il corretto open_balance_tp in quanto non sapremmo a quale beneficiario togliere l'importo della ECO/DIS
+-- la funzione modificata funzionerà comunque anche quando (e se) metteremo le TP sulle ECO e DIS 
+
+/*tot_liquidazioni number := 0;
+totale_tp number := 0;
+
+begin
+
+   select nvl(sum(nvl(t.amount,0)),0) into tot_liquidazioni
+   from fin_t_documenti d
+   ,fin_t_documenti_terze_parti t
+   where d.doc_type in ('LIQ','IMP-PER')
+   and d.previous_doc_id = p_doc_id
+   and nvl(d.deletion_status_flag,'N') = 'N'
+  -- and nvl(d.open_balance_proposed,0) > 0
+  -- and d.data_created &lt;= p_data
+   and t.doc_id = d.doc_id
+   and t.id_ana = p_id_ana
+   and t.id_sede = p_id_ana_sede;
+
+  begin
+   select nvl(sum(nvl(amount,0)),0) into totale_tp
+   from fin_t_documenti_terze_parti
+   where doc_id = p_doc_id
+   and id_ana = p_id_ana
+   and id_sede = p_id_ana_sede;
+ -- exception when no_data_found then totale_tp := 0;
+  end;
+
+  return(totale_tp - tot_liquidazioni);
+*/
+
+end;</pre>	</td></tr>
+</table></div>

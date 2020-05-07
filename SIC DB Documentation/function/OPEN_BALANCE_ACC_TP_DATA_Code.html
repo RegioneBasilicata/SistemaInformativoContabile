@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>OPEN_BALANCE_ACC_TP_DATA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="OPEN_BALANCE_ACC_TP_DATA.html">Details</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_ACC_TP_DATA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_ACC_TP_DATA_References.html">References</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_ACC_TP_DATA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="OPEN_BALANCE_ACC_TP_DATA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION OPEN_BALANCE_ACC_TP_DATA (p_doc_id number, p_id_ana number, p_id_ana_sede number, p_data date) RETURN number IS
+
+tot_reversali number := 0;
+totale_tp number := 0;
+residuo_doc number := 0;
+
+begin
+ select open_balance_acc_data(p_doc_id,p_data) into residuo_doc
+ from dual;
+ 
+ if residuo_doc > 0
+ then
+
+   select nvl(sum(nvl(t.amount,0)),0) into tot_reversali
+   from fin_t_documenti d
+   ,fin_t_documenti_terze_parti t
+   where d.doc_type = 'REV'
+   and d.previous_doc_id = p_doc_id
+   and nvl(d.deletion_status_flag,'N') = 'N'
+   and nvl(d.open_balance_proposed,0) > 0
+   and d.date_created &lt;= p_data
+   and t.doc_id = d.doc_id
+   and t.id_ana = p_id_ana
+   and t.id_sede = p_id_ana_sede;
+
+  begin
+   select nvl(sum(nvl(amount,0)),0) into totale_tp
+   from fin_t_documenti_terze_parti
+   where doc_id = p_doc_id
+   and id_ana = p_id_ana
+   and id_sede = p_id_ana_sede;
+ -- exception when no_data_found then totale_tp := 0;
+  end;
+
+  return(totale_tp - tot_reversali);
+  
+  else return(0);
+  end if;
+
+end;</pre>	</td></tr>
+</table></div>
