@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>PIANTA_ORG</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="PIANTA_ORG.html">Details</a></div></div>
+<div class="tab"><div><a href="PIANTA_ORG_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="PIANTA_ORG_References.html">References</a></div></div>
+<div class="tab"><div><a href="PIANTA_ORG_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="PIANTA_ORG_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION pianta_org (p_int_1  IN  VARCHAR2)
+  RETURN VARCHAR2
+AS
+  l_request   soap_api.t_request;
+  l_response  soap_api.t_response;
+  l_return    VARCHAR2(32767);
+  richiesta   VARCHAR2(2000);
+  l_url          VARCHAR2(32767);
+  l_namespace    VARCHAR2(32767);
+  l_method       VARCHAR2(32767);
+  l_soap_action  VARCHAR2(32767);
+  l_result_name  VARCHAR2(32767);
+BEGIN
+--  l_url         := 'http://172.18.14.66:8080/WebServicesSigru/services/Sigru';
+  l_url         := 'http://172.18.14.66:8080/WebServicesSigru/services/Sigru?wsdl';
+  l_namespace   := 'xmlns="http://172.18.14.66:8080/WebServicesSigru/services/Sigru"';
+  l_method      := 'piantaOrganica';
+  --l_soap_action := 'http://172.18.14.66:8080/WebServicesSigru/services/Sigru/piantaOrganica';
+  l_soap_action := 'piantaOrganica';
+  l_result_name := 'risposta';
+  richiesta:='&lt;richiesta&gt;&lt;ciclo&gt;&lt;matricolaA&gt;&lt;valore&gt;3&lt;/valore&gt;&lt;tipoOperazione&gt;5&lt;/tipoOperazione&gt;&lt;/matricolaA&gt;&lt;/ciclo&gt;&lt;/richiesta&gt;';
+  l_request := soap_api.new_request(p_method       => l_method,
+                                    p_namespace    => l_namespace);
+
+  --soap_api.add_body(l_request,  p_int_1);
+  soap_api.add_body(l_request, richiesta);
+
+
+  l_response := soap_api.invoke(p_request => l_request,
+                                p_url     => l_url,
+                                p_action  => l_soap_action);
+/*
+  l_return := soap_api.get_return_value(p_response  => l_response,
+                                        p_name      => l_result_name,
+                                        p_namespace => NULL);
+*/
+  RETURN 'pippo';--l_return;
+END;</pre>	</td></tr>
+</table></div>
