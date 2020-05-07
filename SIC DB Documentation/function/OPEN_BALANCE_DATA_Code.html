@@ -1,0 +1,395 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>OPEN_BALANCE_DATA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="OPEN_BALANCE_DATA.html">Details</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_DATA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_DATA_References.html">References</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_DATA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="OPEN_BALANCE_DATA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION OPEN_BALANCE_DATA(p_doc_id number --doc_id del documento per il quale calcolare l'obp --
+, p_data date) RETURN number IS
+
+  TOT_STORNO NUMBER := 0;
+	TOT_STORNO_IMP_PER NUMBER := 0;
+	TOT_ECO_IMP_PER NUMBER := 0;	
+	TOT_LIQ NUMBER := 0;
+	TOT_IMP_PER   NUMBER := 0;
+	TOT_ST_LIQ NUMBER := 0;  
+  TOT_MAND NUMBER := 0;
+  TOT_CORR NUMBER := 0;
+  TOT_REV NUMBER := 0;
+ 	totale_storno_accertamenti number(15,2) := 0;
+	totale_correzione_storno_acc number(15,2) := 0;
+	NETTO_IMP  NUMBER := 0; 
+  tipo_doc varchar2(20);
+  importo_doc number;
+  doc_id_pre_imp number;
+	doc_id_impegno number;
+    doc_id_imp_per number;
+	doc_id_liquidazione  number; 
+	doc_id_liq_imp_per  number; 
+  doc_id_mand number;
+  doc_id_st_mand number;
+  doc_id_storno number;
+  doc_id_acc number;
+  doc_id_rev number;
+  doc_id_storno_accertamento number;
+  OPEN_BALANCE number := 0; -- è il return della funzione
+
+-- **************** USCITE ******************************
+ 	CURSOR IMP IS
+		select  distinct	
+		nvl(jugd.document_amount,0)    importo_impegno,
+		jugd.doc_id					   doc_id_impegno,
+		jugd.doc_sequence_value DOC_SEQUENCE_VALUE_IMP,
+		jugd.open_balance_proposed     open_balance_imp
+		from	
+		fin_t_documenti 		jugd                                                               
+		where	
+		jugd.doc_type in ('IMP','IMP-DEF')  and   
+	  nvl(jugd.deletion_status_flag,'N') &lt;> 'Y' and                        
+		nvl(jugd.proposal_status_flag,'Z')||nvl(jugd.auditing_status_flag,'Z') in ('PI','PB','PT') and
+		jugd.date_created &lt;= nvl(p_data,trunc(sysdate,'dd')) and
+        jugd.previous_doc_id = doc_id_pre_imp; 
+
+	CURSOR IMP_PER IS
+		select  distinct	
+		jugd.doc_id					   doc_id_imp_per,
+		jugd.date_created      data_imp_per,
+		jugd.document_amount     importo_imp_per
+		from	
+		fin_t_documenti 		jugd                                                               
+		where	
+		jugd.doc_type in ('IMP-PER')  and   
+		nvl(jugd.deletion_status_flag,'N') &lt;> 'Y' and                        
+		nvl(jugd.proposal_status_flag,'Z')||nvl(jugd.auditing_status_flag,'Z') in ('PI','PB','PT') and
+		jugd.date_created &lt;= p_data 	and
+		jugd.previous_doc_id	= doc_id_impegno; 
+
+	cursor storno_impegni is
+		SELECT
+		nvl(jugd2.open_balance_proposed,0) 	importo_netto_storno_imp
+		FROM
+		fin_t_documenti 					jugd2
+		WHERE
+		jugd2.doc_type 	in ('ST-IMP','DIS','ECO') 	and
+		nvl(jugd2.deletion_status_flag,'N') &lt;> 'Y' 	and
+		jugd2.date_created 		&lt;= p_data	and
+		jugd2.previous_doc_id	= doc_id_impegno;
+
+    cursor storno_imp_per is
+		SELECT
+		nvl(jugd2.open_balance_proposed,0) 	importo_netto_storno_imp_per
+		FROM
+		fin_t_documenti 					jugd2
+		WHERE
+		jugd2.doc_type 	in ('ST-IMP','DIS') 	and
+		--nvl(jugd2.deletion_status_flag,'N') &lt;> 'Y' 	and
+    nvl(jugd2.open_balance_proposed,0) > 0 and
+		jugd2.date_created 		&lt;= p_data	and
+		jugd2.previous_doc_id	= doc_id_imp_per;
+
+	  cursor eco_imp_per is
+		SELECT
+		jugd2.segment8 anno_creazione_eco_imp_per,
+		nvl(jugd2.open_balance_proposed,0) 	importo_netto_eco_imp_per
+		FROM
+		fin_t_documenti 					jugd2
+		WHERE
+		jugd2.doc_type 	= 'ECO' 	and
+		--upper(nvl(jugd2.deletion_status_flag,'N')) &lt;> 'Y' 	and
+		--jugd2.gl_date 	is not null and
+		--jugd2.period_name		is not null and
+    nvl(jugd2.open_balance_proposed,0) > 0 and
+		jugd2.date_created 	&lt;= p_data	and
+		jugd2.previous_doc_id	= doc_id_imp_per;
+
+	CURSOR LIQ IS
+		SELECT
+		jugd1.doc_id            doc_id_liq,
+		jugd1.document_amount   importo_netto_liq
+		FROM
+		fin_t_documenti 		jugd1     --liquidazione
+		WHERE
+		jugd1.doc_type	= 'LIQ' and
+		nvl(jugd1.deletion_status_flag,'N')	&lt;> 'Y'  and 
+    jugd1.date_created 	&lt;= p_data	and
+		jugd1.previous_doc_id	= doc_id_impegno 
+    ;
+
+	CURSOR ST_LIQ IS
+		SELECT
+		nvl(jugd3.open_balance_proposed,0)	importo_netto_st_liq,
+		nvl(jugd3.doc_id,0)            doc_id_st_liq
+		FROM
+		fin_t_documenti 		jugd3 /* movimento_storno */
+		WHERE
+		jugd3.doc_type in ('ST-LIQ','DIS') and
+		nvl(jugd3.deletion_status_flag,'N')	&lt;> 'Y' and
+    jugd3.date_created 	&lt;= p_data	and
+		jugd3.previous_doc_id = doc_id_liquidazione;
+
+  CURSOR MAND IS
+		SELECT
+		nvl(jugd.open_balance_proposed,0)	disponibilita_mandato
+		FROM
+		fina_documenti 		jugd--,
+		--fina_documenti 		jugd3 /* movimento_storno */
+		WHERE
+		jugd.doc_type	= 'MAND' and
+	  nvl(jugd.open_balance_proposed,0)	> 0 and	
+    jugd.date_created 	&lt;= p_data	and
+		jugd.previous_doc_id = doc_id_liquidazione;
+
+
+ /* CURSOR ST_MAND is 
+  SELECT
+		nvl(jugd3.open_balance_proposed,0)	importo_netto_st_mand,
+		jugd3.doc_id            doc_id_st_mand
+		FROM
+		fin_t_documenti 		jugd3 -- movimento_storno 
+		WHERE
+		upper(jugd3.doc_type) = 'ST-MAND' and
+		upper(nvl(jugd3.proposal_status_flag,'Z'))||upper(nvl(jugd3.auditing_status_flag,'Z'))	='PI' 	and
+		upper(nvl(jugd3.deletion_status_flag,'N')) 					&lt;> 'Y' and
+    jugd3.date_created 	&lt;= p_data	and
+		jugd3.previous_doc_id = doc_id_mand;
+
+	CURSOR CORR_DIS IS
+		SELECT
+		jugd4.document_amount	importo_documento_corr_dis
+		FROM
+		fin_t_documenti 		jugd4
+		WHERE
+		upper(jugd4.doc_type) = 'CORR-DIS' and
+		upper(nvl(jugd4.proposal_status_flag,'Z'))||upper(nvl(jugd4.auditing_status_flag,'Z'))	='PI'  AND
+		jugd4.previous_doc_id = doc_id_storno;*/
+
+-- *********************** FINE USCITE ******************************
+
+
+-- ********************** ENTRATE ***********************************
+    cursor storno_accertamenti is
+		select	
+		jugd.doc_id   doc_id_storno_acc,
+		nvl(jugd.document_amount,0)											importo_storno_accertamento
+		from	
+		fin_t_documenti  jugd
+		where	
+		jugd.doc_type  in ('ST-ACC','INSUS') 		 		and                                                
+		nvl(jugd.deletion_status_flag,'N') &lt;> 'Y' 		and                        
+		jugd.date_created &lt;=  p_data	and 			   
+		jugd.previous_doc_id = doc_id_acc;
+
+		cursor corr_storno_accertamenti is
+		select	
+		nvl(jugd.document_amount,0) 										importo_corr_accertamento
+		from	
+		fin_t_documenti 		jugd
+		where	
+		jugd.doc_type = 'CORR_AC' 		     			and                                                
+		nvl(jugd.deletion_status_flag,'N') &lt;> 'Y' 	 		and                        
+		jugd.date_created &lt;=  p_data and 					
+		jugd.previous_doc_id = doc_id_storno_accertamento;
+
+  	cursor reversali is
+		SELECT nvl(jugd.open_balance_proposed,0)		netto_reversale
+		FROM
+		fina_documenti 		jugd
+		WHERE
+		jugd.doc_type	= 'REV' and
+		nvl(jugd.open_balance_proposed,0) > 0 	and
+		jugd.date_created 	&lt;= p_data	and
+		jugd.previous_doc_id	= doc_id_acc;
+
+  /*CURSOR ST_REV is 
+  SELECT
+		nvl(jugd3.open_balance_proposed,0)	importo_netto_st_rev,
+		jugd3.doc_id            doc_id_st_mand
+		FROM
+		fin_t_documenti 		jugd3 -- movimento_storno 
+		WHERE
+		upper(jugd3.doc_type) = 'ST-REV' and
+		upper(nvl(jugd3.proposal_status_flag,'Z'))||upper(nvl(jugd3.auditing_status_flag,'Z'))	='PI' 	and
+		upper(nvl(jugd3.deletion_status_flag,'N')) &lt;> 'Y' and
+		jugd3.previous_doc_id = doc_id_rev;*/
+
+-- ********************** FINE ENTRATE ***********************************
+
+BEGIN
+	 begin
+   select doc_type
+   ,nvl(document_amount,0)
+   into 
+   tipo_doc,
+   importo_doc
+   from fin_t_documenti
+   where doc_id = p_doc_id;
+   exception when no_data_found then OPEN_BALANCE := 0;
+   end;
+
+   -- verifico il tipo di documento per il quale calcolare il residuo
+   -- *** PRE-IMP****
+   if tipo_doc = 'PRE-IMP'
+    then
+    doc_id_pre_imp := p_doc_id;
+    for i in IMP loop
+     NETTO_IMP := nvl(NETTO_IMP,0) + nvl(i.importo_impegno,0);
+    end loop;
+    OPEN_BALANCE := nvl(importo_doc,0) - NETTO_IMP;
+    return (OPEN_BALANCE);
+   -- *** IMP e IMP-DEF **** 
+   elsif tipo_doc = 'IMP' or tipo_doc = 'IMP-DEF'
+    then
+     doc_id_impegno := p_doc_id;
+     TOT_STORNO := 0;
+       for s in storno_impegni loop
+         TOT_STORNO := TOT_STORNO + NVL(S.importo_netto_storno_imp,0);
+       end loop;
+       TOT_IMP_PER := 0;
+      -- verifico IMP-PER
+       FOR D IN IMP_PER LOOP
+         DOC_ID_IMP_PER := D.doc_id_imp_per;
+         TOT_STORNO_IMP_PER := 0;
+        for l in storno_imp_per loop
+           TOT_STORNO_IMP_PER := TOT_STORNO_IMP_PER + NVL(L.importo_netto_storno_imp_per,0);
+        end loop;
+         TOT_ECO_IMP_PER  := 0;
+         for e in eco_imp_per loop
+           IF e.anno_creazione_eco_imp_per &lt; 2005 then
+            TOT_ECO_IMP_PER := TOT_ECO_IMP_PER + NVL(e.importo_netto_eco_imp_per,0);	
+           end if;
+         end loop;
+         TOT_IMP_PER := TOT_IMP_PER + nvl(D.importo_imp_per,0) - TOT_STORNO_IMP_PER - TOT_ECO_IMP_PER;
+        END LOOP;
+        TOT_LIQ := 0;
+        for Q in liq loop
+          TOT_LIQ := TOT_LIQ + NVL(Q.importo_netto_liq,0);
+          DOC_ID_LIQUIDAZIONE := Q.doc_id_liq;
+          TOT_ST_LIQ := 0;
+          for M in ST_LIQ loop
+             TOT_ST_LIQ := TOT_ST_LIQ + NVL(M.importo_netto_st_liq,0);
+          end loop;
+          TOT_LIQ := TOT_LIQ - TOT_ST_LIQ;
+        end loop;
+
+      OPEN_BALANCE := importo_doc - NVL(TOT_STORNO,0) - NVL(TOT_IMP_PER,0) - NVL(TOT_LIQ,0);
+      return (OPEN_BALANCE);
+       -- *** IMP-PER **** 
+   elsif tipo_doc = 'IMP-PER'
+    then
+    doc_id_impegno := p_doc_id;
+    TOT_STORNO := 0;
+		 for s in storno_impegni loop
+			 TOT_STORNO := TOT_STORNO + NVL(S.importo_netto_storno_imp,0);
+		 end loop;
+		 TOT_LIQ := 0;
+		 for l in liq loop
+			 TOT_LIQ := TOT_LIQ + NVL(L.importo_netto_liq,0);
+			 DOC_ID_LIQUIDAZIONE := l.doc_id_liq;
+		 TOT_ST_LIQ := 0;
+          for M in ST_LIQ loop
+             TOT_ST_LIQ := TOT_ST_LIQ + NVL(M.importo_netto_st_liq,0);
+          end loop;
+			TOT_LIQ := TOT_LIQ - TOT_ST_LIQ;
+		 end loop;
+		OPEN_BALANCE := importo_doc - NVL(TOT_STORNO,0) - NVL(TOT_LIQ,0);
+    return (OPEN_BALANCE);
+  -- ** LIQ ***
+   elsif tipo_doc = 'LIQ'
+     then 
+     doc_id_liquidazione := p_doc_id;
+     TOT_STORNO := 0;
+		 for s in ST_LIQ loop
+		 	 DOC_ID_STORNO := S.doc_id_st_liq;
+			 TOT_CORR := 0;
+		--	 for C in CORR_DIS loop
+		--	 	 TOT_CORR := TOT_CORR + NVL(C.importo_documento_corr_dis,0);
+		--	 end loop;
+			 TOT_STORNO := TOT_STORNO - NVL(TOT_CORR,0) + NVL(S.importo_netto_st_liq,0);
+		 end loop;
+
+		 TOT_MAND := 0;
+		 for M in MAND loop
+		 	 TOT_MAND := TOT_MAND + NVL(M.disponibilita_mandato,0);
+		 end loop;
+		 OPEN_BALANCE := importo_doc - NVL(TOT_STORNO,0) - NVL(TOT_MAND,0);
+     return (OPEN_BALANCE);
+   -- ** MAND ***
+   elsif tipo_doc = 'MAND'
+     then  
+     begin
+     SELECT
+      sum(DECODE(jugd3.date_created,NULL,jugd.document_amount,0))	disponibilita_mandato
+      into OPEN_BALANCE
+      FROM
+      fina_documenti 		jugd,
+      fina_documenti 		jugd3 /* movimento_storno */
+      WHERE
+      upper(jugd.doc_type) 					             	= 'MAND' and
+      upper(nvl(jugd.proposal_status_flag,'Z'))||upper(nvl(jugd.auditing_status_flag,'Z'))	='PI' 	and
+      upper(nvl(jugd.deletion_status_flag,'N')) 					&lt;> 'Y' 	and
+      jugd.doc_id							= jugd3.previous_doc_id(+)	and
+      upper(jugd3.doc_type(+)) 						= 'ST-MAND' and
+      upper(nvl(jugd3.proposal_status_flag(+),'Z'))||upper(nvl(jugd3.auditing_status_flag(+),'Z'))	='PI'  and
+      jugd.doc_id = p_doc_id;
+      exception when no_data_found then OPEN_BALANCE := 0;
+    end;
+    return (OPEN_BALANCE);
+   elsif tipo_doc = 'ACC'
+    then
+      doc_id_acc := p_doc_id;
+      tot_rev := 0;
+    -- calcolo reversali 
+     for r in reversali loop
+      tot_rev := tot_rev + nvl(r.netto_reversale,0);
+     end loop;
+    -- fine calcolo reversali
+
+    -- calcolo storno_accertamenti 
+     totale_storno_accertamenti := 0;
+     for sa in storno_accertamenti loop
+      totale_correzione_storno_acc := 0;
+      doc_id_storno_accertamento := sa.doc_id_storno_acc;
+      for csa in corr_storno_accertamenti loop
+       totale_correzione_storno_acc := totale_correzione_storno_acc + nvl(csa.importo_corr_accertamento,0);	
+      end loop;
+      totale_storno_accertamenti := totale_storno_accertamenti + nvl(sa.importo_storno_accertamento,0) - nvl(totale_correzione_storno_acc,0) ;
+     end loop;
+
+    -- fine calcolo storno accertamenti
+
+      OPEN_BALANCE := (nvl(importo_doc,0) - nvl(totale_storno_accertamenti,0) - nvl(tot_rev,0));
+      return (OPEN_BALANCE);
+    elsif tipo_doc = 'REV'
+     then  
+     begin
+     SELECT
+      nvl(sum(nvl(jugd.open_balance_proposed,0)),0)	disponibilita_reversale
+      into OPEN_BALANCE
+      FROM
+      fina_documenti 		jugd     
+      WHERE
+      jugd.doc_type	= 'REV' and
+      nvl(jugd.open_balance_proposed,0) > 0 and
+      jugd.doc_id = p_doc_id;
+      exception when no_data_found then OPEN_BALANCE := 0;
+    end;
+    return (OPEN_BALANCE);
+  end if; 
+
+END;</pre>	</td></tr>
+</table></div>

@@ -1,0 +1,44 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>OPEN_BALANCE_PERENTI_DATA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="OPEN_BALANCE_PERENTI_DATA.html">Details</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_PERENTI_DATA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_PERENTI_DATA_References.html">References</a></div></div>
+<div class="tab"><div><a href="OPEN_BALANCE_PERENTI_DATA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="OPEN_BALANCE_PERENTI_DATA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION OPEN_BALANCE_PERENTI_DATA (p_doc_id number, p_data date) RETURN number IS
+
+tot_liq number := 0;
+totale_imp number := 0;
+
+begin
+
+   select nvl(sum(nvl(d.DOCUMENT_AMOUNT,0)),0) into tot_liq
+   from fin_t_documenti d
+   where d.doc_type in ('LIQ','ECO','DIS','IMP-PER')
+   and d.previous_doc_id = p_doc_id
+   and nvl(d.DELETION_STATUS_FLAG,'N') = 'N'
+   and d.date_created &lt;= p_data;
+
+
+   select nvl(sum(nvl(document_amount,0)),0) into totale_imp
+   from fin_t_documenti
+   where doc_id = p_doc_id;
+
+  return(totale_imp - tot_liq);
+
+end;</pre>	</td></tr>
+</table></div>
