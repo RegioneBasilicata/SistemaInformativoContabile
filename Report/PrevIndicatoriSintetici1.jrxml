@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevIndicatoriSintetici1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<box>
+			<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{DEFINIZIONE},null)]]></conditionExpression>
+			<style mode="Transparent" backcolor="#FCF7F7" fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+ord
+,anno 
+,codice_indicatore1 Codice
+,desc_cod1 Tipologia
+,definizione Definizione
+,tot_missioni1 "Tutte le missioni A1"
+,tot_missioni2 "Tutte le missioni A2"
+,tot_missioni3 "Tutte le missioni A3"
+from fin_t_indicatori_bilancio
+where anno = $P{ANNO} 
+and utente='PREV'||anno
+and tipo_bilancio = 'P'
+and tipo_indicatore = 'S'
+order by ord]]>
+	</queryString>
+	<field name="ORD" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ORD"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="CODICE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CODICE"/>
+	</field>
+	<field name="TIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPOLOGIA"/>
+	</field>
+	<field name="DEFINIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFINIZIONE"/>
+	</field>
+	<field name="Tutte le missioni A1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="Tutte le missioni A1"/>
+	</field>
+	<field name="Tutte le missioni A2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="Tutte le missioni A2"/>
+	</field>
+	<field name="Tutte le missioni A3" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="Tutte le missioni A3"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="46" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="0" width="330" height="46" uuid="7656a225-fe3e-43e9-ac98-552da9e06ea5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPOLOGIA INDICATORE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="0" width="273" height="46" uuid="e80b21ec-9b06-41c7-94f2-678be88a92ca">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66a2309a-bd70-4f8d-8ad4-9d956e93600b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEFINIZIONE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="613" y="0" width="195" height="30" uuid="66e28147-4c24-4456-a876-98e68a1ac533">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6903b19b-17e3-4674-b1ed-35b627f12058"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[VALORE INDICATORE 
+(dati percentuali)]]></text>
+			</staticText>
+			<textField pattern="###0.###;(###0.###-)" isBlankWhenNull="true">
+				<reportElement x="613" y="30" width="65" height="16" uuid="2532b529-6cc8-4637-97e3-b8e121288895"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.###;(###0.###-)" isBlankWhenNull="true">
+				<reportElement x="678" y="30" width="65" height="16" uuid="db72a2d3-7f80-4f38-9698-c79b6fd76162"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[SUM($F{ANNO},1)]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.###;(###0.###-)" isBlankWhenNull="true">
+				<reportElement x="743" y="30" width="65" height="16" uuid="015769a1-2acf-40ff-9469-5877fbc62219"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[SUM($F{ANNO},2)]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Prevent">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="10" y="0" width="60" height="25" uuid="1f6eee3a-00ac-4f23-92bf-102922028087">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45cf638c-eaa8-431b-b08b-0177d42a1cd3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CODICE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" isPrintRepeatedValues="false" x="70" y="0" width="270" height="25" uuid="df64fc6f-f559-4fc2-8a7a-8dc4633fb12c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b2691f2-14a8-4f7c-9a45-7262b3f38df8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TIPOLOGIA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" isPrintRepeatedValues="false" x="340" y="0" width="273" height="25" uuid="8fe4b61a-f1ea-45dc-91cc-107ef90f888a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66a2309a-bd70-4f8d-8ad4-9d956e93600b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DEFINIZIONE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="613" y="0" width="65" height="25" uuid="59f72ab7-6402-48c0-a33f-06165ebe5ea2"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Tutte le missioni A1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="678" y="0" width="65" height="25" uuid="5458b67c-0c00-4481-9d45-ca8817f3be8c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Tutte le missioni A2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="743" y="0" width="65" height="25" uuid="91fcfb56-1278-490c-a444-a1727393a0c7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{Tutte le missioni A3}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

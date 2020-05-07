@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendFCDDE2" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="Style1">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(LEFT($F{DESTOTGEN4},1 ),"A")]]></conditionExpression>
+			<style hTextAlign="Right" vTextAlign="Middle" fontSize="10">
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(LEFT($F{DESTOTGEN4},1 ),"T")]]></conditionExpression>
+			<style hTextAlign="Right" vTextAlign="Middle" fontSize="11" isBold="true">
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+	</style>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT f.descrizione DESTOTGEN4,
+               f.importo_g IMPg4,
+               f.importo_h IMPh4
+ FROM fin_t_rendiconto_fcdde f
+WHERE  f.UTENTE =  $P{UTENTE}  AND
+f.ANNO =  $P{ANNO} AND 
+ f.tipo LIKE 'Q%'
+ORDER BY riga]]>
+	</queryString>
+	<field name="DESTOTGEN4" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESTOTGEN4"/>
+	</field>
+	<field name="IMPG4" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="IMPG4"/>
+	</field>
+	<field name="IMPH4" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="IMPH4"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="50">
+			<staticText>
+				<reportElement x="3" y="0" width="260" height="50" uuid="ce621e59-c00d-4274-b0c1-238c06b0e6b2"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="11" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[COMPOSIZIONE FONDO SVALUTAZIONE CREDITI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="263" y="0" width="90" height="50" uuid="8e410b1e-2d2f-4008-9df3-e6c7974bae46"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTALE CREDITI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="353" y="0" width="90" height="50" uuid="f13bed81-235e-480c-a054-0c95dc696873"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FONDO SVALUTAZIONE CREDITI]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="34" splitType="Stretch">
+			<textField>
+				<reportElement style="Style1" isPrintRepeatedValues="false" x="3" y="0" width="260" height="34" uuid="57dee12c-eb33-49f3-8952-74cf4f53d9ba"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESTOTGEN4}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement style="Style1" x="263" y="0" width="90" height="34" uuid="e24c16ed-47c6-49bb-8436-a1fe042af7ad"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IMPG4}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement style="Style1" x="353" y="0" width="90" height="34" uuid="4c0ea98c-0fc1-4474-ab48-ec32e5ce4305"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IMPH4}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

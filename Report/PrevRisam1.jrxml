@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevRisam1" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<style name="Style1">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS( $F{TIPO_RIGA},"D")&&EQUALS($F{ATTRIBUTO_RIGA},"B" )]]></conditionExpression>
+			<style hTextAlign="Right" isBold="true">
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{ATTRIBUTO_RIGA},"B" )]]></conditionExpression>
+			<style isBold="true">
+				<box>
+					<pen lineWidth="2.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS( $F{TIPO_RIGA},"D")]]></conditionExpression>
+			<style hTextAlign="Right">
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(LEFT($F{CAMPO2},6 ),"Totale" )]]></conditionExpression>
+			<style hTextAlign="Right" isBold="true">
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(LEFT($F{CAMPO2},2),"1)" )||EQUALS(LEFT($F{CAMPO2},2),"2)" )||EQUALS(LEFT($F{CAMPO2},2),"3)" )]]></conditionExpression>
+			<style markup="styled">
+				<box>
+					<pen lineWidth="5.0"/>
+				</box>
+			</style>
+		</conditionalStyle>
+	</style>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select 
+UTENTE
+,ANNO
+,RIGA
+,TIPO_RIGA
+,ATTRIBUTO_RIGA
+,CAMPO1
+,CAMPO2
+,VALORE
+,TAG_BDAP
+from fin_t_previsione_tdrap 
+where utente= $P{UTENTE}
+and anno=$P{ANNO} 
+order by riga]]>
+	</queryString>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="RIGA"/>
+	</field>
+	<field name="TIPO_RIGA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_RIGA"/>
+	</field>
+	<field name="ATTRIBUTO_RIGA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ATTRIBUTO_RIGA"/>
+	</field>
+	<field name="CAMPO1" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAMPO1"/>
+	</field>
+	<field name="CAMPO2" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAMPO2"/>
+	</field>
+	<field name="VALORE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="VALORE"/>
+	</field>
+	<field name="TAG_BDAP" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TAG_BDAP"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement style="Style1" x="0" y="0" width="455" height="20" uuid="a31b31db-e991-49ae-8011-48e260d63976"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $F{CAMPO1},null)?" "+$F{CAMPO2}:"          "+$F{CAMPO2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Style1" stretchType="RelativeToTallestObject" x="455" y="0" width="100" height="20" uuid="3e7cdf7c-b297-4f65-996c-452d57a1666f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font fontName="SansSerif" size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VALORE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;(#,##0.00#-)" isBlankWhenNull="true">
+				<reportElement style="Style1" stretchType="RelativeToTallestObject" x="0" y="0" width="20" height="20" isRemoveLineWhenBlank="true" uuid="8096d7ea-a392-4299-ac0c-3ba19e647658"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAMPO1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

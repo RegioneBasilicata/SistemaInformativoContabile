@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendCMis4" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="06ab9923-bc54-4702-9dbf-fd25c0c93722">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Totale Grassetto">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{CAR03},"TOTALE GENERALE" )]]></conditionExpression>
+			<style isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<subDataset name="Dataset1" uuid="4523fe16-c610-4469-9190-79a521e88795">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<parameter name="UTENTE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[select decode(car02,null,'MISSIONE 999', 'MISSIONE '||car02) car02, CAR03, 
+NUM04 CAR04, 
+NUM05 CAR05, 
+NUM06 CAR06, 
+NUM07 CAR07, 
+NUM08 CAR08, 
+NUM09 CAR09, 
+NUM10 CAR10, 
+NUM11 CAR11, 
+NUM12 CAR12, 
+NUM13 CAR13, 
+NUM14 CAR14,
+NUM15 CAR15, 
+NUM16 CAR16, 
+NUM17 CAR17, 
+NUM18 CAR18, 
+NUM19 CAR19, 
+num20 CAR20,
+num21 CAR21,
+num22 CAR22,
+num23 CAR23, 
+num24 CAR24, 
+num25 CAR25, 
+num26 CAR26, 
+num27 CAR27, 
+num28 CAR28, 
+num29 CAR29, 
+num30 CAR30, 
+num31 CAR31
+, num_ord_riga
+from tmp_tabulati2
+where upper(car01) = 'COSTI PER MISSIONI' and
+utente = $P{UTENTE}    and
+nvl(car02,'999')  in ('14'
+,'15'
+,'16'
+,'17'
+,'18'
+,'19'
+,'20'
+,'50'
+,'60'
+,'99'
+,'999') and
+num_ord_riga>1
+order by nvl(car02,'999')]]>
+		</queryString>
+		<field name="CAR02" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CAR02"/>
+		</field>
+		<field name="CAR03" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CAR03"/>
+		</field>
+		<field name="CAR04" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR04"/>
+		</field>
+		<field name="CAR05" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR05"/>
+		</field>
+		<field name="CAR06" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR06"/>
+		</field>
+		<field name="CAR07" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR07"/>
+		</field>
+		<field name="CAR08" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR08"/>
+		</field>
+		<field name="CAR09" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR09"/>
+		</field>
+		<field name="CAR10" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR10"/>
+		</field>
+		<field name="CAR11" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR11"/>
+		</field>
+		<field name="CAR12" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR12"/>
+		</field>
+		<field name="CAR13" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR13"/>
+		</field>
+		<field name="CAR14" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR14"/>
+		</field>
+		<field name="CAR15" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR15"/>
+		</field>
+		<field name="CAR16" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR16"/>
+		</field>
+		<field name="CAR17" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR17"/>
+		</field>
+		<field name="CAR18" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR18"/>
+		</field>
+		<field name="CAR19" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR19"/>
+		</field>
+		<field name="CAR20" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR20"/>
+		</field>
+		<field name="CAR21" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR21"/>
+		</field>
+		<field name="CAR22" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR22"/>
+		</field>
+		<field name="CAR23" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR23"/>
+		</field>
+		<field name="CAR24" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR24"/>
+		</field>
+		<field name="CAR25" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR25"/>
+		</field>
+		<field name="CAR26" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR26"/>
+		</field>
+		<field name="CAR27" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR27"/>
+		</field>
+		<field name="CAR28" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR28"/>
+		</field>
+		<field name="CAR29" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR29"/>
+		</field>
+		<field name="CAR30" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR30"/>
+		</field>
+		<field name="CAR31" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAR31"/>
+		</field>
+		<field name="NUM_ORD_RIGA" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="NUM_ORD_RIGA"/>
+		</field>
+	</subDataset>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT 
+car04,
+car05,
+car06,
+car07,
+car08,
+car09,
+car10,
+car11,
+car12,
+car13,
+car14,
+car15,
+car16,
+car17,
+car18,
+car19,
+car20,
+car21,
+car22,
+car23,
+car24,
+car25,
+car26,
+car27,
+car28,
+car29,
+car30,
+car31,
+num_ord_riga
+FROM tmp_tabulati2
+where upper(car01) = 'COSTI PER MISSIONI' and
+utente = $P{UTENTE}  and
+num_ord_riga = 1]]>
+	</queryString>
+	<field name="CAR04" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR04"/>
+	</field>
+	<field name="CAR05" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR05"/>
+	</field>
+	<field name="CAR06" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR06"/>
+	</field>
+	<field name="CAR07" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR07"/>
+	</field>
+	<field name="CAR08" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR08"/>
+	</field>
+	<field name="CAR09" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR09"/>
+	</field>
+	<field name="CAR10" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR10"/>
+	</field>
+	<field name="CAR11" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR11"/>
+	</field>
+	<field name="CAR12" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR12"/>
+	</field>
+	<field name="CAR13" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR13"/>
+	</field>
+	<field name="CAR14" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR14"/>
+	</field>
+	<field name="CAR15" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR15"/>
+	</field>
+	<field name="CAR16" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR16"/>
+	</field>
+	<field name="CAR17" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR17"/>
+	</field>
+	<field name="CAR18" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR18"/>
+	</field>
+	<field name="CAR19" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR19"/>
+	</field>
+	<field name="CAR20" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR20"/>
+	</field>
+	<field name="CAR21" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR21"/>
+	</field>
+	<field name="CAR22" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR22"/>
+	</field>
+	<field name="CAR23" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR23"/>
+	</field>
+	<field name="CAR24" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR24"/>
+	</field>
+	<field name="CAR25" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR25"/>
+	</field>
+	<field name="CAR26" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR26"/>
+	</field>
+	<field name="CAR27" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR27"/>
+	</field>
+	<field name="CAR28" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR28"/>
+	</field>
+	<field name="CAR29" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR29"/>
+	</field>
+	<field name="CAR30" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR30"/>
+	</field>
+	<field name="CAR31" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR31"/>
+	</field>
+	<field name="NUM_ORD_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_ORD_RIGA"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="150">
+			<textField>
+				<reportElement x="96" y="50" width="51" height="100" uuid="5219232d-40a6-4e22-829e-99be0cdefa22"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR04}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="147" y="50" width="51" height="100" uuid="d1630866-a963-40a7-82ca-d315f6114917"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR05}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="198" y="50" width="51" height="100" uuid="504352a9-ff97-4e8c-a3d9-785fca059b2f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR06}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="249" y="50" width="51" height="100" uuid="655c1150-c18b-4c2c-b2ad-27f0b570566c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR07}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="50" width="51" height="100" uuid="3f0146a1-684f-46d1-8ae9-4b9d0191cbcf"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR08}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="351" y="50" width="51" height="100" uuid="fe1beab1-fb01-464c-b525-80945fa83968"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR09}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="402" y="50" width="51" height="100" uuid="f946bd72-cdb9-4843-a140-2fdbbadfcb17"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR10}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="453" y="50" width="51" height="100" uuid="e80a8092-13db-4e76-869d-a560694f4a07"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR11}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="504" y="50" width="51" height="100" uuid="b5669251-e4eb-4ca7-9441-5a39483d3c5b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR12}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="555" y="50" width="51" height="100" uuid="885edda1-0f2c-44ab-876c-de97e59f9a26"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR13}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="606" y="50" width="51" height="100" uuid="7be40b9c-6cd6-41d1-adef-921b14c5f782"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR14}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="657" y="50" width="51" height="100" uuid="d27c7a71-a52c-42e5-adcd-2ad34a13e899"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR15}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="708" y="50" width="51" height="100" uuid="59a00083-065a-4ee0-a514-c83e5d6796ff"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR16}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="759" y="50" width="51" height="100" uuid="8dd77eff-a3b9-4ec6-b877-76683ec035d8"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR17}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="96" height="150" uuid="1c164635-2863-4bf5-adf9-26663c82490c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Missioni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="96" y="30" width="102" height="20" uuid="1efda3ca-6fde-436d-a482-b9672946695f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Consumi materie prime]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="198" y="30" width="204" height="20" uuid="2e10a2df-59be-4f3e-9a06-e0d0fec32d6a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Prestazioni di servizi e Trasferimenti e contributi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="30" width="51" height="20" uuid="9a0fafb0-c2cf-42d3-88c6-d2084b499952"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Utilizzo di beni di terzi]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="453" y="30" width="51" height="20" uuid="9b9deeab-fc85-4a11-81ae-5c59df209029"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Personale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="504" y="30" width="204" height="20" uuid="ad36f0c0-9cd4-4e13-8e12-eafb6d1fdde5"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Ammortamenti e svalutazioni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="708" y="30" width="102" height="20" uuid="dcb55034-be8d-456f-88f9-181465b87634"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Accantonamenti]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="96" y="0" width="714" height="30" uuid="cbe26922-4e49-44ae-9d81-81d2d5a46e54"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.8" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[COMPONENTI NEGATIVI DELLA GESTIONE]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20" splitType="Prevent">
+			<componentElement>
+				<reportElement x="0" y="0" width="810" height="20" uuid="a7a20366-6875-492b-a50a-ba3cd0b3a4a8">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset1" uuid="0b362580-1722-4c78-b8b6-5ef564b5ec62">
+						<datasetParameter name="UTENTE">
+							<datasetParameterExpression><![CDATA[$P{UTENTE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="36" uuid="eb904803-5178-462d-a542-b9dda10d8757">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<textField isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="36" height="20" uuid="6078aeec-94e7-4f1a-92e2-3ea88913dc85"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="5" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[EQUALS( $F{CAR02},"MISSIONE 999")?null:$F{CAR02}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="60" uuid="a1a54a2e-2b1b-4b6a-a57d-1be5fa46dd23">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<textField isStretchWithOverflow="true">
+								<reportElement x="0" y="0" width="60" height="20" uuid="f05d2b90-ea79-48cc-ae69-e6c576ad6076"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="5" isBold="true"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR03}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="0a29dcff-31b6-4a61-af8b-2da1114f2c65">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="3cbbfcd8-75cb-4dee-9d3a-0090276ce13d"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR04}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="33f2711b-2fa7-43aa-875e-ec2c97ba91d3">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="3b093aa9-3ff4-4c06-b627-b5f80e40d68f"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR05}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="da42dbce-b21a-4b98-bfb5-5ccd76b41a4b">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="462cf370-c79d-4b7f-878d-1a960ec09579"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR06}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="873568f8-d72b-4cce-8dfb-bc0e9eecc21c">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="23deea80-c531-4d43-8a2e-8e4d8f23cf67"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR07}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="66253056-22a7-42d7-8879-7128e4dfc2db">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="69845698-b6ea-4010-bb16-23227d121821"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR08}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="d592eff0-1018-46b8-9a74-354ea1a465ab">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="1785f1fb-84e0-41f8-bb12-793a0f7b101d"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR09}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="8e3dca21-0965-42ea-8587-ad53575ea95a">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="c2f7eb14-a501-4227-b867-0b0c079f17f2"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR10}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="54b90916-2507-4a25-8c6b-229b0aa8d9ac">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="6f691508-e9c3-43d3-8720-b44ca651e210"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR11}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="344be2ad-a7e8-4695-b61d-b35daa628932">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="5568b9ce-696b-4619-b478-2d5614c8579e"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR12}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="e5bdb172-6efc-481d-86ba-5ba0afd270c6">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="bcf374eb-48fe-46af-8043-3ead2c54c275"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR13}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="c1574adb-ad34-446c-a057-789a8871f148">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="49129dfb-38b7-4091-bfa6-b463f30507a9"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR14}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="f8c87a2a-3086-41a3-881e-eff859e73392">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="08ca2d41-bacd-4166-8b32-82fa6b4bd392"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR15}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="4af19218-8bba-4434-8cca-aeda70bb8376">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="c8559916-fce6-45b6-a1e2-c91211cebd8e"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR16}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="00b8f4a3-5c7e-41be-9548-2bd9708588f9">
+						<jr:detailCell style="Totale Grassetto" height="20">
+							<box>
+								<pen lineWidth="0.5"/>
+							</box>
+							<textField pattern="#,##0.00#">
+								<reportElement style="Totale Grassetto" stretchType="RelativeToTallestObject" x="0" y="0" width="51" height="20" uuid="da4dee84-ef20-407b-aa43-60ad7b6aa1c2"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+									<font size="5"/>
+									<paragraph rightIndent="1"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAR17}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>

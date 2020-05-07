@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevQGRi1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="Entrate" fontSize="6">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{STILE_E},"T")]]></conditionExpression>
+			<style hTextAlign="Right" fontSize="7" isBold="true">
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{STILE_E},"FT")]]></conditionExpression>
+			<style fontSize="7" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="Uscite" fontSize="6">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{STILE_U},"T")]]></conditionExpression>
+			<style hTextAlign="Right" fontSize="7" isBold="true">
+				<paragraph rightIndent="2"/>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{STILE_U},"FT")]]></conditionExpression>
+			<style hTextAlign="Left" fontSize="7" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{STILE_U},"DT")]]></conditionExpression>
+			<style hTextAlign="Left" fontSize="7" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT DESC_RIGO_ENTRATA,
+E_CASSA,
+E_ANNO0,
+E_ANNO1,
+E_ANNO2,
+DESC_RIGO_USCITA,
+U_CASSA,
+U_ANNO0,
+U_ANNO1,
+U_ANNO2,
+ANNO,
+ANNO+1 ANNO1,
+ANNO+2 ANNO2,
+DECODE(SUBSTR(DESC_RIGO_ENTRATA,1,3),'TOT','T','Fon','FT','DIS','T','Tot','T','Uti','FT','') stile_e,
+DECODE(SUBSTR(DESC_RIGO_USCITA,1,5),'Titol','','Fondo','FT','di cu','','','','Disav','DT','T') stile_u
+FROM FIN_T_PREVISIONE_QGR
+WHERE UTENTE = $P{UTENTE} 
+and ANNO= $P{ANNO} 
+ORDER BY RIGA]]>
+	</queryString>
+	<field name="DESC_RIGO_ENTRATA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_RIGO_ENTRATA"/>
+	</field>
+	<field name="E_CASSA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="E_CASSA"/>
+	</field>
+	<field name="E_ANNO0" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="E_ANNO0"/>
+	</field>
+	<field name="E_ANNO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="E_ANNO1"/>
+	</field>
+	<field name="E_ANNO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="E_ANNO2"/>
+	</field>
+	<field name="DESC_RIGO_USCITA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_RIGO_USCITA"/>
+	</field>
+	<field name="U_CASSA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="U_CASSA"/>
+	</field>
+	<field name="U_ANNO0" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="U_ANNO0"/>
+	</field>
+	<field name="U_ANNO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="U_ANNO1"/>
+	</field>
+	<field name="U_ANNO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="U_ANNO2"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="ANNO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO1"/>
+	</field>
+	<field name="ANNO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO2"/>
+	</field>
+	<field name="STILE_E" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="STILE_E"/>
+	</field>
+	<field name="STILE_U" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="STILE_U"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="120" height="60" uuid="c1b1cbf0-3a06-40d6-96d5-b3cdb52cdd98"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ENTRATE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="408" y="0" width="120" height="60" uuid="7a03ea10-d23f-47c6-8cf5-91141d6b605d"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[USCITE]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="0" width="72" height="60" uuid="bdc3c413-b84f-4070-b17b-b78cac117a25"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CASSA ANNO DI RIFERIMENTO DEL BILANCIO "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="192" y="0" width="72" height="60" uuid="758f5062-ec42-4e48-b731-11edb06a2667"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO DI  RIFERIMENTO DEL BILANCIO "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="264" y="0" width="72" height="60" uuid="8c715b88-9407-4591-b287-fa41a7270a48"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="336" y="0" width="72" height="60" uuid="11a1b7fc-e8ab-41b9-aa48-51a8c059e8e8"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="528" y="0" width="72" height="60" uuid="666c7578-3365-4aa0-ad97-af9259c85ecb"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CASSA ANNO DI RIFERIMENTO DEL BILANCIO "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="600" y="0" width="72" height="60" uuid="e65722b5-5fba-46e5-8bc9-e8582ab27e48"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO DI RIFERIMENTO DEL BILANCIO "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="672" y="0" width="72" height="60" uuid="4a7d341d-c296-4ddc-bcea-b46a85179370"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="744" y="0" width="72" height="60" uuid="d2e3f3c5-0174-4ae8-ac35-49787be7d6a7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Entrate" stretchType="ElementGroupHeight" x="0" y="0" width="120" height="30" uuid="a332c04e-c8ca-443d-9458-2a6f2219a4ab">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f9d9e073-6b18-4aff-8ddb-10211c5e8e0a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS(LEFT($F{DESC_RIGO_ENTRATA},6) ,"Titolo")? "<style isBold='true'>"+(LEFT($F{DESC_RIGO_ENTRATA},8 ))+"</style>"+REPLACE($F{DESC_RIGO_ENTRATA},1,9," "):$F{DESC_RIGO_ENTRATA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Entrate" stretchType="ElementGroupHeight" x="120" y="0" width="72" height="30" uuid="2f10384b-cca8-492d-8291-93e2aa542a36">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8c49a16a-a8ad-4967-af55-c289c53e74f7"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{E_CASSA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Entrate" stretchType="ElementGroupHeight" x="192" y="0" width="72" height="30" uuid="f1b07e74-e472-401e-a7c4-ccabfd38d114">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b294ceb-a224-4a31-83dd-0c9c256e4f26"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{E_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Entrate" stretchType="ElementGroupHeight" x="264" y="0" width="72" height="30" uuid="d33aa588-b56c-4810-a4be-d9b9e8d49507">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b84113-7eae-4a35-8222-bafca6ff0993"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{E_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Entrate" stretchType="ElementGroupHeight" x="336" y="0" width="72" height="30" uuid="aac58797-d533-4853-804c-b5fe5dad39a4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="19bc0e3b-48f2-478e-9b8f-d09748f6a6bb"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{E_ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="Uscite" stretchType="ElementGroupHeight" x="408" y="0" width="120" height="30" uuid="43b3ac56-72c6-4367-bb7d-9c76c82b7b4b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="56fb8ce7-077c-45fc-b74e-10a2a9146b43"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="styled">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS(LEFT($F{DESC_RIGO_USCITA},6) ,"Titolo")? "<style isBold='true'>"+(LEFT($F{DESC_RIGO_USCITA},8 ))+"</style>"+REPLACE($F{DESC_RIGO_USCITA},1,9," "):$F{DESC_RIGO_USCITA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Uscite" stretchType="ElementGroupHeight" x="528" y="0" width="72" height="30" uuid="8d3d84e2-3791-44a0-9765-2bb442c733ac">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="aadcecd7-60ce-4d24-aa97-fe4ebb8923b5"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{U_CASSA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Uscite" stretchType="ElementGroupHeight" x="600" y="0" width="72" height="30" uuid="61afe206-2b46-470c-8ebd-21c2fd0b89c6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9564ebb8-375f-4e74-84be-9af8f267d1ef"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{U_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Uscite" stretchType="ElementGroupHeight" x="672" y="0" width="72" height="30" uuid="a77ff19e-5cb4-46de-aee7-6d90a0e9d955">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="056fdbf8-74bd-4888-a8f5-c7b099a6f941"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{U_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Uscite" stretchType="ElementGroupHeight" x="744" y="0" width="72" height="30" uuid="04d1298e-2c52-4032-9ece-73fca3de38f6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d3797e1a-1a07-45b8-9fae-e77a7acc1457"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="styled">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{U_ANNO2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

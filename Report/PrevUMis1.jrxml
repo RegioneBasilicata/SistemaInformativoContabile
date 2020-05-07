@@ -1,0 +1,1217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevUMis1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="true"/>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="STAMPA" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select 
+etitolo_umissione  missione
+,desc_titolo_missione missione_desc
+,etitolo_umissione||etipologia_uprogramma missione_programma
+,etipologia_uprogramma programma
+,desc_tipologia_programma programma_desc
+,'Titolo '||titolo_uscite  titolo
+,desc_titolo_uscite
+,sum(nvl(residuo,0))
+,sum(nvl(competenza_anno_prec,0))
+,sum(nvl(competenza_anno0,0))
+,sum(nvl(competenza_anno1,0))
+,sum(nvl(competenza_anno2,0))
+,sum(nvl(cassa_anno_prec,0))
+,sum(nvl(cassa_anno0,0))
+,sum(nvl(dicui_impegnato_anno0,0))
+,sum(nvl(dicui_impegnato_anno1,0))
+,sum(nvl(dicui_impegnato_anno2,0))
+,sum(nvl(dicui_fpv_anno_prec,0))
+,sum(nvl(dicui_fpv_anno0,0))
+,sum(nvl(dicui_fpv_anno1,0))
+,sum(nvl(dicui_fpv_anno2,0))
+,anno
+,anno+1
+,anno+2
+from 
+fin_t_previsione
+where anno= $P{ANNO} 
+and eu = 'U' 
+and utente = $P{UTENTE} 
+group by 
+etitolo_umissione  
+,desc_titolo_missione 
+,etitolo_umissione||etipologia_uprogramma 
+,etipologia_uprogramma 
+,desc_tipologia_programma 
+,'Titolo '||titolo_uscite 
+,desc_titolo_uscite
+,anno
+,anno+1
+,anno+2
+order by 1,3,4,6]]>
+	</queryString>
+	<field name="MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+	</field>
+	<field name="MISSIONE_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE_DESC"/>
+	</field>
+	<field name="MISSIONE_PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE_PROGRAMMA"/>
+	</field>
+	<field name="PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROGRAMMA"/>
+	</field>
+	<field name="PROGRAMMA_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROGRAMMA_DESC"/>
+	</field>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO_USCITE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO_USCITE"/>
+	</field>
+	<field name="SUM(NVL(RESIDUO,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(RESIDUO,0))"/>
+	</field>
+	<field name="SUM(NVL(COMPETENZA_ANNO_PREC,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(COMPETENZA_ANNO_PREC,0))"/>
+	</field>
+	<field name="SUM(NVL(COMPETENZA_ANNO0,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(COMPETENZA_ANNO0,0))"/>
+	</field>
+	<field name="SUM(NVL(COMPETENZA_ANNO1,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(COMPETENZA_ANNO1,0))"/>
+	</field>
+	<field name="SUM(NVL(COMPETENZA_ANNO2,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(COMPETENZA_ANNO2,0))"/>
+	</field>
+	<field name="SUM(NVL(CASSA_ANNO_PREC,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(CASSA_ANNO_PREC,0))"/>
+	</field>
+	<field name="SUM(NVL(CASSA_ANNO0,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(CASSA_ANNO0,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_IMPEGNATO_ANNO0,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_IMPEGNATO_ANNO0,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_IMPEGNATO_ANNO1,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_IMPEGNATO_ANNO1,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_IMPEGNATO_ANNO2,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_IMPEGNATO_ANNO2,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_FPV_ANNO_PREC,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_FPV_ANNO_PREC,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_FPV_ANNO0,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_FPV_ANNO0,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_FPV_ANNO1,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_FPV_ANNO1,0))"/>
+	</field>
+	<field name="SUM(NVL(DICUI_FPV_ANNO2,0))" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM(NVL(DICUI_FPV_ANNO2,0))"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="ANNO+1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+1"/>
+	</field>
+	<field name="ANNO+2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+2"/>
+	</field>
+	<variable name="MIS_RES" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(RESIDUO,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_ANNO_PREC" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_FPV_ANNO_PREC" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_CASSA_ANNO_PREC" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(CASSA_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_ANNO0" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_IMP_ANNO0" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_IMPEGNATO_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_FPV_ANNO0" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_CASSA_ANNO0" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(CASSA_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_ANNO1" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_ANNO2" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_IMP_ANNO1" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_IMPEGNATO_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_IMP_ANNO2" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_IMPEGNATO_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_FPV_ANNO1" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="MIS_FPV_ANNO2" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_RES" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(RESIDUO,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_ANNO_PREC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(COMPETENZA_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_FPV_ANNO_PREC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_FPV_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_CASSA_ANNO_PREC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(CASSA_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(COMPETENZA_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_IMP_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_IMPEGNATO_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_FPV_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_FPV_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_CASSA_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(CASSA_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_ANNO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(COMPETENZA_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_IMP_ANNO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_IMPEGNATO_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_FPV_ANNO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_FPV_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_ANNO2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(COMPETENZA_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_IMP_ANNO2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_IMPEGNATO_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="TMIS_FPV_ANNO2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[(EQUALS(RIGHT( $F{TITOLO},1),"0" ) )?null:$F{SUM(NVL(DICUI_FPV_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_RES" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(RESIDUO,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_ANNO_PREC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_FPV_PREC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_CASSA_PREC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(CASSA_ANNO_PREC,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_IMP_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_IMPEGNATO_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_FPV_ANNO0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_CASSA0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(CASSA_ANNO0,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_ANNO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_IMP_ANNO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_IMPEGNATO_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_FPV_ANNO1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO1,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_ANNO2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_IMP_ANNO2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_IMPEGNATO_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<variable name="TGEN_FPV_ANNO2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NVL(DICUI_FPV_ANNO2,0))}]]></variableExpression>
+	</variable>
+	<group name="Missione">
+		<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		<groupFooter>
+			<band height="60">
+				<printWhenExpression><![CDATA[EQUALS(LEN($F{MISSIONE}),2)]]></printWhenExpression>
+				<textField>
+					<reportElement mode="Transparent" x="0" y="0" width="121" height="60" backcolor="#A8A5A5" uuid="9e4f6a6e-f66d-4e81-9a6e-d239108f42f2"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTALE MISSIONE "+$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Transparent" x="121" y="0" width="108" height="60" backcolor="#A8A5A5" uuid="84d3558d-1191-4077-8db1-4b0ff542a41d"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MISSIONE_DESC}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="229" y="0" width="86" height="60" backcolor="#A8A5A5" uuid="8bf66faf-f628-4941-b84c-b90e31f4df26"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2" spacingBefore="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_RES}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Transparent" x="315" y="45" width="106" height="15" backcolor="#A8A5A5" uuid="122bbc84-735e-446b-8726-a8f0cd0db362"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="6.5" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Previsioni di Cassa]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="315" y="30" width="106" height="15" backcolor="#A8A5A5" uuid="ac8d2af0-9d8e-4c22-85c8-ae1b0eedaed7"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="6.5" isBold="true" isItalic="false"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="315" y="15" width="106" height="15" backcolor="#A8A5A5" uuid="27e1de85-1e34-40e9-b644-262550e3cf05"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="6.5" isBold="true" isItalic="false"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[di cui già impegnato]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="315" y="0" width="106" height="15" backcolor="#A8A5A5" uuid="23e8b2f3-af65-4d51-9871-eb8b9191b1cf"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="6.5" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Previsioni di Competenza]]></text>
+				</staticText>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="421" y="0" width="80" height="15" backcolor="#A8A5A5" uuid="403db949-694c-47ef-b749-c05ee6122f0e"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_ANNO_PREC}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="421" y="30" width="80" height="15" backcolor="#A8A5A5" uuid="836e279e-8f79-40fe-bb36-cd34ba7222ed"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_FPV_ANNO_PREC}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="421" y="45" width="80" height="15" backcolor="#A8A5A5" uuid="c2cd22df-f041-4712-bb1e-7ed3fe454fd9"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_CASSA_ANNO_PREC}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="501" y="0" width="102" height="15" backcolor="#A8A5A5" uuid="a4d3ba35-90b1-4072-b8e6-4bb5e26dc4b9"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_ANNO0}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="501" y="15" width="102" height="15" backcolor="#A8A5A5" uuid="21fcf551-7367-4284-8bcc-448b78253db5"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_IMP_ANNO0}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="501" y="30" width="102" height="15" backcolor="#A8A5A5" uuid="2abe47e4-6040-4835-a6ab-5c6df7738cae"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_FPV_ANNO0}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="501" y="45" width="102" height="15" backcolor="#A8A5A5" uuid="2fb30a80-ff65-49de-837d-f4870f01cb7f"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_CASSA_ANNO0}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="603" y="0" width="102" height="15" backcolor="#A8A5A5" uuid="8caac35c-d4d6-4549-bfda-70688b0b7438"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_ANNO1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="705" y="0" width="102" height="15" backcolor="#A8A5A5" uuid="52347b68-d5bc-4772-ae8f-d9cdd20e3f70"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_ANNO2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="603" y="15" width="102" height="15" backcolor="#A8A5A5" uuid="36a15bc5-99f7-4e14-93de-7da20aa4216a"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_IMP_ANNO1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="705" y="15" width="102" height="15" backcolor="#A8A5A5" uuid="20d8afa8-211a-4b3e-96b2-9907e377eca4"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_IMP_ANNO2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="603" y="30" width="102" height="15" backcolor="#A8A5A5" uuid="3bc2cfc6-4a4c-4b19-844b-cbc9cb7ac01d"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_FPV_ANNO1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement mode="Transparent" x="705" y="30" width="102" height="15" backcolor="#A8A5A5" uuid="3d6adde2-32a9-4a6b-af21-64bd3f543023"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{MIS_FPV_ANNO2}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Transparent" x="421" y="15" width="80" height="15" backcolor="#A8A5A5" uuid="508b6dce-7a63-4364-9c39-7b4b6de7f8a7"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+					</box>
+					<textElement>
+						<font size="7"/>
+					</textElement>
+				</textField>
+				<staticText>
+					<reportElement x="603" y="45" width="102" height="15" uuid="48733b0c-157d-49ae-8b86-87e45d5e7837"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="705" y="45" width="102" height="15" uuid="e53fb647-d1c9-44a4-99bd-b208a599b62c"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<text><![CDATA[]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="52">
+			<rectangle>
+				<reportElement x="0" y="0" width="807" height="52" uuid="010a0d42-bcc9-4818-8e2d-f17754142ab8"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="1" y="1" width="120" height="50" uuid="ee7a8d63-6422-405c-9c2b-05d5fdcaeec8"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Riepilogo delle Missioni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="121" y="1" width="108" height="50" uuid="5370a7ce-1c9a-4496-ade2-096ff4ebfdf0"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Denominazione]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="229" y="1" width="86" height="50" uuid="8bd7b99b-cceb-4b2f-bb82-4f6ad89be19d"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RESIDUI PRESUNTI AL TERMINE DELL'ESERCIZIO PRECEDENTE QUELLO CUI SI RIFERISCE IL BILANCIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="421" y="1" width="79" height="50" uuid="ddd7ad04-38ea-438e-badd-bf213ca74740"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="6.5" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PREVISIONI DEFINITIVE DELL'ANNO PRECEDENTE QUELLO CUI SI RIFERISCE IL BILANCIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="501" y="1" width="305" height="29" uuid="5416d0bf-d251-4eba-874b-7fcf892f5b58"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PREVISIONE DEL BILANCIO PLURIENNALE]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="501" y="31" width="101" height="20" uuid="b20d2478-a939-4eb9-9a9c-84e428285c92"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsioni Anno "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="603" y="31" width="101" height="20" uuid="35444261-f6b2-4dc4-a5ae-cb60f3c21878"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsioni Anno "+$F{ANNO+1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="705" y="31" width="101" height="20" uuid="754c537b-5deb-43b9-9d1c-e71713302e9e"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsioni Anno "+$F{ANNO+2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20">
+			<printWhenExpression><![CDATA[EQUALS(LEN($F{MISSIONE}),1)]]></printWhenExpression>
+			<staticText>
+				<reportElement x="0" y="0" width="121" height="20" uuid="e162d6b0-6e4d-4394-8667-43234f759dcb"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="121" y="0" width="300" height="20" uuid="3ffeb479-2581-4246-83d6-273559b7ee58">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7f7c37d7-bd4b-4e57-8e4b-16f180990c71"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PROGRAMMA_DESC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="0" width="80" height="20" uuid="c669360f-7758-4145-a9d8-74d231857b53">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="deb18272-737f-42fb-a319-e6ba4f4ad782"/>
+				</reportElement>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO_PREC,0))}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="0" width="102" height="20" uuid="69106bc9-0cd4-40fc-9661-0a3f743f7890">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e27393ce-6527-41ce-85bf-53820f34f2fb"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO0,0))}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="0" width="102" height="20" uuid="78538d53-c644-4522-aa5b-5dd2783ef4c1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="01e01256-02b6-4e92-aadd-c8a64e69467a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO1,0))}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="0" width="102" height="20" uuid="b3434fad-fbeb-436e-a450-1a2c91d622ce">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ca7a2595-ae45-42d2-8bc1-ef8d922c69b0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM(NVL(COMPETENZA_ANNO2,0))}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="120">
+			<staticText>
+				<reportElement x="0" y="0" width="229" height="60" uuid="444a94dc-1002-47cb-acb8-16304355e696"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true"/>
+					<paragraph leftIndent="25"/>
+				</textElement>
+				<text><![CDATA[TOTALE MISSIONI]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="229" y="0" width="86" height="60" uuid="e001f9dc-1535-44e5-a59d-032f766704c4"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2" spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_RES}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="315" y="45" width="106" height="15" uuid="d8b4963c-736b-4218-9d4d-4cbd430b80d1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Previsioni di Cassa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="30" width="106" height="15" uuid="d5785953-fa1a-4a73-9f1e-65c7c59545bf"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true" isItalic="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="15" width="106" height="15" uuid="d2478d07-c50f-4a5f-a38e-1855780227af"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true" isItalic="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[di cui già impegnato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="0" width="106" height="15" uuid="cecf2ea5-c8f4-4ea4-8ed2-508ada0bda1a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Previsioni di Competenza]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="0" width="80" height="15" uuid="5f78c017-4a62-4ae6-b83d-2af03ab64023"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $P{STAMPA},"S")?$V{TMIS_ANNO_PREC}:null]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="30" width="80" height="15" uuid="6339f5de-71bc-4f4c-8049-084dd01fa5fb"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $P{STAMPA},"S")?$V{TMIS_FPV_ANNO_PREC}:null]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="45" width="80" height="15" uuid="ce4643be-3257-4b78-912b-7cba03674e62"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $P{STAMPA},"S")?$V{TMIS_CASSA_ANNO_PREC}:null]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="0" width="102" height="15" uuid="623b5f03-4024-450e-b042-c73d18fd4d41"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="15" width="102" height="15" uuid="47f2d1de-c87c-41dd-a3fd-146b3264e3d8"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_IMP_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="30" width="102" height="15" uuid="7fe259fe-597a-437d-aec7-3e49e9787fda"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_FPV_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="45" width="102" height="15" uuid="dbaf4b5f-e55b-4169-9b0d-e4319a68b8a3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_CASSA_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="0" width="102" height="15" uuid="2c81d4ff-208c-4528-a728-446ea2459c72"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="15" width="102" height="15" uuid="5306154c-05b1-45ca-96d6-cda9000dc6db"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_IMP_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="30" width="102" height="15" uuid="edbf72d5-c128-4082-8cd0-24e1679fa4d9"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_FPV_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="0" width="102" height="15" uuid="cd8c5be5-30b9-416e-baf3-3da6d7eaf2c3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="15" width="102" height="15" uuid="b1e5f565-9cf6-4148-8f09-0a1f3c676fd1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_IMP_ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="30" width="102" height="15" uuid="12cae5ec-23de-41c0-9013-a675fdc18697"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TMIS_FPV_ANNO2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="60" width="229" height="60" uuid="678923c5-8569-4af3-a19b-7689393c40b7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true"/>
+					<paragraph leftIndent="25"/>
+				</textElement>
+				<text><![CDATA[TOTALE GENERALE DELLE SPESE]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="229" y="60" width="86" height="60" uuid="969cefc8-c7df-4c3b-ad4f-ed4f850a5426"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2" spacingBefore="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_RES}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="315" y="105" width="106" height="15" uuid="5a7b9cfd-c1da-4721-8de6-2e5fa569f0c7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Previsioni di Cassa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="90" width="106" height="15" uuid="6b588b3a-1aa6-4e51-958d-3da634fb6623"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true" isItalic="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[di cui fondo pluriennale vincolato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="75" width="106" height="15" uuid="b4be1c95-10d7-42b7-ba6f-37973775d3cd"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true" isItalic="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[di cui già impegnato]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="60" width="106" height="15" uuid="d1079b24-d440-42e8-9849-75847283abe0"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6.5" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Previsioni di Competenza]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="60" width="80" height="15" uuid="a5f375d7-3c02-4ad4-9c23-4eeae98006be"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $P{STAMPA},"S")?$V{TGEN_ANNO_PREC}:null]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="90" width="80" height="15" uuid="1252b826-17e5-47bd-b882-0ace849a57b3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $P{STAMPA},"S")?$V{TGEN_FPV_PREC}:null]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="421" y="105" width="80" height="15" uuid="4c3db4b1-87be-4e0a-8a9b-1d6fa250f3ce"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS( $P{STAMPA},"S")?$V{TGEN_CASSA_PREC}:null]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="60" width="102" height="15" uuid="0fd21cd6-db43-41e0-a410-924e4ac94e33"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="75" width="102" height="15" uuid="82662905-f0ab-4f83-bc09-91560f449998"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_IMP_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="90" width="102" height="15" uuid="7bb75d6e-34ab-461f-a198-53c51c6695f2"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_FPV_ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="501" y="105" width="102" height="15" uuid="95153a1d-29af-4693-861a-34acf9c8c18c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_CASSA0}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="60" width="102" height="15" uuid="08123ae9-cd0b-4169-bc56-b8713f11e8fe"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="75" width="102" height="15" uuid="b34dcab4-edd9-4338-8395-aeced83dfb99"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_IMP_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="603" y="90" width="102" height="15" uuid="c7e60fbe-674e-432a-b9e2-5a3f2d57d376"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_FPV_ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="60" width="102" height="15" uuid="ac335c7f-a121-43ef-8648-c08c0c6e76f9"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="75" width="102" height="15" uuid="a317bd73-2e74-4af1-8a06-3bba9993b9bd"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_IMP_ANNO2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="705" y="90" width="102" height="15" uuid="ee46df2b-6c50-44c9-9657-a3bcb99f6c4f"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TGEN_FPV_ANNO2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="603" y="45" width="102" height="15" uuid="d8c8019e-1fa7-4d72-86e6-4572839f4308"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="705" y="45" width="102" height="15" uuid="489b0f86-9802-4030-b20e-f4bfc1a0ab90"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="603" y="105" width="102" height="15" uuid="36093f76-fcac-4a4f-bb4d-cc8d0063696e"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="705" y="105" width="102" height="15" uuid="92f5fc21-6c8b-46c6-848b-465fbc26d67a"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

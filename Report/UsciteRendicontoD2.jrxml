@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="UsciteRendicontoD2" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{CAR88},"T")||EQUALS($F{CAR88},"E")||EQUALS($F{CAR88},"TG")||EQUALS($F{CAR88},"TA")]]></conditionExpression>
+			<style fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ID" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT 
+ num_ord_riga
+,car02
+,car03
+,car88
+,car89
+,car90
+
+,num08 car04_comp
+,num36 car04_fpv
+,num63 car04_cassa
+
+,num09 car05_comp
+,num37 car05_fpv
+,num64 car05_cassa
+
+,num10 car06_comp
+,num38 car06_fpv
+,num65 car06_cassa
+
+,num11 car07_comp
+,num39 car07_fpv
+,num66 car07_cassa
+
+
+FROM tmp_tabulati3
+WHERE car87= $P{ID}
+and num_ord_riga>0
+order by 1]]>
+	</queryString>
+	<field name="NUM_ORD_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_ORD_RIGA"/>
+	</field>
+	<field name="CAR02" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR02"/>
+	</field>
+	<field name="CAR03" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR03"/>
+	</field>
+	<field name="CAR88" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR88"/>
+	</field>
+	<field name="CAR89" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR89"/>
+	</field>
+	<field name="CAR90" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAR90"/>
+	</field>
+	<field name="CAR04_COMP" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR04_COMP"/>
+	</field>
+	<field name="CAR04_FPV" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR04_FPV"/>
+	</field>
+	<field name="CAR04_CASSA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR04_CASSA"/>
+	</field>
+	<field name="CAR05_COMP" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR05_COMP"/>
+	</field>
+	<field name="CAR05_FPV" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR05_FPV"/>
+	</field>
+	<field name="CAR05_CASSA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR05_CASSA"/>
+	</field>
+	<field name="CAR06_COMP" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR06_COMP"/>
+	</field>
+	<field name="CAR06_FPV" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR06_FPV"/>
+	</field>
+	<field name="CAR06_CASSA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR06_CASSA"/>
+	</field>
+	<field name="CAR07_COMP" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR07_COMP"/>
+	</field>
+	<field name="CAR07_FPV" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR07_FPV"/>
+	</field>
+	<field name="CAR07_CASSA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="CAR07_CASSA"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="32">
+			<subreport>
+				<reportElement x="0" y="0" width="802" height="32" uuid="50ce59dd-7f33-43a8-a5ae-5ff7b3c6e93b"/>
+				<subreportParameter name="ID">
+					<subreportParameterExpression><![CDATA[$P{ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["UsciteRendicontoT2.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="30" y="0" width="148" height="19" uuid="f67f3044-d0fc-4ca1-9e97-9d3ffbff0175"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR90}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="178" y="0" width="52" height="19" uuid="76f15dd9-e5e9-4b6f-b8e6-4c1ca48f61cf"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR04_COMP}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="230" y="0" width="52" height="19" uuid="23d56861-72b8-4538-8ba4-03de746c83a0"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR04_FPV}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="282" y="0" width="52" height="19" uuid="eb2bd61a-6e92-4be5-bcd4-5947012bd8ae"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR04_CASSA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="334" y="0" width="52" height="19" uuid="8f41ea10-82eb-44a6-9e0b-c688edea0938"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR05_COMP}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="386" y="0" width="52" height="19" uuid="918efb78-4580-48e1-b52e-4bb8e6ef6bf4"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR05_FPV}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="438" y="0" width="52" height="19" uuid="175f3fcb-3ef8-40ea-810c-2032cb186bda"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR05_CASSA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="490" y="0" width="52" height="19" uuid="3dfcaa33-6b89-4dc9-a247-c652a7fe10da"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR06_COMP}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="542" y="0" width="52" height="19" uuid="304c8762-7ba9-4271-9584-e9b9c42c6f5b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR06_FPV}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="594" y="0" width="52" height="19" uuid="e10dd8a3-16b0-468a-8d98-f51f9e7c5026"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR06_CASSA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="646" y="0" width="52" height="19" uuid="480f9853-cc53-413c-ac81-4684f37b4921"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR07_COMP}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="698" y="0" width="52" height="19" uuid="edee70d4-6b82-4289-8bb5-37f412e8da70"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR07_FPV}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="750" y="0" width="52" height="19" uuid="d75eefb7-c3a4-4bc9-bee1-87946584d69a"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR07_CASSA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="GrassettoTotali" stretchType="ContainerHeight" x="0" y="0" width="30" height="19" uuid="528cab4e-60ec-47d5-a726-2b79bad14a7c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR89}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendRA1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+anno
+,utente
+,tipo_vincolo
+,cap_u
+,des_cap
+,nvl(ris_accant_01_01,0)
+,nvl(utilizzo_accant,0)
+,nvl(accant_stanziati_eser,0)
+,nvl(variazioni_rendiconto,0)
+,nvl(ris_accant_31_12,0)
+,ordinamento
+from tb_risorse_accantonate
+where anno= $P{ANNO} 
+order by ordinamento, cap_u]]>
+	</queryString>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="UTENTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
+	</field>
+	<field name="TIPO_VINCOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_VINCOLO"/>
+	</field>
+	<field name="CAP_U" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAP_U"/>
+	</field>
+	<field name="DES_CAP" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DES_CAP"/>
+	</field>
+	<field name="NVL(RIS_ACCANT_01_01,0)" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NVL(RIS_ACCANT_01_01,0)"/>
+	</field>
+	<field name="NVL(UTILIZZO_ACCANT,0)" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NVL(UTILIZZO_ACCANT,0)"/>
+	</field>
+	<field name="NVL(ACCANT_STANZIATI_ESER,0)" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NVL(ACCANT_STANZIATI_ESER,0)"/>
+	</field>
+	<field name="NVL(VARIAZIONI_RENDICONTO,0)" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NVL(VARIAZIONI_RENDICONTO,0)"/>
+	</field>
+	<field name="NVL(RIS_ACCANT_31_12,0)" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NVL(RIS_ACCANT_31_12,0)"/>
+	</field>
+	<field name="ORDINAMENTO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ORDINAMENTO"/>
+	</field>
+	<variable name="TOTVIN_RIS_ACC0101" class="java.math.BigDecimal" resetType="Group" resetGroup="Vincolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{NVL(RIS_ACCANT_01_01,0)}]]></variableExpression>
+	</variable>
+	<variable name="TOTVIN_RIS_UTI" class="java.math.BigDecimal" resetType="Group" resetGroup="Vincolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{NVL(UTILIZZO_ACCANT,0)}]]></variableExpression>
+	</variable>
+	<variable name="TOTVIN_RIS_STAN" class="java.math.BigDecimal" resetType="Group" resetGroup="Vincolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{NVL(ACCANT_STANZIATI_ESER,0)}]]></variableExpression>
+	</variable>
+	<variable name="TOTVIN_RIS_VAR" class="java.math.BigDecimal" resetType="Group" resetGroup="Vincolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{NVL(VARIAZIONI_RENDICONTO,0)}]]></variableExpression>
+	</variable>
+	<variable name="TOTVIN_RIS_ACC3112" class="java.math.BigDecimal" resetType="Group" resetGroup="Vincolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{NVL(RIS_ACCANT_31_12,0)}]]></variableExpression>
+	</variable>
+	<group name="Vincolo">
+		<groupExpression><![CDATA[$F{TIPO_VINCOLO}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement x="0" y="0" width="800" height="20" uuid="4b6dc0b7-33d0-4faf-aef6-44d3accec24f"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{TIPO_VINCOLO}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement x="0" y="0" width="350" height="20" uuid="4c58a699-76df-43a2-a35e-e4f6ca742467"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Totale "+$F{TIPO_VINCOLO}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###">
+					<reportElement x="350" y="0" width="90" height="20" uuid="364b17a4-90c9-4c22-8b36-9fd928b25c12"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTVIN_RIS_ACC0101}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###">
+					<reportElement x="440" y="0" width="90" height="20" uuid="ba305e30-75df-4bad-830e-4b4819995d67"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTVIN_RIS_UTI}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###">
+					<reportElement x="530" y="0" width="90" height="20" uuid="4378cbaa-a47f-4832-a6a4-4bf2fa1bc5c2"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTVIN_RIS_STAN}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###">
+					<reportElement x="620" y="0" width="90" height="20" uuid="995a13c8-fde5-4f04-af0a-a5b63a78d6b6"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTVIN_RIS_VAR}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###">
+					<reportElement x="710" y="0" width="90" height="20" uuid="d19554ec-97a8-400a-b119-e55828789b82"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTVIN_RIS_ACC3112}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="90">
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="90" uuid="f11aafe7-c396-483a-af87-a41faf16c386"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Capitolo Spesa]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="710" y="0" width="90" height="90" uuid="3af595a9-d209-456b-8879-67c1663a20c3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Risorse accantonate nel risultato di amministrazioneal 31/12/" +$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="620" y="0" width="90" height="90" uuid="97c00ca3-622c-4552-8b99-277e773348a0"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Variazione accantonamenti effettuata in sede di rendiconto (con segno +/-) "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="530" y="0" width="90" height="90" uuid="9893b775-98d8-420e-8d9a-511d9ad7d754"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Risorse accantonate  stanziate nella spesa del bilancio dell'esercizio " + $F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="440" y="0" width="90" height="90" uuid="2a42e362-ffef-437f-9632-ba53e4aa27b2"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Risorse accantonate applicate al bilancio dell'esercizio " + $F{ANNO} + "  (con segno -)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="0" width="90" height="90" uuid="a05b31f7-b258-4dd4-8586-24eff88a9899"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Risorse accantonate  al 01/01/" + $F{ANNO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="0" width="300" height="90" uuid="0cbf4324-c0bb-45e6-b8be-105cadb3f261"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrizione]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20">
+			<textField>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="50" height="20" uuid="95996247-e230-4c56-ace1-e851e13e9e81">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0b52183c-ef8c-4346-88a9-0a4b058fc6da"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAP_U}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="50" y="0" width="300" height="20" uuid="3ddb58b4-2aa1-4e06-a980-2b57cbf274b7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3f223d53-4955-44d5-a030-b56cb3acfdbc"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DES_CAP}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="350" y="0" width="90" height="20" uuid="bd30889f-e20f-4552-998e-59a93c2e4f5d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a01cc36d-35f5-440c-ba7d-2a4ea93d88f2"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NVL(RIS_ACCANT_01_01,0)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="440" y="0" width="90" height="20" uuid="676dad5e-e6df-4b64-9d89-1a354f48281c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8ed39245-f855-49be-b6e2-face7f280ce6"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NVL(UTILIZZO_ACCANT,0)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="530" y="0" width="90" height="20" uuid="3d305855-24f6-4519-8a0a-44a320601767">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="90136bc5-b72b-4780-b660-d3eee0b2c8e1"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NVL(ACCANT_STANZIATI_ESER,0)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="620" y="0" width="90" height="20" uuid="7d8a7e41-ad3a-4cb3-a781-c7951215423d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1c14d5b3-0f50-4667-93c8-d0ab151c55fd"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NVL(VARIAZIONI_RENDICONTO,0)}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="710" y="0" width="90" height="20" uuid="8d35e98c-88a1-47a8-a00a-1706f30090b5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8709eaef-5088-4e1a-ae52-878b383416de"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NVL(RIS_ACCANT_31_12,0)}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

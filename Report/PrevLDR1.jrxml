@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevEFP1" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" isFloatColumnFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<style name="Style1">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS( $F{TIPO_RIGA},"SPESANN")||EQUALS( $F{TIPO_RIGA},"TOTDEBITO")||EQUALS( $F{TIPO_RIGA},"DEBITOPOT")]]></conditionExpression>
+			<style hTextAlign="Center" isBold="true">
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"TOTDEBREG" )]]></conditionExpression>
+			<style hTextAlign="Right" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+anno
+,anno+1
+,anno+2
+,num_riga
+,tipo_riga
+,segno
+,descrizione
+,stanziamenti_bilancio
+,stanziamenti_bilancio1
+,stanziamenti_bilancio2
+,tipo_bilancio
+from fin_T_previsione_ldr
+where anno= $P{ANNO} 
+and tipo_riga not in ('INTESTAZ1','INTESTAZ2')
+order by num_riga]]>
+	</queryString>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="ANNO+1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+1"/>
+	</field>
+	<field name="ANNO+2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+2"/>
+	</field>
+	<field name="NUM_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_RIGA"/>
+	</field>
+	<field name="TIPO_RIGA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_RIGA"/>
+	</field>
+	<field name="SEGNO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEGNO"/>
+	</field>
+	<field name="DESCRIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCRIZIONE"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO1"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO2"/>
+	</field>
+	<field name="TIPO_BILANCIO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_BILANCIO"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="72" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="305" height="72" uuid="d625167e-721b-451e-9baa-c144857afa7b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ENTRATE TRIBUTARIE NON VINCOLATE (esercizio finanziario),  art. 62, c. 6 del D.Lgs. 118/2011]]></text>
+			</staticText>
+			<textField>
+				<reportElement key="" x="305" y="0" width="80" height="72" uuid="36e75d62-364b-4a91-ba09-f0a84fa01ed7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO  "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="385" y="0" width="80" height="72" uuid="53ba41ef-1096-4e1c-9e0f-db9ceaa4f1bd"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO "+$F{ANNO+1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="465" y="0" width="80" height="72" uuid="1470bef9-d38c-441a-97de-7482239712ed"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO "+$F{ANNO+2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement style="Style1" x="0" y="0" width="281" height="20" uuid="997a7dea-c9df-488c-81b5-5a2a6de6d456">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bb503053-8521-4905-9cb4-87f4874bb3a1"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIZIONE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="281" y="0" width="24" height="20" uuid="f5c03372-ab14-4e1e-b3cc-36b204a3c0d6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="61d5c9e3-dc9d-408a-8f3b-a86a846fdc3a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEGNO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="305" y="0" width="80" height="20" uuid="6122f782-bbed-4fed-8038-98a9314b4159">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="41591695-9fec-4ccf-831a-7d7c9fba4ff0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="465" y="0" width="80" height="20" uuid="bcce23f2-6c27-4065-995b-a62ea9544a27">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9670fc5d-cc87-4a50-855d-05b2a79c4c9b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="385" y="0" width="80" height="20" uuid="a312cec3-3a5e-47e7-ad95-73208d961b4e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="77a58baa-efb3-4a5c-9561-14357d0c4f26"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

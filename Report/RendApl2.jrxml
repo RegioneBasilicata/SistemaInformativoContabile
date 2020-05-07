@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendApl2" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT DISTINCT a.riga
+               ,decode(a.codice,'','',substr(e.codice,1,1)) titolo
+               ,decode(a.codice,'','',e.descrizione) desc_titolo
+               ,a.codice codtipologia
+               ,a.descrizione desctipologia
+			   ,a.anno
+               ,a.prevcompe1
+               ,a.acc1
+               ,a.accn
+               ,a.prevcompe2
+               ,a.acc2
+FROM nb_livello1 e
+,fin_t_rendiconto_accplur a
+WHERE e.eu = 'E' AND
+e.anno=a.anno AND
+a.codice is null AND
+a.utente= $P{UTENTE}  AND
+a.anno=    $P{ANNO} 
+ORDER BY 1,2]]>
+	</queryString>
+	<field name="RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="RIGA"/>
+	</field>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+	</field>
+	<field name="CODTIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CODTIPOLOGIA"/>
+	</field>
+	<field name="DESCTIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCTIPOLOGIA"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="PREVCOMPE1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE1"/>
+	</field>
+	<field name="ACC1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACC1"/>
+	</field>
+	<field name="ACCN" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCN"/>
+	</field>
+	<field name="PREVCOMPE2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVCOMPE2"/>
+	</field>
+	<field name="ACC2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACC2"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="20" splitType="Prevent">
+			<textField>
+				<reportElement x="0" y="0" width="300" height="20" uuid="94a293ef-3992-488c-920f-21961d37ac7f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true" isItalic="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCTIPOLOGIA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="300" y="0" width="100" height="20" uuid="2600a62f-078a-4745-8550-c4d7d0d2ee01">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="db8d7492-8b3f-45ea-8316-ab104ae15d6e"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="400" y="0" width="100" height="20" uuid="80e353db-7e14-48d4-8b61-3d97ef991522">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4351b088-580e-4809-a8e0-b6dacfc98d34"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACC1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="500" y="0" width="100" height="20" uuid="6d5d2402-1447-43b4-9be8-ff23f86277a3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9a0a661f-931e-4a4a-b8f9-f836b06f491c"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREVCOMPE2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="600" y="0" width="100" height="20" uuid="992c976e-7f7b-45f7-b779-e84b2382a3fa">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2b935d86-8334-46bb-8cf6-82680178bb39"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACC2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="700" y="0" width="100" height="20" uuid="a333b9d2-2875-468d-8ebe-8b1d0f9645ad">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e0932a01-94e7-4933-9bba-24cd0e998cde"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCN}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

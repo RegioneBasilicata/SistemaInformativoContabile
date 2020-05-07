@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevEFP1" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" isFloatColumnFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<style name="Style1">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"A" )||EQUALS($F{TIPO_RIGA},"TITOLI" )||EQUALS($F{TIPO_RIGA},"G" )||EQUALS($F{TIPO_RIGA},"TITOLI" )||EQUALS($F{TIPO_RIGA},"H" )||EQUALS($F{TIPO_RIGA},"I" )||EQUALS($F{TIPO_RIGA},"L" )||EQUALS($F{TIPO_RIGA},"M" )]]></conditionExpression>
+			<style isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"N" )]]></conditionExpression>
+			<style hTextAlign="Right" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT  NUM_RIGA
+,ANNO
+,ANNO+1
+,ANNO+2
+,DESCRIZIONE
+,SEGNO
+,STANZIAMENTI_BILANCIO
+,STANZIAMENTI_BILANCIO1
+,STANZIAMENTI_BILANCIO2
+,TIPO_BILANCIO
+,TIPO_RIGA
+from fin_t_previsione_efp
+where anno= $P{ANNO} 
+and num_riga<135
+order by num_riga]]>
+	</queryString>
+	<field name="NUM_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_RIGA"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="ANNO+1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+1"/>
+	</field>
+	<field name="ANNO+2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+2"/>
+	</field>
+	<field name="DESCRIZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESCRIZIONE"/>
+	</field>
+	<field name="SEGNO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEGNO"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO1"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO2"/>
+	</field>
+	<field name="TIPO_BILANCIO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_BILANCIO"/>
+	</field>
+	<field name="TIPO_RIGA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_RIGA"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="72" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="305" height="72" uuid="d625167e-721b-451e-9baa-c144857afa7b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[EQUILIBRIO DI BILANCIO DI CUI ALL'ART. 9 DELLA LEGGE N. 243/2012]]></text>
+			</staticText>
+			<textField>
+				<reportElement key="" x="305" y="0" width="80" height="72" uuid="36e75d62-364b-4a91-ba09-f0a84fa01ed7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO DI RIFERIMENTO DEL BILANCIO "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="385" y="0" width="80" height="72" uuid="53ba41ef-1096-4e1c-9e0f-db9ceaa4f1bd"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO "+$F{ANNO+1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="465" y="0" width="80" height="72" uuid="1470bef9-d38c-441a-97de-7482239712ed"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPETENZA ANNO "+$F{ANNO+2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="281" y="0" width="24" height="20" uuid="f5d31b11-396d-40a7-b9b2-078a55999270"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SEGNO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Style1" x="305" y="0" width="80" height="20" uuid="20fa568a-f7b6-460b-a1fc-ad29975e34f5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="808b6535-cb63-4513-958d-729673be359a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Style1" x="385" y="0" width="80" height="20" uuid="d7008c82-73b1-4816-a2ff-79d11a78cdce">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="808b6535-cb63-4513-958d-729673be359a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Style1" x="465" y="0" width="80" height="20" uuid="90d0cfde-066f-476f-82ea-beff9c43ce6d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="808b6535-cb63-4513-958d-729673be359a"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Style1" x="0" y="0" width="281" height="20" uuid="960ae94f-b614-426d-9b06-cb8d349452fd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a514461a-b497-4d2d-9f72-fcd5de09c99e"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIZIONE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

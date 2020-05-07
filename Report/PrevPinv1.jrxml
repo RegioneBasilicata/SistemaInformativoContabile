@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevPinv1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="true"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="SOLO_ELENCO" class="java.lang.String"/>
+	<parameter name="SOLO_TOTALE" class="java.lang.String"/>
+	<parameter name="DETTAGLIO_CAPITOLI" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select 
+ a.eu eu_bil
+,a.codice capitolo_bil
+,a.descrizione desc_capitolo
+,l1.codice Missione
+,l2.codice Programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,(select 
+  nvl(sum(decode(substr(doc_type,7,3),'NEG',(document_amount * -1),document_amount)),0)
+   from fin_t_documenti 
+  where 
+  doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')
+/*  ('B_COM_POS'
+  ,'B_COM_NEG'
+  ,'A_COM_POS'
+  ,'A_COM_NEG'
+  ,'V_COM_POS'
+  ,'V_COM_NEG')*/
+  and segment8 = to_number( $P{ANNO} )
+  and segment2 =  a.eu||a.codice
+  and (segment9 = 'AV_REG' or (segment9='AV_RP' and segment11='NA'))) avanzo
+  ,(select 
+   nvl(sum(decode(substr(doc_type,7,3),'NEG',(document_amount * -1),document_amount)),0) 
+    from fin_t_documenti 
+   where 
+   doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')/*   ('B_COM_POS'
+   ,'B_PL1_POS'
+   ,'V_PL1_POS'
+   ,'A_PL1_POS'
+   ,'B_PL2_POS'
+   ,'V_PL2_POS'
+   ,'A_PL2_POS'
+   ,'B_COM_NEG'
+   ,'B_PL1_NEG'
+   ,'V_PL1_NEG'
+   ,'A_PL1_NEG'
+   ,'B_PL2_NEG'
+   ,'V_PL2_NEG'
+   ,'A_PL2_NEG'
+   )*/
+   and segment9 in ('MUTUI','MUTUIN')
+   and segment11 = a.eu||a.codice
+   and segment8 = $P{ANNO}) mutui
+ ,( select
+  nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0)
+  from fin_t_documenti d
+  where d.segment9 in ('REGIONE')
+  and d.segment2 = a.eu||a.codice
+  and d.segment8 =  $P{ANNO}
+  and d.doc_type in 
+  ('B_COM_POS'
+  ,'V_COM_POS'
+  ,'A_COM_POS'
+  ,'B_PL1_POS'
+  ,'V_PL1_POS'
+  ,'A_PL1_POS'
+  ,'B_PL2_POS'
+  ,'V_PL2_POS'
+  ,'A_PL2_POS'
+  ,'B_COM_NEG'
+  ,'V_COM_NEG'
+  ,'A_COM_NEG'
+  ,'B_PL1_NEG'
+  ,'V_PL1_NEG'
+  ,'A_PL1_NEG'
+  ,'B_PL2_NEG'
+  ,'V_PL2_NEG'
+  ,'A_PL2_NEG')) entrate
+from 
+fin_t_articoli a,
+nb_livello1 l1,
+nb_livello2 l2,
+fin_t_bilancio b
+where a.anno= $P{ANNO} 
+and a.abilitato = 'S'
+and a.eu = 'U' 
+and nvl(a.nb_titolo,'0') = '2'
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and l1.codice not in ('20','50','60','99')
+and b.anno = a.anno
+and b.eu = a.eu
+and b.articolo = a.codice
+order by 4,5,2]]>
+	</queryString>
+	<field name="EU_BIL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="EU_BIL"/>
+	</field>
+	<field name="CAPITOLO_BIL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAPITOLO_BIL"/>
+	</field>
+	<field name="DESC_CAPITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_CAPITOLO"/>
+	</field>
+	<field name="MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+	</field>
+	<field name="PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROGRAMMA"/>
+	</field>
+	<field name="DESC_MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_MISSIONE"/>
+	</field>
+	<field name="DESC_PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_PROGRAMMA"/>
+	</field>
+	<field name="AVANZO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="AVANZO"/>
+	</field>
+	<field name="MUTUI" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="MUTUI"/>
+	</field>
+	<field name="ENTRATE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ENTRATE"/>
+	</field>
+	<variable name="TOT_CAPITOLO" class="java.lang.Double">
+		<variableExpression><![CDATA[SUM($F{ENTRATE},$F{AVANZO},$F{MUTUI})]]></variableExpression>
+	</variable>
+	<variable name="PROG_ENTRATE" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{ENTRATE}]]></variableExpression>
+	</variable>
+	<variable name="PROG_AVANZO" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{AVANZO}]]></variableExpression>
+	</variable>
+	<variable name="PROG_MUTUI" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{MUTUI}]]></variableExpression>
+	</variable>
+	<variable name="TOT_PROG" class="java.lang.Double" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[SUM($F{ENTRATE},$F{AVANZO},$F{MUTUI})]]></variableExpression>
+	</variable>
+	<variable name="MIS_AVANZO" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{AVANZO}]]></variableExpression>
+	</variable>
+	<variable name="MIS_ENTRATE" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{ENTRATE}]]></variableExpression>
+	</variable>
+	<variable name="MIS_MUTUI" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{MUTUI}]]></variableExpression>
+	</variable>
+	<variable name="TOT_MIS" class="java.lang.Double" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[SUM($F{ENTRATE},$F{AVANZO},$F{MUTUI})]]></variableExpression>
+	</variable>
+	<variable name="TOT_GEN_AVANZO" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{AVANZO}]]></variableExpression>
+	</variable>
+	<variable name="TOT_GEN_ENTRATE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{ENTRATE}]]></variableExpression>
+	</variable>
+	<variable name="TOT_GEN_MUTUI" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MUTUI}]]></variableExpression>
+	</variable>
+	<variable name="TOTALE" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[SUM($F{AVANZO},$F{MUTUI},$F{ENTRATE})]]></variableExpression>
+	</variable>
+	<group name="Missione" isStartNewPage="true" isReprintHeaderOnEachPage="true" keepTogether="true">
+		<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<frame>
+					<reportElement x="0" y="0" width="800" height="20" uuid="33938157-4122-425a-9cf1-c9bc30780393"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textField>
+						<reportElement mode="Opaque" x="0" y="0" width="100" height="20" backcolor="#D9D7D7" uuid="3e8a728c-ae6f-4a01-a876-2b690133d8fb"/>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<leftPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement mode="Opaque" x="100" y="0" width="700" height="20" backcolor="#D9D7D7" uuid="6ba75498-5bb0-4ac0-bc72-91c6f295c556"/>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_MISSIONE}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+				<frame>
+					<reportElement x="0" y="0" width="800" height="20" uuid="eaea50e4-0c13-4045-89a3-a3a9f3c3e4c2"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textField>
+						<reportElement x="0" y="0" width="100" height="20" uuid="5898a244-06c1-4a3d-98d7-cbac69587e4d"/>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<leftPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+						</textElement>
+						<textFieldExpression><![CDATA["Totale "+$F{MISSIONE}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement x="100" y="0" width="300" height="20" uuid="efba27b9-ffb5-40cd-b286-14bcae114126"/>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_MISSIONE}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement x="400" y="0" width="100" height="20" uuid="2edc1a41-b2d4-468f-8428-207f5d1f26df">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{MIS_ENTRATE}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement x="500" y="0" width="100" height="20" uuid="268e56f7-07df-4716-a7aa-fc31ef8188ab">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{MIS_AVANZO}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement x="600" y="0" width="100" height="20" uuid="2912aa3b-d86f-432b-85bc-96ae1fdc97fa">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{MIS_MUTUI}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement x="700" y="0" width="100" height="20" uuid="cb86054b-a3e6-4523-b762-6360b6ee9a05">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")||(EQUALS($P{SOLO_TOTALE},"S")&&EQUALS($P{SOLO_TOTALE},"N"))]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TOT_MIS}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Programma" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{PROGRAMMA}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<frame>
+					<reportElement x="0" y="0" width="800" height="20" uuid="4e3c8404-01e7-479f-bdd7-0531c587e7ce"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textField>
+						<reportElement x="0" y="0" width="100" height="20" uuid="0a0bcfec-c222-4ee5-a876-8d1b48dc8c8a"/>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<leftPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font size="9" isBold="true" isItalic="true"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{PROGRAMMA}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement x="100" y="0" width="300" height="20" uuid="9d0a7e0b-6546-4368-a1c3-8dd302b43150"/>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement verticalAlignment="Middle">
+							<font size="9" isBold="true" isItalic="true"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_PROGRAMMA}]]></textFieldExpression>
+					</textField>
+					<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+						<reportElement x="400" y="0" width="100" height="20" uuid="a7fc8d4e-0fcb-4806-ade3-9576d81c6656">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true" isItalic="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{PROG_ENTRATE}]]></textFieldExpression>
+					</textField>
+					<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+						<reportElement x="500" y="0" width="100" height="20" uuid="039833fc-e5a7-4946-a248-8e4dc863a006">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true" isItalic="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{PROG_AVANZO}]]></textFieldExpression>
+					</textField>
+					<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+						<reportElement x="600" y="0" width="100" height="20" uuid="76520d5c-1e48-4639-ab35-9fd1c942c85c">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true" isItalic="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{PROG_MUTUI}]]></textFieldExpression>
+					</textField>
+					<textField evaluationTime="Group" evaluationGroup="Programma" pattern="#,##0.00#">
+						<reportElement x="700" y="0" width="100" height="20" uuid="e87441f2-5756-4c62-bf89-ff6600495500">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")||(EQUALS($P{SOLO_TOTALE},"S")&&EQUALS($P{SOLO_TOTALE},"N"))]]></printWhenExpression>
+						</reportElement>
+						<box>
+							<topPen lineWidth="0.5"/>
+							<bottomPen lineWidth="0.5"/>
+							<rightPen lineWidth="0.5"/>
+						</box>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="9" isBold="true" isItalic="true"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TOT_PROG}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="81">
+			<staticText>
+				<reportElement x="100" y="1" width="700" height="80" uuid="a2413464-9b6f-4efb-b138-424c8809b320"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font size="9" isBold="true"/>
+					<paragraph leftIndent="80"/>
+				</textElement>
+				<text><![CDATA[Denominazione]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="700" y="1" width="100" height="80" uuid="1d3adb83-9af9-486c-8e52-7ed694f05318">
+					<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")||(EQUALS($P{SOLO_TOTALE},"S")&&EQUALS($P{SOLO_TOTALE},"N"))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTALE]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="1" width="100" height="80" uuid="a73620bd-6716-4292-b575-979ef930a213"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[EQUALS($P{DETTAGLIO_CAPITOLI},"S")?"Missione Programma Capitoli":"Missione Programma"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="1" width="100" height="80" uuid="ae26a367-01d9-4090-9de4-ac139625d239">
+					<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Entrate Libere da Fondi Regionali "+$P{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="1" width="100" height="80" uuid="0fe4fc79-53b8-46bb-bdf0-79b98d2f08db">
+					<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Avanzo Regionale e da Residui Passivi "+$P{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="600" y="1" width="100" height="80" uuid="01919a2a-f24f-495f-a77f-99b87bf859b2">
+					<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Mutui "+$P{ANNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20">
+			<printWhenExpression><![CDATA[EQUALS($P{DETTAGLIO_CAPITOLI},"S")]]></printWhenExpression>
+			<frame>
+				<reportElement x="0" y="0" width="800" height="20" uuid="1b227c02-5b72-4223-9b42-16805fbd4a92"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textField>
+					<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="100" height="20" uuid="b12293fc-fa7b-4e4f-a9b6-6b66b5e05ccc">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdc81def-2397-40e3-aaed-67163f89f162"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{EU_BIL}+$F{CAPITOLO_BIL}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="100" y="0" width="300" height="20" uuid="ecc68603-813b-465b-8aa2-dc4f5cd59cbc">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0138720f-d7ea-4276-9455-97ec90ed653c"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_CAPITOLO}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="500" y="0" width="100" height="20" uuid="9463cda5-0045-4507-8cf3-2e09edfaf627">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="28a25eee-9fc9-4580-8bd0-4a2b04067df6"/>
+						<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{AVANZO}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="600" y="0" width="100" height="20" uuid="eddf0a4e-7851-4b04-9377-d60aba2891a2">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a29d14b-9285-4feb-aaaf-c9e0cf793299"/>
+						<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MUTUI}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="400" y="0" width="100" height="20" uuid="22cb9e7b-9b06-4a88-aab3-4f4e3a582f68">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7c35d3c9-e13d-467b-a8c3-668c0c670060"/>
+						<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")&&EQUALS($P{SOLO_TOTALE},"N")]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ENTRATE}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement stretchType="ElementGroupHeight" x="700" y="0" width="100" height="20" uuid="3ea2f349-f9a9-4a9c-9c1f-2692b1eb8492">
+						<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")||(EQUALS($P{SOLO_TOTALE},"S")&&EQUALS($P{SOLO_TOTALE},"N"))]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOT_CAPITOLO}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<summary>
+		<band height="26">
+			<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="1" width="400" height="25" forecolor="#FFFFFF" backcolor="#B3B1B1" uuid="e104be56-d668-4b02-bf71-375a1a2d466a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph leftIndent="40"/>
+				</textElement>
+				<text><![CDATA[TOTALE GENERALE]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement mode="Opaque" x="500" y="1" width="100" height="25" forecolor="#FFFFFF" backcolor="#B3B1B1" uuid="02d1869e-ef75-4dcb-8afe-886925e03627"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOT_GEN_AVANZO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement mode="Opaque" x="400" y="1" width="100" height="25" forecolor="#FFFFFF" backcolor="#B3B1B1" uuid="7688dc7b-554c-42e0-ab3b-06037ffeea15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOT_GEN_ENTRATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement mode="Opaque" x="600" y="1" width="100" height="25" forecolor="#FFFFFF" backcolor="#B3B1B1" uuid="2307aca2-5570-479c-828a-e36071ba4a81"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOT_GEN_MUTUI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement mode="Opaque" x="700" y="1" width="100" height="25" forecolor="#FFFFFF" backcolor="#B3B1B1" uuid="1684f9ab-8f30-41dc-947b-8ce4cf147648"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

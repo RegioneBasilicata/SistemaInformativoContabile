@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="AssestamentoEtipo" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Gat2"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="Dataset1" uuid="a70565df-4fc0-4d8b-aae3-e51643b93132">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Gat2"/>
+		<parameter name="Titolo" class="java.lang.String"/>
+		<parameter name="ID" class="java.math.BigDecimal"/>
+		<queryString language="SQL">
+			<![CDATA[select 
+p.ANNO
+,p.ETITOLO_UMISSIONE titolo
+,p.DESC_TITOLO_MISSIONE desc_titolo
+,p.ETIPOLOGIA_UPROGRAMMA tipologia
+,p.DESC_TIPOLOGIA_PROGRAMMA desc_tipoligia
+,sum(nvl(p.RESIDUO,0)) residuo
+,sum(nvl(p.COMPETENZA_ANNO0,0)) competenza0
+,sum(nvl(p.COMPETENZA_ANNO1,0)) competenza1
+,sum(nvl(p.COMPETENZA_ANNO2,0)) competenza2
+,sum(nvl(p.cassa_anno0,0)) cassa0
+,r.id
+from fin_T_previsione p
+,tmp_param_reports_2 r
+where r.id =  $P{ID} 
+and p.ETITOLO_UMISSIONE=  $P{Titolo}
+and p.anno=r.p01_anno
+and p.utente=r.user_name
+and p.eu='E'
+and p.ETITOLO_UMISSIONE<>'0' 
+group by 
+p.ANNO
+,p.ETITOLO_UMISSIONE 
+,p.DESC_TITOLO_MISSIONE 
+,p.ETIPOLOGIA_UPROGRAMMA
+,p.DESC_TIPOLOGIA_PROGRAMMA
+,r.id
+ order by p.ETITOLO_UMISSIONE ,p.ETIPOLOGIA_UPROGRAMMA]]>
+		</queryString>
+		<field name="ANNO" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+		</field>
+		<field name="TITOLO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+		</field>
+		<field name="DESC_TITOLO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+		</field>
+		<field name="TIPOLOGIA" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="TIPOLOGIA"/>
+		</field>
+		<field name="DESC_TIPOLIGIA" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESC_TIPOLIGIA"/>
+		</field>
+		<field name="RESIDUO" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="RESIDUO"/>
+		</field>
+		<field name="COMPETENZA0" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="COMPETENZA0"/>
+		</field>
+		<field name="COMPETENZA1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="COMPETENZA1"/>
+		</field>
+		<field name="COMPETENZA2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="COMPETENZA2"/>
+		</field>
+		<field name="CASSA0" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CASSA0"/>
+		</field>
+		<field name="ID" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ID"/>
+		</field>
+		<group name="Titolo">
+			<groupExpression><![CDATA[$F{DESC_TITOLO}]]></groupExpression>
+		</group>
+	</subDataset>
+	<parameter name="ID" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select distinct
+p.ETITOLO_UMISSIONE titolo
+,p.DESC_TITOLO_MISSIONE desc_titolo
+,p.ANNO anno0
+,p.anno+1 anno1
+,p.anno+2 anno2
+,r.id
+from fin_T_previsione p
+,tmp_param_reports_2 r
+where r.id = $P{ID} 
+and p.anno=r.p01_anno
+and p.utente=r.user_name
+and p.eu='E'
+and p.ETITOLO_UMISSIONE<>'0' 
+ order by p.ETITOLO_UMISSIONE]]>
+	</queryString>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+	</field>
+	<field name="ANNO0" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO0"/>
+	</field>
+	<field name="ANNO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO1"/>
+	</field>
+	<field name="ANNO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO2"/>
+	</field>
+	<field name="ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ID"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="400" height="60" uuid="f11aafe7-c396-483a-af87-a41faf16c386"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TITOLI E TIPOLOGIA DI ENTRATA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="0" width="100" height="60" uuid="6a29dbe7-b57f-487e-918c-7a3ef24fbdad"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Previsioni di
+competenza del bilancio
+pluriennale]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="500" y="40" width="100" height="20" uuid="6d0aa9b6-5f83-46d0-a06d-9b25c2bef268"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO0}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="600" y="40" width="100" height="20" uuid="ca827368-59a2-4580-addd-79a7efa0e276"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="700" y="40" width="100" height="20" uuid="25744546-5d91-4ebe-b67b-e602358e55b2"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ANNO2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="500" y="0" width="300" height="40" uuid="c22b1ebd-1980-4c28-abc4-5a673402c3a1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Previsioni di
+competenza del bilancio
+pluriennale]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="85" splitType="Prevent">
+			<textField>
+				<reportElement x="50" y="0" width="750" height="25" uuid="94a293ef-3992-488c-920f-21961d37ac7f"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TITOLO "+$F{TITOLO}+" "+$F{DESC_TITOLO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="50" height="25" uuid="13d701f5-adac-4e6f-9bb1-bfcd736516a8"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="0" y="25" width="800" height="30" uuid="c273d368-1459-42dd-95cb-223710c4b119">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset1" uuid="afae0bb5-02f1-487e-8477-530fbd200639">
+						<datasetParameter name="ID">
+							<datasetParameterExpression><![CDATA[$F{ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="Titolo">
+							<datasetParameterExpression><![CDATA[$F{TITOLO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="50" uuid="7de60490-6b3f-4854-a9a9-88c594b7b17e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna1"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="50" height="30" uuid="066fcb74-34e7-45a1-a280-54b716e6c8af"/>
+								<textFieldExpression><![CDATA[$F{TIPOLOGIA}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="300" uuid="51170611-da0d-4664-93b4-b3d4a4f172af">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna2"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="300" height="30" uuid="761c5ccf-c7f1-4ba6-8031-1670f477c953"/>
+								<textFieldExpression><![CDATA[$F{DESC_TIPOLIGIA}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="66172c97-55b1-464b-926e-3791e1249b0b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna3"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="30" uuid="64a0ae1b-3334-4761-8776-ad27367d5a9d"/>
+								<text><![CDATA[previsioni di competenza]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="23f8f680-9f1d-43c6-8489-474b7026f4b2">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna4"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#">
+								<reportElement x="0" y="0" width="100" height="30" uuid="6c3f9ff8-791e-4c49-a9ec-7fe3f2ba8be8"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{RESIDUO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="dbb3b06e-c688-46e8-b566-c97647f48208">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna5"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#">
+								<reportElement x="0" y="0" width="100" height="30" uuid="d8b2c49e-4ed1-40a0-820f-f872d189166a"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{COMPETENZA0}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="92c4394a-97f0-4e82-b5b5-313a08ed137b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna6"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#">
+								<reportElement x="0" y="0" width="100" height="30" uuid="6f6d20a5-30b6-4bd2-bbe2-76c7f34c2893"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{COMPETENZA1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="64ceb792-0d53-40b3-ac6a-c2cf8111b576">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna7"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#">
+								<reportElement x="0" y="0" width="100" height="30" uuid="63f69a08-5fad-4b0b-b583-fff2971635b0"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{COMPETENZA2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+			<componentElement>
+				<reportElement x="0" y="55" width="800" height="30" uuid="bbb5c763-c813-43eb-9312-d0581356edb8">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 1_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 1_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table 1_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset1" uuid="5f7699c7-d27e-45f5-9424-0061b24e666a">
+						<datasetParameter name="ID">
+							<datasetParameterExpression><![CDATA[$F{ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="Titolo">
+							<datasetParameterExpression><![CDATA[$F{TITOLO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="50" uuid="830c74b0-46db-4b07-9968-c66c6f0d14ce">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna1"/>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="50" height="30" uuid="e555cd55-e600-47be-bc5c-67302d750cc7"/>
+								<textFieldExpression><![CDATA[$F{TIPOLOGIA}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="300" uuid="ddc85f38-3033-46cd-a4c2-01cdba6772a9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna2"/>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="300" height="30" uuid="71c93851-c253-4c05-b18b-5225b1f91503"/>
+								<textFieldExpression><![CDATA[$F{DESC_TIPOLIGIA}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="0431777e-7f03-44d5-b2d7-bf10be5bbc72">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna3"/>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="30" uuid="d92bdcab-77bd-47b3-bdf4-12c7045b0496"/>
+								<text><![CDATA[previsioni di cassa]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="a8be850a-b720-4f70-a355-6afe715a2450">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna4"/>
+						<jr:detailCell style="Table 1_TD" height="30"/>
+					</jr:column>
+					<jr:column width="100" uuid="f20e57ac-946c-42fa-a1ea-ad50dc560688">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna5"/>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField pattern="#,##0.00#">
+								<reportElement x="0" y="0" width="100" height="30" uuid="a8ad1f54-d1df-4975-8887-1e90ecd0639a"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{CASSA0}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="f4c9666c-c7de-4d86-a92d-2961f8f2b218">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna6"/>
+						<jr:detailCell style="Table 1_TD" height="30"/>
+					</jr:column>
+					<jr:column width="100" uuid="2e4e2458-f7ef-4a26-83f3-911f73990fe1">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna7"/>
+						<jr:detailCell style="Table 1_TD" height="30"/>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>

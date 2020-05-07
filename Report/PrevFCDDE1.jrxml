@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevFCDDE1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="di cui">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"B1-DICUIACCPERCASSA")||EQUALS($F{TIPO_RIGA},"B1-TRASFUE")||EQUALS($F{TIPO_RIGA},"B1-CONTRINVAMMPUB")||EQUALS($F{TIPO_RIGA},"B1-CONTRINVUE")||EQUALS($F{TIPO_RIGA},"B1-ALTRITRACCMMPUB")||EQUALS($F{TIPO_RIGA},"B1-ALTRITRCCUE")]]></conditionExpression>
+			<style hTextAlign="Right" isBold="false"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(RIGHT($F{DENOMINAZIONE},1),"1" )||EQUALS(RIGHT($F{DENOMINAZIONE},1),"2" )||EQUALS(RIGHT($F{DENOMINAZIONE},1),"3" )||EQUALS(RIGHT($F{DENOMINAZIONE},1),"4" )||EQUALS(RIGHT($F{DENOMINAZIONE},1),"5" )||EQUALS($F{TIPO_RIGA},"A-TITOLO")]]></conditionExpression>
+			<style hTextAlign="Left" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"Q-TOTGEN" )||EQUALS($F{TIPO_RIGA},"R-DICUIPARTECORR" )||EQUALS($F{TIPO_RIGA},"S-DICUICONTOCAP" )]]></conditionExpression>
+			<style hTextAlign="Right" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(LEN($F{TIPOLOGIA} ),7 )]]></conditionExpression>
+			<style hTextAlign="Left" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"B1-DICUINONACCPERCASSA")||EQUALS($F{TIPO_RIGA},"B1-CONTRINVNETTO")||EQUALS($F{TIPO_RIGA},"B1-ALTRITRNETTO")||EQUALS($F{TIPO_RIGA},"B1-TRASFRESTOM")]]></conditionExpression>
+			<style isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"B1-DICUINONACCPERCASSA")||EQUALS($F{TIPO_RIGA},"B1-TRASFRESTOM")||EQUALS($F{TIPO_RIGA},"B1-CONTRINVNETTO")||EQUALS($F{TIPO_RIGA},"B1-ALTRITRNETTO")]]></conditionExpression>
+			<style hTextAlign="Right" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="Numeri">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS(LEFT($F{TIPO_RIGA},2 ),"B-")||EQUALS(LEFT($F{TIPO_RIGA},2 ),"A-")||EQUALS(LEFT($F{TIPO_RIGA},2 ),"P-")||EQUALS(LEFT($F{TIPO_RIGA},2 ),"Q-")||EQUALS(LEFT($F{TIPO_RIGA},2 ),"R-")||EQUALS(LEFT($F{TIPO_RIGA},2 ),"S-")]]></conditionExpression>
+			<style isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{TIPO_RIGA},"B1-DICUINONACCPERCASSA")||EQUALS($F{TIPO_RIGA},"B1-TRASFRESTOM")||EQUALS($F{TIPO_RIGA},"B1-CONTRINVNETTO")||EQUALS($F{TIPO_RIGA},"B1-ALTRITRNETTO")]]></conditionExpression>
+			<style isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select
+anno
+,anno+1
+,anno+2 
+,num_riga
+,tipo_riga
+,tipologia
+,denominazione
+,stanziamenti_bilancio 
+,accantonamento_obbligatorio
+,accantonamento_effettivo
+,perc_stanziam_accantonam
+,stanziamenti_bilancio1
+,accantonamento_obbligatorio1
+,accantonamento_effettivo1
+,perc_stanziam_accantonam1
+,stanziamenti_bilancio2
+,accantonamento_obbligatorio2
+,accantonamento_effettivo2
+,perc_stanziam_accantonam2
+from fin_t_previsione_fcdde
+where anno = $P{ANNO} 
+order by num_riga]]>
+	</queryString>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<field name="ANNO+1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+1"/>
+	</field>
+	<field name="ANNO+2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO+2"/>
+	</field>
+	<field name="NUM_RIGA" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="NUM_RIGA"/>
+	</field>
+	<field name="TIPO_RIGA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPO_RIGA"/>
+	</field>
+	<field name="TIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPOLOGIA"/>
+	</field>
+	<field name="DENOMINAZIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DENOMINAZIONE"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO"/>
+	</field>
+	<field name="ACCANTONAMENTO_OBBLIGATORIO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCANTONAMENTO_OBBLIGATORIO"/>
+	</field>
+	<field name="ACCANTONAMENTO_EFFETTIVO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCANTONAMENTO_EFFETTIVO"/>
+	</field>
+	<field name="PERC_STANZIAM_ACCANTONAM" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PERC_STANZIAM_ACCANTONAM"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO1"/>
+	</field>
+	<field name="ACCANTONAMENTO_OBBLIGATORIO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCANTONAMENTO_OBBLIGATORIO1"/>
+	</field>
+	<field name="ACCANTONAMENTO_EFFETTIVO1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCANTONAMENTO_EFFETTIVO1"/>
+	</field>
+	<field name="PERC_STANZIAM_ACCANTONAM1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PERC_STANZIAM_ACCANTONAM1"/>
+	</field>
+	<field name="STANZIAMENTI_BILANCIO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="STANZIAMENTI_BILANCIO2"/>
+	</field>
+	<field name="ACCANTONAMENTO_OBBLIGATORIO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCANTONAMENTO_OBBLIGATORIO2"/>
+	</field>
+	<field name="ACCANTONAMENTO_EFFETTIVO2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ACCANTONAMENTO_EFFETTIVO2"/>
+	</field>
+	<field name="PERC_STANZIAM_ACCANTONAM2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PERC_STANZIAM_ACCANTONAM2"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="92" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="20" width="50" height="72" uuid="c1b1cbf0-3a06-40d6-96d5-b3cdb52cdd98"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPOLOGIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="20" width="390" height="72" uuid="d625167e-721b-451e-9baa-c144857afa7b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DENOMINAZIONE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="440" y="20" width="90" height="72" uuid="472c7884-36cf-44de-88bc-4eef6be11f4c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[STANZIAMENTI DI BILANCIO 
+(a)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="530" y="20" width="90" height="72" uuid="c0116f05-1a99-4208-8afb-64823bf71313"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ACCANTONAMENTO OBBLIGATORIO AL FONDO (*)
+(b)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="620" y="20" width="90" height="72" uuid="085dcb4a-9be6-4772-994a-935ed74d21c0"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ACCANTONAMENTO EFFETTIVO DI BILANCIO (**)
+(c) ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="710" y="20" width="90" height="72" uuid="af03fb90-53f9-430e-a3c0-bc62eab596aa"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[% di stanziamento accantonato al fondo nel rispetto del principio contabile applicato 3.3
+(d)=(c/a)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="0" width="800" height="20" uuid="9f793eb0-ce5f-4fa7-9bdf-d6de0ef71514"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Esercizio finanziario "+$F{ANNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="50" height="20" uuid="bf7bba08-247f-47a8-bdca-e2a7f5d616f8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0f35ce91-5c89-4f62-bff9-261a8b40ef1b"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIPOLOGIA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="di cui" x="50" y="0" width="390" height="20" uuid="fcd1dfca-4540-4768-a844-f96139c083b0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="47e0bb1a-c414-45fe-b889-c68fa670964f"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2" rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DENOMINAZIONE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Numeri" x="440" y="0" width="90" height="20" uuid="fdfd25bc-a481-4409-9d1a-a5f856a098d8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d16194c-aa60-4c6b-b3c8-1132e671fd9d"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STANZIAMENTI_BILANCIO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Numeri" x="530" y="0" width="90" height="20" uuid="03fa1ee0-6f89-4f3a-b5b9-80b4784ecf28">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d16194c-aa60-4c6b-b3c8-1132e671fd9d"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCANTONAMENTO_OBBLIGATORIO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Numeri" x="620" y="0" width="90" height="20" uuid="02b13d10-7772-4268-96df-7e1450d1e6c1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d16194c-aa60-4c6b-b3c8-1132e671fd9d"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCANTONAMENTO_EFFETTIVO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement style="Numeri" x="710" y="0" width="90" height="20" uuid="3cafbf20-e965-4460-810d-421f592ae27d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d16194c-aa60-4c6b-b3c8-1132e671fd9d"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PERC_STANZIAM_ACCANTONAM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

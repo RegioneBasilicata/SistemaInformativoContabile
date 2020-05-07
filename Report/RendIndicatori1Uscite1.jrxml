@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RendIndicatori1Uscite1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="05410849-5f25-4ccf-8f72-4ab6c58fa267">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SIC_CONSIGLIO"/>
+	<style name="GrassettoTotali" mode="Transparent" fontSize="10" isBold="false">
+		<box>
+			<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[EQUALS($F{CODICE_INDICATORE2},null)]]></conditionExpression>
+			<style mode="Transparent" backcolor="#FCF7F7" fontSize="10" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="Dataset1" uuid="a70565df-4fc0-4d8b-aae3-e51643b93132">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SIC_CONSIGLIO"/>
+		<parameter name="ANNO" class="java.math.BigDecimal"/>
+		<parameter name="MISSIONE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[select
+ord
+,desc_cod1 Missione
+,codice_indicatore2
+,desc_cod2 
+,INC_MIS_PROG1
+,INC_FPV1
+,CAP_PAG1
+,INC_MIS_PROG2
+,INC_FPV2
+,INC_MIS_PROG3
+,INC_FPV3
+,INC_MIS_PROG_MEDIA
+,INC_FPV_MEDIA
+,CAP_PAG_MEDIA
+,anno+1
+,anno+2
+from fin_t_indicatori_bilancio
+where anno = $P{ANNO} 
+and utente='PREV'||anno
+and tipo_bilancio = 'P'
+and desc_cod1 =  $P{MISSIONE} 
+order by ord]]>
+		</queryString>
+		<field name="MISSIONE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+		</field>
+		<field name="CODICE_INDICATORE2" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CODICE_INDICATORE2"/>
+		</field>
+		<field name="DESC_COD2" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESC_COD2"/>
+		</field>
+		<field name="INC_MIS_PROG1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG1"/>
+		</field>
+		<field name="INC_FPV1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV1"/>
+		</field>
+		<field name="CAP_PAG1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAP_PAG1"/>
+		</field>
+		<field name="INC_MIS_PROG2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG2"/>
+		</field>
+		<field name="INC_FPV2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV2"/>
+		</field>
+		<field name="INC_MIS_PROG3" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG3"/>
+		</field>
+		<field name="INC_FPV3" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV3"/>
+		</field>
+		<field name="INC_MIS_PROG_MEDIA" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG_MEDIA"/>
+		</field>
+		<field name="INC_FPV_MEDIA" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV_MEDIA"/>
+		</field>
+		<field name="CAP_PAG_MEDIA" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAP_PAG_MEDIA"/>
+		</field>
+		<group name="MISSIONE">
+			<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		</group>
+	</subDataset>
+	<subDataset name="Dataset2" uuid="dd95d680-8bb5-423b-8c6c-be07262fd971">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SIC_CONSIGLIO"/>
+		<parameter name="ANNO" class="java.math.BigDecimal"/>
+		<parameter name="MISSIONE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[select
+ord
+,desc_cod1 Missione
+,codice_indicatore2
+,desc_cod2 
+,INC_MIS_PROG1
+,INC_FPV1
+,CAP_PAG1
+,INC_MIS_PROG2
+,INC_FPV2
+,INC_MIS_PROG3
+,INC_FPV3
+from fin_t_indicatori_bilancio
+where anno =$P{ANNO} 
+and utente='CONS'||anno
+and tipo_bilancio = 'R'
+and desc_cod1 =$P{MISSIONE} 
+and tipo_indicatore = 'U1' 
+order by ord]]>
+		</queryString>
+		<field name="ORD" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ORD"/>
+		</field>
+		<field name="MISSIONE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+		</field>
+		<field name="CODICE_INDICATORE2" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CODICE_INDICATORE2"/>
+		</field>
+		<field name="DESC_COD2" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DESC_COD2"/>
+		</field>
+		<field name="INC_MIS_PROG1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG1"/>
+		</field>
+		<field name="INC_FPV1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV1"/>
+		</field>
+		<field name="CAP_PAG1" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CAP_PAG1"/>
+		</field>
+		<field name="INC_MIS_PROG2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG2"/>
+		</field>
+		<field name="INC_FPV2" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV2"/>
+		</field>
+		<field name="INC_MIS_PROG3" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_MIS_PROG3"/>
+		</field>
+		<field name="INC_FPV3" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="INC_FPV3"/>
+		</field>
+		<group name="MISSIONE">
+			<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		</group>
+	</subDataset>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<queryString language="SQL">
+		<![CDATA[select distinct
+codice_indicatore1
+,desc_cod1 Missione
+,anno
+from fin_t_indicatori_bilancio
+where anno =  $P{ANNO} 
+and utente='CONS'||anno
+and tipo_bilancio = 'R'
+and tipo_indicatore = 'U1'
+order by 1]]>
+	</queryString>
+	<field name="CODICE_INDICATORE1" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CODICE_INDICATORE1"/>
+	</field>
+	<field name="MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+	</field>
+	<field name="ANNO" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="101" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="0" width="240" height="101" uuid="12c4ac52-f975-4a4c-8d7b-4c2c6e7e6360"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[MISSIONI PROGRAMMI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="250" y="50" width="79" height="51" uuid="e7d615f5-813b-460c-9452-9d3f0d7e5c65"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Incidenza Missioni/Programmi: Previsioni stanziamento/ totale previsioni missioni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="329" y="50" width="79" height="51" uuid="2016428c-7416-4541-a85b-f7708b898bd5"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[di cui Incidenza FPV: Previsioni  stanziamento  FPV/ Previsione FPV totale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="250" y="0" width="550" height="30" uuid="ccf5a09e-b300-41ac-bfbe-f869de2732b4"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPOSIZIONE DELLE SPESE PER MISSIONI E PROGRAMMI (dati percentuali)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="250" y="30" width="158" height="20" uuid="54a1bfa9-cfcb-4eef-b237-a5326cb06404"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Previsioni iniziali]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="408" y="50" width="79" height="51" uuid="9253c7d2-3894-4574-8990-115254d1d2d9"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Incidenza Missioni/Programmi: Previsioni stanziamento/ totale previsioni missioni]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="487" y="50" width="79" height="51" uuid="6aacf94f-b730-46ce-b4ba-617b2fa903b3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[di cui Incidenza FPV: Previsioni  stanziamento  FPV/ Previsione FPV totale]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="408" y="30" width="158" height="20" uuid="06675ef1-1e63-4785-aa43-beedb6947aa7"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Previsioni definitive]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="566" y="50" width="78" height="51" uuid="78407e69-b645-45d6-a220-8862467bbd78"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Incidenza Missione programma: (Impegni + FPV)/(Totale impegni + Totale FPV)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="644" y="50" width="78" height="51" uuid="2469c8b0-2826-4018-b0ae-9b94bc3607d6"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[di cui incidenza FPV: FPV / Totale FPV]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="566" y="30" width="234" height="20" uuid="1317fe33-3805-4846-8bc8-3e6f9aa80ca1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dati di rendiconto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="722" y="50" width="78" height="51" uuid="ec96baea-df96-46d4-8917-dd90383ffec4"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[di cui incidenza economie di spesa: Economie di competenza/ Totale Economie di competenza]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Prevent">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="10" y="0" width="100" height="30" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" uuid="2438f2d3-f9c4-4fc8-a3fe-e11b99499f73">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3c59d1cc-e394-4398-abda-d83d8d22bb91"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font size="10" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="110" y="0" width="690" height="30" uuid="4599b6ed-d98a-4407-bc44-f9176931bf65">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="Dataset2" uuid="570683cc-1661-4b4f-bc00-8872901bec09">
+						<datasetParameter name="ANNO">
+							<datasetParameterExpression><![CDATA[$F{ANNO}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="MISSIONE">
+							<datasetParameterExpression><![CDATA[$F{MISSIONE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="20" uuid="77663863-f672-43cf-a61e-f24e9dff170e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna1"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="20" height="30" uuid="b550fd6f-59d8-491d-bd61-1fd50f0b2190"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="7" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CODICE_INDICATORE2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="120" uuid="79893ba6-537a-48a2-8e30-9382272fec9e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna2"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="120" height="30" uuid="2a19dbe1-1870-45b7-a18c-4d870157b534"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="7" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DESC_COD2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="79" uuid="830665e2-30e0-4c4e-bd7b-5938f599162b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna3"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="79" height="30" uuid="e922a308-e02e-4cc4-ab01-37880729180c"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{INC_MIS_PROG1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="79" uuid="76350f58-0b12-4dc6-8ce0-509ebe1f418f">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna4"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="79" height="30" uuid="04d85dc7-6939-4b44-8aa2-54be06f719f0"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{INC_FPV1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="79" uuid="78d71b32-718c-4f5b-9e83-56722992247b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna5"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="79" height="30" uuid="758fa2ba-7251-419a-8d4f-cb491be2a732"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CAP_PAG1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="79" uuid="2f8d76ba-a15f-4d63-9ee3-97cbf8048c15">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna6"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="79" height="30" uuid="034d9e61-0bb0-4b00-b8ca-cceb1b707745"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{INC_MIS_PROG2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="78" uuid="5ee74802-e58e-4840-9e35-e003abdd5be8">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna7"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="78" height="30" uuid="97372e16-f8a8-4ea9-b3bb-a3cfc12aa3a6"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{INC_FPV2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="78" uuid="056ad9f6-5ba6-44f7-bd79-ce3747ed0f6c">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna8"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="78" height="30" uuid="9852436b-6d7b-4050-8222-25c8676ea6b4"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{INC_MIS_PROG3}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="78" uuid="02fe4927-12a3-438f-a208-ed0b3977e0af">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Colonna9"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField pattern="#,##0.00#;(#,##0.00#-)">
+								<reportElement style="GrassettoTotali" x="0" y="0" width="78" height="30" uuid="0e2afd38-f728-4445-933f-5c291497c0c8"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{INC_FPV3}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>

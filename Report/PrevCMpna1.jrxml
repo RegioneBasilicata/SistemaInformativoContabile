@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PrevCMpna1" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" isFloatColumnFooter="true" uuid="c72ac0ec-3744-4e9c-865d-2c068f6d561a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="SOLO_ELENCO" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select 	
+b.anno anno_fin
+,b.eu 
+,l1.codice missione
+,l2.codice programma
+,l1.descrizione desc_missione
+,l2.descrizione desc_programma
+,b.articolo
+, a.descrizione desc_articolo
+,previsione_iniziale($P{ANNO} ,a.eu||a.codice) previsto_attuale
+from
+fina_bilancio b,
+nb_livello1 l1,
+nb_livello2 l2,
+fina_articoli a
+where b.anno   = $P{ANNO} 
+and b.eu  = 'U' 
+and b.eu  = a.eu 
+and b.titolo  = a.titolo  
+and b.categoria = a.categoria 
+and b.capitolo   = a.capitolo 
+and b.articolo = a.codice 
+and b.anno = a.anno 
+and l2.id(+) = a.nb_id_padre 
+and l1.id(+) = l2.id_livello1
+and nvl(a.abilitato,'S') = 'S'  
+and nvl(a.flag_spesa_obbligatoria,'N') = 'S'
+order by l1.codice,l2.codice]]>
+	</queryString>
+	<field name="ANNO_FIN" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ANNO_FIN"/>
+	</field>
+	<field name="EU" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="EU"/>
+	</field>
+	<field name="MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MISSIONE"/>
+	</field>
+	<field name="PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROGRAMMA"/>
+	</field>
+	<field name="DESC_MISSIONE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_MISSIONE"/>
+	</field>
+	<field name="DESC_PROGRAMMA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_PROGRAMMA"/>
+	</field>
+	<field name="ARTICOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ARTICOLO"/>
+	</field>
+	<field name="DESC_ARTICOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_ARTICOLO"/>
+	</field>
+	<field name="PREVISTO_ATTUALE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="PREVISTO_ATTUALE"/>
+	</field>
+	<variable name="PROG_PREVISTO_ATTUALE" class="java.math.BigDecimal" resetType="Group" resetGroup="Missione" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></variableExpression>
+	</variable>
+	<variable name="MIS_PREVISTO_ATTUALE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></variableExpression>
+	</variable>
+	<variable name="TOT_PREVISTO_ATTUALE" class="java.math.BigDecimal" resetType="Group" resetGroup="Programma" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREVISTO_ATTUALE}]]></variableExpression>
+	</variable>
+	<group name="Missione">
+		<groupExpression><![CDATA[$F{MISSIONE}]]></groupExpression>
+		<groupFooter>
+			<band height="20">
+				<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+				<textField pattern="#,##0.00#">
+					<reportElement x="465" y="0" width="80" height="20" uuid="f9c663b8-ce3b-411e-8e99-b3a21455d479">
+						<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+					</reportElement>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true" isItalic="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{PROG_PREVISTO_ATTUALE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="155" y="0" width="310" height="20" uuid="bca0ae87-a6a7-4780-9b8b-2183281c1155"/>
+					<box>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true" isItalic="true"/>
+						<paragraph leftIndent="0"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTALE MISSIONE "+$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="0" width="155" height="20" uuid="7b7b2307-dcbe-4a35-8908-f64b954613fd"/>
+					<box>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.5"/>
+					</box>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<line>
+					<reportElement x="0" y="0" width="1" height="20" uuid="aba7d9a5-9cf0-401a-a3e2-08fe5778a88c"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Solid"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Programma">
+		<groupExpression><![CDATA[$F{PROGRAMMA}]]></groupExpression>
+		<groupFooter>
+			<band height="30">
+				<textField>
+					<reportElement x="155" y="0" width="65" height="30" uuid="2691f03d-5186-43ec-b9e5-562c7e838ee0">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="fdd089c9-44bc-4b37-bf7e-4fec810e4b02"/>
+					</reportElement>
+					<box>
+						<pen lineWidth="0.5"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PROGRAMMA}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement isPrintRepeatedValues="false" x="55" y="0" width="100" height="30" uuid="47adfff2-2e75-4c6f-bbae-9febb49e3df7">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ea344e09-04bc-4fda-b70d-08d2ec8b5532"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="8" isItalic="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESC_MISSIONE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement isPrintRepeatedValues="false" x="0" y="0" width="55" height="30" uuid="fec9e0b7-8514-4951-8bff-9bff8c83268d"/>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+					</box>
+					<textElement verticalAlignment="Top">
+						<font size="8" isItalic="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+				</textField>
+				<frame>
+					<reportElement x="220" y="0" width="325" height="30" uuid="c9f0b4d0-10fa-4aab-8028-4f1c13e96c52"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<leftPen lineWidth="0.0"/>
+					</box>
+					<textField pattern="#,##0.00#">
+						<reportElement x="245" y="0" width="80" height="30" uuid="91018c93-5681-437c-b777-3adbcb0e33db">
+							<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+						</reportElement>
+						<textElement textAlignment="Right" verticalAlignment="Top">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{PROG_PREVISTO_ATTUALE}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement x="0" y="0" width="245" height="30" uuid="05a63fb6-ecea-4613-8289-4e4a2a573fdb"/>
+						<textElement verticalAlignment="Top">
+							<font size="8"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_PROGRAMMA}]]></textFieldExpression>
+					</textField>
+				</frame>
+				<line>
+					<reportElement x="0" y="0" width="1" height="30" uuid="348f71bd-d502-4729-8c8d-b5de883c05ac"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Solid"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="30">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="155" height="30" backcolor="#EBE8E8" uuid="cd12599e-8747-4f3b-9688-42aa2a1f59dd"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Missione]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="155" y="0" width="65" height="30" backcolor="#EBE8E8" uuid="e27e7d34-3cd3-40b9-8e82-37b95319279b"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Programma]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="220" y="0" width="325" height="30" backcolor="#EBE8E8" uuid="4865244c-8fb6-4d48-8df8-17d2a799594c"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph leftIndent="100"/>
+				</textElement>
+				<text><![CDATA[Descrizione Programma]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="465" y="0" width="80" height="30" backcolor="#EBE8E8" uuid="0bdadfca-0804-4179-bf0d-efe2ce78cfb7">
+					<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[€]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="35">
+			<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+			<staticText>
+				<reportElement x="0" y="5" width="440" height="25" uuid="e4eb7492-6894-41e2-b4e7-b039964e8871"/>
+				<box>
+					<topPen lineWidth="2.0"/>
+					<bottomPen lineWidth="2.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[TOTALE GENERALE]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="440" y="5" width="104" height="25" uuid="d9c265a3-8c2e-4a00-9559-4cbec3b9e167">
+					<printWhenExpression><![CDATA[EQUALS($P{SOLO_ELENCO},"N")]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="2.0"/>
+					<bottomPen lineWidth="2.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{MIS_PREVISTO_ATTUALE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
