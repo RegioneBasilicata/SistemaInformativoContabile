@@ -1,0 +1,51 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CAPITOLO_DOC</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CAPITOLO_DOC.html">Details</a></div></div>
+<div class="tab"><div><a href="CAPITOLO_DOC_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CAPITOLO_DOC_References.html">References</a></div></div>
+<div class="tab"><div><a href="CAPITOLO_DOC_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CAPITOLO_DOC_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function capitolo_doc(p_anno in number, p_doc_id in number) return varchar2 is
+
+	capitolo varchar2(6);
+	anno_doc number;
+	doc_id_capo number;
+
+	begin
+	 begin
+		select segment8,doc_id_capo_filiera,segment2 
+		into anno_doc,doc_id_capo,capitolo
+		from fin_t_documenti
+		where doc_id = p_doc_id;
+	  exception when no_data_found then anno_doc := 1000; doc_id_capo := 0; capitolo := 'U00000';
+	 end;
+
+	 if anno_doc &lt; p_anno
+	  then
+	   begin
+	   	select ind_cap into capitolo
+	   	from bas_ind
+	   	where ind_anno = p_anno
+	   	and doc_id = doc_id_capo;
+	   	exception when no_data_found then capitolo := 'U00000';
+	   end;
+     end if;
+
+return(capitolo);
+
+	end;</pre>	</td></tr>
+</table></div>

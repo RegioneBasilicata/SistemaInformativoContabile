@@ -1,0 +1,357 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CALCOLA_FPV_OLD</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CALCOLA_FPV_OLD.html">Details</a></div></div>
+<div class="tab"><div><a href="CALCOLA_FPV_OLD_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CALCOLA_FPV_OLD_References.html">References</a></div></div>
+<div class="tab"><div><a href="CALCOLA_FPV_OLD_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CALCOLA_FPV_OLD_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION   CALCOLA_FPV_OLD(p_anno in number,p_CAPITOLO in varchar2) return number is
+--procedura per report "Allegato b) al Rendiconto  - Fondo Pluriennale Vincolato"
+colonna_1 number(15,2) := 0; --FPV al 31/12/p_anno-1
+colonna_2 number(15,2) := 0; --FPV liquidato (LIQ)
+colonna_3 number(15,2) := 0; --economie di impegni riacc
+colonna_4 number(15,2) := 0; --FPV residuo = (colonna_1 - colonna_2 - colonna3)
+colonna_5 number(15,2) := 0; --Impegni pluriennali (p_anno+1) assunti in p_anno
+colonna_6 number(15,2) := 0; --Impegni pluriennali (p_anno+2) assunti in p_anno
+colonna_7 number(15,2) := 0; --Impegni p_anno riaccertati
+fpv number(15,2) := 0; --FPV al 31/12/p_anno = (colonna_4 + colonna_5 + colonna_6 + colonna_7)
+colonna_9 number(15,2) := 0; --ordinamento righe
+
+
+b_impegni_plur number(15,2) := 0;
+b_impegni_riacc number(15,2) := 0;
+
+b_acc_riacc number(15,2) := 0;
+
+
+b_impegni_plur_liq number(15,2) := 0;
+b_impegni_riacc_liq number(15,2) := 0;
+b_impegni_no_riacc_liq number(15,2) := 0;
+b_impegni_no_riacc_liq1 number(15,2) := 0;
+b_impegni_riacc_parz number(15,2) := 0;
+
+
+c_impegni_plur1 number(15,2) := 0;
+c_impegni_riacc1 number(15,2) := 0;
+
+c_impegni_plur2 number(15,2) := 0;
+c_impegni_riacc2 number(15,2) := 0;
+
+c_impegni_plur3 number(15,2) := 0;
+c_impegni_riacc3 number(15,2) := 0;
+elim_imp_plur1 number(15,2) := 0;
+elim_imp_plur2 number(15,2) := 0;
+
+cursor capitoli is
+select  a.eu||a.codice capitolo
+ ,a.descrizione desc_capitolo
+ ,nvl(nb1.codice,'Da Def.') missione
+ ,nb1.descrizione           desc_missione
+ ,nvl(nb2.codice,'Da Def.') programma
+ ,nb2.descrizione           desc_programma
+from 
+ fin_t_articoli a
+ ,nb_livello1 nb1
+ ,nb_livello2 nb2
+where a.anno = p_anno
+and   a.eu = 'U' 
+and   nb2.id(+) = a.nb_id_padre 
+and   nb1.id(+) = nb2.id_livello1;
+
+begin
+
+  -- determino importi per colonna_1 (a) del report
+   begin
+      select nvl(aiuti,0) into colonna_1
+      from fin_t_bilancio
+      where anno = p_anno
+      and eu||articolo = p_capitolo
+      and nvl(aiuti,0) > 0;
+      exception when no_data_found then  colonna_1 := 0;
+  end;
+  
+ 
+  -- determino l'importo della colonna_2 (b) del report
+  
+  -- prendo l'importo liquidato degli impegni plur (0101||p_anno) fatti nel p_anno - 1
+     /* select 
+       nvl(sum((nvl(d.document_amount,0) - nvl(d.open_balance_proposed,0))),0) into b_impegni_plur_liq
+      from 
+       fin_t_documenti d
+       ,bas_ind b
+      where d.doc_type = 'IMP-DEF'
+      and d.segment8 >= p_anno
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+      and substr(nvl(d.attribute38,'9999'),1,4) &lt;= (p_anno - 1)
+      and b.ind_anno = p_anno
+      and b.doc_id = d.doc_id
+      and b.ind_cap = p_capitolo;    */
+       select nvl(sum(nvl(l.document_amount,0)),0) into b_impegni_plur_liq
+      from 
+       fin_t_documenti d
+       ,fin_t_documenti l
+       ,bas_ind b
+      where d.doc_type = 'IMP-DEF'
+      and d.segment8 >= p_anno
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+      and substr(nvl(d.attribute38,'9999'),1,4) &lt;= (p_anno - 1)
+      and l.doc_type = 'LIQ'
+      and l.previous_doc_id = d.doc_id
+      and nvl(l.deletion_status_flag,'N') = 'N'
+      and l.segment8 = p_anno
+      and b.ind_anno = p_anno
+      and b.doc_id = d.doc_id
+      and b.ind_cap = p_capitolo; 
+   
+    -- prendo l'importo liquidato degli impegni plur (0101||p_anno)
+    /*select 
+     nvl(sum((nvl(d.document_amount,0) - nvl(d.open_balance_proposed,0))),0) into b_impegni_riacc_liq
+    from fin_t_riaccertamenti r
+    ,fin_t_documenti d
+    where upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' 
+    and upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'
+    and d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+    and nvl(d.segment8,0) = p_anno
+    and d.segment2 = p_capitolo
+    and r.anno_riaccertamento = d.segment8
+    and r.doc_id_riaccertamento = d.doc_id;    */
+    
+    select nvl(sum(nvl(l.document_amount,0)),0) into b_impegni_riacc_liq
+      from 
+       fin_t_documenti d
+       ,fin_t_documenti l
+       ,fin_t_riaccertamenti r
+      where upper(nvl(d.proposal_status_flag,'Z'))||upper(nvl(d.auditing_status_flag,'Z'))='PI' 
+      and upper(nvl(d.deletion_status_flag,'N')) &lt;> 'Y'
+      and d.doc_type in ('IMP','IMP-DEF','IMP-PER')
+      and nvl(d.segment8,0) = p_anno
+      and d.segment2 = p_capitolo
+      and l.doc_type = 'LIQ'
+      and l.previous_doc_id = d.doc_id
+      and nvl(l.deletion_status_flag,'N') = 'N'
+      and l.segment8 = p_anno
+      and r.anno_riaccertamento = d.segment8
+      and r.doc_id_riaccertamento = d.doc_id
+      and r.doc_id not in (
+         select d.doc_id
+        from 
+         fin_t_documenti d
+         ,bas_ind b
+        where d.doc_type = 'IMP-DEF'
+        and d.segment8 >= p_anno
+        and nvl(d.deletion_status_flag,'N') = 'N'
+        and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+        and substr(nvl(d.attribute38,'9999'),1,4) &lt;= (p_anno - 1)
+        and b.ind_anno = p_anno
+        and b.doc_id = d.doc_id
+        and b.ind_cap = p_capitolo);  
+      
+    select  nvl(sum(nvl(r.residuo_lordo,0)),0) into b_impegni_no_riacc_liq
+    from fin_t_riaccertamenti r
+    ,fin_t_documenti d
+    where r.anno_finanziario = p_anno 
+    and r.capitolo = p_capitolo
+    and r.anno_riaccertamento is null
+    and d.doc_type = 'IMP-DEF'
+    and d.segment8 = p_anno
+    and nvl(d.deletion_status_flag,'N') = 'N'
+    and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+    and d.doc_id = r.doc_id;
+    
+    select nvl(sum(nvl(r.residuo_lordo,0)),0) into b_impegni_no_riacc_liq1
+      from fin_t_riaccertamenti r
+      where r.anno_finanziario = p_anno
+      and r.capitolo = p_capitolo
+      and r.anno_riaccertamento is null
+      and r.doc_id in (select doc_id_riaccertamento 
+      from fin_t_riaccertamenti 
+      where anno_finanziario &lt; p_anno
+      and doc_id_riaccertamento is not null)
+       and r.doc_id not in (
+        select  d.doc_id
+        from fin_t_riaccertamenti r
+        ,fin_t_documenti d
+        where r.anno_finanziario = p_anno 
+        and r.capitolo = p_capitolo
+        and r.anno_riaccertamento is null
+        and d.doc_type = 'IMP-DEF'
+        and d.segment8 = p_anno
+        and nvl(d.deletion_status_flag,'N') = 'N'
+        and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+         and substr(nvl(d.attribute38,'9999'),1,4) &lt;= (p_anno - 1)
+        and d.doc_id = r.doc_id);
+        
+   -- serve per prendere la quotaparte di impegni riaccertati che sono stati liquidati nell'anno + 1
+   select  nvl(sum(nvl(r.residuo_lordo,0) - nvl(r.residuo,0)),0) into b_impegni_riacc_parz
+    from fin_t_riaccertamenti r
+    ,fin_t_documenti d
+    where r.anno_finanziario = p_anno 
+    and r.capitolo = p_capitolo
+    and r.anno_riaccertamento is not null
+    and nvl(r.residuo_lordo,0) &lt;> nvl(r.residuo,0)
+    and d.doc_type like 'IMP%'
+    and d.segment8 = p_anno
+    and nvl(d.deletion_status_flag,'N') = 'N'
+    and d.doc_id = r.doc_id;
+   
+  
+   colonna_2 := b_impegni_plur_liq + b_impegni_riacc_liq  + b_impegni_no_riacc_liq + b_impegni_no_riacc_liq1 + b_impegni_riacc_parz;--
+
+ --importi colonna_3 (x) del report
+  select nvl(sum(nvl(importo_variazione,0)),0) into colonna_3
+  from fin_t_variazioni_fpv
+  where anno = p_anno
+  and capitolo = p_capitolo;
+   
+ -- **********
+ 
+ -- importo colonna_4 (c) del report
+ colonna_4 := nvl(colonna_1,0) -nvl(colonna_2,0) -nvl(colonna_3,0);
+ -- ****
+
+ -- importo colonna_5 (d) del report
+      select 
+       nvl(sum(nvl(d.document_amount,0)),0) into c_impegni_plur1
+      from 
+       fin_t_documenti d
+       ,bas_ind b
+      where d.doc_type = 'IMP-DEF'
+      and d.segment8 = p_anno + 1
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+      and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+      and b.ind_anno = p_anno + 1
+      and b.doc_id = d.doc_id
+      and b.ind_cap = p_capitolo;
+      
+      select nvl(sum(nvl(r.importo_riaccertamento,0)),0) into c_impegni_riacc1
+      from fin_t_riaccertamenti r
+      where nvl(r.anno_riaccertamento,9999) = (p_anno + 1)
+      and r.capitolo_riaccertamento = p_capitolo
+      -- aggiunta 13052015
+    and nvl(r.flag_elimina,'N') = 'N'
+    and r.anno_bilancio_riaccertamento = p_anno + 1
+    and r.tipo_documento&lt;> 'ACC'
+    -- ****** fine aggiunta
+    ;
+      
+       --calcolo eventuali imp_plur1 eliminati in anni successivi
+      select nvl(sum(nvl(f.importo_variazione,0)),0) into elim_imp_plur1
+      from FIN_T_VARIAZIONI_FPV f
+      where f.anno > p_anno
+      --and f.importo_originario = f.importo_variazione
+      and f.doc_id in (select d.doc_id 
+      from fin_t_documenti d
+      ,fin_t_articoli a
+      where d.doc_type like 'IMP%'
+      --and nvl(d.deletion_status_flag,'N') = 'Y'
+      and d.segment8 = p_anno+1
+      and d.date_created = to_date('0101'||(p_anno+1),'ddmmyyyy')
+      and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+      and a.anno = d.segment8
+      and a.eu||a.codice = d.segment2
+      and a.codice_precedente = p_capitolo);
+ 
+      colonna_5 := nvl(c_impegni_plur1,0) + nvl(c_impegni_riacc1,0) + nvl(elim_imp_plur1,0);
+ -- *** fine colonna_5
+
+ -- importo colonna_6 (e) del report
+      select 
+       nvl(sum(nvl(d.document_amount,0)),0) into c_impegni_plur2
+      from 
+       fin_t_documenti d
+       ,bas_ind b
+      where d.doc_type = 'IMP-DEF'
+      and d.segment8 = p_anno + 2
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+      and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+      and b.ind_anno = p_anno + 2
+      and b.doc_id = d.doc_id
+      and b.ind_cap = p_capitolo;
+      
+      select nvl(sum(nvl(r.importo_riaccertamento,0)),0) into c_impegni_riacc2
+      from fin_t_riaccertamenti r
+      where nvl(r.anno_riaccertamento,9999) = (p_anno + 2)
+      and r.capitolo_riaccertamento = p_capitolo
+       -- aggiunta 13052015
+      and nvl(r.flag_elimina,'N') = 'N'
+      and r.anno_bilancio_riaccertamento = p_anno + 1
+      and r.tipo_documento&lt;> 'ACC'
+      -- ****** fine aggiunta
+      ;
+      
+       --calcolo eventuali imp_plur2 eliminati in anni successivi
+        select nvl(sum(nvl(f.importo_variazione,0)),0) into elim_imp_plur2
+        from FIN_T_VARIAZIONI_FPV f
+        where f.anno > p_anno
+       -- and f.importo_originario = f.importo_variazione
+        and f.doc_id in (select d.doc_id 
+        from fin_t_documenti d
+        ,fin_t_articoli a
+        where d.doc_type like 'IMP%'
+       -- and nvl(d.deletion_status_flag,'N') = 'Y'
+        and d.segment8 = p_anno+2
+        and d.date_created = to_date('0101'||(p_anno+2),'ddmmyyyy')
+        and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+        and a.anno = d.segment8
+        and a.eu||a.codice = d.segment2
+        and a.codice_precedente = p_capitolo);
+ 
+      colonna_6 := nvl(c_impegni_plur2,0) + nvl(c_impegni_riacc2,0) + nvl(elim_imp_plur2,0); 
+ 
+ -- *** fine colonna_6
+
+ -- importo colonna_7 (f) del report
+      select 
+       nvl(sum(nvl(d.document_amount,0)),0) into c_impegni_plur3
+      from 
+       fin_t_documenti d
+       ,bas_ind b
+      where d.doc_type = 'IMP-DEF'
+      and d.segment8 = p_anno + 3
+      and nvl(d.deletion_status_flag,'N') = 'N'
+      and d.date_created = to_date('0101'||d.segment8,'ddmmyyyy')
+      and substr(nvl(d.attribute38,'9999'),1,4) = p_anno
+      and b.ind_anno = p_anno + 3
+      and b.doc_id = d.doc_id
+      and b.ind_cap = p_capitolo;
+      
+      select nvl(sum(nvl(r.importo_riaccertamento,0)),0) into c_impegni_riacc3
+      from fin_t_riaccertamenti r
+      where nvl(r.anno_riaccertamento,9999) = (p_anno + 3)
+      and r.capitolo_riaccertamento = p_capitolo
+        -- aggiunta 13052015
+      and nvl(r.flag_elimina,'N') = 'N'
+      and r.anno_bilancio_riaccertamento = p_anno + 1
+      and r.tipo_documento&lt;> 'ACC'
+    -- ****** fine aggiunta
+      ;
+ 
+      colonna_7 := nvl(c_impegni_plur3,0) + nvl(c_impegni_riacc3,0); 
+ 
+ -- *** fine colonna_7
+ 
+ -- importo colonna_8 (g) del report
+ FPV := colonna_4 + colonna_5 + colonna_6 + colonna_7;
+ -- *** fine colonna_8
+ return(FPV);
+   
+end; </pre>	</td></tr>
+</table></div>

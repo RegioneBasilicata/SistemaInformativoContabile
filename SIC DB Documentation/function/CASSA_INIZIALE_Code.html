@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>CASSA_INIZIALE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="CASSA_INIZIALE.html">Details</a></div></div>
+<div class="tab"><div><a href="CASSA_INIZIALE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="CASSA_INIZIALE_References.html">References</a></div></div>
+<div class="tab"><div><a href="CASSA_INIZIALE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="CASSA_INIZIALE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function      cassa_iniziale(p_anno in NUMBER, p_capitolo in varchar2) return number IS
+importo number(15,2) := 0; 
+vdata_approvazione_previsione date;
+
+
+BEGIN
+
+ begin
+ select data_approvazione_previsione 
+ into vdata_approvazione_previsione
+ from fin_t_dati_generali 
+ where anno_finanziario=p_anno;
+ exception when no_data_found then null;
+ end;
+ 
+ 
+ select 
+ nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+ into importo
+ from  fin_t_documenti d
+ where d.segment8 = p_anno
+ and d.segment2 = p_capitolo
+ and 
+ (
+ d.doc_type in 
+ ('B_CAS_POS'
+ ,'B_CAS_NEG'
+ ) or (doc_type in ('V_CAS_POS','V_CAS_NEG') and trunc(date_created,'dd') &lt; trunc(nvl(vdata_approvazione_previsione,date_created+1),'dd')));
+ 
+--or determinato per il bilancio provvisorio in quanto in fase di approvazione del bilancio stanno facendo delle variazioni.
+
+ return nvl(importo,0);
+END; </pre>	</td></tr>
+</table></div>
