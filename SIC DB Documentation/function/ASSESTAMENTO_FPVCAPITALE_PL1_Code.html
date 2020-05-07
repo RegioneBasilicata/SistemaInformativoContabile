@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ASSESTAMENTO_FPVCAPITALE_PL1</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ASSESTAMENTO_FPVCAPITALE_PL1.html">Details</a></div></div>
+<div class="tab"><div><a href="ASSESTAMENTO_FPVCAPITALE_PL1_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ASSESTAMENTO_FPVCAPITALE_PL1_References.html">References</a></div></div>
+<div class="tab"><div><a href="ASSESTAMENTO_FPVCAPITALE_PL1_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ASSESTAMENTO_FPVCAPITALE_PL1_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION      assestamento_fpvcapitale_pl1(p_anno in NUMBER) return number IS
+importo number(15,2) := 0; 
+vdata_atto_assestamento date;
+
+BEGIN
+ begin
+ select data_atto_assestamento 
+ into vdata_atto_assestamento
+ from fin_t_dati_generali 
+ where anno_finanziario=p_anno - 1;
+ exception when no_data_found then null;
+ end;
+ select 
+ nvl(sum(decode(substr(d.doc_type,7,3),'NEG',(d.document_amount * -1),d.document_amount)),0) 
+ into importo
+ from  fin_t_documenti d, 
+      fin_t_articoli a
+ where d.segment8=p_anno 
+ and substr(d.segment2,1,1) = 'U'
+ and d.segment9 in ('FPV','FPV_REG')
+ and 
+ (
+  d.doc_type in 
+ ('A_PL1_POS','A_PL1_NEG') 
+ or (doc_type in ('V_PL1_POS','V_PL1_NEG') and nvl(attribute10,'N')&lt;>'Y') and trunc(to_date(attribute17,'dd/mm/yyyy'),'dd') &lt; trunc(nvl(vdata_atto_assestamento,to_date(attribute17,'dd/mm/yyyy')+1),'dd') )
+ and d.segment8 = a.anno 
+ and d.segment2 = a.eu||a.codice 
+ and a.nb_titolo = '2'; 
+ 
+ return nvl(importo,0);
+END; </pre>	</td></tr>
+</table></div>
