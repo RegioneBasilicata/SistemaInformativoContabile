@@ -1,0 +1,51 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>ANALIZZO_ORE</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="ANALIZZO_ORE.html">Details</a></div></div>
+<div class="tab"><div><a href="ANALIZZO_ORE_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="ANALIZZO_ORE_References.html">References</a></div></div>
+<div class="tab"><div><a href="ANALIZZO_ORE_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="ANALIZZO_ORE_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function analizzo_ore(w_entrata in NUMBER, 
+                                         w_uscita in NUMBER, 
+                                         w_entrata_turno in NUMBER,
+                                         w_uscita_turno in NUMBER) return number IS
+w_ore number := 0; 
+BEGIN
+-- HO 4 CASI POSSIBILI:
+-- 1 ENTRATA MINORE-UGUALE ENTRATA TURNO E USCITA MINORE-UGUALE USCITA TURNO  
+IF w_entrata &lt;= w_entrata_turno and
+    w_uscita > w_entrata_turno and
+    w_uscita &lt;= w_uscita_turno
+  THEN
+   w_ore:= w_uscita - w_entrata_turno;  
+-- 2 ENTRATA MINORE-UGUALE ENTRATA TURNO E USCITA MAGGIORE USCITA TURNO  IF 
+ ELSIF w_entrata &lt;= w_entrata_turno and
+    w_uscita > w_uscita_turno
+    THEN w_ore:= w_uscita_turno - w_entrata_turno;  
+-- 3 ENTRATA MAGGIORE ENTRATA TURNO E USCITA MINORE-UGUALE USCITA TURNO  
+   ELSIF w_entrata > w_entrata_turno and
+         w_uscita &lt;= w_uscita_turno
+     THEN w_ore:= w_uscita - w_entrata;  
+-- 4 ENTRATA MAGGIORE ENTRATA TURNO E MINOREUGUALE USCITA TURNO E USCITA MAGGIORE USCITA TURNO  
+     ELSIF w_entrata > w_entrata_turno and
+           w_entrata &lt;= w_uscita_turno and
+           w_uscita > w_uscita_turno
+      THEN w_ore:= w_uscita_turno - w_entrata;  
+END IF;
+   return w_ore;
+END; </pre>	</td></tr>
+</table></div>
