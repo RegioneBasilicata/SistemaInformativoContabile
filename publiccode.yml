@@ -1,0 +1,94 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+categories:
+  - accounting
+  - billing-and-invoicing
+  - budgeting
+  - erp
+  - financial-reporting
+  - inventory-management
+  - office
+  - warehouse-management
+description:
+  lt:
+    features:
+      - Gestione Bilancio di Previsione/Assestamento e Rendiconto
+      - Gestione Ragioneria e Modulo Fiscale
+      - Gestione Tesoreria
+      - Gestione Patrimonio Mobiliare e Immobiliare
+      - Gestione Autoparco
+      - Gestione Sanitaria Accentrata
+      - Gestione Fatturazione Attiva e Passiva
+    genericName: SICRegBas
+    longDescription: >
+      Il SIC è utilizzato, dalla Regione Basilicata, dal 2003 e via via evoluto
+      a seconda delle esigenze normative e/o organizzative.
+      Dal 2013 (a seguito dell'entrata in vigore del Decreto Legislativo
+      118/2011) il SIC viene utilizzato anche dagli Enti Strumentali della
+      Regione Basilicata e dal Consiglio Regionale.
+      Il Sistema è assimilabile ad un vero e proprio Enterprise Resource
+      Planning (ERP) in quanto non gestisce solamente tutti gli aspetti
+      contabili dell'Ente ma anche i processsi riguardanti Gestione Contratti,
+      Gestione Patrimonio, ecc.
+    shortDescription: >-
+      E' un sistema integrato per la gestione dei processi amministrativi
+      contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
+      Basilicata.
+developmentStatus: stable
+intendedAudience:
+  scope:
+    - government
+it:
+  conforme:
+    gdpr: true
+    lineeGuidaDesign: false
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: true
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: true
+  riuso:
+    codiceIPA: r_basili
+legal:
+  license: EUPL-1.2
+  mainCopyrightOwner: Regione Basilicata
+  repoOwner: Regione Basilicata
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  contacts:
+    - email: alobefaro@latraccia.it
+      name: Angelo Lobefaro
+  contractors:
+    - name: Cooperativa EDP La Traccia
+      until: '2003-01-01'
+  type: contract
+name: Sistema Informativo Contabile
+platforms:
+  - web
+  - windows
+  - mac
+  - linux
+releaseDate: '2017-01-01'
+softwareType: standalone/web
+softwareVersion: '3.0'
+url: 'https://github.com/RegioneBasilicata/SistemaInformativoContabile'
+usedBy:
+  - Regione Basilicata
+  - Parco Gallipoli Cognato e delle Piccole Dolomiti Lucane
+  - Parco delle Chiese Rupestri Materane
+  - Parco Naturale Regionale del Vulture
+  - Agenzia Lucana di Sviluppo e di Innovazione in Agricoltura
+  - Consiglio Regionale della Basilicata
+  - Agenzia di Promozione del Turismo
+  - Agenzia Regionale per l’Ambiente Basilicata
+  - Agenzia Regionale per il Diritto allo Studio Universitario della Basilicata
+  - Agenzia Regionale per il lavoro e le transizioni nella vita attiva (LAB)
