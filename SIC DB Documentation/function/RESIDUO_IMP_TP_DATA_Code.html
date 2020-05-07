@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>RESIDUO_IMP_TP_DATA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="RESIDUO_IMP_TP_DATA.html">Details</a></div></div>
+<div class="tab"><div><a href="RESIDUO_IMP_TP_DATA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="RESIDUO_IMP_TP_DATA_References.html">References</a></div></div>
+<div class="tab"><div><a href="RESIDUO_IMP_TP_DATA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="RESIDUO_IMP_TP_DATA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION RESIDUO_IMP_TP_DATA (p_doc_id number, p_data date, p_id_ana number) RETURN number IS
+
+  importo_doc NUMBER := 0;
+  residuo_doc number := 0;
+  	TOT_MAND NUMBER := 0;
+    TOT_IMPPER number := 0;
+
+
+BEGIN
+ select sum(nvl(t.amount,0)) into importo_doc
+ from  fin_t_documenti_terze_parti t
+ where t.doc_id = p_doc_id
+ and t.id_ana = p_id_ana;
+
+ select residuo_imp_data(p_doc_id,p_data) into residuo_doc
+ from dual;
+ if residuo_doc > 0 then
+
+    /*SELECT
+		nvl(sum(nvl(jugd2.open_balance_proposed,0)),0) 	into tot_storno
+		FROM
+		fin_t_documenti 					jugd2
+		WHERE
+		jugd2.doc_type 	in ('ST-IMP','DIS','ECO','ST-IMPDEF') 	and
+		nvl(jugd2.deletion_status_flag,'N') &lt;> 'Y' 	and
+		jugd2.date_created 		&lt;= p_data	and
+		jugd2.previous_doc_id	= p_doc_id;
+        */
+
+    SELECT 
+		nvl(sum(nvl(t.amount,0)),0) into 	tot_mand
+		FROM
+		fin_t_documenti d
+        ,fin_t_documenti_terze_parti t
+		WHERE
+		d.doc_type = 'MAND' and
+        nvl(d.open_balance_proposed,0) > 0 and
+		d.date_created 	&lt;= p_data	and
+		d.doc_id_capo_filiera = p_doc_id and 
+        t.doc_id = d.doc_id and
+        t.id_ana = p_id_ana;
+        
+       SELECT 
+		nvl(sum(nvl(t.amount,0)),0) into 	tot_impper
+		FROM
+		fin_t_documenti d
+        ,fin_t_documenti_terze_parti t
+		WHERE
+		d.doc_type = 'IMP-PER' and
+        nvl(d.deletion_status_flag,'N') = 'N' and
+		d.date_created 	&lt;= p_data	and
+		d.previous_doc_id = p_doc_id and 
+        t.doc_id = d.doc_id and
+        t.id_ana = p_id_ana;
+
+    if residuo_doc &lt; (importo_doc - NVL(TOT_MAND,0)-nvl(TOT_IMPPER,0))
+     then return residuo_doc;
+     elsif (importo_doc - NVL(TOT_MAND,0)-nvl(TOT_IMPPER,0)) > 0
+     then return (importo_doc - NVL(TOT_MAND,0)-nvl(TOT_IMPPER,0));
+     else return(0);
+    end if;
+    
+    else return(0);
+    end if;
+
+END RESIDUO_IMP_TP_DATA;</pre>	</td></tr>
+</table></div>

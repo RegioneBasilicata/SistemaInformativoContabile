@@ -1,0 +1,46 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SPLIT</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SPLIT.html">Details</a></div></div>
+<div class="tab"><div><a href="SPLIT_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SPLIT_References.html">References</a></div></div>
+<div class="tab"><div><a href="SPLIT_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SPLIT_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function split
+(
+    p_list varchar2,
+    p_del varchar2
+) return split_tbl pipelined
+is
+    l_idx    pls_integer;
+    l_list    varchar2(32767) := p_list;
+
+    l_value    varchar2(32767);
+begin
+    loop
+        l_idx := instr(l_list,p_del);
+        if l_idx > 0 then
+            pipe row(substr(l_list,1,l_idx-1));
+            l_list := substr(l_list,l_idx+length(p_del));
+
+        else
+            pipe row(l_list);
+            exit;
+        end if;
+    end loop;
+    return;
+end split;</pre>	</td></tr>
+</table></div>

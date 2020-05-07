@@ -1,0 +1,134 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>RESIDUO_PERENTI</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="RESIDUO_PERENTI.html">Details</a></div></div>
+<div class="tab"><div><a href="RESIDUO_PERENTI_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="RESIDUO_PERENTI_References.html">References</a></div></div>
+<div class="tab"><div><a href="RESIDUO_PERENTI_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="RESIDUO_PERENTI_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+FUNCTION residuo_perenti (p_doc_id number --doc_id del documento per il quale calcolare l'obp --
+, p_anno number) RETURN number IS
+
+  TOT_ECO_IMP_PER NUMBER := 0;	
+  TOT_ECO_PERENTE NUMBER:= 0;
+  TOT_IMP_PER NUMBER:= 0;
+  TOT_LIQ  NUMBER:= 0;
+  NETTO_IMP  NUMBER := 0; 
+  doc_id_impegno number;
+  doc_id_imp_per number;
+  p_data_perenzione date;
+	doc_id_liquidazione  number; 
+	doc_id_liq_imp_per  number; 
+  doc_id_mand number;
+  doc_id_st_mand number;
+  doc_id_storno number;
+  doc_id_acc number;
+  doc_id_rev number;
+  doc_id_storno_accertamento number;
+  residuo_perente number := 0; -- è il return della funzione
+  
+  
+       CURSOR eco_perente IS
+    SELECT
+       nvl(jugd2.open_balance_proposed, 0) importo_netto_eco_perente
+    FROM
+        fin_t_documenti jugd2
+    WHERE
+        upper(jugd2.doc_type) = 'ECO'
+        AND upper(nvl(jugd2.proposal_status_flag, 'Z'))
+            || upper(nvl(jugd2.auditing_status_flag, 'Z')) = 'PI'
+        AND upper(nvl(jugd2.deletion_status_flag, 'N')) &lt;> 'Y'
+        AND jugd2.date_created &lt;= TO_DATE('3112' || p_anno, 'ddmmyyyy')
+        AND jugd2.date_created > p_data_perenzione
+        AND jugd2.previous_doc_id = doc_id_impegno;
+        
+        
+	    CURSOR eco_imp_per IS
+    SELECT
+        to_number(TO_CHAR(jugd2.creation_date, 'yyyy')) anno_creazione_eco_imp_per,
+        nvl(jugd2.open_balance_proposed, 0) importo_netto_eco_imp_per
+    FROM
+        fin_t_documenti jugd2
+    WHERE
+        upper(jugd2.doc_type) = 'ECO'
+        AND upper(nvl(jugd2.proposal_status_flag, 'Z'))
+            || upper(nvl(jugd2.auditing_status_flag, 'Z')) = 'PI'
+        AND upper(nvl(jugd2.deletion_status_flag, 'N')) &lt;> 'Y'
+        AND jugd2.date_created &lt;= TO_DATE('3112' || p_anno, 'ddmmyyyy')
+        AND jugd2.previous_doc_id = doc_id_imp_per;
+	 
+      CURSOR imp_per IS
+    SELECT
+        jugd.document_amount doc_id_imp_per
+        ,nvl(jugd.document_amount, 0) importo_imp_per
+    FROM
+        fin_t_documenti jugd
+    WHERE
+        upper(jugd.doc_type) = 'IMP-PER'
+        AND upper(nvl(jugd.proposal_status_flag, 'Z'))
+            || upper(nvl(jugd.auditing_status_flag, 'Z')) = 'PI'
+        AND upper(nvl(jugd.deletion_status_flag, 'N')) &lt;> 'Y'
+        AND jugd.date_created &lt;= TO_DATE('3112' || p_anno, 'ddmmyyyy')
+        AND jugd.previous_doc_id = doc_id_impegno;
+  
+    
+ 
+BEGIN
+	 begin
+   select nvl(closed_amount_proposed,0)
+   ,data_perenzione
+   into 
+   netto_imp
+   ,p_data_perenzione
+   from fin_t_documenti
+   where doc_id = p_doc_id;
+   exception when no_data_found then netto_imp := 0;
+   end;
+   
+   
+   doc_id_impegno := p_doc_id;
+   TOT_IMP_PER := 0;
+      -- verifico IMP-PER
+       FOR D IN IMP_PER LOOP
+         DOC_ID_IMP_PER := D.doc_id_imp_per;
+         TOT_ECO_IMP_PER  := 0;
+         TOT_ECO_PERENTE := 0;
+         for e in eco_imp_per loop
+           IF e.anno_creazione_eco_imp_per &lt; 2005 then
+            TOT_ECO_IMP_PER := TOT_ECO_IMP_PER + NVL(e.importo_netto_eco_imp_per,0);	
+           end if;
+         end loop;
+         for p in eco_perente loop
+          TOT_ECO_PERENTE := TOT_ECO_PERENTE + p.importo_netto_eco_perente;
+         end loop;
+         TOT_IMP_PER := TOT_IMP_PER + nvl(D.importo_imp_per,0)  - TOT_ECO_IMP_PER ;
+        END LOOP;
+      /*  TOT_LIQ := 0;
+        for Q in liq loop
+          TOT_LIQ := TOT_LIQ + NVL(Q.importo_netto_liq,0);
+          DOC_ID_LIQUIDAZIONE := Q.doc_id_liq;
+          TOT_ST_LIQ := 0;
+          for M in ST_LIQ loop
+             TOT_ST_LIQ := TOT_ST_LIQ + NVL(M.importo_netto_st_liq,0);
+          end loop;
+          TOT_LIQ := TOT_LIQ - TOT_ST_LIQ;
+        end loop;
+        */ 
+     residuo_perente := netto_imp - NVL(TOT_IMP_PER,0) - TOT_ECO_PERENTE;
+   
+return (residuo_perente);
+END;</pre>	</td></tr>
+</table></div>

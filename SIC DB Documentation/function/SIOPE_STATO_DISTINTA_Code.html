@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=Cp1252" />
+<script src="../dbdoc.js" type="text/javascript"></script>
+<link href="../dbdoc.css" type="text/css" rel="stylesheet">
+</head>
+<body class="object">
+<div id="header"><h2>SIOPE_STATO_DISTINTA</h2>
+<div class="tabs clearfix">
+
+<div class="tab"><div><a href="SIOPE_STATO_DISTINTA.html">Details</a></div></div>
+<div class="tab"><div><a href="SIOPE_STATO_DISTINTA_Grants.html">Grants</a></div></div>
+<div class="tab"><div><a href="SIOPE_STATO_DISTINTA_References.html">References</a></div></div>
+<div class="tab"><div><a href="SIOPE_STATO_DISTINTA_Dependencies.html">Dependencies</a></div></div>
+<div class="tab" id="current"><div><a href="SIOPE_STATO_DISTINTA_Code.html">Code</a></div></div>
+</div></div><br/>
+<div class="tab-panes">
+<div id="Code"> <table cellpadding="0" cellspacing="0" cellspacing="0" summary=""><tr>
+	<th>TEXT</th>
+</tr>
+	<tr><td><pre>
+function siope_stato_distinta(p_anno in NUMBER, p_distinta in number,p_tipo in char) return clob IS
+
+a_identificativo_flusso varchar2(100);
+a_file_firmato varchar2(250);
+a_prog_flusso number;
+a_codice_risposta varchar2(20);
+a_messaggio_risposta varchar2(4000);
+a_ack_flusso varchar2(100);
+a_data_produzione_ack date;
+a_stato_flusso_ack varchar2(20);
+a_errori_ack_flusso clob;
+a_esito_flusso varchar2(100);
+a_data_produzione_esito date;
+a_stato_esito_flusso varchar2(20);
+a_errori_esito_flusso varchar2(4000);
+a_num_esiti_applicativi number;
+
+CURSOR cur_errori_ack_flusso IS
+ select 
+  progr_errore,
+  tipo,
+  codice,
+  descrizione,
+  elemento			
+ from	
+  siope_errori_ack_flussi
+ where	
+  progr_ack_flusso = a_ack_flusso; 
+  
+CURSOR cur_errori_esito_flusso IS
+ select 
+  progr_errore,
+  codice,
+  descrizione
+ from	
+  siope_errori_esiti_flussi
+ where	
+  progr_esito_flusso = a_esito_flusso; 
+  
+
+BEGIN
+
+ if p_anno &lt; 2017
+    then return('Distinta gestita tramite OIL');
+ end if;
+
+ if p_tipo = 'R' and
+    p_anno = 2017 and 
+    p_distinta &lt; 369
+    then return('Distinta gestita tramite OIL');
+ end if;
+
+ if p_tipo = 'M' and
+    p_anno = 2017 and 
+    p_distinta &lt; 431
+    then return('Distinta gestita tramite OIL');
+ end if;
+
+
+ begin
+  select 
+   f.identificativo_flusso
+  ,f.file_firmato
+  ,f.prog_flusso
+  ,f.codice_risposta
+  ,f.messaggio_risposta
+  ,f.ack_flusso
+  ,a.data_produzione
+  ,a.stato_flusso
+  ,f.esito_flusso
+  ,e.data_produzione
+  ,e.esito_flusso
+  into 
+   a_identificativo_flusso
+  ,a_file_firmato
+  ,a_prog_flusso
+  ,a_codice_risposta
+  ,a_messaggio_risposta
+  ,a_ack_flusso
+  ,a_data_produzione_ack
+  ,a_stato_flusso_ack
+  ,a_esito_flusso
+  ,a_data_produzione_esito
+  ,a_stato_esito_flusso
+  from siope_flussi_ordinativi f, siope_ack_flussi_ordinativi a, siope_esiti_flussi_ordinativi e
+  where 
+  f.ack_flusso = a.progr_ack_flusso(+) and
+  f.esito_flusso = e.progr_esito_flusso(+) and 
+  f.identificativo_flusso like P_ANNO||P_TIPO||P_DISTINTA||'v%'
+  and to_number(replace(f.identificativo_flusso, P_ANNO||P_TIPO||P_DISTINTA||'v','')) = 
+  (select max(to_number(replace(f2.identificativo_flusso, P_ANNO||P_TIPO||P_DISTINTA||'v',''))) 
+  from siope_flussi_ordinativi f2
+  where f2.identificativo_flusso like P_ANNO||P_TIPO||P_DISTINTA||'v%');
+  exception when no_data_found then a_identificativo_flusso := null;
+ end;
+
+ select count(*) into a_num_esiti_applicativi
+ from siope_esiti_applicativi
+ where identificativo_flusso = a_identificativo_flusso;
+ 
+ if a_identificativo_flusso is null 
+    then return('Bisogna Generare l''XML ');
+ end if;
+
+ if a_file_firmato is null 
+    then return('Bisogna Prelevare File, Firmarlo Digitalmente e Caricarlo a Sistema');
+ end if;
+
+ if a_codice_risposta is null
+    then return('In attesa di Invio a Sistema Siope Plus (modalita'' automatica)');
+ end if;
+
+ if a_codice_risposta &lt;> '201'
+    then return('Errore in fase di Invio Siope Plus '||a_codice_risposta||' '||a_messaggio_risposta);
+ end if;
+
+ if a_codice_risposta = '201' then
+ 
+    if a_ack_flusso is null then
+        return('Flusso Inviato a Siope Plus');
+    end if;
+
+    if a_ack_flusso is not null and a_esito_flusso is null then
+        for e in cur_errori_ack_flusso loop
+         a_errori_ack_flusso := a_errori_ack_flusso || '&lt;br>' || e.tipo || ' ' || e.progr_errore || '. Codice ' || e.codice || ' - ' || e.descrizione || ' nel tag ' || e.elemento;
+        end loop;
+        return('Flusso Ricevuto da Siope Plus con stato: ' || a_stato_flusso_ack || a_errori_ack_flusso);
+    end if;
+
+    if a_esito_flusso is not null and a_num_esiti_applicativi = 0  then
+        for e in cur_errori_esito_flusso loop
+         a_errori_esito_flusso := a_errori_esito_flusso || '&lt;br>' || e.progr_errore || '. Codice ' || e.codice || ' - ' || e.descrizione;
+        end loop;
+        return('Flusso Elaborato da Siope Plus con stato: ' || a_stato_esito_flusso || a_errori_esito_flusso);
+    end if;
+    
+    if a_num_esiti_applicativi > 0 then
+        return('Flusso Elaborato dalla Tesoreria: apri la distinta per visualizzare i dettagli');
+    end if;
+
+ end if;
+
+ return ('Condizione da Verificare');
+END;</pre>	</td></tr>
+</table></div>
