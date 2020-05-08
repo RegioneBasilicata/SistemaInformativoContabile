@@ -40,7 +40,8 @@ Di seguito i documenti che accompagnano il codice
 
  1. Manuale di Gestione dell'Applicazione
  2. Manuale Utente
- 3. Script SQL per la creazione degli oggetti di Data Base
- 4. Dizionario dati DB
+ 3. [Script SQL per la creazione degli oggetti di Data Base](https://github.com/RegioneBasilicata/SistemaInformativoContabile/blob/master/SQL/SIC%20script%20DDL.sql)
+ 4. [File sorgente Apex dell'applicazione](https://github.com/RegioneBasilicata/SistemaInformativoContabile/blob/master/SQL/SIC_Application.sql.zip)
+ 5. [Dizionario dati DB](https://github.com/RegioneBasilicata/SistemaInformativoContabile/tree/master/SIC%20DB%20Documentation)
 
  
