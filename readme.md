@@ -5,7 +5,7 @@ E' un sistema integrato per la gestione dei processi amministrativi contabili re
 Il SIC è utilizzato, dalla Regione Basilicata, dal 2003 e via via evoluto a seconda delle esigenze normative e/o organizzative.
 Dal 2013 (a seguito dell'entrata in vigore del Decreto Legislativo 118/2011) il SIC viene utilizzato anche dagli Enti Strumentali della Regione Basilicata e dal Consiglio Regionale.
 Il Sistema è assimilabile ad un vero e proprio Enterprise Resource Planning (ERP) in quanto non gestisce solamente tutti gli aspetti contabili dell'Ente ma anche i processsi riguardanti Gestione Contratti, Gestione Patrimonio, ecc.
-Nella [brochure](www.latraccia.it) sono evidenziate le principali carattersitche del Sistema.
+Nella [brochure](https://github.com/RegioneBasilicata/SistemaInformativoContabile/blob/master/Documents/SIC_brochure.pdf) sono evidenziate le principali carattersitche del Sistema.
 
 ## Framework, tecnologie e linguaggi utilizzati
  - Oracle DataBase vers. 11 e superiori
