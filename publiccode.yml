@@ -65,8 +65,9 @@ localisation:
   localisationReady: false
 maintenance:
   contacts:
-    - email: alobefaro@latraccia.it
-      name: Angelo Lobefaro
+    - email: info@latraccia.it
+      name: 'Francesco Ferrante, Angelo Lobefaro'
+      phone: 0835336836
   contractors:
     - name: Cooperativa EDP La Traccia
       until: '2003-01-01'
@@ -92,3 +93,5 @@ usedBy:
   - Agenzia Regionale per l’Ambiente Basilicata
   - Agenzia Regionale per il Diritto allo Studio Universitario della Basilicata
   - Agenzia Regionale per il lavoro e le transizioni nella vita attiva (LAB)
+documentation: 'https://www.latraccia.it/prodotti/sic/'
+logo: 'Logo_SIC.png'
