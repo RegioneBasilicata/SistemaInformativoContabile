@@ -68,7 +68,7 @@ maintenance:
   contacts:
     - email: sic@latraccia.it
       name: 'Francesco Ferrante, Angelo Lobefaro'
-      phone: 0835336836
+      phone: '+390835336836'
   contractors:
     - name: Cooperativa EDP La Traccia
       until: '2003-01-01'
