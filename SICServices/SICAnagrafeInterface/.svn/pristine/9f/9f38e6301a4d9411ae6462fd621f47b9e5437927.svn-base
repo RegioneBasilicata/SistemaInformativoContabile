@@ -1,0 +1,1025 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Messaggio_Richiesta" type="MessaggioRichiesta_Types" />
+  <xs:complexType name="MessaggioRichiesta_Types">
+    <xs:sequence>
+      <xs:element name="Intestazione" type="Intestazione_Types">
+        <xs:annotation>
+          <xs:documentation>Header contenente informazioni su mittente, destinatario e tipo di richiesta
+					</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:sequence>
+        <xs:element name="Richiesta" type="Richiesta_Types">
+          <xs:annotation>
+            <xs:documentation>Contiene tutti i tipi di richiesta</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Intestazione_Types">
+    <xs:annotation>
+      <xs:documentation>    *******************************************************                   INIZIO DEFINIZIONE TIPI COMPOSTI                   *******************************************************      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="InfoMittDest" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Informazioni che identificano univocamente un mittente</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Applicazione" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Dati che identificano univocamente un'applicazione che utilizza il WS</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Richiesta_Types">
+    <xs:choice>
+      <xs:element name="InterrogaAnagrafica" type="InterrogaAnagrafica_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di interrogazione anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+	  <xs:element name="InterrogaAnagraficaContratti" type="InterrogaAnagraficaContratti_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di interrogazione anagrafica beneficiari associati ad un contratto</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="VerificaAnagrafica" type="VerificaAnagrafica_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di verifica con Anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CreaAnagrafica" type="CreaAnagrafica_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di creazione anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CreaSede" type="CreaSede_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di creazione della sede associata ad un anagrafica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CreaContoBancario" type="CreaContoBancario_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio per la creazione di un conto bancario associato ad una sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="InterrogaComuni" type="InterrogaComuni_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di interrogazione Comuni dell'Anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ModificaAnagrafica" type="ModificaAnagrafica_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di modifica dell' Anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ModificaSede" type="ModificaSede_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di modifica della sede di un' anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ModificaContoBancario" type="ModificaContoBancario_Types">
+        <xs:annotation>
+          <xs:documentation>Servizio di modifica del conto bancario di una sede dell' anagrafica SIC</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="InterrogaComuni_Types">
+    <xs:sequence>
+     <xs:element name="NomeComune" type="xs:string">
+       <xs:annotation>
+         <xs:documentation>Nome o parte del nome del Comune da ricercare</xs:documentation>
+       </xs:annotation>
+     </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="InterrogaAnagrafica_Types">
+    <xs:choice>
+      <xs:element name="IdAnagrafica">
+        <xs:annotation>
+          <xs:documentation>Identificativo Anagrafica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Denominazione" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Descrizione delle persone giuridiche o cognome e nome della persona fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="PartitaIva">
+        <xs:annotation>
+          <xs:documentation>Partita Iva</xs:documentation>
+        </xs:annotation>
+		<xs:simpleType>
+		 <xs:restriction base="xs:string">
+		  <xs:pattern value="\d{11}"/>
+		 </xs:restriction>
+		</xs:simpleType>      
+	  </xs:element>
+      <xs:element name="CodiceFiscale">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+	  <xs:element name="NumeroContratto" type="xs:string" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Numero del contratto</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+	</xs:choice>
+  </xs:complexType>
+  <xs:complexType name="InterrogaAnagraficaContratti_Types">
+    <xs:sequence>
+     <xs:element name="Chiave" type="xs:string" minOccurs="1" maxOccurs="unbounded">
+       <xs:annotation>
+         <xs:documentation>Chiave del contratto</xs:documentation>
+       </xs:annotation>
+     </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="VerificaAnagrafica_Types">
+    <xs:sequence>
+	  <xs:element name="Anagrafica" type="Anagrafica_Types">
+        <xs:annotation>
+          <xs:documentation>Anagrafica da verificare</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Anagrafica_Types">
+    <xs:sequence>
+      <xs:element name="TipoAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Tipo Anagrafica (= F o G)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="F" />
+            <xs:enumeration value="G" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="PartitaIva" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Partita Iva</xs:documentation>
+        </xs:annotation>
+		<xs:simpleType>
+		 <xs:restriction base="xs:string">
+		  <xs:pattern value="\d{11}"/>
+		 </xs:restriction>
+		</xs:simpleType>      
+	  </xs:element>
+      <xs:element name="Denominazione" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Descrizione delle persone giuridiche</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CognomeLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Cognome del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NomeLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SessoLR" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Sesso del Legale Rappresentante (= F o M)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="F" />
+            <xs:enumeration value="M" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="ComuneNSLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune di Nascita del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DataNascitaLR" type="xs:date" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Data di Nascita del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IndirizzoLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Indirizzo del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ComuneRESLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune di Residenza del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CAPRESLR" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CAP di Residenza del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="10" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CodiceFiscaleLR" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CodiceFiscale" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale Persona Fisica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Cognome" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Cognome della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Nome" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="AltriNomi" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Altri Nomi della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Sesso" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Sesso della Persona Fisica (= F o M)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="F" />
+            <xs:enumeration value="M" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="ComuneNS" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune di Nascita della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DataNascita" type="xs:date" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Data di Nascita della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Pignoramento" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Pignoramento (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="NotaPignoramento" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nota Pignoramento</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Estero" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Estero (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="Commissioni" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Commissioni (= S o N o E)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+            <xs:enumeration value="E" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="Sede" type="Sede_Types">
+        <xs:annotation>
+          <xs:documentation>Sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DatiBancari" type="DatiBancari_Types">
+        <xs:annotation>
+          <xs:documentation>Dati Bancari</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Sede_Types">
+    <xs:sequence>
+      <xs:element name="Indirizzo" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Indirizzo della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Comune" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CAP" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CAP della sede</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="10" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Telefono" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Telefono della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EMail" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>EMail della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Fax" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Telefono della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Bollo" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Bollo (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="NomeSede" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome della sede</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="15" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="TipoPagamento" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Tipologia del pagamento</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DatiBancari_Types">
+    <xs:sequence>
+      <xs:element name="NomeBanca" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome della Banca</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ContoCorrente" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Conto Corrente</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="240" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ModalitaPrincipale" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Modalità Principale (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="SedeAgenzia" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Sede dell'agenzia</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Indirizzo" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Indirizzo agenzia</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Citta" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Citta agenzia</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CAP" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CAP agenzia</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="5" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Provincia" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Provincia agenzia</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="2" />
+            <xs:maxLength value="2" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ABI" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>ABI agenzia</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="5" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CAB" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CAB agenzia</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="5" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CIN" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CIN agenzia</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="1" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="IBAN" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>IBAN</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="27" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CreaAnagrafica_Types">
+    <xs:sequence>
+	  <xs:element name="Anagrafica" type="Anagrafica_Types">
+        <xs:annotation>
+          <xs:documentation>Anagrafica da creare</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CodiceFiscaleOperatore" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale dell'utente del sistema che sta effettuando l'operazione</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CreaSede_Types">
+    <xs:sequence>
+      <xs:element name="IdAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo Anagrafica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Sede" type="Sede_Types">
+        <xs:annotation>
+          <xs:documentation>Sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DatiBancari" type="DatiBancari_Types">
+        <xs:annotation>
+          <xs:documentation>Dati Bancari</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CodiceFiscaleOperatore" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale dell'utente del sistema che sta effettuando l'operazione</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CreaContoBancario_Types">
+    <xs:sequence>
+      <xs:element name="IdAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo Anagrafica SIC</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="IdSede" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo Sede SIC</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="DatiBancari" type="DatiBancari_Types">
+        <xs:annotation>
+          <xs:documentation>Dati Bancari</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CodiceFiscaleOperatore" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale dell'utente del sistema che sta effettuando l'operazione</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ModificaAnagrafica_Types">
+    <xs:sequence>
+      <xs:element name="IdAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo Anagrafica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="TipoAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Tipo Anagrafica (= F o G)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="F" />
+            <xs:enumeration value="G" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="PartitaIva" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Partita Iva</xs:documentation>
+        </xs:annotation>
+		<xs:simpleType>
+		 <xs:restriction base="xs:string">
+		  <xs:pattern value="\d{11}"/>
+		 </xs:restriction>
+		</xs:simpleType>      
+	  </xs:element>
+      <xs:element name="Denominazione" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Descrizione delle persone giuridiche</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CognomeLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Cognome del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NomeLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SessoLR" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Sesso del Legale Rappresentante (= F o M)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="F" />
+            <xs:enumeration value="M" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="ComuneNSLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune di Nascita del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DataNascitaLR" type="xs:date" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Data di Nascita del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IndirizzoLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Indirizzo del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ComuneRESLR" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune di Residenza del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CAPRESLR" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CAP di Residenza del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="10" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CodiceFiscaleLR" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale del Legale Rappresentante</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CodiceFiscale" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale Persona Fisica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Cognome" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Cognome della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Nome" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="AltriNomi" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Altri Nomi della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Sesso" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Sesso della Persona Fisica (= F o M)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="F" />
+            <xs:enumeration value="M" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="ComuneNS" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune di Nascita della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DataNascita" type="xs:date" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Data di Nascita della Persona Fisica</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Pignoramento" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Pignoramento (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="NotaPignoramento" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nota Pignoramento</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Estero" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Estero (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="Commissioni" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Commissioni (= S o N o E)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+            <xs:enumeration value="E" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="CodiceFiscaleOperatore" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale dell'utente del sistema che sta effettuando l'operazione</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ModificaSede_Types">
+    <xs:sequence>
+      <xs:element name="IdAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo Anagrafica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="IdSede" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo della sede</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Indirizzo" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Indirizzo della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Comune" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Comune della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CAP" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CAP della sede</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="10" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="Telefono" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Telefono della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EMail" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>EMail della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Fax" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Telefono della sede</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Bollo" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Bollo (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="NomeSede" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Nome della sede</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="15" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="TipoPagamento" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Tipologia del pagamento</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CodiceFiscaleOperatore" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale dell'utente del sistema che sta effettuando l'operazione</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ModificaContoBancario_Types">
+    <xs:sequence>
+      <xs:element name="IdAnagrafica" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo Anagrafica</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="IdSede" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo della sede</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="IdContoCorrente" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Identificativo del conto corrente</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{10}" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ContoCorrente" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Conto Corrente</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="240" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ModalitaPrincipale" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Modalità Principale (= S o N)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="S" />
+            <xs:enumeration value="N" />
+		  </xs:restriction>
+		</xs:simpleType>
+      </xs:element>
+      <xs:element name="CIN" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>CIN agenzia</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="1" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="IBAN" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>IBAN</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="27" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CodiceFiscaleOperatore" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice Fiscale dell'utente del sistema che sta effettuando l'operazione</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9]){16}" />
+            <xs:minLength value="16" />
+            <xs:maxLength value="16" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+</xs:schema>

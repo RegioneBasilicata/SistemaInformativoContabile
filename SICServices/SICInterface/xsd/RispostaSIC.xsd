@@ -1,0 +1,1370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Created with Liquid XML Studio - 30 Day Trial Edition 7.1.6.1440 (http://www.liquid-technologies.com)-->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="Messaggio_Risposta" type="MessaggioRisposta_Types"/>
+	<xs:complexType name="MessaggioRisposta_Types">
+		<xs:sequence>
+			<xs:element name="Intestazione" type="Intestazione_Types">
+				<xs:annotation>
+					<xs:documentation>Header contenente informazioni su mittente, destinatario e tipo di richiesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice>
+				<xs:element name="Successo" type="Successo_Types">
+					<xs:annotation>
+						<xs:documentation>Contiene tutti i tipi di ritorno in caso di successo</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Eccezione" type="Eccezione_Types">
+					<xs:annotation>
+						<xs:documentation>Rappresenta un generico messaggio di errore</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Intestazione_Types">
+		<xs:annotation>
+			<xs:documentation>*******************************************************                   INIZIO DEFINIZIONE TIPI COMPOSTI                   *******************************************************</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="InfoMittDest" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Informazioni che identificano univocamente un mittente</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Applicazione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Dati che identificano univocamente un'applicazione che utilizza il WS</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Eccezione_Types">
+		<xs:sequence>
+			<xs:element name="Codice" type="xs:integer">
+				<xs:annotation>
+					<xs:documentation>Codifica errore</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Descrizione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Descrizione dell'errore</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="Exception" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Dettaglio tecnico dell'eccezione</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Successo_Types">
+		<xs:choice>
+			<xs:element name="Risposta_InterrogazioneCapitoli" type="Risposta_InterrogazioneCapitoli_Types"/>
+			<xs:element name="Risposta_InterrogazioneCapitoliLiquidazioni" type="Risposta_InterrogazioneCapitoli_Types"/>
+			<xs:element name="Risposta_InterrogazioneBilancio" type="Risposta_InterrogazioneBilancio_Types"/>
+			<xs:element name="Risposta_InterrogazioneObiettiviGestionali" type="Risposta_InterrogazioneObiettiviGestionali_Types"/>
+			<xs:element name="Risposta_DisponibilitaPreImpegno" type="Risposta_DisponibilitaPreImpegno_Types"/>
+			<xs:element name="Risposta_InterrogazionePreimpegniAperti" type="Risposta_InterrogazionePreimpegniAperti_Types"/>
+			<xs:element name="Risposta_InterrogazioneImpegniAperti" type="Risposta_InterrogazioneImpegniAperti_Types"/>
+			<xs:element name="Risposta_InterrogazioneLiquidazioniAperte" type="Risposta_InterrogazioneLiquidazioniAperte_Types"/>
+			<xs:element name="Risposta_InterrogazioneImpegniPerenti" type="Risposta_InterrogazioneImpegniPerenti_Types"/>
+			<xs:element name="Risposta_PrenotazionePreimpegni" type="Risposta_PrenotazionePreimpegni_Types"/>
+			<xs:element name="Risposta_CreateDelDocumento" type="Risposta_CreateDelDocumento_Types"/>
+			<xs:element name="Risposta_DisponibilitaImpegno" type="Risposta_DisponibilitaImpegno_Types"/>
+			<xs:element name="Risposta_InterrogaTipologiaReddito" type="Risposta_InterrogaTipologiaReddito_Types"/>
+			<xs:element name="Risposta_InterrogaCodiceSiope" type="Risposta_InterrogaCodiceSiope_Types"/>
+			<xs:element name="Risposta_InterrogaCapitoloEntrata" type="Risposta_InterrogaCapitoloEntrata_Types"/>
+			<xs:element name="Risposta_InterrogaReversaliCollegabili" type="Risposta_InterrogaReversaliCollegabili_Types"/>
+			<xs:element name="Risposta_InterrogaBeneficiariLiq" type="Risposta_InterrogaBeneficiariLiq_Types"/>
+			<xs:element name="Risposta_InterrogaMandatiBeneficiariAtto" type="Risposta_InterrogaMandatiBeneficiariAtto_Types"/>
+			<xs:element name="Risposta_InterrogazionePCF" type="Risposta_InterrogazionePCF_Types"/>
+			<xs:element name="Risposta_InterrogazioneMandatiTrasparenza" type="Risposta_InterrogazioneMandatiTrasparenza_Types"/>
+			<xs:element name="Risposta_InterrogazioneContratti" type="Risposta_InterrogazioneContratti_Types"/>
+			<xs:element name="Risposta_InterrogazioneListaContratti" type="Risposta_InterrogazioneContratti_Types"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="COG_Type">
+		<xs:sequence>
+			<xs:element name="Codice">
+				<xs:annotation>
+					<xs:documentation>Codice dell'Obiettivo Gestionale</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Descrizione">
+				<xs:annotation>
+					<xs:documentation>Descrizione dell'Obiettivo Gestionale</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="255"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ListaCOG_Type">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="COG" type="COG_Type">
+				<xs:annotation>
+					<xs:documentation>Lista dei Codici Obiettivi Gestionali</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CodiceSiope_Type">
+		<xs:sequence>
+			<xs:element name="Codice">
+				<xs:annotation>
+					<xs:documentation>Codice SIOPE</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="4"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Descrizione">
+				<xs:annotation>
+					<xs:documentation>Descrizione del Codice Siope</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="255"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PCF_Type">
+		<xs:sequence>
+			<xs:element name="Codice">
+				<xs:annotation>
+					<xs:documentation>Codice del Piano dei Conti Finanziario</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="20"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Descrizione">
+				<xs:annotation>
+					<xs:documentation>Descrizione del Codice PCF</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="255"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_VerificaStato_Types">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" name="Attivo" type="xs:string">
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="MotivoNonAttivo" type="xs:string">
+				
+					</xs:element>
+
+					</xs:sequence>
+					</xs:complexType>
+					
+	<xs:complexType name="Risposta_InterrogazioneCapitoli_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Capitolo">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="AnnoBilancio" type="xs:gYear">
+							<xs:annotation>
+								<xs:documentation>Anno del bilancio</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CodiceCapitolo">
+							<xs:annotation>
+								<xs:documentation>Codice del capitolo: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="U\d{5}"/>
+									<xs:minLength value="6"/>
+									<xs:maxLength value="6"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DescrizioneCapitolo">
+							<xs:annotation>
+								<xs:documentation>Descrizione del capitolo</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="255"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Perenti" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Indica se perente o meno</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="UPB">
+							<xs:annotation>
+								<xs:documentation>Codice UPB</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="7"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="MissioneProgramma" type="xs:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Missione e Programma</xs:documentation>
+							</xs:annotation>
+							
+						</xs:element>
+						<xs:element name="DisponibilitaCompetenza" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Disponibilita Competenza</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="DisponibilitaCassa" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Disponibilita Cassa</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CodiceRisposta" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Codice Risposta</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="DescrizioneRisposta" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Descrizione Risposta</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneBilancio_Types">
+		<xs:sequence>
+			<xs:element name="AnnoBilancio" type="xs:gYear">
+				<xs:annotation>
+					<xs:documentation>Anno del bilancio</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CodiceCapitolo">
+				<xs:annotation>
+					<xs:documentation>Codice del capitolo: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="U\d{5}"/>
+						<xs:minLength value="6"/>
+						<xs:maxLength value="6"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="DescrizioneCapitolo">
+				<xs:annotation>
+					<xs:documentation>Descrizione del capitolo</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="255"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Perenti" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Indica se perente o meno</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="POR">
+				<xs:annotation>
+					<xs:documentation>POR</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="S|N"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContoEconomica1">
+				<xs:annotation>
+					<xs:documentation>Conto di Economica 1</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContoEconomica2">
+				<xs:annotation>
+					<xs:documentation>Conto di Economica 2</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContoEconomica3">
+				<xs:annotation>
+					<xs:documentation>Conto di Economica 3</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContoEconomica4">
+				<xs:annotation>
+					<xs:documentation>Conto di Economica 4</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContoEconomica5">
+				<xs:annotation>
+					<xs:documentation>Conto di Economica 5</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Competenza" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Competenza</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Residuo" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Residuo</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Cassa" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Cassa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PreImpegni" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Pre-Impegni</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Impegni" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Impegni</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Mandati" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Mandati</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DispCompetenza" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Disponibilita' di competenza</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DispCassa" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Disponibilita' di cassa</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ListaCOG" type="ListaCOG_Type">
+				<xs:annotation>
+					<xs:documentation>Lista dei Codici Obiettivi Gestionali</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<!-- simonebrunox 06/02/2017: aggiunti campi di Risposta_InterrogazioneCapitoli su richiesta di Stefania Prudente -->
+			<xs:element name="MissioneProgramma" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Missione e Programma</xs:documentation>
+				</xs:annotation>							
+			</xs:element>
+			<xs:element name="CodiceRisposta" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Codice Risposta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DescrizioneRisposta" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Descrizione Risposta</xs:documentation>
+				</xs:annotation>
+			</xs:element>		
+			<!-- simonebrunox 06/02/2017: aggiunti campi di Risposta_InterrogazioneCapitoli su richiesta di Stefania Prudente -->	
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneObiettiviGestionali_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="ObiettivoGestionale" type="COG_Type">
+				<xs:annotation>
+					<xs:documentation>Codice e descrizione dell'Obiettivo Gestionale</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_DisponibilitaPreImpegno_Types">
+		<xs:sequence>
+			<xs:element name="Disponibilita" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Disponibilita' sul pre-impegno</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DataPreimpegno" type="xs:date">
+				<xs:annotation>
+					<xs:documentation>Data del preimpegno</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CodiceCapitolo">
+				<xs:annotation>
+					<xs:documentation>Codice del capitolo: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="U\d{5}"/>
+						<xs:minLength value="6"/>
+						<xs:maxLength value="6"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="UPB">
+				<xs:annotation>
+					<xs:documentation>Codice UPB</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="7"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MissioneProgramma" type="xs:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Missione e Programma</xs:documentation>
+							</xs:annotation>
+							
+						</xs:element>
+			<xs:element name="TipoAtto">
+				<xs:annotation>
+					<xs:documentation>Tipo dell'atto</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="15"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="DataAtto" type="xs:date">
+				<xs:annotation>
+					<xs:documentation>Data dell'atto</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="NumeroAtto">
+				<xs:annotation>
+					<xs:documentation>Numero dell'atto</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-99999999999999999999]"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="OggettoPreimpegno">
+				<xs:annotation>
+					<xs:documentation>Oggetto del Pre-Impegno</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="240"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_CreateDelDocumento_Types">
+		<xs:sequence>
+			<xs:element name="NumeroDocumento" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Numero del documento generato/eliminato/di variazione/sostituito</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{9}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="NumeroDocumento_Plur1">
+				<xs:annotation>
+					<xs:documentation>Numero del documento generato/eliminato/di variazione/sostituito Pluriennale 1</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{9}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="NumeroDocumento_Plur2">
+				<xs:annotation>
+					<xs:documentation>Numero del documento generato/eliminato/di variazione/sostituito Pluriennale 2</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{9}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="NumeroStorno">
+				<xs:annotation>
+					<xs:documentation>Numero del documento di storno nel caso di sostituzione (opzionale)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{9}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="DocId" type="xs:int" maxOccurs="1" minOccurs="0"></xs:element>
+			<xs:element name="DocId1" type="xs:int" maxOccurs="1" minOccurs="0"></xs:element>
+			<xs:element name="DocId2" type="xs:int" maxOccurs="1" minOccurs="0"></xs:element>
+			<xs:element name="Messaggio" type="xs:string" maxOccurs="1" minOccurs="0"></xs:element>			
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazionePreimpegniAperti_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Preimpegno">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="DataPreimpegno" type="xs:date">
+							<xs:annotation>
+								<xs:documentation>Data del pre-impegno</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="NumeroPreimpegno">
+							<xs:annotation>
+								<xs:documentation>Numero del pre-impegno</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="ImportoIniziale" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo iniziale</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ImportoDisponibile" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo disponibile</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="OggettoPreimpegno">
+							<xs:annotation>
+								<xs:documentation>Oggetto del pre-impegno</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="240"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="TipoAtto">
+							<xs:annotation>
+								<xs:documentation>Tipo dell'atto</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="15"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DataAtto" type="xs:date">
+							<xs:annotation>
+								<xs:documentation>Data dell'atto</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="NumeroAtto">
+							<xs:annotation>
+								<xs:documentation>Numero dell'atto</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-99999999999999999999]"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="PCF" type="PCF_Type"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneImpegniAperti_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Impegno">
+				<xs:complexType>
+					<xs:sequence>
+					    <xs:element name="Utilizzabile" type="xs:string" minOccurs="0" maxOccurs="1">
+							<xs:annotation>
+								<xs:documentation>Impegno utilizzabile Si (S) o No (N)</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="MotivoNonUtilizzabile" type="xs:string" minOccurs="0" maxOccurs="1">
+							<xs:annotation>
+								<xs:documentation>Motivo dell'Impegno non utilizzabile</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="TipoImpegno" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Tipo dell'impegno</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="DataImpegno" type="xs:date">
+							<xs:annotation>
+								<xs:documentation>Data dell'impegno</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="NumeroImpegno">
+							<xs:annotation>
+								<xs:documentation>Numero dell'impegno</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="ImportoIniziale" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo iniziale</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ImportoDisponibile" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo disponibile</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="OggettoImpegno">
+							<xs:annotation>
+								<xs:documentation>Oggetto dell'Impegno</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="240"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="TipoAtto">
+							<xs:annotation>
+								<xs:documentation>Tipo dell'atto</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="15"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DataAtto" type="xs:date">
+							<xs:annotation>
+								<xs:documentation>Data dell'atto</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="NumeroAtto">
+							<xs:annotation>
+								<xs:documentation>Numero dell'atto</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-99999999999999999999]"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="COG_Semplice">
+							<xs:annotation>
+								<xs:documentation>Codice Obiettivo Gestionale</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="10"/>
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="PCF" type="PCF_Type"/>
+
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneLiquidazioniAperte_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Liquidazione">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Numero">
+							<xs:annotation>
+								<xs:documentation>Numero della liquidazione</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Oggetto">
+							<xs:annotation>
+								<xs:documentation>Oggetto della liquidazione</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="240"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Capitolo">
+							<xs:annotation>
+								<xs:documentation>Codice del capitolo della liquidazione: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="U\d{5}"/>
+									<xs:minLength value="6"/>
+									<xs:maxLength value="6"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Importo" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo della liquidazione</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ImportoResiduo" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo residuo della liquidazione</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneImpegniPerenti_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="ImpegnoPerente">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Numero">
+							<xs:annotation>
+								<xs:documentation>Numero dell'impegno in perenzione</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Oggetto">
+							<xs:annotation>
+								<xs:documentation>Oggetto dell'Impegno in perenzione</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="240"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="CapitoloOriginario">
+							<xs:annotation>
+								<xs:documentation>Codice del capitolo originario: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="U\d{5}"/>
+									<xs:minLength value="6"/>
+									<xs:maxLength value="6"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="CapitoloAttuale">
+							<xs:annotation>
+								<xs:documentation>Codice del capitolo attuale: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="U\d{5}"/>
+									<xs:minLength value="6"/>
+									<xs:maxLength value="6"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="ImportoOriginario" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo originario</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ImportoResiduo" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo residuo</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="PCF" type="PCF_Type"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_PrenotazionePreimpegni_Types">
+		<xs:sequence>
+			<xs:element name="Codice" type="xs:integer">
+				<xs:annotation>
+					<xs:documentation>Codifica risposta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Descrizione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Descrizione della risposta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_DisponibilitaImpegno_Types">
+		<xs:sequence>
+			<xs:element name="Disponibilita" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Disponibilita' su impegno</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CodiceCapitolo">
+				<xs:annotation>
+					<xs:documentation>Codice del capitolo: Uxxxxx (lettera U seguita da 5 cifre) – Uscite</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="U\d{5}"/>
+						<xs:minLength value="6"/>
+						<xs:maxLength value="6"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="OggettoImpegno">
+				<xs:annotation>
+					<xs:documentation>Oggetto del Impegno</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="240"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Perenti" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Indica se perente o meno</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Importo" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Importo</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="COG_Semplice">
+				<xs:annotation>
+					<xs:documentation>Codice Obiettivo Gestionale assegnato</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="10"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			
+			<!-- simonebrunox 16/06/2017: esposizione beneficiari dell'impegno -->
+		    <xs:element name="Beneficiario" minOccurs="0" maxOccurs="unbounded">
+		      <xs:complexType>
+				<xs:sequence>
+					<xs:element name="IdBeneficiario">
+						<xs:annotation>
+							<xs:documentation>Codice del beneficiario</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:pattern value="[0-9999999999]"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="DescrizioneBeneficiario" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Descrizione beneficiario</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="IdSede">
+						<xs:annotation>
+							<xs:documentation>Codice della sede del beneficiario</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:pattern value="[0-9999999999]"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="ImportoOriginario" type="xs:double">
+						<xs:annotation>
+							<xs:documentation>Importo Originario</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="ImportoResiduo" type="xs:double">
+						<xs:annotation>
+							<xs:documentation>Importo Residuo</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="InfoAggiuntiveBeneficiario">
+				    	<xs:complexType>
+							<xs:sequence>
+								<xs:element name="TipoAnagrafica">
+									<xs:annotation>
+										<xs:documentation>F=Persona Fisica, G=Persona Giuridica</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:maxLength value="1"/>											
+										</xs:restriction>
+									</xs:simpleType>								
+								</xs:element>
+								<xs:element minOccurs="0" name="PartitaIva" type="xs:string"/>
+								<xs:element minOccurs="0" name="CodiceFiscale" type="xs:string"/>
+								<xs:element minOccurs="0" name="NomeSede" type="xs:string"/>
+								<xs:element minOccurs="0" name="IndirizzoSede" type="xs:string"/>	
+								<xs:element minOccurs="0" name="NomeMetodoPagamento" type="xs:string"/>
+								<xs:element minOccurs="0" name="InfoAggiuntive" type="xs:string"/>									
+								<xs:element minOccurs="0" name="MetodoPagamento" type="xs:string"/>								
+								<xs:element minOccurs="0" name="ContoBancario" type="xs:string"/>
+								<xs:element minOccurs="0" name="Iban" type="xs:string"/>
+								<xs:element minOccurs="0" name="IdDelegato" type="xs:string"/>																						
+								<xs:element minOccurs="0" name="AnagraficaDelegato" type="xs:string"/>
+								<xs:element minOccurs="0" name="CodiceFiscaleDelegato" type="xs:string"/>
+								<xs:element minOccurs="0" name="IdSedeDelegato" type="xs:string"/>
+								<xs:element minOccurs="0" name="ContoBancarioDelegato" type="xs:string"/>
+								<xs:element minOccurs="0" name="IbanDelegato" type="xs:string"/>
+								<xs:element minOccurs="0" name="Commissioni" type="xs:string"/>
+								<xs:element minOccurs="0" name="Bollo" type="xs:string"/>
+								<xs:element minOccurs="0" name="CodiceCup" type="xs:string"/>
+								<xs:element minOccurs="0" name="CodiceCig" type="xs:string"/>
+								<xs:element minOccurs="0" name="DatoSensibile" type="xs:string"/>									
+							</xs:sequence>
+						</xs:complexType>	
+					</xs:element>
+				</xs:sequence>
+		      </xs:complexType>
+		    </xs:element>
+			<!-- simonebrunox 16/06/2017: esposizione beneficiari dell'impegno -->
+									
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaTipologiaReddito_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Tipologia">
+				<xs:annotation>
+					<xs:documentation>Elenco delle tipologie di reddito</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Codice">
+							<xs:annotation>
+								<xs:documentation>Codice Tipologia Reddito</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="15"/>
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Descrizione">
+							<xs:annotation>
+								<xs:documentation>Descrizione Tipologia Reddito</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="50"/>
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaCodiceSiope_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Siope">
+				<xs:annotation>
+					<xs:documentation>Elenco dei codici Siope</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Codice">
+							<xs:annotation>
+								<xs:documentation>Codice gestionale Siope</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="4"/>
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Descrizione">
+							<xs:annotation>
+								<xs:documentation>Descrizione Codice Gestionale Siope</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="500"/>
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaCapitoloEntrata_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Capitolo">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="AnnoBilancio" type="xs:gYear">
+							<xs:annotation>
+								<xs:documentation>Anno del bilancio</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CodiceCapitolo">
+							<xs:annotation>
+								<xs:documentation>Codice del capitolo: Exxxxx (lettera E seguita da 5 cifre) – Entrate</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="E\d{5}"/>
+									<xs:minLength value="6"/>
+									<xs:maxLength value="6"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DescrizioneCapitolo">
+							<xs:annotation>
+								<xs:documentation>Descrizione del capitolo</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="255"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaReversaliCollegabili_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Reversale">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Numero">
+							<xs:annotation>
+								<xs:documentation>Numero della reversale</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Importo" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo della reversale</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaBeneficiariLiq_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Beneficiario">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="IdBeneficiario">
+							<xs:annotation>
+								<xs:documentation>Codice del beneficiario</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9999999999]"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="IdSede">
+							<xs:annotation>
+								<xs:documentation>Codice della sede del beneficiario</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9999999999]"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="ImportoOriginario" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo Originario</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="ImportoResiduo" type="xs:double">
+							<xs:annotation>
+								<xs:documentation>Importo Residuo</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneMandatiTrasparenza_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Mandato">
+				<xs:annotation>
+					<xs:documentation>Mandato</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+
+						<xs:element minOccurs="0" maxOccurs="1" name="NumeroMandato">
+							<xs:annotation>
+								<xs:documentation>Numero del Mandato</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element minOccurs="0" maxOccurs="1" name="DataMandato" type="xs:date">
+							<xs:annotation>
+								<xs:documentation>Data del Mandato</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="TipoAtto" type="xs:string"/>
+						<xs:element minOccurs="0" name="NumeroAtto" type="xs:string"/>
+						<xs:element minOccurs="0" name="DataAtto" type="xs:date"/>
+						<xs:element minOccurs="0" name="Ufficio" type="xs:string"/>
+						<xs:element minOccurs="0" name="IdProvvedimento" type="xs:string"/>
+						<xs:element minOccurs="0" name="IdLiquidazione" type="xs:string"/>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Beneficiario">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" name="NomeFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="CodiceFiscalePartitaIvaFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="IndirizzoFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="ImportoLordoBeneficiario" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImportoRitenuteBeneficiario" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImportoNettoBeneficiario" type="xs:double"/>
+									<xs:element minOccurs="0" name="IdFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="CodiceSedeFornitore" type="xs:string"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneContratti_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Contratto">
+				<xs:annotation>
+					<xs:documentation>Contratto</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+
+						<xs:element minOccurs="0" maxOccurs="1" name="Chiave" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Chiave contratto</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="NumeroRepertorio" type="xs:string"/>
+
+						<xs:element minOccurs="0" name="Descrizione" type="xs:string">
+							<xs:annotation>
+								<xs:documentation>Descrizione del Contratto</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="CodiceCup" type="xs:string"/>
+						<xs:element minOccurs="0" name="CodiceCig" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaMandatiBeneficiariAtto_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Mandato">
+				<xs:annotation>
+					<xs:documentation>Codice del Documento</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="1" name="IdDocumento">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element minOccurs="0" maxOccurs="1" name="NumeroMandato">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:pattern value="[0-9]{9}"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element minOccurs="0" maxOccurs="1" name="DataEmissioneMandato" type="xs:date">
+							<xs:annotation>
+								<xs:documentation>Data emissione del Mandato</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="ValidoAnnullato" type="xs:string"/>
+						<xs:element minOccurs="0" name="NumeroStorno" type="xs:long"/>
+						<xs:element minOccurs="0" name="DataStorno" type="xs:date"/>
+						<xs:element minOccurs="0" name="ImportoTotaleMandato" type="xs:double"/>
+						<xs:element minOccurs="0" name="OggettoMandato" type="xs:string"/>
+						<xs:element minOccurs="0" name="NumeroLiquidazione" type="xs:long"/>
+						<xs:element minOccurs="0" name="NumeroImpegno" type="xs:long"/>
+						<xs:element minOccurs="0" name="NumeroImpegnoRifPerEnte" type="xs:long"/>
+						<xs:element minOccurs="0" name="ImportoImpegno" type="xs:double"/>
+						<xs:element minOccurs="0" name="TipoImpegno" type="xs:string"/>
+						<xs:element minOccurs="0" name="EsercizioMandato" type="xs:int"/>
+						<xs:element minOccurs="0" name="EsercizioImpegno" type="xs:int"/>
+						<xs:element minOccurs="0" name="EsercizioImpegnoRifPerEnte" type="xs:int"/>
+						<xs:element minOccurs="0" name="Dipartimento" type="xs:string"/>
+						<xs:element minOccurs="0" name="TipoAttoLiq" type="xs:string"/>
+						<xs:element minOccurs="0" name="NumeroAttoLiq" type="xs:string"/>
+						<xs:element minOccurs="0" name="DataAttoLiq" type="xs:date"/>
+						<xs:element minOccurs="0" name="TipoAttoImp" type="xs:string"/>
+						<xs:element minOccurs="0" name="NumeroAttoImp" type="xs:string"/>
+						<xs:element minOccurs="0" name="DataAttoImp" type="xs:date"/>
+						<xs:element minOccurs="0" name="NumeroDistinta" type="xs:long"/>
+						<xs:element minOccurs="0" name="Incarico" type="xs:string"/>
+						<xs:element minOccurs="0" name="DataIncarico" type="xs:date"/>
+						<xs:element minOccurs="0" name="DataQuietanza" type="xs:date"/>
+						<xs:element minOccurs="0" name="NumeroQuietanza" type="xs:long"/>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Beneficiario">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" name="NomeFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="DataNascitaFornitore" type="xs:date"/>
+									<xs:element minOccurs="0" name="CodiceFiscaleFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="PartitaIvaFornitore" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>Importo Residuo</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="RappresentanteLegale" type="xs:string"/>
+									<xs:element minOccurs="0" name="CodiceFiscaleRappresentanteLegale" type="xs:string"/>
+									<xs:element minOccurs="0" name="DataNascitaRappresentanteLegale" type="xs:date"/>
+									<xs:element minOccurs="0" name="IndirizzoFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="CittaFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="ProvinciaFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="CapFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="NazioneFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="StatoFornitore" type="xs:string"/>
+									<xs:element minOccurs="0" name="ImportoLordoBeneficiario" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImportoNettoBeneficiario" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImponibileIrpef" type="xs:double"/>
+									<xs:element minOccurs="0" name="RitenutaIrpef" type="xs:double"/>
+									<xs:element minOccurs="0" name="AddizionaleComunale" type="xs:double"/>
+									<xs:element minOccurs="0" name="AddizionaleRegionale" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImponibilePrevidenziale" type="xs:double"/>
+									<xs:element minOccurs="0" name="RitenutePrevidenzialiEnte" type="xs:double"/>
+									<xs:element minOccurs="0" name="RitenutePrevidenzialiBeneficiario" type="xs:double"/>
+									<xs:element minOccurs="0" name="AltreRitenute" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImponibileIrap" type="xs:double"/>
+									<xs:element minOccurs="0" name="ImpostaIrap" type="xs:double"/>
+									<xs:element minOccurs="0" name="MetodoPagamento" type="xs:string"/>
+									<xs:element minOccurs="0" name="InfoPagamento" type="xs:string"/>
+									<xs:element minOccurs="0" name="InfoAggiuntive" type="xs:string"/>
+									<xs:element minOccurs="0" name="ContoCorrente" type="xs:string"/>
+									<xs:element minOccurs="0" name="IBAN" type="xs:string"/>
+									<xs:element minOccurs="0" name="ABI" type="xs:string"/>
+									<xs:element minOccurs="0" name="CAB" type="xs:string"/>
+									<xs:element minOccurs="0" name="Banca" type="xs:string"/>
+									<xs:element minOccurs="0" name="IndirizzoBanca" type="xs:string"/>
+									<xs:element minOccurs="0" name="CittaBanca" type="xs:string"/>
+									<xs:element minOccurs="0" name="NazioneBanca" type="xs:string"/>
+									<xs:element minOccurs="0" name="CapBanca" type="xs:string"/>
+									<xs:element minOccurs="0" name="ProvinciaBanca" type="xs:string"/>
+									<xs:element minOccurs="0" name="DescrizionePagamentoTesoriere" type="xs:string"/>
+									<xs:element minOccurs="0" name="CodiceCup" type="xs:string"/>
+									<xs:element minOccurs="0" name="CodiceCig" type="xs:string"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazioneCodiciSiope_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="CodiceSiope" type="CodiceSiope_Type">
+				<xs:annotation>
+					<xs:documentation>Codice e descrizione dell'elemento SIOPE</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogazionePCF_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="PianoDeiContiFina" type="PCF_Type">
+				<xs:annotation>
+					<xs:documentation>Codice e descrizione del Piano dei Conti Finanziario</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

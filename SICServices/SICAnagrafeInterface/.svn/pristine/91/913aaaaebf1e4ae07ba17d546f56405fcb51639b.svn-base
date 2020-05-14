@@ -1,0 +1,457 @@
+package it.latraccia.ws.unittest;
+
+import java.io.UnsupportedEncodingException;
+
+import it.latraccia.ws.SICAnagrafeInterface;
+
+/**
+ *
+ * Classe di test di unit� per il POJO it.latraccia.ws.SICInterface
+ * Ha lo scopo di testare la classe che rappresenta il web service al di fuori del 
+ * SOAP Engine
+ *
+ * @author Vincenzo Gioviale
+ *  
+ */
+public class TestPojo 
+{
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) 
+	{
+		SICAnagrafeInterface si = new SICAnagrafeInterface();
+
+		/*
+		String toSend = "<?xml version=\"1.0\"?>" +
+				"<Messaggio_Richiesta>" +
+				"    <Intestazione>" +
+				"        <InfoMittDest>Intema</InfoMittDest>" +
+				"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+				"    </Intestazione>" +
+				"    <Richiesta>" +
+				"       <InterrogaAnagrafica>" +
+				"            <!--<Denominazione>INTEMA</Denominazione>-->" +
+				"            <IdAnagrafica>60</IdAnagrafica>" +
+				"            <!--<PartitaIva>00317370773</PartitaIva>-->" +
+				"            <!--<CodiceFiscale>FEODTL82D64L738T</CodiceFiscale>--> " +
+				"            <!--<NumeroContratto>0210002</NumeroContratto>-->" +
+				"       </InterrogaAnagrafica>" +
+				"    </Richiesta>" +
+				"</Messaggio_Richiesta>";
+		 */
+		
+		/*
+		String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"       <InterrogaAnagraficaContratti>" +
+		"      		 <Chiave>0060002</Chiave> " +
+		"     		 <Chiave>0120001</Chiave> " +
+		"      		 <Chiave>0040001</Chiave> " +
+		"       </InterrogaAnagraficaContratti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";
+		*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"   <Intestazione>" +
+		"		<InfoMittDest>Intema</InfoMittDest>" +
+		"		<Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"	</Intestazione>" +
+		"	<Richiesta>" +
+		"		<VerificaAnagrafica>" +
+		"			<Anagrafica>" +
+		"				<TipoAnagrafica>G</TipoAnagrafica>" +
+		"				<PartitaIva>00317370773</PartitaIva>" +
+		"				<!--<Denominazione>COOPERATIVA EDP LA TRACCIA</Denominazione>-->" +
+		"				<!--<SessoLR>M</SessoLR>-->" +
+		"				<!--<ComuneNSLR>MATERA</ComuneNSLR>-->" +
+		"				<!--<ComuneRESLR>MATERA</ComuneRESLR>-->" +
+		"				<!--<Commissioni>N</Commissioni>-->" +
+		"				<Sede>" +
+		"					<Indirizzo>RECINTO II FIORENTINI, 10</Indirizzo>" +
+		"					<Comune>MATERA</Comune>" +
+		"					<CAP>75100</CAP>" +
+		"					<!--<Bollo>S</Bollo>-->" +
+		"					<NomeSede>SEDE N. 1</NomeSede>" +
+		"					<TipoPagamento>Accredito su c/c bancario</TipoPagamento>" +
+		"				</Sede>" +
+		"				<DatiBancari>" +
+		"					<!--<NomeBanca>BANCA POPOLARE DI BARI</NomeBanca>-->" +
+		"					<ContoCorrente>000000156219</ContoCorrente>" +
+		"					<!--<ModalitaPrincipale>N</ModalitaPrincipale>-->" +
+		"					<!--<SedeAgenzia>AGENZIA DI MATERA</SedeAgenzia>-->" +
+		"					<!--<Indirizzo>VIA ROMA, 35</Indirizzo>-->" +
+		"					<!--<Citta>MATERA</Citta>-->" +
+		"					<!--<ABI>05424</ABI>-->" +
+		"					<!--<CAB>16101</CAB>-->" +
+		"					<!--<CIN>B</CIN>-->" +
+		"					<!--<IBAN>IT77B0542416101000000156219</IBAN>-->" +
+		"				</DatiBancari>" +
+		"			</Anagrafica>" +
+		"		</VerificaAnagrafica>" +
+		"	</Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+				"<Messaggio_Richiesta>" +
+				"    <Intestazione>" +
+				"        <InfoMittDest>Intema</InfoMittDest>" +
+				"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+				"    </Intestazione>" +
+				"    <Richiesta>" +
+				"        <CreaAnagrafica>" +
+				"            <Anagrafica>" +
+				"                <TipoAnagrafica>F</TipoAnagrafica>" +
+				"                <CodiceFiscale>GVLVCN76C05A225K</CodiceFiscale>" +
+				"                <Cognome>Gioviale</Cognome>" +
+				"                <Nome>Vincenzo</Nome>" +
+				"                <Sesso>M</Sesso>" +
+				"                <ComuneNS>Altamura</ComuneNS>" +
+				"                <DataNascita>1976-03-05</DataNascita>" +
+				"                <Pignoramento>N</Pignoramento>" +
+				"                <NotaPignoramento></NotaPignoramento>" +
+				"                <Estero>N</Estero>" +
+				"                <Commissioni>N</Commissioni>" +
+				"                <Sede>" +
+				"                    <Indirizzo>Recinto II Fiorentini</Indirizzo>" +
+				"                    <Comune>Matera</Comune>" +
+				"                    <CAP>75100</CAP>" +
+				"                    <Telefono>0835336836</Telefono>" +
+				"                    <EMail>vgioviale@latraccia.it</EMail>" +
+				"                    <Fax>0835336825</Fax>" +
+				"                    <Bollo>N</Bollo>" +
+				"                    <NomeSede>Matera</NomeSede>" +
+				"                    <TipoPagamento>ACCREDITOSUC/CBANCARIO</TipoPagamento>" +
+				"                </Sede>" +
+				"                <DatiBancari>" +
+				"                    <NomeBanca>IWBank</NomeBanca>" +
+				"                    <ContoCorrente>123456789</ContoCorrente>" +
+				"                    <ModalitaPrincipale>S</ModalitaPrincipale>" +
+				"                    <SedeAgenzia>Milano</SedeAgenzia>" +
+				"                    <Indirizzo>Via prova</Indirizzo>" +
+				"                    <Citta>Milano</Citta>" +
+				"                    <CAP>00010</CAP>" +
+				"                    <Provincia>MI</Provincia>" +
+				"                    <ABI>01030</ABI>" +
+				"                    <CAB>01031</CAB>" +
+				"                    <CIN>A</CIN>" +
+				"                    <IBAN>123456789123456078965412369</IBAN>" +
+				"                </DatiBancari>" +
+				"            </Anagrafica>" +
+				"            <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+				"        </CreaAnagrafica>" +
+				"    </Richiesta>" +
+				"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"        <CreaSede>" +
+		"            <IdAnagrafica>9830</IdAnagrafica>" +
+		"            <Sede>" +
+		"                <Indirizzo>Via Gabriele D'Annunzio n.6 int.9</Indirizzo>" +
+		"                <Comune>Altamura</Comune>" +
+		"                <CAP>70022</CAP>" +
+		"                <Telefono>0803149977</Telefono>" +
+		"                <EMail>info@latraccia.it</EMail>" +
+		"                <Fax>0803149977</Fax>" +
+		"                <Bollo>N</Bollo>" +
+		"                <NomeSede>Traccia Altamura</NomeSede>" +
+		"                <TipoPagamento>ACCREDITOSUC/CBANCARIO</TipoPagamento>" +
+		"            </Sede>" +
+		"            <DatiBancari>" +
+		"                <NomeBanca>IWBank</NomeBanca>" +
+		"                <ContoCorrente>0123456789</ContoCorrente>" +
+		"                <ModalitaPrincipale>N</ModalitaPrincipale>" +
+		"                <SedeAgenzia>Milano</SedeAgenzia>" +
+		"                <Indirizzo>Milano</Indirizzo>" +
+		"                <Citta>Milano</Citta>" +
+		"                <CAP>00100</CAP>" +
+		"                <Provincia>MI</Provincia>" +
+		"                <ABI>00012</ABI>" +
+		"                <CAB>00012</CAB>" +
+		"                <CIN>V</CIN>" +
+		"                <IBAN>012345789610234587912547891</IBAN>" +
+		"            </DatiBancari>" +
+		"            <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+		"        </CreaSede>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"        <CreaContoBancario>" +
+		"            <IdAnagrafica>9830</IdAnagrafica>" +
+		"            <IdSede>2</IdSede>" +
+		"    		<DatiBancari>" +
+		"  				<NomeBanca>IWBank</NomeBanca>" +
+		"    			<ContoCorrente>7123456789</ContoCorrente>" +
+		"    			<ModalitaPrincipale>N</ModalitaPrincipale>" +
+		"    			<SedeAgenzia>Milano</SedeAgenzia>" +
+		"    			<Indirizzo>Milano</Indirizzo>" +
+		"    			<Citta>Milano</Citta>" +
+		"    			<CAP>00100</CAP>" +
+		"    			<Provincia>MI</Provincia>" +
+		"    			<ABI>00012</ABI>" +
+		"    			<CAB>00012</CAB>" +
+		"    			<CIN>V</CIN>" +
+		"    			<IBAN>712345789610234587912547891</IBAN>" +
+		"    		</DatiBancari>" +
+		"    		<CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+		"        </CreaContoBancario>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogaComuni>" +
+		"            <NomeComune>MAT</NomeComune>" +
+		"        </InterrogaComuni>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"     <ModificaAnagrafica>" +
+		"        <IdAnagrafica>9830</IdAnagrafica>" +
+		"        <TipoAnagrafica>G</TipoAnagrafica>" +
+		"        <PartitaIva>00317370773</PartitaIva>" +
+		"        <!--<Denominazione>COOPERATIVA E.D.P. LA TRACCIA</Denominazione>-->" +
+		"        <DataNascitaLR>1958-07-18</DataNascitaLR>" +
+		"        <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+		"     </ModificaAnagrafica>" +
+		"   </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"        <ModificaSede>" +
+		"        <IdAnagrafica>9830</IdAnagrafica>" +
+		"        <IdSede>1</IdSede>" +
+		"        <Indirizzo>RECINTO II FIORENTINI, 10</Indirizzo>" +
+		"        <Comune>MATERA</Comune>" +
+		"        <CAP>75100</CAP>" +
+		"        <EMail>info@latraccia.it</EMail>" +
+		"        <TipoPagamento>ACCREDITOSUC/CBANCARIO</TipoPagamento>" +
+		"        <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+		"    </ModificaSede>" +
+		"   </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>Intema</InfoMittDest>" +
+		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"        <ModificaContoBancario>" +
+		"        <IdAnagrafica>9830</IdAnagrafica>" +
+		"        <IdSede>1</IdSede>" +
+		"        <IdContoCorrente>8951</IdContoCorrente>" +
+		"        <ContoCorrente>2400948</ContoCorrente>" +
+		"        <ModalitaPrincipale>N</ModalitaPrincipale>" +
+		"        <CIN>c</CIN>" +
+		"        <IBAN>123456789154236987a45217784</IBAN>" +
+		"        <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+		"    </ModificaContoBancario>" +
+		"   </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+    	/*String toSend = "<?xml version=\"1.0\"?>"
+    			+ "<Messaggio_Richiesta xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+    			+ "<Intestazione>"
+    			+ "	<InfoMittDest>Petrizzi Nicola</InfoMittDest>"
+    			+ "	<Applicazione>ProvvedimentiAmministrativi</Applicazione>"
+    			+ "</Intestazione>"
+    			+ "<Richiesta>"
+    			+ "	<CaricamentoAnagrafiche>"
+    			+ "		<CodiceFiscaleOperatore>PTRNCL64P23B181V</CodiceFiscaleOperatore>"
+    			+ "			<AnagraficaMassiva>"
+    			+ "			<ElementoAnagraficaMassiva>"
+    			+ "				<IdAnagraficaMittente>281</IdAnagraficaMittente>"
+    			+ "					<Anagrafica>"
+    			+ "						<TipoAnagrafica>F</TipoAnagrafica>"
+    			+ "						<CodiceFiscale>PRRGNE56L14E469F</CodiceFiscale>"
+    			+ "						<Cognome>PERRONE</Cognome>"
+    			+ "						<Nome>EUGENIO</Nome>"
+    			+ "						<ComuneNS>LATERZA</ComuneNS>"
+    			+ "						<Sede>"
+    			+ "							<Indirizzo>CONTRADA LA BRUNA, 06</Indirizzo>"
+    			+ "							<Comune>MATERA</Comune>"
+    			+ "							<CAP>75100</CAP>"
+    			+ "   						<TipoPagamento>1</TipoPagamento>"
+    			+ " 					</Sede>"
+    			+ " 					<DatiBancari>"
+    			+ "							<IBAN>IT03K0306778900000000010734</IBAN>"
+    			+ " 					</DatiBancari>"
+    			+ "					</Anagrafica>"
+    			+ "			</ElementoAnagraficaMassiva>"
+    			+ "			<ElementoAnagraficaMassiva>"
+    			+ "        	          <IdAnagraficaMittente>282</IdAnagraficaMittente>"
+    			+ "        	          <Anagrafica>"
+    			+ "        	            <TipoAnagrafica>F</TipoAnagrafica>"
+    			+ "        	            <CodiceFiscale>PRDFNC52P25F052Z</CodiceFiscale>"
+    			+ "        	            <Cognome>PARADISO</Cognome>"
+    			+ "        	            <Nome>FRANCESCO PAOLO</Nome>"
+    			+ "        	            <ComuneNS>MATERA</ComuneNS>"
+    			+ "        	            <Sede>"
+    			+ "        	              <Indirizzo>CONTRADA LE PIANE, S.N.C.</Indirizzo>"
+    			+ "        	              <Comune>MATERA</Comune>"
+    			+ "        	              <CAP>75100</CAP>"
+    			+ "        	              <TipoPagamento>1</TipoPagamento>"
+    			+ "        	            </Sede>"
+    			+ "        	            <DatiBancari>"
+    			+ "        	              <IBAN>IT57Q0760116100000079592382</IBAN>"
+    			+ "        	            </DatiBancari>"
+    			+ "        	          </Anagrafica>"
+    			+ "        	        </ElementoAnagraficaMassiva>"
+    			+ "        	      </AnagraficaMassiva>"
+    			+ "        	    </CaricamentoAnagrafiche>"
+    			+ "        	  </Richiesta>"
+    			+ "        	</Messaggio_Richiesta>";
+    			*/
+		
+		//String toSend ="<?xml version=\"1.0\"?><Messaggio_Richiesta xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">  <Intestazione>    <InfoMittDest>Petrizzi Nicola</InfoMittDest>    <Applicazione>ProvvedimentiAmministrativi</Applicazione>  </Intestazione>  <Richiesta>    <CaricamentoAnagrafiche>      <CodiceFiscaleOperatore>PTRNCL64P23B181V</CodiceFiscaleOperatore>      <AnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>13</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>PTRPTR86R07E977T</CodiceFiscale>            <Cognome>PETRONE</Cognome>            <Nome>PIETRO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MARSICOVETERE</ComuneNS>            <DataNascita>1986-10-07</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>CONTRADA LA BRUNA, 06</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>F24EP</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT03K0306778900000000010734</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>14</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>G</TipoAnagrafica>            <PartitaIva>01219980529</PartitaIva>            <Denominazione>ESTRA ENERGIE S.R.L.</Denominazione>            <DataNascitaLR>0001-01-01</DataNascitaLR>            <Sede>              <Indirizzo>VIA PIPPO, 07</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 5</NomeSede>              <TipoPagamento>F24EP</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT57Q0760116100000079592382</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>15</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>G</TipoAnagrafica>            <PartitaIva>01219980529</PartitaIva>            <Denominazione>ESTRA ENERGIE S.R.L.</Denominazione>            <DataNascitaLR>0001-01-01</DataNascitaLR>            <Sede>              <Indirizzo>VIA PIPPO, 07</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 5</NomeSede>              <TipoPagamento>F24EP</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT57Q0760116100000079592382</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>16</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>G</TipoAnagrafica>            <PartitaIva>01219980529</PartitaIva>            <Denominazione>ESTRA ENERGIE S.R.L.</Denominazione>            <DataNascitaLR>0001-01-01</DataNascitaLR>            <Sede>              <Indirizzo>VIA PIPPO, 07</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 5</NomeSede>              <TipoPagamento>F24EP</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT57Q0760116100000079592382</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>      </AnagraficaMassiva>    </CaricamentoAnagrafiche>  </Richiesta></Messaggio_Richiesta>";
+		//String toSend ="<?xml version=\"1.0\"?><Messaggio_Richiesta xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">  <Intestazione>    <InfoMittDest>Gallo Maria Giuseppina</InfoMittDest>    <Applicazione>ProvvedimentiAmministrativi</Applicazione>  </Intestazione>  <Richiesta>    <CaricamentoAnagrafiche>      <CodiceFiscaleOperatore>GLLMGS60S56G942C</CodiceFiscaleOperatore>      <AnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1875</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DRSCSM59P17F052R</CodiceFiscale>            <Cognome>ADORISIO</Cognome>            <Nome>COSIMO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1959-09-17</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA PIERO DELLA FRANCSCA,112</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT44Z0101016100000046000131</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1876</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BLSPNI60B13F637Z</CodiceFiscale>            <Cognome>BALSEBRE</Cognome>            <Nome>PINO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MONTESCAGLIOSO</ComuneNS>            <DataNascita>1960-02-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA UGO LA MALFA,78</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT03N0578716100027570054546</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1877</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BRTNGL79P46L219A</CodiceFiscale>            <Cognome>BERTUGNO</Cognome>            <Nome>ANGELA</Nome>            <Sesso>F</Sesso>            <ComuneNS>TORINO</ComuneNS>            <DataNascita>1979-09-06</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CADUTI DI NASSIRYA,146</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT45U0311113101000000001908</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1878</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BMOGFR64R04G942B</CodiceFiscale>            <Cognome>BOEMIO</Cognome>            <Nome>GUIDO FRANCESCO</Nome>            <Sesso>M</Sesso>            <ComuneNS>POTENZA</ComuneNS>            <DataNascita>1964-10-04</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA VACCARO,248</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT36N034750160CC0010303465</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1879</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BRNMRA52B28D497B</CodiceFiscale>            <Cognome>BRUNO</Cognome>            <Nome>MARIO</Nome>            <Sesso>M</Sesso>            <ComuneNS>FARDELLA</ComuneNS>            <DataNascita>1952-01-28</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CIRILLO,49</Indirizzo>              <Comune>FARDELLA </Comune>              <CAP>85032</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT15K0538741350000000101652</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1880</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPSNNL80S23L049X</CodiceFiscale>            <Cognome>CAPISTRANO</Cognome>            <Nome>ANTONIO LUCIO</Nome>            <Sesso>M</Sesso>            <ComuneNS>TARANTO</ComuneNS>            <DataNascita>1980-11-23</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA TIMEO, 24 - MARCONIA</Indirizzo>              <Comune>PISTICCI</Comune>              <CAP>75015</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT14G0760116100000074534371</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1881</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPBRCL76S03A801K</CodiceFiscale>            <Cognome>CAPOBIANCO</Cognome>            <Nome>ROCCO LUIGI</Nome>            <Sesso>M</Sesso>            <ComuneNS>BERNALDA</ComuneNS>            <DataNascita>1976-11-03</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GHIDONI,36</Indirizzo>              <Comune>BERNALDA</Comune>              <CAP>75012</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT64H0344214239000063397767</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1882</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPPMHL56D13A666D</CodiceFiscale>            <Cognome>CAPPA</Cognome>            <Nome>MICHELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>BARILE</ComuneNS>            <DataNascita>1956-04-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIALE EUROPA, 5</Indirizzo>              <Comune>BARILE</Comune>              <CAP>85022</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT83A0542441880000002000124</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1883</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRBVCN60D13B549A</CodiceFiscale>            <Cognome>CARBONE</Cognome>            <Nome>VINCENZO</Nome>            <Sesso>M</Sesso>            <ComuneNS>CAMPOMAGGIORE</ComuneNS>            <DataNascita>1960-04-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CAIROLI,14</Indirizzo>              <Comune>CAMPOMAGIORE</Comune>              <CAP>85010</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT28H0760104200000016657397</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1884</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRDCMD68B29F052K</CodiceFiscale>            <Cognome>CARDINALE</Cognome>            <Nome>COSIMO DAMIANO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1968-02-29</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA TURI,3/INT.2</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT30R0103016101000063164117</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1885</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRGLRD67D24G786P</CodiceFiscale>            <Cognome>CARIGLIA</Cognome>            <Nome>LEONARDO</Nome>            <Sesso>M</Sesso>            <ComuneNS>POLICORO</ComuneNS>            <DataNascita>1967-04-24</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA SANTA CROCE,11/A </Indirizzo>              <Comune>POLICORO</Comune>              <CAP>75025</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT35L846980400000000201471</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1886</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CSTVCN60L31A225O</CodiceFiscale>            <Cognome>CASTORO</Cognome>            <Nome>VINCENZO</Nome>            <Sesso>M</Sesso>            <ComuneNS>ALTAMURA</ComuneNS>            <DataNascita>1960-07-31</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA PICCINNI, 47</Indirizzo>              <Comune>ALTAMURA</Comune>              <CAP>70022</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT41L0538541331000005279490</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1887</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPRLGU67B01F399I</CodiceFiscale>            <Cognome>CIPRIANO</Cognome>            <Nome>LUIGI</Nome>            <Sesso>M</Sesso>            <ComuneNS>MONTALBANO JONICO</ComuneNS>            <DataNascita>1967-02-01</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA MONTI, 8</Indirizzo>              <Comune>MONTALBANO JONICO</Comune>              <CAP>75023</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT61C0526280490CC1521194144</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1888</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CCLGCM76S08A285K</CodiceFiscale>            <Cognome>COCOLA</Cognome>            <Nome>GIACOMO</Nome>            <Sesso>M</Sesso>            <ComuneNS>ANDRIA</ComuneNS>            <DataNascita>1976-11-08</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CAVOUR,157</Indirizzo>              <Comune>MINERVINO MURGE</Comune>              <CAP>70055</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT34K0307502200CC8110310842</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1889</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRNLGU54R01L197U</CodiceFiscale>            <Cognome>CORNIOLA</Cognome>            <Nome>LUIGI</Nome>            <Sesso>M</Sesso>            <ComuneNS>TOLVE</ComuneNS>            <DataNascita>1954-10-01</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA F.LLI BANDIERA, 13</Indirizzo>              <Comune>TOLVE</Comune>              <CAP>85017</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT40M05542404207000002012116</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1890</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DDMMNL54B26F052R</CodiceFiscale>            <Cognome>D'ADAMO</Cognome>            <Nome>EMANUELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1954-02-26</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA DE AMICIS,11</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT78A0100516100000000014768</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1891</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DLSSFN62A42G712A</CodiceFiscale>            <Cognome>D'ALESSANDRO</Cognome>            <Nome>STEFANIA</Nome>            <Sesso>F</Sesso>            <ComuneNS>PISTICCI</ComuneNS>            <DataNascita>1962-01-02</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GIUSTI, 7</Indirizzo>              <Comune>PISTICCI</Comune>              <CAP>75015</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT63V0578780390041512000242</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1892</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DVDVRM78C24F052D</CodiceFiscale>            <Cognome>DAVID</Cognome>            <Nome>VALERIO MICHELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1978-03-24</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA JOZZINO, 9/2</Indirizzo>              <Comune>POMARICO</Comune>              <CAP>75016</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT73T0311116100000000051143</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1893</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>FRNVNT62D05A662R</CodiceFiscale>            <Cognome>FORNARELLI</Cognome>            <Nome>VITANTONIO</Nome>            <Sesso>M</Sesso>            <ComuneNS>BARI</ComuneNS>            <DataNascita>1962-04-05</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA DIETA DI BARI, 62</Indirizzo>              <Comune>BARI</Comune>              <CAP>70121</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT62X01010040251000000004705</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1894</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>GRGRCC59S06A321Z</CodiceFiscale>            <Cognome>GIORGIO</Cognome>            <Nome>ROCCO</Nome>            <Sesso>M</Sesso>            <ComuneNS>ANZI</ComuneNS>            <DataNascita>1959-11-06</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GIOVANNI XXIII,7</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT80J0311104200000000001508</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1895</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>LNZGNS71B46B266S</CodiceFiscale>            <Cognome>LANZIERI</Cognome>            <Nome>AGNESE</Nome>            <Sesso>F</Sesso>            <ComuneNS>BUONABITACOLO</ComuneNS>            <DataNascita>1971-02-06</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GIOVANNI XXIII, 141</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT24Y011004210082997320268</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1896</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>LVNDNT54H28L197X</CodiceFiscale>            <Cognome>LAVANGA</Cognome>            <Nome>DONATO</Nome>            <Sesso>M</Sesso>            <ComuneNS>TOLVE</ComuneNS>            <DataNascita>1954-06-28</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA SAN GIOVANNI,45</Indirizzo>              <Comune>TRICARICO</Comune>              <CAP>75019</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT68F01005161000000000005511</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1897</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>LVCRFL83H13E977L</CodiceFiscale>            <Cognome>LAVECCHIA</Cognome>            <Nome>RAFFAELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MARSICOVETERE</ComuneNS>            <DataNascita>1983-06-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA LE SORTI,3/2</Indirizzo>              <Comune>PATERNO</Comune>              <CAP>85050</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT18V0760104200000092859651</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1898</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>MLVGPP58S10A801N</CodiceFiscale>            <Cognome>MALVASI</Cognome>            <Nome>GIUSEPPE</Nome>            <Sesso>M</Sesso>            <ComuneNS>BERNALDA</ComuneNS>            <DataNascita>1958-11-10</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA DON MINZZONI,26</Indirizzo>              <Comune>BERNALA</Comune>              <CAP>75012</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT37M05787161000027570053280</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1899</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>MTRGPP66D02F052O</CodiceFiscale>            <Cognome>MATARAZZO</Cognome>            <Nome>GIUSEPPE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1966-04-02</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA PROF.L.PARLATI,20</Indirizzo>              <Comune>MONTESCAGLIOSO</Comune>              <CAP>75024</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT21C0101080370100000000818</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>1900</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>MRTCRL68M13L049A</CodiceFiscale>            <Cognome>MORETTI</Cognome>            <Nome>CARLO</Nome>            <Sesso>M</Sesso>            <ComuneNS>TARANTO</ComuneNS>            <DataNascita>1968-08-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA SALINA PICCOLA,6</Indirizzo>              <Comune>TARANTO</Comune>              <CAP>74121</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT21Y0303215800010000002201</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>      </AnagraficaMassiva>    </CaricamentoAnagrafiche>  </Richiesta></Messaggio_Richiesta>";
+		String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">  <Intestazione>    <InfoMittDest>Gallo Maria Giuseppina</InfoMittDest>    <Applicazione>ProvvedimentiAmministrativi</Applicazione>  </Intestazione>  <Richiesta>    <CaricamentoAnagrafiche>      <CodiceFiscaleOperatore>GLLMGS60S56G942C</CodiceFiscaleOperatore>      <AnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2499</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DRSCSM59P17F052R</CodiceFiscale>            <Cognome>ADORISIO</Cognome>            <Nome>COSIMO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1959-09-17</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA PIERO DELLA FRANCSCA,112</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT44Z0101016100000046000131</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2500</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BLSPNI60B13F637Z</CodiceFiscale>            <Cognome>BALSEBRE</Cognome>            <Nome>PINO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MONTESCAGLIOSO</ComuneNS>            <DataNascita>1960-02-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA UGO LA MALFA,78</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT03N0578716100027570054546</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2501</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BRTNGL79P46L219A</CodiceFiscale>            <Cognome>BERTUGNO</Cognome>            <Nome>ANGELA</Nome>            <Sesso>F</Sesso>            <ComuneNS>TORINO</ComuneNS>            <DataNascita>1979-09-06</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CADUTI DI NASSIRYA,146</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT45U0311113101000000001908</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2502</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BMOGFR64R04G942B</CodiceFiscale>            <Cognome>BOEMIO</Cognome>            <Nome>GUIDO FRANCESCO</Nome>            <Sesso>M</Sesso>            <ComuneNS>POTENZA</ComuneNS>            <DataNascita>1964-10-04</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA VACCARO,248</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT36N034750160CC0010303465</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2503</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>BRNMRA52B28D497B</CodiceFiscale>            <Cognome>BRUNO</Cognome>            <Nome>MARIO</Nome>            <Sesso>M</Sesso>            <ComuneNS>FARDELLA</ComuneNS>            <DataNascita>1952-01-28</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CIRILLO,49</Indirizzo>              <Comune>FARDELLA </Comune>              <CAP>85032</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT15K0538741350000000101652</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2504</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPSNNL80S23L049X</CodiceFiscale>            <Cognome>CAPISTRANO</Cognome>            <Nome>ANTONIO LUCIO</Nome>            <Sesso>M</Sesso>            <ComuneNS>TARANTO</ComuneNS>            <DataNascita>1980-11-23</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA TIMEO, 24 - MARCONIA</Indirizzo>              <Comune>PISTICCI</Comune>              <CAP>75015</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT14G0760116100000074534371</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2505</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPBRCL76S03A801K</CodiceFiscale>            <Cognome>CAPOBIANCO</Cognome>            <Nome>ROCCO LUIGI</Nome>            <Sesso>M</Sesso>            <ComuneNS>BERNALDA</ComuneNS>            <DataNascita>1976-11-03</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GHIDONI,36</Indirizzo>              <Comune>BERNALDA</Comune>              <CAP>75012</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT64H0344214239000063397767</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2506</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPPMHL56D13A666D</CodiceFiscale>            <Cognome>CAPPA</Cognome>            <Nome>MICHELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>BARILE</ComuneNS>            <DataNascita>1956-04-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIALE EUROPA, 5</Indirizzo>              <Comune>BARILE</Comune>              <CAP>85022</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT83A0542441880000002000124</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2507</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRBVCN60D13B549A</CodiceFiscale>            <Cognome>CARBONE</Cognome>            <Nome>VINCENZO</Nome>            <Sesso>M</Sesso>            <ComuneNS>CAMPOMAGGIORE</ComuneNS>            <DataNascita>1960-04-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CAIROLI,14</Indirizzo>              <Comune>CAMPOMAGGIORE</Comune>              <CAP>85010</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT28H0760104200000016657397</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2508</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRDCMD68B29F052K</CodiceFiscale>            <Cognome>CARDINALE</Cognome>            <Nome>COSIMO DAMIANO</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1968-02-29</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA TURI,3/INT.2</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT30R0103016101000063164117</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2509</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRGLRD67D24G786P</CodiceFiscale>            <Cognome>CARIGLIA</Cognome>            <Nome>LEONARDO</Nome>            <Sesso>M</Sesso>            <ComuneNS>POLICORO</ComuneNS>            <DataNascita>1967-04-24</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA SANTA CROCE,11/A </Indirizzo>              <Comune>POLICORO</Comune>              <CAP>75025</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT35L846980400000000201471</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2510</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CSTVCN60L31A225O</CodiceFiscale>            <Cognome>CASTORO</Cognome>            <Nome>VINCENZO</Nome>            <Sesso>M</Sesso>            <ComuneNS>ALTAMURA</ComuneNS>            <DataNascita>1960-07-31</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA PICCINNI, 47</Indirizzo>              <Comune>ALTAMURA</Comune>              <CAP>70022</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT41L0538541331000005279490</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2511</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CPRLGU67B01F399I</CodiceFiscale>            <Cognome>CIPRIANO</Cognome>            <Nome>LUIGI</Nome>            <Sesso>M</Sesso>            <ComuneNS>MONTALBANO JONICO</ComuneNS>            <DataNascita>1967-02-01</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA MONTI, 8</Indirizzo>              <Comune>MONTALBANO JONICO</Comune>              <CAP>75023</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>S</ModalitaPrincipale>              <IBAN>IT61C0526280490CC1521194144</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2512</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CCLGCM76S08A285K</CodiceFiscale>            <Cognome>COCOLA</Cognome>            <Nome>GIACOMO</Nome>            <Sesso>M</Sesso>            <ComuneNS>ANDRIA</ComuneNS>            <DataNascita>1976-11-08</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA CAVOUR,157</Indirizzo>              <Comune>MINERVINO MURGE</Comune>              <CAP>70055</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT34K0307502200CC8110310842</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2513</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>CRNLGU54R01L197U</CodiceFiscale>            <Cognome>CORNIOLA</Cognome>            <Nome>LUIGI</Nome>            <Sesso>M</Sesso>            <ComuneNS>TOLVE</ComuneNS>            <DataNascita>1954-10-01</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA F.LLI BANDIERA, 13</Indirizzo>              <Comune>TOLVE</Comune>              <CAP>85017</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT40M05542404207000002012116</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2514</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DDMMNL54B26F052R</CodiceFiscale>            <Cognome>D'ADAMO</Cognome>            <Nome>EMANUELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1954-02-26</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA DE AMICIS,11</Indirizzo>              <Comune>MATERA</Comune>              <CAP>75100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT78A0100516100000000014768</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2515</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DLSSFN62A42G712A</CodiceFiscale>            <Cognome>D'ALESSANDRO</Cognome>            <Nome>STEFANIA</Nome>            <Sesso>F</Sesso>            <ComuneNS>PISTICCI</ComuneNS>            <DataNascita>1962-01-02</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GIUSTI, 7</Indirizzo>              <Comune>PISTICCI</Comune>              <CAP>75015</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT63V0578780390041512000242</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2516</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>DVDVRM78C24F052D</CodiceFiscale>            <Cognome>DAVID</Cognome>            <Nome>VALERIO MICHELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1978-03-24</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA JOZZINO, 9/2</Indirizzo>              <Comune>POMARICO</Comune>              <CAP>75016</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT73T0311116100000000051143</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2517</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>FRNVNT62D05A662R</CodiceFiscale>            <Cognome>FORNARELLI</Cognome>            <Nome>VITANTONIO</Nome>            <Sesso>M</Sesso>            <ComuneNS>BARI</ComuneNS>            <DataNascita>1962-04-05</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA DIETA DI BARI, 62</Indirizzo>              <Comune>BARI</Comune>              <CAP>70121</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT62X01010040251000000004705</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2518</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>GRGRCC59S06A321Z</CodiceFiscale>            <Cognome>GIORGIO</Cognome>            <Nome>ROCCO</Nome>            <Sesso>M</Sesso>            <ComuneNS>ANZI</ComuneNS>            <DataNascita>1959-11-06</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GIOVANNI XXIII,7</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT80J0311104200000000001508</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2519</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>LNZGNS71B46B266S</CodiceFiscale>            <Cognome>LANZIERI</Cognome>            <Nome>AGNESE</Nome>            <Sesso>F</Sesso>            <ComuneNS>BUONABITACOLO</ComuneNS>            <DataNascita>1971-02-06</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA GIOVANNI XXIII, 141</Indirizzo>              <Comune>POTENZA</Comune>              <CAP>85100</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT24Y011004210082997320268</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2520</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>LVNDNT54H28L197X</CodiceFiscale>            <Cognome>LAVANGA</Cognome>            <Nome>DONATO</Nome>            <Sesso>M</Sesso>            <ComuneNS>TOLVE</ComuneNS>            <DataNascita>1954-06-28</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA SAN GIOVANNI,45</Indirizzo>              <Comune>TRICARICO</Comune>              <CAP>75019</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT68F01005161000000000005511</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2521</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>LVCRFL83H13E977L</CodiceFiscale>            <Cognome>LAVECCHIA</Cognome>            <Nome>RAFFAELE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MARSICOVETERE</ComuneNS>            <DataNascita>1983-06-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA LE SORTI,3/2</Indirizzo>              <Comune>PATERNO</Comune>              <CAP>85050</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT18V0760104200000092859651</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2522</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>MLVGPP58S10A801N</CodiceFiscale>            <Cognome>MALVASI</Cognome>            <Nome>GIUSEPPE</Nome>            <Sesso>M</Sesso>            <ComuneNS>BERNALDA</ComuneNS>            <DataNascita>1958-11-10</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA DON MINZZONI,26</Indirizzo>              <Comune>BERNALDA</Comune>              <CAP>75012</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT37M05787161000027570053280</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2523</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>MTRGPP66D02F052O</CodiceFiscale>            <Cognome>MATARAZZO</Cognome>            <Nome>GIUSEPPE</Nome>            <Sesso>M</Sesso>            <ComuneNS>MATERA</ComuneNS>            <DataNascita>1966-04-02</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA PROF.L.PARLATI,20</Indirizzo>              <Comune>MONTESCAGLIOSO</Comune>              <CAP>75024</CAP>              <NomeSede>SEDE 2</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT21C0101080370100000000818</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>        <ElementoAnagraficaMassiva>          <IdAnagraficaMittente>2524</IdAnagraficaMittente>          <Anagrafica>            <TipoAnagrafica>F</TipoAnagrafica>            <CodiceFiscale>MRTCRL68M13L049A</CodiceFiscale>            <Cognome>MORETTI</Cognome>            <Nome>CARLO</Nome>            <Sesso>M</Sesso>            <ComuneNS>TARANTO</ComuneNS>            <DataNascita>1968-08-13</DataNascita>            <Estero>N</Estero>            <Sede>              <Indirizzo>VIA SALINA PICCOLA,6</Indirizzo>              <Comune>TARANTO</Comune>              <CAP>74121</CAP>              <NomeSede>SEDE 1</NomeSede>              <TipoPagamento>BONIFICO BANCARIO E POSTALE</TipoPagamento>            </Sede>            <DatiBancari>              <ModalitaPrincipale>N</ModalitaPrincipale>              <IBAN>IT21Y0303215800010000002201</IBAN>            </DatiBancari>          </Anagrafica>        </ElementoAnagraficaMassiva>      </AnagraficaMassiva>    </CaricamentoAnagrafiche>  </Richiesta></Messaggio_Richiesta>";
+		/*
+		String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"   <Intestazione>" +
+		"		<InfoMittDest>Intema</InfoMittDest>" +
+		"		<Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"	</Intestazione>" +
+		"	<Richiesta>" +
+		"		<CaricamentoAnagrafiche>" +
+		"			<CodiceFiscaleOperatore>PCASVT57T25L049J</CodiceFiscaleOperatore>" +
+		"			<AnagraficaMassiva>" +
+		"				<ElementoAnagraficaMassiva>" +
+		"					<IdAnagraficaMittente>1</IdAnagraficaMittente>" +
+		"					<Anagrafica>" +
+		"						<TipoAnagrafica>G</TipoAnagrafica>" +
+		"						<PartitaIva>00317370773</PartitaIva>" +
+		"						<Denominazione>COOPERATIVA EDP LA TRACCIA</Denominazione>" +
+		"						<SessoLR>M</SessoLR>" +
+		"						<ComuneNSLR>MATERA</ComuneNSLR>" +
+		"						<ComuneRESLR>MATERA</ComuneRESLR>" +
+		"						<Commissioni>N</Commissioni>" +
+		"						<Sede>" +
+		"							<Indirizzo>RECINTO II FIORENTINI, 10</Indirizzo>" +
+		"							<Comune>MATERA</Comune>" +
+		"							<CAP>75100</CAP>" +
+		"							<Bollo>S</Bollo>" +
+		"							<NomeSede>SEDE N. 1</NomeSede>" +
+		"							<TipoPagamento>Accredito su c/c bancario</TipoPagamento>" +
+		"						</Sede>" +
+		"						<DatiBancari>" +
+		"							<NomeBanca>BANCA POPOLARE DI BARI</NomeBanca>-->" +
+		"							<ContoCorrente>000000156219</ContoCorrente>" +
+		"							<ModalitaPrincipale>N</ModalitaPrincipale>" +
+		"							<SedeAgenzia>AGENZIA DI MATERA</SedeAgenzia>" +
+		"							<Indirizzo>VIA ROMA, 35</Indirizzo>" +
+		"							<Citta>MATERA</Citta>" +
+		"							<ABI>05424</ABI>" +
+		"							<CAB>16101</CAB>" +
+		"							<CIN>B</CIN>" +
+		"							<IBAN>IT77B0542416101000000156219</IBAN>" +
+		"						</DatiBancari>" +
+		"					</Anagrafica>" +
+		"				</ElementoAnagraficaMassiva>" +
+		"				<ElementoAnagraficaMassiva>" +
+		"					<IdAnagraficaMittente>2</IdAnagraficaMittente>" +
+		"		            <Anagrafica>" +
+		"		                <TipoAnagrafica>F</TipoAnagrafica>" +
+		"		                <CodiceFiscale>GVLVCN76C05A225K</CodiceFiscale>" +
+		"		                <Cognome>Gioviale</Cognome>" +
+		"		                <Nome>Vincenzo</Nome>" +
+		"		                <Sesso>M</Sesso>" +
+		"		                <ComuneNS>Altamura</ComuneNS>" +
+		"		                <DataNascita>1976-03-05</DataNascita>" +
+		"		                <Pignoramento>N</Pignoramento>" +
+		"		                <NotaPignoramento></NotaPignoramento>" +
+		"		                <Estero>N</Estero>" +
+		"		                <Commissioni>N</Commissioni>" +
+		"		                <Sede>" +
+		"		                    <Indirizzo>Recinto II Fiorentini</Indirizzo>" +
+		"		                    <Comune>Matera</Comune>" +
+		"		                    <CAP>75100</CAP>" +
+		"		                    <Telefono>0835336836</Telefono>" +
+		"		                    <EMail>vgioviale@latraccia.it</EMail>" +
+		"		                    <Fax>0835336825</Fax>" +
+		"		                    <Bollo>N</Bollo>" +
+		"		                    <NomeSede>Matera</NomeSede>" +
+		"		                    <TipoPagamento>Accredito su c/c bancario</TipoPagamento>" +
+		"		                </Sede>" +
+		"		                <DatiBancari>" +
+		"		                    <NomeBanca>IWBank</NomeBanca>" +
+		"		                    <ContoCorrente>123456789</ContoCorrente>" +
+		"		                    <ModalitaPrincipale>S</ModalitaPrincipale>" +
+		"		                    <SedeAgenzia>Milano</SedeAgenzia>" +
+		"		                    <Indirizzo>Via prova</Indirizzo>" +
+		"		                    <Citta>Milano</Citta>" +
+		"		                    <CAP>00010</CAP>" +
+		"		                    <Provincia>MI</Provincia>" +
+		"		                    <ABI>01030</ABI>" +
+		"		                    <CAB>01031</CAB>" +
+		"		                    <CIN>A</CIN>" +
+		"		                    <IBAN>123456789123456078965412369</IBAN>" +
+		"		                </DatiBancari>" +
+		"		            </Anagrafica>" +
+		"				</ElementoAnagraficaMassiva>" +
+		"			</AnagraficaMassiva>" +
+		"		</CaricamentoAnagrafiche>" +
+		"	</Richiesta>" +
+		"</Messaggio_Richiesta>";
+		*/
+    	
+		String toSendUTF8="";
+
+		try 
+		{
+			toSendUTF8 = new String(toSend.getBytes("UTF-8"));
+		} 
+		catch (UnsupportedEncodingException e)
+		{ 
+			e.printStackTrace();
+		}
+
+		String result = si.queryAnagrafica(toSendUTF8);
+
+		System.out.println("\nEsito: "+result);
+	}
+
+}

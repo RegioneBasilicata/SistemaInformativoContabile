@@ -1,0 +1,747 @@
+/**
+ * Creato il 22 Giugno 2011
+ * Modificato il 06 Ottobre 2011
+ */
+package it.latraccia.ws;
+
+import java.math.BigInteger;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBException;
+
+import java.io.ByteArrayInputStream;
+
+import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
+import it.latraccia.utility.*;
+import it.latraccia.entity.anasic.richiesta.*;
+import it.latraccia.entity.anasic.risposta.*;
+import it.latraccia.entity.anasic.risposta.impl.RispostaInterrogaAnagraficaContrattiTypesImpl;
+
+
+/**
+ *
+ * Web Service che consente di interfacciarsi con l'anagrafica del SIC
+ *
+ * @author Vincenzo Gioviale
+ *  
+ */
+public class SICAnagrafeInterface 
+{
+	/**
+	 * Metodo per la richiesta all'anagrafica del SIC
+	 *
+	 * @return String - risposta xml
+	 * @param  q  - stringa contenente lo xml della richiesta 
+	 * 
+	 */
+	public String queryAnagrafica(String q) 
+	{
+		String res = null;
+		MessaggioRichiesta anaRequest=null;
+		DB db = new DB();
+
+		try 
+		{
+			ByteArrayInputStream bAIS = new ByteArrayInputStream(q.getBytes("UTF-8"));
+
+			it.latraccia.entity.anasic.richiesta.ObjectFactory objFactory = new it.latraccia.entity.anasic.richiesta.ObjectFactory();
+			Unmarshaller unmarshaller = objFactory.createUnmarshaller();
+
+			anaRequest = (MessaggioRichiesta) unmarshaller.unmarshal(bAIS);
+
+			if (anaRequest.getIntestazione().getApplicazione().length()==0)
+			{
+				return esitoNegativo(new BigInteger("0"),"Nome applicazione non indicato","Anagrafe SIC","Regione Basilicata");
+			}
+
+			if (anaRequest.getIntestazione().getInfoMittDest().length()==0)
+			{
+				return esitoNegativo(new BigInteger("0"),"Informazioni del mittente e destinatario non fornite","Anagrafe SIC","Regione Basilicata");
+			}
+			if (anaRequest.getRichiesta().getInterrogaAnagrafica()!=null)
+			{
+				List iarl=null;
+				if (anaRequest.getRichiesta().getInterrogaAnagrafica().getCodiceFiscale() != null)
+				{
+					iarl = db.getAnagrafica(anaRequest.getRichiesta().getInterrogaAnagrafica().getCodiceFiscale(),1);					
+				}
+				if (anaRequest.getRichiesta().getInterrogaAnagrafica().getDenominazione() != null)
+				{
+					iarl = db.getAnagrafica(anaRequest.getRichiesta().getInterrogaAnagrafica().getDenominazione(),2);					
+				}
+				if (anaRequest.getRichiesta().getInterrogaAnagrafica().getPartitaIva() != null)
+				{
+					iarl = db.getAnagrafica(anaRequest.getRichiesta().getInterrogaAnagrafica().getPartitaIva(),3);					
+				}
+				if (anaRequest.getRichiesta().getInterrogaAnagrafica().getIdAnagrafica() != null)
+				{
+					iarl = db.getAnagrafica(anaRequest.getRichiesta().getInterrogaAnagrafica().getIdAnagrafica(),4);					
+				}
+
+				if (anaRequest.getRichiesta().getInterrogaAnagrafica().getNumeroContratto()!= null)
+				{
+					iarl = db.getAnagrafica(anaRequest.getRichiesta().getInterrogaAnagrafica().getNumeroContratto(),5);					
+				}
+				ListIterator li = iarl.listIterator();
+				if (li.hasNext()==false)
+				{
+					res = esitoNegativo(BigInteger.valueOf(1),"Nessun risultato restituito","Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+					it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+					MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+					it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+					it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+					iti.setApplicazione("Anagrafe SIC");
+					iti.setInfoMittDest("Regione Basilicata");
+					mr.setIntestazione(iti);
+					it.latraccia.entity.anasic.risposta.RispostaInterrogaAnagraficaTypes riat = objFactory1.createRispostaInterrogaAnagraficaTypes();
+					List as = riat.getAnagrafica();
+
+					while (li.hasNext()) 
+					{
+						Anagrafica iar = (Anagrafica)li.next();    
+						it.latraccia.entity.anasic.risposta.AnagraficaTypes aa = objFactory1.createAnagraficaTypes();
+						aa.setCommissioni(iar.getCommissioni());
+						aa.setAltriNomi(iar.getAltriNomi());
+						aa.setCAPRESLR(iar.getCapResLR());
+						aa.setCodiceFiscale(iar.getCodiceFiscale());
+						aa.setCodiceFiscaleLR(iar.getCodiceFiscaleLR());
+						aa.setCognome(iar.getCognome());
+						aa.setCognomeLR(iar.getCognomeLR());
+						aa.setComuneNS(iar.getComuneNS());
+						aa.setComuneNSLR(iar.getComuneNSLR());
+						aa.setComuneRESLR(iar.getComuneRESLR());
+
+						if (iar.getDataNascita() != null)
+						{
+							Calendar cal = Calendar.getInstance();
+							cal.setTime(iar.getDataNascita());
+							aa.setDataNascita(cal);
+						}
+						else
+						{
+							aa.setDataNascita(null);
+						}
+
+						if (iar.getDataNascitaLR() != null)
+						{
+							Calendar cal1 = Calendar.getInstance();
+							cal1.setTime(iar.getDataNascitaLR());
+							aa.setDataNascitaLR(cal1);
+						}
+						else
+						{
+							aa.setDataNascitaLR(null);
+						}
+
+						aa.setDenominazione(iar.getDenominazione());
+						aa.setEstero(iar.getEstero());
+						aa.setIdAnagrafica(iar.getIdAnagrafica());
+						aa.setIdComuneNS(iar.getIdComuneNS());
+						aa.setIdComuneNSLR(iar.getComuneNSLR());
+						aa.setIdComuneRESLR(iar.getIdComuneRESLR());
+						aa.setIndirizzoLR(iar.getIndirizzoLR());
+						aa.setNome(iar.getNome());
+						aa.setNomeLR(iar.getNomeLR());
+						aa.setNotaPignoramento(iar.getNotaPignoramento());
+						aa.setPartitaIva(iar.getPartitaIva());
+						aa.setPignoramento(iar.getPignoramento());
+						aa.setSesso(iar.getSesso());
+						aa.setSessoLR(iar.getSessoLR());
+						aa.setTipoAnagrafica(iar.getTipoAnagrafica());
+
+						aa.setListaSedi(iar.getListaSedi());
+
+						as.add(aa);
+					}
+					st.setRispostaInterrogaAnagrafica(riat);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+			
+			
+
+			if (anaRequest.getRichiesta().getInterrogaAnagraficaContratti()!=null)
+			{
+				List iacrl=null;
+				it.latraccia.entity.anasic.richiesta.InterrogaAnagraficaContrattiTypes listaChiavi=anaRequest.getRichiesta().getInterrogaAnagraficaContratti();
+
+				iacrl = db.getAnagraficaContratti(listaChiavi);					
+
+				ListIterator li = iacrl.listIterator();
+				if (li.hasNext()==false)
+				{
+					res = esitoNegativo(BigInteger.valueOf(1),"Nessun risultato restituito","Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+					it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+					MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+					it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+					it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+					iti.setApplicazione("Anagrafe SIC");
+					iti.setInfoMittDest("Regione Basilicata");
+					mr.setIntestazione(iti);
+
+					//lista risposta
+					it.latraccia.entity.anasic.risposta.RispostaInterrogaAnagraficaContrattiTypes riact = objFactory1.createRispostaInterrogaAnagraficaContrattiTypes();
+
+
+					while (li.hasNext()) 
+					{
+
+
+						AnagraficaContratto iacr = (AnagraficaContratto)li.next();    
+
+						it.latraccia.entity.anasic.risposta.RispostaInterrogaAnagraficaContrattoTypes ac=objFactory1.createRispostaInterrogaAnagraficaContrattoTypes();
+						//imposta chiave contratto
+						ac.setChiave(iacr.getChiave());
+
+						//imposta anagrafiche associate al contratto
+						List <Anagrafica> lia = iacr.getListaAnagrafica();
+						Iterator itlia=lia.iterator();
+
+						while(itlia.hasNext()){
+
+							it.latraccia.entity.anasic.risposta.AnagraficaTypes aa = objFactory1.createAnagraficaTypes();
+							Anagrafica iar=(Anagrafica)itlia.next();
+
+							aa.setCommissioni(iar.getCommissioni());
+							aa.setAltriNomi(iar.getAltriNomi());
+							aa.setCAPRESLR(iar.getCapResLR());
+							aa.setCodiceFiscale(iar.getCodiceFiscale());
+							aa.setCodiceFiscaleLR(iar.getCodiceFiscaleLR());
+							aa.setCognome(iar.getCognome());
+							aa.setCognomeLR(iar.getCognomeLR());
+							aa.setComuneNS(iar.getComuneNS());
+							aa.setComuneNSLR(iar.getComuneNSLR());
+							aa.setComuneRESLR(iar.getComuneRESLR());
+
+							if (iar.getDataNascita() != null)
+							{
+								Calendar cal = Calendar.getInstance();
+								cal.setTime(iar.getDataNascita());
+								aa.setDataNascita(cal);
+							}
+							else
+							{
+								aa.setDataNascita(null);
+							}
+
+							if (iar.getDataNascitaLR() != null)
+							{
+								Calendar cal1 = Calendar.getInstance();
+								cal1.setTime(iar.getDataNascitaLR());
+								aa.setDataNascitaLR(cal1);
+							}
+							else
+							{
+								aa.setDataNascitaLR(null);
+							}
+
+							aa.setDenominazione(iar.getDenominazione());
+							aa.setEstero(iar.getEstero());
+							aa.setIdAnagrafica(iar.getIdAnagrafica());
+							aa.setIdComuneNS(iar.getIdComuneNS());
+							aa.setIdComuneNSLR(iar.getComuneNSLR());
+							aa.setIdComuneRESLR(iar.getIdComuneRESLR());
+							aa.setIndirizzoLR(iar.getIndirizzoLR());
+							aa.setNome(iar.getNome());
+							aa.setNomeLR(iar.getNomeLR());
+							aa.setNotaPignoramento(iar.getNotaPignoramento());
+							aa.setPartitaIva(iar.getPartitaIva());
+							aa.setPignoramento(iar.getPignoramento());
+							aa.setSesso(iar.getSesso());
+							aa.setSessoLR(iar.getSessoLR());
+							aa.setTipoAnagrafica(iar.getTipoAnagrafica());
+
+							aa.setListaSedi(iar.getListaSedi());
+
+
+							ac.getAnagrafica().add(aa);
+						}
+
+						riact.getContratto().add(ac);
+					}
+
+					st.setRispostaInterrogaAnagraficaContratti(riact);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getVerificaAnagrafica()!=null)
+			{
+				Anagrafica var = db.verificaAnagrafe(anaRequest.getRichiesta().getVerificaAnagrafica().getAnagrafica());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+				it.latraccia.entity.anasic.risposta.RispostaVerificaAnagraficaTypes rvat = objFactory1.createRispostaVerificaAnagraficaTypes();
+
+				it.latraccia.entity.anasic.risposta.AnagraficaTypes aa = objFactory1.createAnagraficaTypes();
+
+				if (var == null)
+				{
+					res = esitoNegativo(BigInteger.valueOf(1),"Nessun risultato restituito","Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					aa.setAltriNomi(var.getAltriNomi());
+					aa.setCAPRESLR(var.getCapResLR());
+					aa.setCodiceFiscale(var.getCodiceFiscale());
+					aa.setCodiceFiscaleLR(var.getCodiceFiscaleLR());
+					aa.setCognome(var.getCognome());
+					aa.setCognomeLR(var.getCognomeLR());
+					aa.setComuneNS(var.getComuneNS());
+					aa.setComuneNSLR(var.getComuneNSLR());
+					aa.setComuneRESLR(var.getComuneRESLR());
+					aa.setCommissioni(var.getCommissioni());
+
+					if (var.getDataNascita() != null)
+					{
+						Calendar cal = Calendar.getInstance();
+						cal.setTime(var.getDataNascita());
+						aa.setDataNascita(cal);
+					}
+					else
+					{
+						aa.setDataNascita(null);
+					}
+
+					if (var.getDataNascita() != null)
+					{
+						Calendar cal1 = Calendar.getInstance();
+						cal1.setTime(var.getDataNascitaLR());
+						aa.setDataNascitaLR(cal1);
+					}
+					else
+					{
+						aa.setDataNascitaLR(null);
+					}
+					aa.setDenominazione(aa.getDenominazione());
+					aa.setEstero(var.getEstero());
+					aa.setIdAnagrafica(var.getIdAnagrafica());
+					aa.setIdComuneNS(var.getIdComuneNS());
+					aa.setIdComuneNSLR(var.getComuneNSLR());
+					aa.setIdComuneRESLR(var.getIdComuneRESLR());
+					aa.setIndirizzoLR(var.getIndirizzoLR());
+					aa.setNome(var.getNome());
+					aa.setNomeLR(var.getNomeLR());
+					aa.setNotaPignoramento(var.getNotaPignoramento());
+					aa.setPartitaIva(var.getPartitaIva());
+					aa.setPignoramento(var.getPignoramento());
+					aa.setSesso(var.getSesso());
+					aa.setSessoLR(var.getSessoLR());
+
+					it.latraccia.entity.anasic.risposta.SedeTypes st1 = objFactory1.createSedeTypes();
+
+
+					aa.setListaSedi(var.getListaSedi());
+
+					rvat.setAnagrafica(aa);
+
+					st.setRispostaVerificaAnagrafica(rvat);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+			if (anaRequest.getRichiesta().getCreaAnagrafica()!=null)
+			{
+				CreaAnagrafeResult var = db.creaAnagrafe(anaRequest.getRichiesta().getCreaAnagrafica().getAnagrafica(),anaRequest.getRichiesta().getCreaAnagrafica().getCodiceFiscaleOperatore());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+
+				it.latraccia.entity.anasic.risposta.RispostaCreaAnagraficaTypes rcat = objFactory1.createRispostaCreaAnagraficaTypes();
+
+				if (var.getCodiceRisposta()==0)//SE c'è stato qualche problema restituisco l'eccezione
+				{
+					res = esitoNegativo(new BigInteger(String.valueOf(var.getCodiceRisposta())),var.getDescrizioneRisposta(),"Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					rcat.setIdAnagrafica(var.getIdAnagrafica());
+					rcat.setIdContoCorrente(var.getIdContoCorrente());
+					rcat.setIdSede(var.getIdSede());
+					rcat.setIdTipoPagamento(var.getIdTipoPagamento());
+
+					st.setRispostaCreaAnagrafica(rcat);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getCreaSede()!=null)
+			{
+				CreaSedeResult var = db.creaSede(anaRequest.getRichiesta().getCreaSede());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+
+				it.latraccia.entity.anasic.risposta.RispostaCreaSedeTypes rcst = objFactory1.createRispostaCreaSedeTypes();
+
+				if (var.getCodiceRisposta()==0)//SE c'è stato qualche problema restituisco l'eccezione
+				{
+					res = esitoNegativo(new BigInteger(String.valueOf(var.getCodiceRisposta())),var.getDescrizioneRisposta(),"Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					rcst.setIdAnagrafica(var.getIdAnagrafica());
+					rcst.setIdContoCorrente(var.getIdContoCorrente());
+					rcst.setIdSede(var.getIdSede());
+					rcst.setIdTipoPagamento(var.getIdTipoPagamento());
+
+					st.setRispostaCreaSede(rcst);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getCreaContoBancario()!=null)
+			{
+				CreaContoBancarioResult var = db.creaContoBancario(anaRequest.getRichiesta().getCreaContoBancario());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+
+				it.latraccia.entity.anasic.risposta.RispostaCreaContoBancarioTypes rccbt = objFactory1.createRispostaCreaContoBancarioTypes();
+
+				if (var.getCodiceRisposta()==0)//SE c'è stato qualche problema restituisco l'eccezione
+				{
+					res = esitoNegativo(new BigInteger(String.valueOf(var.getCodiceRisposta())),var.getDescrizioneRisposta(),"Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					rccbt.setIdAnagrafica(var.getIdAnagrafica());
+					rccbt.setIdContoCorrente(var.getIdContoCorrente());
+					rccbt.setIdSede(var.getIdSede());
+					rccbt.setIdTipoPagamento(var.getIdTipoPagamento());
+
+					st.setRispostaCreaContoBancario(rccbt);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getInterrogaComuni()!=null)
+			{
+				List icrl=null;
+				if (anaRequest.getRichiesta().getInterrogaComuni().getNomeComune() != null)
+				{
+					icrl = db.getComune(anaRequest.getRichiesta().getInterrogaComuni().getNomeComune());					
+				}
+				ListIterator li = icrl.listIterator();
+				if (li.hasNext()==false)
+				{
+					res = esitoNegativo(BigInteger.valueOf(1),"Nessun risultato restituito","Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+					it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+					MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+					it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+					it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+					iti.setApplicazione("Anagrafe SIC");
+					iti.setInfoMittDest("Regione Basilicata");
+					mr.setIntestazione(iti);
+					it.latraccia.entity.anasic.risposta.RispostaInterrogaComuniTypes rict = objFactory1.createRispostaInterrogaComuniTypes();
+					List ac = rict.getComune();
+
+					while (li.hasNext()) 
+					{
+						Comune iar = (Comune)li.next();    
+						it.latraccia.entity.anasic.risposta.ComuneTypes aa = objFactory1.createComuneTypes();
+						aa.setCAP(iar.getCAP());
+						aa.setCodiceBelFiore(iar.getCodiceBelFiore());
+						aa.setCodiceIstat(iar.getCodiceIstat());
+						aa.setCodProvincia(iar.getCodiceProvincia());
+						aa.setCodRegione(iar.getCodiceRegione());
+						aa.setCodRipartizioneGeografica(iar.getCodRipartizioneGeo());
+						aa.setDescRipartizioneGeografica(iar.getDescRipartizioneGeo());
+						aa.setDescrizione(iar.getDescrizione());
+						aa.setIdComune(iar.getIdComune());
+						aa.setNazione(iar.getNazione());
+						aa.setProvincia(iar.getProvincia());
+						aa.setRegione(iar.getRegione());
+
+						ac.add(aa);
+					}
+					st.setRispostaInterrogaComuni(rict);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getModificaAnagrafica()!=null)
+			{
+				ModificaAnagraficaResult var = db.modificaAnagrafica(anaRequest.getRichiesta().getModificaAnagrafica());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+
+				it.latraccia.entity.anasic.risposta.RispostaModificaAnagraficaTypes rmat = objFactory1.createRispostaModificaAnagraficaTypes();
+
+				if (var.getCodiceRisposta()==0)//SE c'è stato qualche problema restituisco l'eccezione
+				{
+					res = esitoNegativo(new BigInteger(String.valueOf(var.getCodiceRisposta())),var.getDescrizioneRisposta(),"Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					rmat.setIdAnagrafica(var.getIdAnagrafica());
+
+					st.setRispostaModificaAnagrafica(rmat);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getModificaSede()!=null)
+			{
+				ModificaSedeResult var = db.modificaSede(anaRequest.getRichiesta().getModificaSede());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+
+				it.latraccia.entity.anasic.risposta.RispostaModificaSedeTypes rmst = objFactory1.createRispostaModificaSedeTypes();
+
+				if (var.getCodiceRisposta()==0)//SE c'è stato qualche problema restituisco l'eccezione
+				{
+					res = esitoNegativo(new BigInteger(String.valueOf(var.getCodiceRisposta())),var.getDescrizioneRisposta(),"Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					rmst.setIdAnagrafica(var.getIdAnagrafica());
+					rmst.setIdSede(var.getIdSede());
+					rmst.setIdTipoPagamento(var.getIdTipoPagamento());
+
+					st.setRispostaModificaSede(rmst);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+			if (anaRequest.getRichiesta().getModificaContoBancario() != null)
+			{
+				ModificaContoBancarioResult var = db.modificaContoBancario(anaRequest.getRichiesta().getModificaContoBancario());
+
+				JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+				it.latraccia.entity.anasic.risposta.ObjectFactory objFactory1 = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+				MessaggioRisposta mr = objFactory1.createMessaggioRisposta();
+				it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory1.createIntestazioneTypes();
+				it.latraccia.entity.anasic.risposta.SuccessoTypes st = objFactory1.createSuccessoTypes();
+
+				iti.setApplicazione("Anagrafe SIC");
+				iti.setInfoMittDest("Regione Basilicata");
+				mr.setIntestazione(iti);
+
+				it.latraccia.entity.anasic.risposta.RispostaModificaContoBancarioTypes rmcbt = objFactory1.createRispostaModificaContoBancarioTypes();
+
+				if (var.getCodiceRisposta()==0)//SE c'è stato qualche problema restituisco l'eccezione
+				{
+					res = esitoNegativo(new BigInteger(String.valueOf(var.getCodiceRisposta())),var.getDescrizioneRisposta(),"Anagrafe SIC","Regione Basilicata");
+				}
+				else
+				{
+					rmcbt.setIdAnagrafica(var.getIdAnagrafica());
+					rmcbt.setIdSede(var.getIdSede());
+					rmcbt.setIdContoCorrente(var.getIdContoCorrente());
+
+					st.setRispostaModificaContoBancario(rmcbt);
+					mr.setSuccesso(st);
+
+					Marshaller marshaller = jaxbContext.createMarshaller();
+					marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					marshaller.marshal(mr, baos);
+					res = baos.toString("UTF-8");
+				}
+			}
+
+		} 
+		catch (JAXBException e) 
+		{
+			e.printStackTrace();
+			return esitoNegativo(new BigInteger("0"),"XML non valido","Anagrafe SIC","Regione Basilicata");
+		}
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+			return esitoNegativo(new BigInteger("0"),"UnsupportedEncodingException: "+e.getMessage(),"Anagrafe SIC","Regione Basilicata");
+		}
+		catch (SQLException e) 
+		{
+			e.printStackTrace();
+			return esitoNegativo(new BigInteger("0"),"SQLException: "+e.getMessage(),"Anagrafe SIC","Regione Basilicata");
+		}
+		finally
+		{
+			db.closeDB();
+		}
+		return res;
+	}
+
+	/**
+	 * Metodo privato per la preparazione di esiti negativi
+	 *
+	 * @return String - risposta xml
+	 * 
+	 */
+	private String esitoNegativo(BigInteger codiceEsito, String descrizioneEsito, String applicazione, String infomittdest) 
+	{
+		String ack="";
+		try 
+		{
+			JAXBContext jaxbContext=JAXBContext.newInstance("it.latraccia.entity.anasic.risposta");
+			it.latraccia.entity.anasic.risposta.ObjectFactory objFactory = new it.latraccia.entity.anasic.risposta.ObjectFactory();
+
+			MessaggioRisposta mr = objFactory.createMessaggioRisposta();
+			it.latraccia.entity.anasic.risposta.IntestazioneTypes iti = objFactory.createIntestazioneTypes();
+			it.latraccia.entity.anasic.risposta.EccezioneTypes et = objFactory.createEccezioneTypes();
+
+			iti.setApplicazione(applicazione);
+			iti.setInfoMittDest(infomittdest);
+			mr.setIntestazione(iti);
+			et.setCodice(codiceEsito);
+
+			if (descrizioneEsito == null || descrizioneEsito == "")
+			{
+				et.setDescrizione("Nessuna");
+				et.setException("Nessuna");
+			}
+			else
+			{
+				et.setDescrizione(descrizioneEsito);
+				et.setException(descrizioneEsito);
+			}
+
+			mr.setEccezione(et);
+
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			marshaller.marshal(mr, baos);
+
+			ack = baos.toString("UTF-8");
+		} 
+		catch (JAXBException e) 
+		{
+			e.printStackTrace();
+			ack = "<?xml version=\"1.0\"?> <Messaggio_Risposta>  <Intestazione> <InfoMittDest>Regione Basilicata</InfoMittDest> <Applicazione>Anagrafe SIC</Applicazione> </Intestazione> <Eccezione> <Codice>0</Codice>  <Descrizione>JAXBException</Descrizione> <Exception>"+e.getMessage()+"</Exception> </Eccezione> </Messaggio_Risposta>";
+			return ack;
+		}
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+			ack = "<?xml version=\"1.0\"?> <Messaggio_Risposta>  <Intestazione> <InfoMittDest>Regione Basilicata</InfoMittDest> <Applicazione>Anagrafe SIC</Applicazione> </Intestazione> <Eccezione> <Codice>0</Codice>  <Descrizione>UnsupportedEncodingException</Descrizione> <Exception>"+e.getMessage()+"</Exception> </Eccezione> </Messaggio_Risposta>";
+			return ack;
+		}
+		return ack;
+	}
+}

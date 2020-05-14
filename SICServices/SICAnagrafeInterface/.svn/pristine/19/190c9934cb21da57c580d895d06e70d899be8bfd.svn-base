@@ -1,0 +1,384 @@
+/**
+ * Creato il 20 Giugno 2011
+ * Modificato il 14 Ottobre 2011
+ */
+package it.latraccia.ws.client;
+
+import javax.xml.namespace.QName;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.rpc.client.RPCServiceClient;
+
+
+
+
+/**
+*
+* Client del Web Service 
+* 
+* @author Vincenzo Gioviale
+* @version     %I%, %G%
+*  
+*/
+public class Client
+{
+
+	/**
+	 * Metodo Main
+	 * @param args
+	 */
+	public static void main(String[] args) throws AxisFault
+	{
+        RPCServiceClient serviceClient = new RPCServiceClient();
+        Options options = serviceClient.getOptions();
+       // EndpointReference targetEPR = new EndpointReference("http://localhost:8081/axis2/services/SICAnagrafeInterface");
+        //EndpointReference targetEPR = new EndpointReference("http://localhost:8081/axis2/services/SICAnagrafeInterfaceTest");
+        EndpointReference targetEPR = new EndpointReference("http://172.18.17.54:8081/axis2/services/SICAnagrafeInterfaceTest");
+        
+        options.setTo(targetEPR);
+        
+        //Imposto l'oggetto di richiesta
+        QName opSIC = new QName("http://ws.latraccia.it/xsd", "queryAnagrafica");
+        
+        Object[] response=null;
+        try
+        {
+        	
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+			"<Messaggio_Richiesta>" +
+			"    <Intestazione>" +
+			"        <InfoMittDest>Intema</InfoMittDest>" +
+			"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+			"    </Intestazione>" +
+			"    <Richiesta>" +
+			"       <InterrogaAnagrafica>" +
+			"            <Denominazione>INTEMA</Denominazione>" +
+			"            <!--<IdAnagrafica>9830</IdAnagrafica>-->" +
+			"            <!--<PartitaIva>00317370773</PartitaIva>-->" +
+			"            <!--<CodiceFiscale>FEODTL82D64L738T</CodiceFiscale>-->" +
+			"       </InterrogaAnagrafica>" +
+			"    </Richiesta>" +
+			"</Messaggio_Richiesta>";*/
+        	
+        	String toSend = "<?xml version=\"1.0\"?>" +
+			"<Messaggio_Richiesta>" +
+			"    <Intestazione>" +
+			"        <InfoMittDest>Intema</InfoMittDest>" +
+			"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+			"    </Intestazione>" +
+			"    <Richiesta>" +
+			"       <InterrogaAnagrafica>" +
+			"            <!--<Denominazione>INTEMA</Denominazione>-->" +
+			"            <!--<IdAnagrafica>9830</IdAnagrafica>-->" +
+			"            <!--<PartitaIva>00317370773</PartitaIva>-->" +
+			"            <!--<CodiceFiscale>FEODTL82D64L738T</CodiceFiscale>--> " +
+			"            <NumeroContratto>0210002</NumeroContratto>" +
+			"       </InterrogaAnagrafica>" +
+			"    </Richiesta>" +
+			"</Messaggio_Richiesta>";
+        	
+        	/*String toSend="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+        			"<Messaggio_Richiesta> " +
+        			"    <Intestazione>   " +
+        			"        <InfoMittDest>PROVA</InfoMittDest>" +
+        			"        <Applicazione>PROVA</Applicazione>" +
+        			"    </Intestazione>" +
+        			"    <Richiesta>" +
+        			"        <CreaAnagrafica>" +
+        			"            <Anagrafica>" +
+        			"                <TipoAnagrafica>F</TipoAnagrafica>" +
+        			"                <CodiceFiscale>PCASVT57T25L049J</CodiceFiscale>" +
+        			"                <Cognome>PACE</Cognome>" +
+        			"        	     <Nome>SALVATORE</Nome>" +
+        			"                <Sesso>M</Sesso>" +
+        			"                <ComuneNS>TARANTO</ComuneNS>" +
+        			"                <DataNascita>1957-12-25+01:00</DataNascita>" +
+        			"                <Sede>" +
+        			"                   <Indirizzo>VIA PETRUCCELLI, 18</Indirizzo>" +
+        			"                    <Comune>AVIGLIANO</Comune>" +
+        			"                    <CAP>85021</CAP>" +
+        			"                    <Bollo>N</Bollo>" +
+        			"					 <NomeSede>Sede</NomeSede>" +        			
+        			"                    <TipoPagamento>22</TipoPagamento>" +
+        			"                </Sede>" +
+        			"                <DatiBancari>" +
+        			"                    <NomeBanca>BANCOPOSTA</NomeBanca>" +
+        			"                    <ContoCorrente>000083504209</ContoCorrente>" +
+        			"                    <ModalitaPrincipale>S</ModalitaPrincipale>" +
+        			"                    <SedeAgenzia>AVIGLIANO</SedeAgenzia>" +
+        			"                    <Indirizzo>VIA DANTE, 1</Indirizzo>" +
+        			"                    <Citta>AVIGLIANO</Citta>" +
+        			"                    <CAP>85100</CAP>" +
+        			"                    <Provincia>PZ</Provincia>" +
+        			"                    <ABI>07601</ABI>" +
+        			"                    <CAB>04200</CAB>" +
+        			"                    <CIN>P</CIN>" +
+        			"                    <IBAN>IT04P0760104200000083504209</IBAN>" +
+        			"                </DatiBancari>" +
+        			"            </Anagrafica>" +
+        			"            <CodiceFiscaleOperatore>PCASVT57T25L049J</CodiceFiscaleOperatore>" +
+        			"        </CreaAnagrafica>" +
+        			"    </Richiesta>" +
+        			"</Messaggio_Richiesta>";
+
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+			"<Messaggio_Richiesta>" +
+			"   <Intestazione>" +
+			"		<InfoMittDest>Intema</InfoMittDest>" +
+			"		<Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+			"	</Intestazione>" +
+			"	<Richiesta>" +
+			"		<VerificaAnagrafica>" +
+			"			<Anagrafica>" +
+			"				<TipoAnagrafica>G</TipoAnagrafica>" +
+			"				<PartitaIva>00317370773</PartitaIva>" +
+			"				<!--<Denominazione>COOPERATIVA EDP LA TRACCIA</Denominazione>-->" +
+			"				<!--<SessoLR>M</SessoLR>-->" +
+			"				<!--<ComuneNSLR>MATERA</ComuneNSLR>-->" +
+			"				<!--<ComuneRESLR>MATERA</ComuneRESLR>-->" +
+			"				<!--<Commissioni>N</Commissioni>-->" +
+			"				<Sede>" +
+			"					<Indirizzo>RECINTO II FIORENTINI, 10</Indirizzo>" +
+			"					<Comune>MATERA</Comune>" +
+			"					<CAP>75100</CAP>" +
+			"					<!--<Bollo>S</Bollo>-->" +
+			"					<NomeSede>SEDE N. 1</NomeSede>" +
+			"					<TipoPagamento>Accredito su c/c bancario</TipoPagamento>" +
+			"				</Sede>" +
+			"				<DatiBancari>" +
+			"					<!--<NomeBanca>BANCA POPOLARE DI BARI</NomeBanca>-->" +
+			"					<ContoCorrente>000000156219</ContoCorrente>" +
+			"					<!--<ModalitaPrincipale>N</ModalitaPrincipale>-->" +
+			"					<!--<SedeAgenzia>AGENZIA DI MATERA</SedeAgenzia>-->" +
+			"					<!--<Indirizzo>VIA ROMA, 35</Indirizzo>-->" +
+			"					<!--<Citta>MATERA</Citta>-->" +
+			"					<!--<ABI>05424</ABI>-->" +
+			"					<!--<CAB>16101</CAB>-->" +
+			"					<!--<CIN>B</CIN>-->" +
+			"					<!--<IBAN>IT77B0542416101000000156219</IBAN>-->" +
+			"				</DatiBancari>" +
+			"			</Anagrafica>" +
+			"		</VerificaAnagrafica>" +
+			"	</Richiesta>" +
+			"</Messaggio_Richiesta>";*/
+
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+			"<Messaggio_Richiesta>" +
+			"    <Intestazione>" +
+			"        <InfoMittDest>Intema</InfoMittDest>" +
+			"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+			"    </Intestazione>" +
+			"    <Richiesta>" +
+			"        <CreaAnagrafica>" +
+			"            <Anagrafica>" +
+			"                <TipoAnagrafica>F</TipoAnagrafica>" +
+			"                <CodiceFiscale>GVLVCN76C05A225K</CodiceFiscale>" +
+			"                <Cognome>Gioviale</Cognome>" +
+			"                <Nome>Vincenzo</Nome>" +
+			"                <Sesso>M</Sesso>" +
+			"                <ComuneNS>Altamura</ComuneNS>" +
+			"                <DataNascita>1976-03-05</DataNascita>" +
+			"                <Pignoramento>N</Pignoramento>" +
+			"                <NotaPignoramento></NotaPignoramento>" +
+			"                <Estero>N</Estero>" +
+			"                <Commissioni>N</Commissioni>" +
+			"                <Sede>" +
+			"                    <Indirizzo>Recinto II Fiorentini</Indirizzo>" +
+			"                    <Comune>Matera</Comune>" +
+			"                    <CAP>75100</CAP>" +
+			"                    <Telefono>0835336836</Telefono>" +
+			"                    <EMail>vgioviale@latraccia.it</EMail>" +
+			"                    <Fax>0835336825</Fax>" +
+			"                    <Bollo>N</Bollo>" +
+			"                    <NomeSede>Matera</NomeSede>" +
+			"                    <TipoPagamento>ACCREDITOSUC/CBANCARIO</TipoPagamento>" +
+			"                </Sede>" +
+			"                <DatiBancari>" +
+			"                    <NomeBanca>IWBank</NomeBanca>" +
+			"                    <ContoCorrente>123456789</ContoCorrente>" +
+			"                    <ModalitaPrincipale>S</ModalitaPrincipale>" +
+			"                    <SedeAgenzia>Milano</SedeAgenzia>" +
+			"                    <Indirizzo>Via prova</Indirizzo>" +
+			"                    <Citta>Milano</Citta>" +
+			"                    <CAP>00010</CAP>" +
+			"                    <Provincia>MI</Provincia>" +
+			"                    <ABI>01030</ABI>" +
+			"                    <CAB>01031</CAB>" +
+			"                    <CIN>A</CIN>" +
+			"                    <IBAN>123456789123456078965412369</IBAN>" +
+			"                </DatiBancari>" +
+			"            </Anagrafica>" +
+			"            <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+			"        </CreaAnagrafica>" +
+			"    </Richiesta>" +
+			"</Messaggio_Richiesta>";*/
+        	
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+    				"<Messaggio_Richiesta>" +
+    				"    <Intestazione>" +
+    				"        <InfoMittDest>Intema</InfoMittDest>" +
+    				"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+    				"    </Intestazione>" +
+    				"    <Richiesta>" +
+    				"        <CreaSede>" +
+    				"            <IdAnagrafica>9830</IdAnagrafica>" +
+    				"            <Sede>" +
+    				"                <Indirizzo>Via Gabriele D'Annunzio n.6 int.9</Indirizzo>" +
+    				"                <Comune>Altamura</Comune>" +
+    				"                <CAP>70022</CAP>" +
+    				"                <Telefono>0803149977</Telefono>" +
+    				"                <EMail>info@latraccia.it</EMail>" +
+    				"                <Fax>0803149977</Fax>" +
+    				"                <Bollo>N</Bollo>" +
+    				"                <NomeSede>Traccia Altamura</NomeSede>" +
+    				"                <TipoPagamento>ACCREDITOSUC/CBANCARIO</TipoPagamento>" +
+    				"            </Sede>" +
+    				"            <DatiBancari>" +
+    				"                <NomeBanca>IWBank</NomeBanca>" +
+    				"                <ContoCorrente>0123456789</ContoCorrente>" +
+    				"                <ModalitaPrincipale>N</ModalitaPrincipale>" +
+    				"                <SedeAgenzia>Milano</SedeAgenzia>" +
+    				"                <Indirizzo>Milano</Indirizzo>" +
+    				"                <Citta>Milano</Citta>" +
+    				"                <CAP>00100</CAP>" +
+    				"                <Provincia>MI</Provincia>" +
+    				"                <ABI>00012</ABI>" +
+    				"                <CAB>00012</CAB>" +
+    				"                <CIN>V</CIN>" +
+    				"                <IBAN>012345789610234587912547891</IBAN>" +
+    				"            </DatiBancari>" +
+    				"            <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+    				"        </CreaSede>" +
+    				"    </Richiesta>" +
+    				"</Messaggio_Richiesta>";*/
+    		
+    		
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+    				"<Messaggio_Richiesta>" +
+    				"    <Intestazione>" +
+    				"        <InfoMittDest>Intema</InfoMittDest>" +
+    				"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+    				"    </Intestazione>" +
+    				"    <Richiesta>" +
+    				"        <CreaContoBancario>" +
+    				"            <IdAnagrafica>9830</IdAnagrafica>" +
+    				"            <IdSede>2</IdSede>" +
+    				"    		<DatiBancari>" +
+    				"  				<NomeBanca>IWBank</NomeBanca>" +
+    				"    			<ContoCorrente>7123456789</ContoCorrente>" +
+    				"    			<ModalitaPrincipale>N</ModalitaPrincipale>" +
+    				"    			<SedeAgenzia>Milano</SedeAgenzia>" +
+    				"    			<Indirizzo>Milano</Indirizzo>" +
+    				"    			<Citta>Milano</Citta>" +
+    				"    			<CAP>00100</CAP>" +
+    				"    			<Provincia>MI</Provincia>" +
+    				"    			<ABI>00012</ABI>" +
+    				"    			<CAB>00012</CAB>" +
+    				"    			<CIN>V</CIN>" +
+    				"    			<IBAN>712345789610234587912547891</IBAN>" +
+    				"    		</DatiBancari>" +
+    				"    		<CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+    				"        </CreaContoBancario>" +
+    				"    </Richiesta>" +
+    				"</Messaggio_Richiesta>";*/
+    		
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+    		"<Messaggio_Richiesta>" +
+    		"    <Intestazione>" +
+    		"        <InfoMittDest>Intema</InfoMittDest>" +
+    		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+    		"    </Intestazione>" +
+    		"    <Richiesta>" +
+    		"        <InterrogaComuni>" +
+    		"            <NomeComune>MAT</NomeComune>" +
+    		"        </InterrogaComuni>" +
+    		"    </Richiesta>" +
+    		"</Messaggio_Richiesta>";*/
+
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+    		"<Messaggio_Richiesta>" +
+    		"    <Intestazione>" +
+    		"        <InfoMittDest>Intema</InfoMittDest>" +
+    		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+    		"    </Intestazione>" +
+    		"    <Richiesta>" +
+    		"     <ModificaAnagrafica>" +
+    		"        <IdAnagrafica>9830</IdAnagrafica>" +
+    		"        <TipoAnagrafica>G</TipoAnagrafica>" +
+    		"        <PartitaIva>00317370773</PartitaIva>" +
+    		"        <Denominazione>COOPERATIVA E.D.P. LA TRACCIA</Denominazione>" +
+    		"        <!--<DataNascitaLR>1958-07-18</DataNascitaLR>-->" +
+    		"        <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+    		"     </ModificaAnagrafica>" +
+    		"   </Richiesta>" +
+    		"</Messaggio_Richiesta>";*/
+    		
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+    		"<Messaggio_Richiesta>" +
+    		"    <Intestazione>" +
+    		"        <InfoMittDest>Intema</InfoMittDest>" +
+    		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+    		"    </Intestazione>" +
+    		"    <Richiesta>" +
+    		"        <ModificaSede>" +
+    		"        <IdAnagrafica>9830</IdAnagrafica>" +
+    		"        <IdSede>1</IdSede>" +
+    		"        <Indirizzo>RECINTO II FIORENTINI, 10</Indirizzo>" +
+    		"        <Comune>MATERA</Comune>" +
+    		"        <CAP>75100</CAP>" +
+    		"        <EMail>info@latraccia.it</EMail>" +
+    		"        <TipoPagamento>ACCREDITOSUC/CBANCARIO</TipoPagamento>" +
+    		"        <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+    		"    </ModificaSede>" +
+    		"   </Richiesta>" +
+    		"</Messaggio_Richiesta>";*/
+
+    		/*String toSend = "<?xml version=\"1.0\"?>" +
+    		"<Messaggio_Richiesta>" +
+    		"    <Intestazione>" +
+    		"        <InfoMittDest>Intema</InfoMittDest>" +
+    		"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+    		"    </Intestazione>" +
+    		"    <Richiesta>" +
+    		"        <ModificaContoBancario>" +
+    		"        <IdAnagrafica>9830</IdAnagrafica>" +
+    		"        <IdSede>1</IdSede>" +
+    		"        <IdContoCorrente>8951</IdContoCorrente>" +
+    		"        <ContoCorrente>2400948</ContoCorrente>" +
+    		"        <ModalitaPrincipale>N</ModalitaPrincipale>" +
+    		"        <CIN>c</CIN>" +
+    		"        <IBAN>123456789154236987a45217784</IBAN>" +
+    		"        <CodiceFiscaleOperatore>SRLMCL55L55A013G</CodiceFiscaleOperatore>" +
+    		"    </ModificaContoBancario>" +
+    		"   </Richiesta>" +
+    		"</Messaggio_Richiesta>";*/
+    				
+    		String toSendUTF8 = new String(toSend.getBytes("UTF-8"));
+        	
+        	Object[] opSICArgs = new Object[] {toSendUTF8};
+            Class[] returnTypes = new Class[] { String.class };
+            long soTimeout = 5 * 60 * 1000; // Imposto il timeout a 5 minuti
+    	    options.setTimeOutInMilliSeconds(soTimeout);
+    	    serviceClient.getOptions().setTimeOutInMilliSeconds(soTimeout);
+    	    
+            // Invoco il servizio
+    	    response = serviceClient.invokeBlocking(opSIC, opSICArgs, returnTypes);
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        
+    	String ts = (String) response[0];
+        if (ts == null) 
+        {
+            System.out.println("Servizio SICAnagrafeInterface non inizializzato!");
+        }
+        else
+        {
+        	// Visualizzo il risultato
+        	System.out.println("Risposta: "+ts);
+        }
+    }	
+}

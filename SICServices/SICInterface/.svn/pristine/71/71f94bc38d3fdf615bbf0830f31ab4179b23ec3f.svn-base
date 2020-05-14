@@ -1,0 +1,573 @@
+package it.latraccia.ws.unittest;
+
+import java.io.UnsupportedEncodingException;
+
+import it.latraccia.ws.SICInterface;
+
+/**
+*
+* Classe di test di unità per il POJO it.latraccia.ws.SICInterface
+* Ha lo scopo di testare la classe che rappresenta il web service al di fuori del 
+* SOAP Engine
+*
+* @author Vincenzo Gioviale
+*  
+*/
+public class TestPojo 
+{
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) 
+	{
+		SICInterface si = new SICInterface();
+		
+    	//test by leo
+    	/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogazioneBilancio>" +
+		"            <AnnoBilancio>2008</AnnoBilancio>" +
+		"            <CodiceCapitolo>U01103</CodiceCapitolo>" +
+		"            <Struttura>75AF</Struttura>" +    		
+		"        </InterrogazioneBilancio>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+    	/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogazioneBilancio>" +
+		"            <AnnoBilancio>2008</AnnoBilancio>" +
+		"            <CodiceCapitolo>U16000</CodiceCapitolo>" +
+		"            <Struttura>CICCIO</Struttura>" +
+		"        </InterrogazioneBilancio>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogazioneCapitoli>" +
+		"            <AnnoBilancio>2014</AnnoBilancio>" +
+		"            <Struttura>120B</Struttura>" +
+		"        </InterrogazioneCapitoli>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogazioneCapitoliLiquidazioni>" +
+		"            <AnnoBilancio>2014</AnnoBilancio>" +
+		"            <Struttura>120B</Struttura>" +
+		"        </InterrogazioneCapitoliLiquidazioni>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <DisponibilitaPreImpegno>" +
+		"            <NumeroPreimpegno>200900645</NumeroPreimpegno>" +
+		"        </DisponibilitaPreImpegno>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"<GenerazionePreImpegno>" +
+		"<DataMovimento>2008-12-18</DataMovimento>" +
+		"<OggettoPreimpegno>attività preimpegno per vincenzo</OggettoPreimpegno>" +
+		"<CodiceCapitoloUscita>U16000</CodiceCapitoloUscita>" +
+		"<Importo>1000</Importo>" +
+		"<TipoAtto>DELIBERA</TipoAtto>" +
+		"<DataAtto>2008-12-18</DataAtto>" +
+		"<NumeroAtto>1</NumeroAtto>" +
+		"</GenerazionePreImpegno>" +
+		"</Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"<EliminazionePreImpegno>" +
+		"<NumeroPreimpegno>200800657</NumeroPreimpegno>" +
+		"</EliminazionePreImpegno>" +
+		"</Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"      <GenerazioneImpegno>" +
+		" 	         <DataMovimento>2008-12-17</DataMovimento>" +
+		"            <NumeroPreimpegno>200800646</NumeroPreimpegno>" +
+		"			 <Importo>5000</Importo>" +
+		"            <TipoAtto>DETERMINA</TipoAtto>" +
+		"            <DataAtto>2008-12-17</DataAtto>" +
+		"            <NumeroAtto>1</NumeroAtto>" +
+		"            <Dipartimento>71A</Dipartimento>" +
+		"            <ContoEconomica></ContoEconomica>" +
+		"            <Ratei>0</Ratei>" +
+		"            <ImpostaIrap>0</ImpostaIrap>" +
+		"            <Risconti>0</Risconti>" +
+		"        </GenerazioneImpegno>" +
+		"</Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <GenerazioneLiquidazione>" +
+		"            <DataMovimento>2008-12-17</DataMovimento>" +
+		"            <NumeroImpegno>200805727</NumeroImpegno>" +
+		"			 <Importo>5000</Importo>" +
+		"            <TipoAtto>DETERMINA</TipoAtto>" +
+		"            <DataAtto>2008-12-17</DataAtto>" +
+		"            <NumeroAtto>3</NumeroAtto>" +
+		"            <Struttura>71A</Struttura>" +
+		"            <ContoEconomica></ContoEconomica>" +
+		"            <ImportoIVA>5000</ImportoIVA>" +
+		"            <!--<Allegato>" +
+		"                <CodiceProgetto>1</CodiceProgetto>" +
+		"                <Causale>1</Causale>" +
+		"                <Importo>1000</Importo>" +
+		"                <CodiceFiscaleBeneficiario>BBCDDF75L03B072K</CodiceFiscaleBeneficiario>" +
+		"            </Allegato>-->" +
+		"        </GenerazioneLiquidazione>" +
+		"</Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneImpegniAperti>" +
+		"            <AnnoFinanziario>2013</AnnoFinanziario>" +
+		"            <CodiceCapitolo>U16100</CodiceCapitolo>" +
+		"            <Struttura>71AM</Struttura>" +
+		"        </InterrogazioneImpegniAperti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		//test by leo
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneImpegniAperti>" +
+		"            <AnnoFinanziario>2010</AnnoFinanziario>" +
+		"            <CodiceCapitolo>U16101</CodiceCapitolo>" +
+		"            <Struttura>71AM</Struttura>" +
+		"        </InterrogazioneImpegniAperti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		//test by leo
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneImpegniAperti>" +
+		"            <AnnoFinanziario>2014</AnnoFinanziario>" +
+		"            <CodiceCapitolo>U02170</CodiceCapitolo>" +
+		"            <Struttura>71AC</Struttura>" +
+		"        </InterrogazioneImpegniAperti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";		*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneLiquidazioniAperte>" +
+		"            <AnnoFinanziario>2009</AnnoFinanziario>" +
+		"            <CodiceCapitolo>U17060</CodiceCapitolo>" +
+		"        </InterrogazioneLiquidazioniAperte>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneImpegniPerenti>" +
+		"            <AnnoFinanziario>2014</AnnoFinanziario>" +
+		"            <CodiceCapitolo>U09170</CodiceCapitolo>" +
+		"        </InterrogazioneImpegniPerenti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";
+		
+/*		String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneObiettiviGestionali>" +
+		"            <Anno>2009</Anno>" +
+		"            <CodiceCapitolo>U40200</CodiceCapitolo>" +
+		"			 <Ufficio>71AO</Ufficio>" +
+		"        </InterrogazioneObiettiviGestionali>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";
+*/		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazionePreimpegniAperti>" +
+		"            <AnnoFinanziario>2014</AnnoFinanziario>" +
+		"            <CodiceCapitolo>U06060</CodiceCapitolo>" +
+		"        </InterrogazionePreimpegniAperti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <PrenotazionePreimpegni>" +
+		"            <TipoOperazione>C</TipoOperazione>" +
+		"            <NumeroPreimpegno>200800648</NumeroPreimpegno>" +
+		"            <Importo>100</Importo>" +
+		"        </PrenotazionePreimpegni>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";      //nota che P o C
+		*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+				"<Messaggio_Richiesta>" +
+				"    <Intestazione>" +
+				"        <InfoMittDest>string</InfoMittDest>" +
+				"        <Applicazione>string</Applicazione>" +
+				"    </Intestazione>" +
+				"    <Richiesta>" +
+				"       <CreateDelDocumento>" +
+				"            <TipoDocumento>DEL-PREIMP</TipoDocumento>" +
+				"            <!--<DataMovimento>2008-12-17</DataMovimento>--> <!-- elemento opzionale-->" +
+				"            <!--<Oggetto>PROVA PER VINCENZO</Oggetto>-->   <!-- elemento opzionale-->" +
+				"            <!--<CodiceCapitoloUscita>U16000</CodiceCapitoloUscita>-->  <!-- elemento opzionale-->" +
+				"            <NumeroDocumentoPC>200800653</NumeroDocumentoPC>  <!-- elemento opzionale-->" +
+				"            <!--<Importo>1000</Importo>--> <!-- elemento opzionale-->" +
+				"            <!--<TipoAtto>DETERMINA</TipoAtto>--> <!-- elemento opzionale-->" +
+				"            <!--<DataAtto>2008-12-17</DataAtto>--> <!-- elemento opzionale-->" +
+				"            <!--<NumeroAtto>3</NumeroAtto>--> <!-- elemento opzionale-->" +
+				"            <!--<Struttura>71A</Struttura>--> <!-- elemento opzionale-->" +
+				"            <!--<ContoEconomica>1234</ContoEconomica>--> <!-- elemento opzionale-->" +
+				"            <!--<Ratei>1000</Ratei>--> <!-- elemento opzionale-->" +
+				"            <!--<ImpostaIrap>1000</ImpostaIrap>--> <!-- elemento opzionale-->" +
+				"            <!--<Risconti>1000</Risconti>--> <!-- elemento opzionale-->" +
+				"            <!--<ImportoIVA>1000</ImportoIVA>--> <!-- elemento opzionale-->" +
+				"                               " +				
+				"            <!-- elemento opzionale-->" +
+				"			<!--<Allegato>" +
+				"                <CodiceProgetto>1</CodiceProgetto>" +
+				"                <Causale>1</Causale>" +
+				"                <Importo>1000</Importo>" +
+				"                <CodiceFiscaleBeneficiario>BBCDDF75L03B072K</CodiceFiscaleBeneficiario>" +
+				"            </Allegato>-->" +
+				"            <!--<COG>aX201CCw01</COG>--><!-- elemento opzionale-->" +
+				"			 <Beneficiari> " +
+				"			   <Beneficiario> " +
+				"				<DatoSensibile>true</DatoSensibile>" +
+				"              </Beneficiario> " +
+				"			 </Beneficiari>" +
+				"        </CreateDelDocumento>" +
+				"    </Richiesta>" +
+				"</Messaggio_Richiesta>";	*/
+
+		
+		//String toSend="<?xml version=\"1.0\"?><Messaggio_Richiesta> <Intestazione>   <InfoMittDest>Marchese Rosanna</InfoMittDest><Applicazione>ProvvedimentiAmministrativi</Applicazione>  </Intestazione>		  <Richiesta>		    <CreateDelDocumento>		      <TipoDocumento>LIQ</TipoDocumento>		      <DataMovimento>2013-10-08</DataMovimento>		      <NumeroDocumentoPC>201301906</NumeroDocumentoPC>		      <Importo>4</Importo>		      <TipoAtto>DETERMINA</TipoAtto>		      <DataAtto>2013-10-08</DataAtto>		      <NumeroAtto>00010</NumeroAtto>		      <Struttura>71AM</Struttura>		      <ContoEconomica>C0502GAA</ContoEconomica>		      <ImportoIVA>0</ImportoIVA>		      <Beneficiari>		        <Beneficiario>		          <CodiceBeneficiario>114930</CodiceBeneficiario>		          <CodiceSede>1</CodiceSede>		          <CodiceTipoPagamento>4</CodiceTipoPagamento>		          <CodiceContoCorrente />		          <CodiceSIOPE />		          <CodiceSIOPEAggiuntivo />		          <CodiceCUP />		          <CodiceCIG />		          <EsenzCommBonifico>N</EsenzCommBonifico>		          <StampaAvviso>N</StampaAvviso>		          <Bollo>N</Bollo>		          <ImportoLordo>2</ImportoLordo>		          <DatoSensibile>true</DatoSensibile>		        </Beneficiario>		        <Beneficiario>		          <CodiceBeneficiario>45278</CodiceBeneficiario>		          <CodiceSede>1</CodiceSede>		          <CodiceTipoPagamento>22</CodiceTipoPagamento>		          <CodiceContoCorrente>32368</CodiceContoCorrente>		          <CodiceSIOPE />		          <CodiceSIOPEAggiuntivo />		          <CodiceCUP />		          <CodiceCIG />		          <EsenzCommBonifico>S</EsenzCommBonifico>		          <StampaAvviso>N</StampaAvviso>		          <Bollo>N</Bollo>		          <ImportoLordo>2</ImportoLordo>		          <DatoSensibile>false</DatoSensibile>		        </Beneficiario>		      </Beneficiari>		    </CreateDelDocumento>		  </Richiesta> </Messaggio_Richiesta>";		
+/*		
+		String toSend = "<?xml version=\"1.0\"?>" +
+		"<Messaggio_Richiesta>" +
+		"    <Intestazione>" +
+		"        <InfoMittDest>string</InfoMittDest>" +
+		"        <Applicazione>string</Applicazione>" +
+		"    </Intestazione>" +
+		"    <Richiesta>" +
+		"       <CreateDelDocumento>" +
+		"            <TipoDocumento>IMP-DEF</TipoDocumento>" +
+		"            <DataMovimento>2010-01-11</DataMovimento> <!-- elemento opzionale-->" +
+		"            <Oggetto>PROVA PER VINCENZO</Oggetto>   <!-- elemento opzionale-->" +
+		"            <CodiceCapitoloUscita>U16000</CodiceCapitoloUscita>  <!-- elemento opzionale-->" +
+		"            <NumeroDocumentoPC>201000006</NumeroDocumentoPC>  <!-- elemento opzionale-->" +
+		"            <Importo>1000</Importo> <!-- elemento opzionale-->" +
+		"            <TipoAtto>DETERMINA</TipoAtto> <!-- elemento opzionale-->" +
+		"            <DataAtto>2010-01-11</DataAtto> <!-- elemento opzionale-->" +
+		"            <NumeroAtto>3</NumeroAtto> <!-- elemento opzionale-->" +
+		"            <Struttura>71A</Struttura> <!-- elemento opzionale-->" +
+		"            <ContoEconomica>1234</ContoEconomica> <!-- elemento opzionale-->" +
+		"            <Ratei>1000</Ratei> <!-- elemento opzionale-->" +
+		"            <ImpostaIrap>1000</ImpostaIrap> <!-- elemento opzionale-->" +
+		"            <Risconti>1000</Risconti> <!-- elemento opzionale-->" +
+		"            <ImportoIVA>1000</ImportoIVA> <!-- elemento opzionale-->" +
+		"                               " +				
+		"            <!-- elemento opzionale-->" +
+		"			 <Allegato>" +
+		"                <CodiceProgetto>1</CodiceProgetto>" +
+		"                <Causale>1</Causale>" +
+		"                <Importo>1000</Importo>" +
+		"                <CodiceFiscaleBeneficiario>BBCDDF75L03B072K</CodiceFiscaleBeneficiario>" +
+		"            </Allegato>" +
+		"            <COG>aX201CCw01</COG> <!-- elemento opzionale-->" +
+		"        </CreateDelDocumento>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";	
+*/
+		
+/*		String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <DisponibilitaImpegno>" +
+		"            <NumeroImpegno>200800645</NumeroImpegno>" +
+		"        </DisponibilitaImpegno>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";
+*/
+    	//Test By G.Gentilesca
+		/*String toSend = "<?xml version=\"1.0\"?>" +
+				"<Messaggio_Richiesta>" +
+				"    <Intestazione>" +
+				"        <InfoMittDest>Petrizzi Nicola</InfoMittDest>" +
+				"        <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+				"    </Intestazione>" +
+				"    <Richiesta>" +
+				"       <CreateDelDocumento>" +
+				"            <TipoDocumento>PRE-IMP</TipoDocumento>" +
+				"            <DataMovimento>2010-11-15</DataMovimento> <!-- elemento opzionale-->" +
+				"            <Oggetto>determina di impegno</Oggetto>   <!-- elemento opzionale-->" +
+				"            <CodiceCapitoloUscita>U16100</CodiceCapitoloUscita>  <!-- elemento opzionale-->" +
+				"            <Importo>79.02</Importo> <!-- elemento opzionale-->" +
+				"            <TipoAtto>DETERMINA</TipoAtto> <!-- elemento opzionale-->" +
+				"            <DataAtto>2010-11-15</DataAtto> <!-- elemento opzionale-->" +
+				"            <NumeroAtto>00101</NumeroAtto> <!-- elemento opzionale-->" +
+				"            <Struttura>71AM</Struttura> <!-- elemento opzionale-->" +
+				"			 <COG>2eX71AM01</COG>" +
+				"        </CreateDelDocumento>" +
+				"    </Richiesta>" +
+				"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"		 <InterrogazioneTipologiaReddito/>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogaCodiceSiope>" +
+		"            <AnnoBilancio>2011</AnnoBilancio>" +
+		"            <CodiceCapitolo>U16100</CodiceCapitolo>" +
+		"        </InterrogaCodiceSiope>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"        <InterrogaCapitoloEntrate>" +
+		"            <AnnoBilancio>2011</AnnoBilancio>" +
+		"        </InterrogaCapitoloEntrate>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		"      <InterrogaReversaliCollegabili>" +
+		"        <AnnoBilancio>2011</AnnoBilancio>" +
+		"      </InterrogaReversaliCollegabili>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogaBeneficiariLiq>" +
+		"        <NumeroLiquidazione>201103447</NumeroLiquidazione>" +
+		"      </InterrogaBeneficiariLiq>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";
+		
+		String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		"<Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		"  </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogaMandatiBeneficiariAtto>" +
+		"        <TipoAtto>D</TipoAtto>" +
+		"        <NumeroAtto>1</NumeroAtto>" +
+		"        <DataAtto>2010-07-07</DataAtto>" +
+		"        <Ufficio>1</Ufficio> " +
+		"		 <NumeroLiquidazione>201000027</NumeroLiquidazione>" +
+		"      </InterrogaMandatiBeneficiariAtto>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		" <Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		" </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogazionePCF>" +
+		"        <Anno>2012</Anno>" +
+		"        <CodiceCapitolo>U16100</CodiceCapitolo>" +
+		"      </InterrogazionePCF>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+
+		//String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> <Intestazione>  <InfoMittDest>Petrizzi Nicola</InfoMittDest><Applicazione>ProvvedimentiAmministrativi</Applicazione></Intestazione><Richiesta><CreateDelDocumento><TipoDocumento>PRE-IMP</TipoDocumento><DataMovimento>2012-09-05</DataMovimento><Oggetto>determina di test per albe</Oggetto><CodiceCapitolo>U16100</CodiceCapitolo><Importo_Plur1>2</Importo_Plur1><TipoAtto>DETERMINA</TipoAtto><DataAtto>2012-09-03</DataAtto><NumeroAtto>00233</NumeroAtto><Struttura>71AM</Struttura><CodiceFiscale>PTRNCL64P23B181V</CodiceFiscale><COG_Plur1>2eX71AM04</COG_Plur1><PianoContiFina_Plur1>*A*U.1.03.03.09.008</PianoContiFina_Plur1></CreateDelDocumento></Richiesta></Messaggio_Richiesta> ";
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		" <Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		" </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogazioneMandatiTrasparenza>" +
+		"        <Anno>2011</Anno>" +
+		"      </InterrogazioneMandatiTrasparenza>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>"; */
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		" <Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		" </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogazioneListaContratti> " +
+		"      <Chiave>0010159</Chiave> " +
+	//	"      <Chiave>0120001</Chiave> " +
+	//	"      <Chiave>0040001</Chiave> " +
+		"      </InterrogazioneListaContratti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		" <Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		" </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogazioneContratti> " +
+		"      <NumeroContratto>123</NumeroContratto> " +
+		"      <OggettoContratto>Atto di cottimo fiduciario per il servizio di derattizzazione presso gli uffici regionali</OggettoContratto>" +
+		"      </InterrogazioneContratti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		" <Intestazione>" +
+		"  <InfoMittDest>PROVA</InfoMittDest>" +
+		" <Applicazione>PROVA</Applicazione>" +
+		" </Intestazione>" +
+		"    <Richiesta>" +
+		" 	   <InterrogazioneListaContratti> " +
+		"      <Chiave>0060002</Chiave> " +
+		"      <Chiave>0120001</Chiave> " +
+		"      <Chiave>0040001</Chiave> " +
+		"      </InterrogazioneListaContratti>" +
+		"    </Richiesta>" +
+		"</Messaggio_Richiesta>";*/
+		/*String toSend = "<?xml version=\"1.0\"?><Messaggio_Richiesta> " +
+		" <Intestazione>" +
+		"		    <InfoMittDest>D'Andrea Vidina</InfoMittDest>" +
+		"		    <Applicazione>ProvvedimentiAmministrativi</Applicazione>" +
+		"		  </Intestazione>" +
+		"		  <Richiesta>" +
+		"		    <InterrogaMandatiBeneficiariAtto>" +
+		"		      <TipoAtto />" +
+		"		      <NumeroAtto />" +
+		"		      <DataAtto>0001-01-01</DataAtto>" +
+		"		      <Ufficio />" +
+		"		      <NumeroLiquidazione>201107422</NumeroLiquidazione>" +
+		"		    </InterrogaMandatiBeneficiariAtto>" +
+		"		  </Richiesta> " +
+		"		  </Messaggio_Richiesta>";*/
+
+
+		String toSendUTF8="";
+
+		try 
+		{
+			toSendUTF8 = new String(toSend.getBytes("UTF-8"));
+		} 
+		catch (UnsupportedEncodingException e)
+		{ 
+			e.printStackTrace();
+		}
+			
+		String result = si.querySIC(toSendUTF8);
+		
+		System.out.println("\nEsito: "+result);
+	}
+
+}

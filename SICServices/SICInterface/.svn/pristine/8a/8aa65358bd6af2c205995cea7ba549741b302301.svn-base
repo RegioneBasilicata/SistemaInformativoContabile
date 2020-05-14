@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><connessioni><database><tnsnames>(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = clu-oracle-db.hosting.int)(PORT = 1521))(CONNECT_DATA =(SERVICE_NAME = SIRS)))</tnsnames><username>test_sic_arpab</username><password>test_sic_arpab</password></database><cliente>arpab</cliente><messaggio-blocco>Ufficio Bilancio</messaggio-blocco></connessioni>

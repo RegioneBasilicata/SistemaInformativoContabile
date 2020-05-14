@@ -1,0 +1,1001 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="Messaggio_Risposta" type="MessaggioRisposta_Types"/>
+		
+	<xs:complexType name="MessaggioRisposta_Types">
+		<xs:sequence>
+			<xs:element name="Intestazione" type="Intestazione_Types">
+				<xs:annotation>
+					<xs:documentation>Header contenente informazioni su mittente, destinatario e tipo di richiesta</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice>
+				<xs:element name="Successo" type="Successo_Types">
+					<xs:annotation>
+						<xs:documentation>Contiene tutti i tipi di ritorno in caso di successo</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Eccezione" type="Eccezione_Types">
+					<xs:annotation>
+						<xs:documentation>Rappresenta un generico messaggio di errore</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				
+				<!-- simonebrunox 27/12/2017: caricamento massivo beneficiari -->
+				<xs:element name="Messaggio_RispostaMassiva" type="MessaggioRispostaMassiva_Types"/>
+				<!-- simonebrunox 27/12/2017: caricamento massivo beneficiari -->		
+						
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- simonebrunox 27/12/2017: caricamento massivo beneficiari -->
+	<xs:complexType name="MessaggioRispostaMassiva_Types">
+		<xs:sequence>
+		  	<xs:element name="RispostaMassiva_Type" minOccurs="0" maxOccurs="unbounded">
+		  		<xs:complexType>
+				    <xs:sequence>	
+						<xs:element name="IdAnagraficaMittente" type="xs:string">
+						  <xs:annotation>
+						    <xs:documentation>Identificativo utilizzato dal mittente per individuare l'anagrafica inviata</xs:documentation>
+						  </xs:annotation>
+						</xs:element>					    		
+						<xs:choice>
+							<xs:element name="Risposta_ProcessaAnagrafica" type="Risposta_ProcessaAnagrafica_Types"/>
+							<xs:element name="Eccezione" type="Eccezione_Types">
+								<xs:annotation>
+									<xs:documentation>Rappresenta un generico messaggio di errore</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- simonebrunox 27/12/2017: caricamento massivo beneficiari -->
+		
+	<xs:complexType name="Intestazione_Types">
+		<xs:annotation>
+			<xs:documentation>*******************************************************                   INIZIO DEFINIZIONE TIPI COMPOSTI                   *******************************************************</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="InfoMittDest" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Informazioni che identificano univocamente un mittente</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Applicazione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Dati che identificano univocamente un'applicazione che utilizza il WS</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Eccezione_Types">
+		<xs:sequence>
+			<xs:element name="Codice" type="xs:integer">
+				<xs:annotation>
+					<xs:documentation>Codifica errore</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Descrizione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Descrizione dell'errore</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="Exception" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Dettaglio tecnico dell'eccezione</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Successo_Types">
+		<xs:choice>
+			<xs:element name="Risposta_InterrogaAnagrafica" type="Risposta_InterrogaAnagrafica_Types"/>
+			<xs:element name="Risposta_InterrogaAnagraficaContratti" type="Risposta_InterrogaAnagraficaContratti_Types"/>
+			<xs:element name="Risposta_VerificaAnagrafica" type="Risposta_VerificaAnagrafica_Types"/>
+			<xs:element name="Risposta_CreaAnagrafica" type="Risposta_CreaAnagrafica_Types"/>
+			<xs:element name="Risposta_CreaSede" type="Risposta_CreaSede_Types"/>
+			<xs:element name="Risposta_CreaContoBancario" type="Risposta_CreaContoBancario_Types"/>
+			<xs:element name="Risposta_InterrogaComuni" type="Risposta_InterrogaComuni_Types"/>
+			<xs:element name="Risposta_ModificaAnagrafica" type="Risposta_ModificaAnagrafica_Types"/>
+			<xs:element name="Risposta_ModificaSede" type="Risposta_ModificaSede_Types"/>
+			<xs:element name="Risposta_ModificaContoBancario" type="Risposta_ModificaContoBancario_Types"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="Risposta_InterrogaAnagraficaContratti_Types" abstract="false">
+		<xs:sequence>
+			<xs:element name="Contratto" type="Risposta_InterrogaAnagraficaContratto_Types" maxOccurs="unbounded"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Risposta_InterrogaAnagraficaContratto_Types">
+		<xs:sequence>
+			<xs:element name="Chiave" type="xs:string"/>
+			<xs:element name="Anagrafica" type="Anagrafica_Types" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Risposta_InterrogaAnagrafica_Types">
+		<xs:sequence>
+			<xs:element name="Anagrafica" type="Anagrafica_Types" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Lista di Anagrafiche restituite</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Anagrafica_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="TipoAnagrafica" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Tipo Anagrafica (= F o G)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="F"/>
+						<xs:enumeration value="G"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="PartitaIva" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Partita Iva</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="\d{11}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Denominazione" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Descrizione delle persone giuridiche</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CognomeLR" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Cognome del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="NomeLR" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nome del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="SessoLR" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Sesso del Legale Rappresentante (= F o M)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="F"/>
+						<xs:enumeration value="M"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdComuneNSLR" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Identificativo Comune di Nascita del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ComuneNSLR" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Comune di Nascita del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DataNascitaLR" type="xs:date" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Data di Nascita del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="IndirizzoLR" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Indirizzo del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="IdComuneRESLR" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Identificativo Comune di Residenza del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ComuneRESLR" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Comune di Residenza del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CAPRESLR" nillable="true">
+				<xs:annotation>
+					<xs:documentation>CAP di Residenza del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CodiceFiscaleLR" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice Fiscale del Legale Rappresentante</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="([a-zA-Z0-9]){16}"/>
+						<xs:minLength value="16"/>
+						<xs:maxLength value="16"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CodiceFiscale" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice Fiscale Persona Fisica</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="([a-zA-Z0-9]){16}"/>
+						<xs:minLength value="16"/>
+						<xs:maxLength value="16"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Cognome" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Cognome della Persona Fisica</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Nome" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nome della Persona Fisica</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="AltriNomi" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Altri Nomi della Persona Fisica</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Sesso" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Sesso della Persona Fisica (= F o M)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="F"/>
+						<xs:enumeration value="M"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdComuneNS" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Identificativo Comune di Nascita della Persona Fisica</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ComuneNS" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Comune di Nascita della Persona Fisica</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DataNascita" type="xs:date" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Data di Nascita della Persona Fisica</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Pignoramento" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Pignoramento (= S o N)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="S"/>
+						<xs:enumeration value="N"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="NotaPignoramento" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nota Pignoramento</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Estero" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Estero (= S o N)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="S"/>
+						<xs:enumeration value="N"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Commissioni" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Commissioni (= S o N o E)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="S"/>
+						<xs:enumeration value="N"/>
+						<xs:enumeration value="E"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ListaSedi" type="ListaSedi_Types">
+				<xs:annotation>
+					<xs:documentation>Lista delle Sedi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ListaSedi_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="Sede" type="Sede_Types">
+				<xs:annotation>
+					<xs:documentation>Lista delle sedi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ListaContiBancari_Types">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="ContoBancario" type="DatiBancari_Types">
+				<xs:annotation>
+					<xs:documentation>Lista dei conti bancari</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Sede_Types">
+		<xs:sequence>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Indirizzo" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Indirizzo della sede</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="IdComune" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Identificativo Comune della sede</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Comune" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Comune della sede</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CAP" nillable="true">
+				<xs:annotation>
+					<xs:documentation>CAP della sede</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Telefono" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Telefono della sede</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="EMail" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>EMail della sede</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Fax" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Telefono della sede</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Bollo" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Bollo (= S o N)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="S"/>
+						<xs:enumeration value="N"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="DataCreazione" type="xs:date" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Data di Creazione</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="NomeSede" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nome della sede</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="15"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdTipoPagamento" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Identificativo Tipo Pagamento SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="DescTipoPagamento" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Descrizione della Tipologia del pagamento</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ListaDatiBancari" type="ListaContiBancari_Types">
+				<xs:annotation>
+					<xs:documentation>Lista dei Dati Bancari</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DatiBancari_Types">
+		<xs:sequence>
+			<xs:element name="IdContoCorrente">
+				<xs:annotation>
+					<xs:documentation>Identificativo Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="NomeBanca" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nome della Banca</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="IdAgenzia" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Identificativo Agenzia</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContoCorrente" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="240"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ModalitaPrincipale" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Modalità Principale (= S o N)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="S"/>
+						<xs:enumeration value="N"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="SedeAgenzia" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Sede dell'agenzia</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Indirizzo" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Indirizzo agenzia</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Citta" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Citta agenzia</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ABI" nillable="true">
+				<xs:annotation>
+					<xs:documentation>ABI agenzia</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="5"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CAB" nillable="true">
+				<xs:annotation>
+					<xs:documentation>CAB agenzia</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="5"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CIN" nillable="true">
+				<xs:annotation>
+					<xs:documentation>CIN agenzia</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IBAN" nillable="true">
+				<xs:annotation>
+					<xs:documentation>IBAN</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="27"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_VerificaAnagrafica_Types">
+		<xs:sequence>
+			<xs:element name="Anagrafica" type="Anagrafica_Types" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Lista di Anagrafiche restituite</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_CreaAnagrafica_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC a cui la sede appartiene</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdTipoPagamento">
+				<xs:annotation>
+					<xs:documentation>Identificativo Tipo Pagamento</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdContoCorrente">
+				<xs:annotation>
+					<xs:documentation>Identificativo Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_ProcessaAnagrafica_Types">
+		<xs:sequence>
+			<xs:element name="Operazione" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Inserimento o (Modifica/Verifica con Inserimento/Modifica Sede e Inserimento/Modifica Conto)</xs:documentation>
+				</xs:annotation>
+			</xs:element>		
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC a cui la sede appartiene</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdTipoPagamento">
+				<xs:annotation>
+					<xs:documentation>Identificativo Tipo Pagamento</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdContoCorrente">
+				<xs:annotation>
+					<xs:documentation>Identificativo Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>	
+	<xs:complexType name="Risposta_CreaSede_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC a cui la sede appartiene</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdTipoPagamento">
+				<xs:annotation>
+					<xs:documentation>Identificativo Tipo Pagamento</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdContoCorrente">
+				<xs:annotation>
+					<xs:documentation>Identificativo Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_CreaContoBancario_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC a cui la sede appartiene</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdTipoPagamento">
+				<xs:annotation>
+					<xs:documentation>Identificativo Tipo Pagamento</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdContoCorrente">
+				<xs:annotation>
+					<xs:documentation>Identificativo Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_InterrogaComuni_Types">
+		<xs:sequence>
+			<xs:element name="Comune" type="Comune_Types" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Lista dei comuni restituiti</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Comune_Types">
+		<xs:sequence>
+			<xs:element name="IdComune">
+				<xs:annotation>
+					<xs:documentation>Identificativo del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Descrizione" type="xs:string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Descrizione del Comune</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CodiceIstat" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice Istat del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="6"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CAP" nillable="true">
+				<xs:annotation>
+					<xs:documentation>CAP del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="10"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CodiceBelFiore" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice BelFiore del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="4"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CodProvincia" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice della Provincia del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Provincia" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Provincia del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="20"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CodRegione" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice della Regione del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="3"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Regione" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Regione del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="21"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CodRipartizioneGeografica" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Codice della ripartizione geografica del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="DescRipartizioneGeografica" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Descrizione della ripartizione geografica del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="20"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Nazione" nillable="true">
+				<xs:annotation>
+					<xs:documentation>Nazione del Comune</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="2000"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_ModificaAnagrafica_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_ModificaSede_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC a cui la sede appartiene</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdTipoPagamento">
+				<xs:annotation>
+					<xs:documentation>Identificativo Tipo Pagamento</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Risposta_ModificaContoBancario_Types">
+		<xs:sequence>
+			<xs:element name="IdAnagrafica">
+				<xs:annotation>
+					<xs:documentation>Identificativo Anagrafica SIC a cui la sede appartiene</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdSede">
+				<xs:annotation>
+					<xs:documentation>Identificativo Sede SIC</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="IdContoCorrente">
+				<xs:annotation>
+					<xs:documentation>Identificativo del Conto Corrente</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9]{1,10}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

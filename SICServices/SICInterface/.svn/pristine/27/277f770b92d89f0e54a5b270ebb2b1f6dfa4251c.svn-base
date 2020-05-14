@@ -1,0 +1,3 @@
+#Mon Sep 04 16:36:37 CEST 2017
+javax.xml.bind.context.factory=com.sun.xml.bind.ContextFactory_1_0_1
+com.sun.xml.bind.jaxbContextImpl=it.latraccia.entity.sic.risposta.impl.runtime.DefaultJAXBContextImpl
