@@ -22,6 +22,7 @@ description:
       - Gestione Autoparco
       - Gestione Sanitaria Accentrata
       - Gestione Fatturazione Attiva e Passiva
+      - Servizi web di integrazione con Sistemi esterni (Provvedimenti Amministrativi, HR, ecc.)
     genericName: SICRegBas
     longDescription: >
       Il SIC è utilizzato, dalla Regione Basilicata, dal 2003 e via via evoluto
@@ -34,7 +35,7 @@ description:
       contabili dell'Ente ma anche i processsi riguardanti Gestione Contratti,
       Gestione Patrimonio, ecc.
     shortDescription: >-
-      E' un sistema integrato per la gestione dei processi amministrativi
+      E'' un sistema integrato per la gestione dei processi amministrativi
       contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
       Basilicata.
     documentation: 'https://www.latraccia.it/prodotti/sic/'
