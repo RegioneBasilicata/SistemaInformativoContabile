@@ -29,7 +29,6 @@ description:
       L'attività di progettazione e sviluppo dell'applicazione è stata avviata, dalla Regione Basilicata,
       nel 2003 a seguito della necessità di dotarsi di un nuovo sistema integrato per la gestione della contabilità, 
       che comprendesse anche una gestione economica ed analitica delle risorse.
-
       Il Sistema negli anni è stato evoluto in base alle esigenze normative e/o organizzative. 
       Dal 2012 la Regione Basilicata è uno degli Enti sperimentatori per l’Armonizzazione contabile degli Enti Territoriali, 
       cardine irrinunciabile della riforma della contabilità pubblica (legge n. 196/2009) e della riforma federale prevista dalla legge n. 42/2009, 
@@ -37,10 +36,8 @@ description:
       A conferma degli eccellenti risultati raggiunti nell’introduzione delle nuove regole contabili, 
       alla Regione Basilicata è stato assegnato l’Oscar di bilancio della Pubblica amministrazione del 2013. 
       Il Sistema Contabile è stato premiato per organicità, trasparenza e comunicazione.
-
       Dal 2013 il SIC viene utilizzato anche dagli Enti Strumentali della Regione Basilicata e dal Consiglio Regionale. Il Sistema è assimilabile ad un vero e 
       proprio Enterprise Resource Planning (ERP) in quanto non gestisce solamente tutti gli aspetti contabili dell’Ente ma anche i processsi riguardanti Gestione Contratti, Gestione Patrimonio, ecc.
-
      ## **Architettura Funzionale**
       L’applicativo SIC è organizzato per moduli funzionali/organizzativi, tale segmentazione è utile anche per la corretta profilazione degli utenti. Tutte le interfacce 
       dei vari moduli prevedono, in testa, una sezione denominata “Modalità operative” con le indicazioni da seguire per utilizzare al meglio l’interfaccia stessa.
@@ -128,7 +125,6 @@ description:
        - ***Scheda catastale***
        - ***Manutenzioni***
        - ***Scheda Ammortamenti***
-
       **Modulo Ammortamenti**
       Il modulo permette la generazione automatica degli ammortamenti sulla base delle percentuali impostati a livello di categoria/sottocategoria del bene.
       ### **3. Modulo Contratti**
@@ -142,7 +138,6 @@ description:
        - ***Gestione Bozza Provvedimento***
        - ***Aggiornamenti PCC***
        - ***Casse Economali***
-
       ### **4. Modulo Performance**
       Il Modulo consente la Gestione del Piano della Performance dell'Ente, sia nella fase di progettazione del Piano che nelle fasi di Monitoraggio del raggiungimento degli obiettivi (stragecici e operativi).
       Principali funzionalità
@@ -150,21 +145,6 @@ description:
       #### SCHEDA DI VALUTAZIONE
       **Scheda di Valutazione del Funzionario**
       **Scheda di  Valutazione del Dirigente**
-      ### **5. Modulo Reportistica**
-      Il Modulo Reportistica raccoglie tutti i report previsti nel Sistema e può essere richiamato da tutti i moduli sopra descritti. Il modulo prevede due diverse categorie di report:
-      **Report Istituzionali**
-      Tutta la reportistica ufficiale impostata e aggiornata secondo quando previsto dalla normativa vigente esportabile in formato non modificale PDF.
-      **Report Interattivi**
-      Questa categoria di report è completamente personalizzabile dall’utente finale che, del tutto similmente a quanto farebbe con un file Excel, può:
-       - Scegliere le colonne da visualizzare
-       - Filtrare le righe sulla base di criteri personalizzati
-       - Aggregare i dati per effettuare somme, calcolare medie, ecc.
-       - Creare formule personalizzate
-       - Creare un grafico
-       - Creare visualizzazioni condizionali
-       - Salvare i report di volta in volta nella propria area personale (gli utenti amministratori possono rendere disponibili i report creati a tutti gli altri utenti)
-       - Inviare il report creato via email
-       - Scaricare il report in formato Excel e/o PDF
 shortDescription: >-
       E' un sistema integrato per la gestione dei processi amministrativi
       contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
