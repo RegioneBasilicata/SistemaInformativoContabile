@@ -59,13 +59,14 @@ description:
       Tutte le informazioni (sulla base dei workflow operativi previsti) vengono inserite una sola volta e 
       utilizzate/modificate negli step successivi sulla base delle autorizzazioni che ciascun utente/agente 
       automatico possiede.
-      ### **1. Modulo Contabilità**
-      #### **Contabilità Finanziaria**
+      1. **Modulo Contabilità**
+       **Contabilità Finanziaria**
       Tutta la contabilità finanziaria viene gestita attraverso il Modulo Contabilità che si articola in tre sotto 
       moduli principali:
-       1. *Modulo Bilancio*
-       2. *Modulo Ragioneria*
-       3. *Modulo Organizzazione*
+       a. **Modulo Bilancio**
+       b. **Modulo Ragioneria**
+       c. **Modulo Organizzazione**
+       
       **Modulo Bilancio**
       Il sotto modulo Bilancio permette di gestire tutte le fasi del Bilancio (Previsione, Assestamento e Rendiconto). 
       Sia la composizione del Bilancio di Previsione (triennale) che il suo Assestamento 
@@ -80,6 +81,7 @@ description:
        - Estrazioni per BDAP
        - Pareggio di Bilancio
        - Interrogazione Bilancio online 
+       
       **Modulo Ragioneria**
       Il sotto modulo Ragioneria consente di gestire il Bilancio in esercizio, di seguito le principali funzionalità:
        - Gestione documenti contabili
@@ -89,11 +91,12 @@ description:
        - Gestione Anagrafica
        - Monitoraggio cassa
        - Gestione pignoramenti
+       
       **Modulo Organizzazione**
       Il sotto modulo Organizzazione sovra intende tutti i processi del Sistema che impattano con la struttura 
       organizzativa dell’Ente.
       
-      #### **Contabilità Economico Patrimoniale**
+      **Contabilità Economico Patrimoniale**
       Il Modulo di gestione della Contabilità Economico Patrimoniale permette di:
        - Elaborare automaticamente le scritture da Contabilità Finanziaria (attraverso la Matrice di Correlazione 
          pre impostata) ad una certa data
@@ -152,7 +155,8 @@ description:
       **Modulo Ammortamenti**
       Il modulo permette la generazione automatica degli ammortamenti sulla base delle percentuali impostati a livello di 
       categoria/sottocategoria del bene.
-      ### **3. Modulo Contratti**
+      
+      **3. Modulo Contratti**
       Il modulo consente di creare e gestire il fascicolo dei contratti, in particolare collezionando sia i dati 
       amministrativi che quelli relativi alle fatture pervenute e pagate e i 
       relativi provvedimenti di impegno e liquidazione. Il modulo è interfacciato, attraverso web service, con il 
@@ -166,14 +170,10 @@ description:
        - ***Gestione Bozza Provvedimento***
        - ***Aggiornamenti PCC***
        - ***Casse Economali***
-      ### **4. Modulo Performance**
+      
+      **4. Modulo Performance**
       Il Modulo consente la Gestione del Piano della Performance dell'Ente, sia nella fase di progettazione del 
       Piano che nelle fasi di Monitoraggio del raggiungimento degli obiettivi (stragecici e operativi).
-      Principali funzionalità
-      #### MONITORAGGIO
-      #### SCHEDA DI VALUTAZIONE
-      **Scheda di Valutazione del Funzionario**
-      **Scheda di  Valutazione del Dirigente** 
     shortDescription: >-
       Sistema integrato per la gestione dei processi amministrativi
       contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
