@@ -108,8 +108,8 @@ description:
          Contabilità Finanziaria
        - Visualizzare i conti e le scritture per tutti gli anni presenti a sistema
        - Stampa e/o estrazione in formato elaborabile di: Libro Giornale, Mastrini, Conto Economico, Stato Patrimoniale 
-      ### **2. Modulo Provveditorato e Patrimonio**
-      #### **Gestione Magazzino**
+      2. **Modulo Provveditorato e Patrimonio**
+      **Gestione Magazzino**
       Il Modulo consente all’utente “generico” di effettuare ordini di beni di consumo e agli utenti amministratori del 
       Modulo di gestire le richieste e tutte le altre funzioni necessarie all’approvvigionamento. 
       Il modulo consente di gestire (per ciascun articolo e/o categoria) i livelli di sotto scorta per essere 
@@ -122,12 +122,12 @@ description:
        - ***Gestione richieste***
        - ***Gestione bolle***
      
-      #### Gestione Beni Mobili e Immobili
+      **Gestione Beni Mobili e Immobili**
       Il modulo oltre al sotto modulo Magazzino illustrato nel paragrafo precedente, prevede anche i sotto moduli 
       Beni Mobili, Beni Immobili e Ammortamento. Di seguito si descrivono i due restanti sotto moduli. 
       Questi sono auto consistenti ma è possibile sfruttare le informazioni dell’uno per completare quelle 
       dell’altro (es. gestione stanze per la localizzazione dei beni mobili).
-      **Modulo Beni Mobili**
+      ***Modulo Beni Mobili***
       Così come nel caso dei beni di consumo anche per i beni Mobili è prevista la creazione e inventariazione 
       automatica dei beni a partire dai dati delle Bolle di consegna. 
       Di seguito si elencano le principali funzionalità del modulo:
@@ -137,14 +137,15 @@ description:
        - ***Gestione Assegnazioni***
        - ***Gestione Beni Informatici***
       
-      **Modulo Autoparco**
+      ***Modulo Autoparco***
       Consente la gestione del parco auto dell’Ente; il modulo è costituito da diverse sezioni:
        - ***Anagrafica autoparchi***
        - ***Prenotazione Viaggi***
        - ***Gestione Viaggio***
        - ***Analisi autoparco***
        - ***Piano di lavoro giornaliero***
-      **Modulo Beni Immobili**
+       
+      ***Modulo Beni Immobili***
       Il modulo consente la gestione del Patrimonio Immobiliare dell’Ente attraverso le funzioni di seguito elencate:
        - ***Registro cespiti***
        - ***Gestione macrocespiti***
@@ -152,11 +153,12 @@ description:
        - ***Scheda catastale***
        - ***Manutenzioni***
        - ***Scheda Ammortamenti***
-      **Modulo Ammortamenti**
+      
+      ***Modulo Ammortamenti***
       Il modulo permette la generazione automatica degli ammortamenti sulla base delle percentuali impostati a livello di 
       categoria/sottocategoria del bene.
       
-      **3. Modulo Contratti**
+      3. **Modulo Contratti**
       Il modulo consente di creare e gestire il fascicolo dei contratti, in particolare collezionando sia i dati 
       amministrativi che quelli relativi alle fatture pervenute e pagate e i 
       relativi provvedimenti di impegno e liquidazione. Il modulo è interfacciato, attraverso web service, con il 
