@@ -55,12 +55,15 @@ description:
        3. **Modulo Contratti**
        4. **Modulo Performance**
        5. **Modulo Reportistica**
+      
       Tutti i moduli sono, chiaramente, interconnessi e operano sulla stessa base dati in maniera trasparente all’utente. 
       Tutte le informazioni (sulla base dei workflow operativi previsti) vengono inserite una sola volta e 
       utilizzate/modificate negli step successivi sulla base delle autorizzazioni che ciascun utente/agente 
       automatico possiede.
+      
       1. **Modulo Contabilità**
-       **Contabilità Finanziaria**
+      
+      **Contabilità Finanziaria**
       Tutta la contabilità finanziaria viene gestita attraverso il Modulo Contabilità che si articola in tre sotto 
       moduli principali:
        a. **Modulo Bilancio**
@@ -108,7 +111,9 @@ description:
          Contabilità Finanziaria
        - Visualizzare i conti e le scritture per tutti gli anni presenti a sistema
        - Stampa e/o estrazione in formato elaborabile di: Libro Giornale, Mastrini, Conto Economico, Stato Patrimoniale 
-      2. **Modulo Provveditorato e Patrimonio**
+     
+     2. **Modulo Provveditorato e Patrimonio**
+      
       **Gestione Magazzino**
       Il Modulo consente all’utente “generico” di effettuare ordini di beni di consumo e agli utenti amministratori del 
       Modulo di gestire le richieste e tutte le altre funzioni necessarie all’approvvigionamento. 
@@ -127,6 +132,7 @@ description:
       Beni Mobili, Beni Immobili e Ammortamento. Di seguito si descrivono i due restanti sotto moduli. 
       Questi sono auto consistenti ma è possibile sfruttare le informazioni dell’uno per completare quelle 
       dell’altro (es. gestione stanze per la localizzazione dei beni mobili).
+      
       ***Modulo Beni Mobili***
       Così come nel caso dei beni di consumo anche per i beni Mobili è prevista la creazione e inventariazione 
       automatica dei beni a partire dai dati delle Bolle di consegna. 
@@ -159,6 +165,7 @@ description:
       categoria/sottocategoria del bene.
       
       3. **Modulo Contratti**
+      
       Il modulo consente di creare e gestire il fascicolo dei contratti, in particolare collezionando sia i dati 
       amministrativi che quelli relativi alle fatture pervenute e pagate e i 
       relativi provvedimenti di impegno e liquidazione. Il modulo è interfacciato, attraverso web service, con il 
@@ -166,6 +173,7 @@ description:
       Gli Amministratori del Modulo attraverso degli opportuni parametri (CDR, tipologia fornitura, ecc.) 
       possono concedere i privilegi di lettura/scrittura agli Utenti “gestori” dei contratti.
       Le principali funzioni del modulo riguardano:
+      
        - ***Anagrafica Contratto***
        - ***Elenco Fatture***
        - ***Gestione Fatturazione Attiva***
@@ -173,9 +181,29 @@ description:
        - ***Aggiornamenti PCC***
        - ***Casse Economali***
       
-      **4. Modulo Performance**
+      4. **Modulo Performance**
+      
       Il Modulo consente la Gestione del Piano della Performance dell'Ente, sia nella fase di progettazione del 
       Piano che nelle fasi di Monitoraggio del raggiungimento degli obiettivi (stragecici e operativi).
+      
+      5. **Modulo Reportistica**
+      
+      Il Modulo Reportistica raccoglie tutti i report previsti nel Sistema e può essere richiamato da tutti i moduli sopra descritti. Il modulo prevede due diverse categorie di report:
+      
+      **Report Istituzionali**
+      Tutta la reportistica ufficiale impostata e aggiornata secondo quando previsto dalla normativa vigente esportabile in formato non modificale PDF.
+      
+      **Report Interattivi**
+      Questa categoria di report è completamente personalizzabile dall’utente finale che, del tutto similmente a quanto farebbe con un file Excel, può:
+       - Scegliere le colonne da visualizzare
+       - Filtrare le righe sulla base di criteri personalizzati
+       - Aggregare i dati per effettuare somme, calcolare medie, ecc.
+       - Creare formule personalizzate
+       - Creare un grafico
+       - Creare visualizzazioni condizionali
+       - Salvare i report di volta in volta nella propria area personale (gli utenti amministratori possono rendere disponibili i report creati a tutti gli altri utenti)
+       - Inviare il report creato via email
+       - Scaricare il report in formato Excel e/o PDF
     shortDescription: >-
       Sistema integrato per la gestione dei processi amministrativi
       contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
