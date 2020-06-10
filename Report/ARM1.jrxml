@@ -52,9 +52,9 @@ nb_livello1 missione
 ,descr_macro_agg desc_macro
 ,capitolo
 ,desc_capitolo
-,residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo) c1
-,(residui_iniziali-residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo)) c2
-,residui_iniziali c3
+,nvl(residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo),0) c1
+,nvl((residui_iniziali-residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo)),0) c2
+,nvl(residui_iniziali,0) c3
  from
   fin_t_consuntivo_excel 
 where
@@ -253,7 +253,7 @@ where anno_finanziario =$P{ANNO})
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[DENOMINAZIONE]]></text>
+				<text><![CDATA[DENOMINAZIONE ]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="700" y="0" width="100" height="60" uuid="0f16cd78-ee74-4d09-b93b-62b824262d8f"/>

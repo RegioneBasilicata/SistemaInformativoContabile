@@ -2,7 +2,6 @@
 <!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ARMptc1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2c3eafa5-b7e2-454a-81f5-551bec69c8a0">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Gat2"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -53,9 +52,9 @@ nb_livello1 missione
 ,descr_macro_agg desc_macro
 ,capitolo
 ,desc_capitolo
-,residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo) c1
-,(residui_iniziali-residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo)) c2
-,residui_iniziali c3
+,nvl(residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo),0) c1
+,nvl((residui_iniziali-residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo)),0) c2
+,nvl(residui_iniziali,0) c3
  from
   fin_t_consuntivo_excel 
 where
