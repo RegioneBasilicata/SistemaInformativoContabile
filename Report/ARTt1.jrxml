@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final utlizzo versione della libreria JasperReports6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ARTt" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2c3eafa5-b7e2-454a-81f5-551bec69c8a0">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="ANNO" class="java.math.BigDecimal"/>
+	<parameter name="UTENTE" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select
+  nb_livello1 titolo,
+  desc_nb_livello1 desc_titolo,
+  nb_livello2 tipologia,
+  desc_nb_livello2 desc_tipologia,
+  nb_livello3 categoria,
+  desc_nb_livello3 desc_categoria,
+  capitolo,
+  desc_capitolo,
+  nvl(residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo),0) c1,
+  nvl((residui_iniziali-residuo_previsione(anno_consuntivo,tipo_capitolo||capitolo)),0) c2,
+  nvl(residui_iniziali,0) c3
+from
+  fin_t_consuntivo_excel 
+where tipo_capitolo = 'E' 
+and  nb_livello1 <> '0'
+ and  anno_consuntivo = $P{ANNO}
+ and  utente = upper( $P{UTENTE})
+ order by 1,3,5,7]]>
+	</queryString>
+	<field name="TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TITOLO"/>
+	</field>
+	<field name="DESC_TITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TITOLO"/>
+	</field>
+	<field name="TIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TIPOLOGIA"/>
+	</field>
+	<field name="DESC_TIPOLOGIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_TIPOLOGIA"/>
+	</field>
+	<field name="CATEGORIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CATEGORIA"/>
+	</field>
+	<field name="DESC_CATEGORIA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_CATEGORIA"/>
+	</field>
+	<field name="CAPITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CAPITOLO"/>
+	</field>
+	<field name="DESC_CAPITOLO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESC_CAPITOLO"/>
+	</field>
+	<field name="C1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C1"/>
+	</field>
+	<field name="C2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C2"/>
+	</field>
+	<field name="C3" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C3"/>
+	</field>
+	<variable name="TIT_C1" class="java.math.BigDecimal" resetType="Group" resetGroup="Titolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{C1}]]></variableExpression>
+	</variable>
+	<variable name="TIT_C2" class="java.math.BigDecimal" resetType="Group" resetGroup="Titolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{C2}]]></variableExpression>
+	</variable>
+	<variable name="TIT_C3" class="java.math.BigDecimal" resetType="Group" resetGroup="Titolo" calculation="Sum">
+		<variableExpression><![CDATA[$F{C3}]]></variableExpression>
+	</variable>
+	<variable name="TIP_C1" class="java.math.BigDecimal" resetType="Group" resetGroup="Tipologia" calculation="Sum">
+		<variableExpression><![CDATA[$F{C1}]]></variableExpression>
+	</variable>
+	<variable name="TIP_C2" class="java.math.BigDecimal" resetType="Group" resetGroup="Tipologia" calculation="Sum">
+		<variableExpression><![CDATA[$F{C2}]]></variableExpression>
+	</variable>
+	<variable name="TIP_C3" class="java.math.BigDecimal" resetType="Group" resetGroup="Tipologia" calculation="Sum">
+		<variableExpression><![CDATA[$F{C3}]]></variableExpression>
+	</variable>
+	<variable name="TOT_C1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{C1}]]></variableExpression>
+	</variable>
+	<variable name="TOT_C2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{C2}]]></variableExpression>
+	</variable>
+	<variable name="TOT_C3" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{C3}]]></variableExpression>
+	</variable>
+	<group name="Titolo" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{TITOLO}]]></groupExpression>
+		<groupHeader>
+			<band height="23">
+				<frame>
+					<reportElement mode="Transparent" x="0" y="0" width="800" height="23" backcolor="#DFFFDF" uuid="92a5b188-5643-4f78-842d-5c0cb8dc4bc3"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textField>
+						<reportElement mode="Opaque" x="0" y="3" width="70" height="20" backcolor="#FFBF80" uuid="78a524f0-181c-40b5-a479-54a15e4ad3ae"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{TITOLO}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement mode="Opaque" x="70" y="3" width="730" height="20" backcolor="#FFBF80" uuid="f49fde40-1439-424f-a9a4-bfb73e757047"/>
+						<textElement verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_TITOLO}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="21">
+				<frame>
+					<reportElement mode="Transparent" x="0" y="0" width="800" height="21" backcolor="#DFFFDF" uuid="cce094f5-8502-41d9-be6f-f44835a840f1"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textField>
+						<reportElement mode="Opaque" x="0" y="1" width="70" height="20" backcolor="#FFBF80" uuid="fadf665b-a76d-41f4-99a5-2cad1a01e154"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression><![CDATA["Totale "+$F{TITOLO}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement mode="Opaque" x="70" y="1" width="430" height="20" backcolor="#FFBF80" uuid="fbe4bf60-87b3-4fc0-911a-d6f0e4207597"/>
+						<textElement verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_TITOLO}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement mode="Opaque" x="500" y="1" width="100" height="20" backcolor="#FFBF80" uuid="7342a09a-a90a-48b5-9980-3e78d804d761"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TIT_C1}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement mode="Opaque" x="600" y="1" width="100" height="20" backcolor="#FFBF80" uuid="362a4397-941d-4baa-b619-aad4181b7fa5"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TIT_C2}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement mode="Opaque" x="700" y="1" width="100" height="20" backcolor="#FFBF80" uuid="43979161-bed2-4382-85e8-49bd106aa55f"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TIT_C3}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Tipologia" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{TIPOLOGIA}]]></groupExpression>
+		<groupFooter>
+			<band height="20">
+				<frame>
+					<reportElement mode="Transparent" x="0" y="0" width="800" height="20" backcolor="#FFFFDF" uuid="0da4c8ad-a2f0-4a25-8983-5a11b695f81e"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textField>
+						<reportElement mode="Transparent" x="0" y="0" width="70" height="20" backcolor="#FFDF80" uuid="6304702d-587b-4c79-9153-594c933225a2"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font size="8"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{TIPOLOGIA}]]></textFieldExpression>
+					</textField>
+					<textField>
+						<reportElement mode="Transparent" x="70" y="0" width="430" height="20" backcolor="#FFDF80" uuid="868827b2-27fd-4eaf-bd6f-db12af9393ac"/>
+						<textElement verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph leftIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{DESC_TIPOLOGIA}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement mode="Transparent" x="500" y="0" width="100" height="20" backcolor="#FFDF80" uuid="d4df090e-49e5-4ef8-bbc8-952999f94047"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TIP_C1}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement mode="Transparent" x="600" y="0" width="100" height="20" backcolor="#FFDF80" uuid="da6eadef-0d2d-4e3d-9265-2d80a1242bc9"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TIP_C2}]]></textFieldExpression>
+					</textField>
+					<textField pattern="#,##0.00#">
+						<reportElement mode="Transparent" x="700" y="0" width="100" height="20" backcolor="#FFDF80" uuid="b4a3b249-5637-4c6a-9904-abb308557911"/>
+						<textElement textAlignment="Right" verticalAlignment="Middle">
+							<font size="8"/>
+							<paragraph rightIndent="2"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$V{TIP_C3}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="70" height="60" uuid="a488e8f9-347f-41ab-ad9a-396f14e56e09"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TITOLO TIPOLOGIA ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="0" width="430" height="60" uuid="ed3d01bf-cb9e-42d0-aad1-633169a84891"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DENOMINAZIONE]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="700" y="0" width="100" height="60" uuid="0f16cd78-ee74-4d09-b93b-62b824262d8f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Residui Passivi definitivi al 01/01/"+$P{ANNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="600" y="0" width="100" height="60" uuid="440e6e12-56a2-4dde-80cc-28745f99a514"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Differenze in + o -"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="0" width="100" height="60" uuid="f435ba96-2c72-4772-b43c-3a71bd6b440d"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Previsione Residui Passivi al 01/01/"+$P{ANNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="20">
+			<frame>
+				<reportElement x="0" y="0" width="800" height="20" uuid="0c734fb0-465f-4c8a-8056-4d8fac399f39"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<staticText>
+					<reportElement x="0" y="0" width="500" height="20" uuid="6eae59d5-502c-4216-abec-dc0e314ff6a4"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Totale Generale]]></text>
+				</staticText>
+				<textField pattern="#,##0.00#">
+					<reportElement x="500" y="0" width="100" height="20" uuid="3f8a98d2-cced-49d1-a9ec-e5e55a1c53c8"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOT_C1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement x="600" y="0" width="100" height="20" uuid="2fd84e2d-62ed-4609-bd2a-36dbd25520ff"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOT_C2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00#">
+					<reportElement x="700" y="0" width="100" height="20" uuid="bc573d78-eb5f-42db-a067-a96b943bd1a8"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOT_C3}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</summary>
+</jasperReport>
