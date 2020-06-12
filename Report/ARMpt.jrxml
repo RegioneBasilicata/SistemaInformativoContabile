@@ -14,53 +14,6 @@
 	<property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Gat2"/>
 	<style name="Grassetto" fontSize="10" isBold="false"/>
-	<subDataset name="Dataset1" uuid="2d72e6e5-705b-4db7-bcf6-b2814f5b83f8">
-		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-		<parameter name="ID" class="java.lang.String"/>
-		<queryString>
-			<![CDATA[select  
-b.DESCRIZIONE 
-,b.LOGO
-,b.anno_finanziario
-,b.partita_iva
-,a.intestazione01
-,a.intestazione02
-,a.intestazione_destra
-,decode((select count(*) from fin_t_previsione_qgr where utente='PREV'||a.p01_anno),0,a.user_name,'PREV'||a.p01_anno) utente
-,b.anno_finanziario anno
-from tmp_param_reports_2 a
-,fin_t_dati_generali b
-where a.id =  $P{ID} 
-and b.anno_finanziario = a.p01_anno]]>
-		</queryString>
-		<field name="DESCRIZIONE" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="DESCRIZIONE"/>
-		</field>
-		<field name="LOGO" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="LOGO"/>
-		</field>
-		<field name="ANNO_FINANZIARIO" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="ANNO_FINANZIARIO"/>
-		</field>
-		<field name="PARTITA_IVA" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="PARTITA_IVA"/>
-		</field>
-		<field name="INTESTAZIONE01" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE01"/>
-		</field>
-		<field name="INTESTAZIONE02" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE02"/>
-		</field>
-		<field name="INTESTAZIONE_DESTRA" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="INTESTAZIONE_DESTRA"/>
-		</field>
-		<field name="UTENTE" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="UTENTE"/>
-		</field>
-		<field name="ANNO" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="ANNO"/>
-		</field>
-	</subDataset>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String">
 		<defaultValueExpression><![CDATA["/Users/alobefaro/JaspersoftWorkspace/SIC/"]]></defaultValueExpression>
 	</parameter>
