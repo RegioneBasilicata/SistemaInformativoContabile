@@ -11,6 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Gat2"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -235,7 +236,7 @@ where anno_finanziario =$P{ANNO})
 						<textElement textAlignment="Center" verticalAlignment="Middle">
 							<font size="8" isBold="false"/>
 						</textElement>
-						<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+						<textFieldExpression><![CDATA["Totale "+$F{MISSIONE}]]></textFieldExpression>
 					</textField>
 					<textField>
 						<reportElement mode="Opaque" x="85" y="1" width="415" height="20" backcolor="#BFFFDF" uuid="da197465-821d-41a9-b7a2-d76f815b9083"/>
@@ -344,7 +345,7 @@ where anno_finanziario =$P{ANNO})
 						<textElement textAlignment="Center" verticalAlignment="Middle">
 							<font size="8"/>
 						</textElement>
-						<textFieldExpression><![CDATA[$F{PROGRAMMA}]]></textFieldExpression>
+						<textFieldExpression><![CDATA["Totale "+$F{PROGRAMMA}]]></textFieldExpression>
 					</textField>
 					<textField>
 						<reportElement mode="Opaque" x="85" y="1" width="415" height="20" backcolor="#DFFFDF" uuid="fbe4bf60-87b3-4fc0-911a-d6f0e4207597"/>
@@ -429,7 +430,7 @@ where anno_finanziario =$P{ANNO})
 						<textElement textAlignment="Center" verticalAlignment="Middle">
 							<font size="8"/>
 						</textElement>
-						<textFieldExpression><![CDATA[$F{TITOLO}]]></textFieldExpression>
+						<textFieldExpression><![CDATA["Totale "+$F{TITOLO}]]></textFieldExpression>
 					</textField>
 					<textField>
 						<reportElement mode="Opaque" x="85" y="1" width="415" height="20" backcolor="#FFFFDF" uuid="868827b2-27fd-4eaf-bd6f-db12af9393ac"/>
@@ -514,7 +515,7 @@ where anno_finanziario =$P{ANNO})
 						<textElement textAlignment="Center" verticalAlignment="Middle">
 							<font size="8" isBold="false"/>
 						</textElement>
-						<textFieldExpression><![CDATA[$F{MACROAGGREGATO}]]></textFieldExpression>
+						<textFieldExpression><![CDATA["Totale "+$F{MACROAGGREGATO}]]></textFieldExpression>
 					</textField>
 					<textField>
 						<reportElement mode="Opaque" x="85" y="1" width="415" height="20" backcolor="#FFDFFF" uuid="018622a9-28e3-4e33-b8bf-4739c1ae1bc0"/>

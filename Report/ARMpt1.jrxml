@@ -226,7 +226,7 @@ where anno_finanziario =$P{ANNO})
 						<textElement textAlignment="Center" verticalAlignment="Middle">
 							<font size="8" isBold="false"/>
 						</textElement>
-						<textFieldExpression><![CDATA[$F{MISSIONE}]]></textFieldExpression>
+						<textFieldExpression><![CDATA["Totale "+$F{MISSIONE}]]></textFieldExpression>
 					</textField>
 					<textField>
 						<reportElement mode="Opaque" x="85" y="1" width="415" height="20" backcolor="#BFFFDF" uuid="da197465-821d-41a9-b7a2-d76f815b9083"/>
@@ -335,7 +335,7 @@ where anno_finanziario =$P{ANNO})
 						<textElement textAlignment="Center" verticalAlignment="Middle">
 							<font size="8"/>
 						</textElement>
-						<textFieldExpression><![CDATA[$F{PROGRAMMA}]]></textFieldExpression>
+						<textFieldExpression><![CDATA["Totale "+$F{PROGRAMMA}]]></textFieldExpression>
 					</textField>
 					<textField>
 						<reportElement mode="Opaque" x="85" y="1" width="415" height="20" backcolor="#DFFFDF" uuid="fbe4bf60-87b3-4fc0-911a-d6f0e4207597"/>
