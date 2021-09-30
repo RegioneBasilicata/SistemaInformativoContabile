@@ -201,7 +201,7 @@ order by 1,3,5,7]]>
 						<font size="7"/>
 						<paragraph rightIndent="2"/>
 					</textElement>
-					<textFieldExpression><![CDATA[EQUALS($F{CAPITOLO},"E00003" )?$F{SUM(NVL(CASSA_ANNO0,0))}:$F{SUM(NVL(COMPETENZA_ANNO0,0))}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[EQUALS($F{CAPITOLO_DESC},"FONDO DI CASSA" )?$F{SUM(NVL(CASSA_ANNO0,0))}:$F{SUM(NVL(COMPETENZA_ANNO0,0))}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00#">
 					<reportElement x="560" y="0" width="120" height="15" uuid="43e8fe3a-6e62-47c2-8811-9ef8fef706f1"/>
@@ -246,7 +246,7 @@ order by 1,3,5,7]]>
 						<font size="7"/>
 						<paragraph leftIndent="2"/>
 					</textElement>
-					<textFieldExpression><![CDATA[EQUALS($F{CAPITOLO},"E00003" )?"Previsioni di Cassa":"Previsioni di Competenza"]]></textFieldExpression>
+					<textFieldExpression><![CDATA[EQUALS($F{CAPITOLO_DESC},"FONDO DI CASSA" )?"Previsioni di Cassa":"Previsioni di Competenza"]]></textFieldExpression>
 				</textField>
 			</frame>
 		</band>
