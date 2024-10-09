@@ -203,7 +203,7 @@ description:
       contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
       Basilicata.
     documentation: >-
-      https://latraccia.it/prodotti-traccia/sic
+      https://latraccia.it/area-suite-pa/
 developmentStatus: stable
 intendedAudience:
   scope:
@@ -260,4 +260,5 @@ usedBy:
   - Agenzia Regionale per l’Ambiente Basilicata
   - Agenzia Regionale per il Diritto allo Studio Universitario della Basilicata
   - Agenzia Regionale per il lavoro e le transizioni nella vita attiva (LAB)
+  - Consiglio regionale della Calabria
 logo: 'logo_sic.svg'
