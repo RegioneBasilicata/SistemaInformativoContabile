@@ -23,6 +23,7 @@ description:
       - Gestione Sanitaria Accentrata
       - Gestione Fatturazione Attiva e Passiva
       - Servizi web di integrazione con Sistemi esterni (Provvedimenti Amministrativi, HR, ecc.)
+    genericName: Gestione Amministrativo Contabile
     longDescription: >
       ## **Introduzione**
 
@@ -237,7 +238,7 @@ maintenance:
       phone: '+390835336836'
   contractors:
     - name: Cooperativa EDP La Traccia
-      until: '2024-10-10'
+      until: '2027-10-10'
   type: contract
 name: Sistema Informativo Contabile
 platforms:
