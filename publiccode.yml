@@ -203,8 +203,6 @@ description:
       Sistema integrato per la gestione dei processi amministrativi
       contabili realizzato dalla Cooperativa EDP La Traccia per la Regione
       Basilicata.
-    documentation: >-
-      http://latraccia.it/area-suite-pa/
 developmentStatus: stable
 intendedAudience:
   scope:
